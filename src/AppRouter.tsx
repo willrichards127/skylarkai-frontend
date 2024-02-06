@@ -11,7 +11,7 @@ import { Box, CircularProgress } from "@mui/material";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { currentUser } from "./redux/features/authSlice";
 import { useAddUserActivityMutation } from "./redux/services/userAPI";
-import FeaturePage from "./pages/home/features/feature";
+import FeaturePage from "./pages/premium/feature";
 
 const LandingPage = lazy(() => import("./pages/landing"));
 
@@ -25,10 +25,9 @@ const RegisterForm = lazy(() => import("./pages/auth/RegisterForm"));
 const RegisterOTPForm = lazy(() => import("./pages/auth/RegisterOTPForm"));
 const LoginForm = lazy(() => import("./pages/auth/LoginForm"));
 
-// const WelcomePage = lazy(() => import("./pages/home/welcome"));
-const HelpPage = lazy(() => import("./pages/home/help"));
-const SupportPage = lazy(() => import("./pages/home/support"));
-const FeaturesPage = lazy(() => import("./pages/home/features"));
+const HelpPage = lazy(() => import("./pages/help"));
+const SupportPage = lazy(() => import("./pages/support"));
+const FeaturesPage = lazy(() => import("./pages/premium"));
 
 const ErrorBoundary = () => {
   const error = useRouteError();
@@ -110,24 +109,20 @@ function AppRouter() {
             element: <ProtectedRoute isAllowed={!!token && !!user} />,
             errorElement: <ErrorBoundary />,
             children: [
-              // {
-              //   path: "/home/welcome",
-              //   element: <WelcomePage />,
-              // },
               {
-                path: "/home/help",
+                path: "/help",
                 element: <HelpPage />,
               },
               {
-                path: "/home/support",
+                path: "/support",
                 element: <SupportPage />,
               },
               {
-                path: "/home/features",
+                path: "/premium",
                 element: <FeaturesPage />,
               },
               {
-                path: "/home/features/:featureId",
+                path: "/premium/:featureId",
                 element: <FeaturePage />,
               },
             ],

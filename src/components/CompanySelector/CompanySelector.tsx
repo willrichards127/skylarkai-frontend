@@ -8,8 +8,8 @@ import {
   Button,
 } from "@mui/material";
 import { StyledPopper, ListboxComponent } from "./sub-components";
-import { FetchFilesModal } from "../../pages/home/features/components/sub-components/FetchFilesModal";
-import { tickers } from "../../models/constants";
+import { FetchFilesModal } from "../../pages/premium/components/sub-components/FetchFilesModal";
+import { tickers } from "../../shared/models/constants";
 import { useGetEnabledCompaniesQuery } from "../../redux/services/transcriptAPI";
 import { ICompany } from "../../redux/interfaces";
 

@@ -12,14 +12,14 @@ import {
 } from "@mui/material";
 import { Logo } from "../../components/Svgs";
 import { FeatureCard } from "../../components/FeatureCard";
-import secFilingImg from "../../assets/features/sec_filing.png";
-import investmentImg from "../../assets/features/investment_memo.png";
-import insiderTransactionImg from "../../assets/features/insider_transactions.png";
-import analyzeEarningImg from "../../assets/features/analyze_earnings.png";
-import compareDocImg from "../../assets/features/compare.png";
-import sentimentImg from "../../assets/features/sentiment.png";
-import bottomNavBg from "../../assets/bottom-nav-bg.png";
-import { bottomNavHeight } from "../../models/constants";
+import secFilingImg from "../../assets/premium/sec_filing.png";
+import investmentImg from "../../assets/premium/investment_memo.png";
+import insiderTransactionImg from "../../assets/premium/insider_transactions.png";
+import analyzeEarningImg from "../../assets/premium/analyze_earnings.png";
+import compareDocImg from "../../assets/premium/compare.png";
+import sentimentImg from "../../assets/premium/sentiment.png";
+import bottomNavBg from "../../assets/global/bottom-nav-bg.png";
+import { bottomNavHeight } from "../../shared/models/constants";
 import { useGetSubScriptionFeaturesQuery } from "../../redux/services/mainFeaturesAPI";
 import { Stack } from "@mui/system";
 

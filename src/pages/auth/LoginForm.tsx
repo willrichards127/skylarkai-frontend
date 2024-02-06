@@ -55,7 +55,7 @@ const LoginForm = memo(() => {
       if (userInfo.user_role === 2) {
         navigate("/admin");
       } else {
-        navigate("/home/features");
+        navigate("/premium");
       }
     }
   }, [navigate, isLoggedIn, userInfo]);

@@ -1,4 +1,4 @@
-import { secCategories, secFormTitles } from "../../models/constants";
+import { secCategories, secFormTitles } from "../models/constants";
 import { IEdgarFile } from "../../redux/interfaces";
 
 const parseDate = (str: string) => {
