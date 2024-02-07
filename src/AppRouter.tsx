@@ -12,6 +12,15 @@ import { ProtectedRoute } from "./ProtectedRoute";
 import { currentUser } from "./redux/features/authSlice";
 import { useAddUserActivityMutation } from "./redux/services/userAPI";
 import FeaturePage from "./pages/premium/feature";
+import ReportsPage from "./pages/portal/reports/ReportsPage";
+import ReportDetailPage from "./pages/portal/reports/ReportDetailPage";
+import SetupsPage from "./pages/portal/setups/SetupsPage";
+import SetupDetailPage from "./pages/portal/setups/SetupDetailPage";
+import OrdersPage from "./pages/portal/workorders/OrdersPage";
+import OrderDetailPage from "./pages/portal/workorders/OrderDetailPage";
+import CompaniesPage from "./pages/portal/workorders/CompaniesPage";
+import CompanyDetailPage from "./pages/portal/workorders/CompanyDetailPage";
+import ProfilePage from "./pages/portal/profile/ProfilePage";
 
 const LandingPage = lazy(() => import("./pages/landing"));
 
@@ -124,6 +133,43 @@ function AppRouter() {
               {
                 path: "/premium/:featureId",
                 element: <FeaturePage />,
+              },
+              // portal routing
+              {
+                path: "/main/reports",
+                element: <ReportsPage />
+              },
+              {
+                path: "/main/reports/:reportId",
+                element: <ReportDetailPage />
+              },
+              {
+                path: "/main/setups",
+                element: <SetupsPage />
+              },
+              {
+                path: "/main/setups/:setupId",
+                element: <SetupDetailPage />
+              },
+              {
+                path: "/main/orders",
+                element: <OrdersPage />
+              },
+              {
+                path: "/main/companies",
+                element: <CompaniesPage />
+              },
+              {
+                path: "/main/companies/:companyId",
+                element: <CompanyDetailPage />
+              },
+              {
+                path: "/main/companies/:companyId/:orderId",
+                element: <OrderDetailPage />
+              },
+              {
+                path: "/main/profile",
+                element: <ProfilePage />
               },
             ],
           },
