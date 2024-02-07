@@ -1,4 +1,4 @@
-import { ICompany } from "../../redux/interfaces";
+import { ICompany, ITopic } from "../../redux/interfaces";
 
 export const HeaderConfig = {
   mainToolbarHeight: 64,
@@ -53353,3 +53353,372 @@ export const tickers: ICompany[] = [
     company_name: "Falcon's Beyond Global, Inc.",
   },
 ];
+
+export const suggestionDict: {[x: string]: ITopic[]} = {
+  "10-K": [
+    {
+      topic: "Revenue Composition and Growth",
+      queries: ["How is the company's revenue distributed across its different product lines or services, and what has been the year-over-year growth rate for each segment? Are there new products or services that significantly contributed to revenue growth?"]
+    },
+    {
+      topic: "Gross Margin Analysis",
+      queries: ["What are the trends in the company’s gross margins over the past few years? Are there specific factors, such as changes in production costs, pricing strategies, or supply chain efficiencies, that have impacted these margins?"]
+    },
+    {
+      topic: "Operating Expense Trends",
+      queries: ["What are the key components of the company’s operating expenses, and how have they changed over the past few years? Are there any notable increases in research and development, sales and marketing, or administrative expenses?"]
+    },
+    {
+      topic: "Long-term Liabilities and Financial Health",
+      queries: ["What is the nature and scale of the company's long-term liabilities, including long-term debt and lease obligations?"]
+    },
+    {
+      topic: "Cash Flow Analysis",
+      queries: ["What does the cash flow statement reveal about the company’s operating, investing, and financing activities? Are there any concerns regarding the sustainability of the company’s cash flows?"]
+    },
+    {
+      topic: "Legal and Regulatory Matters",
+      queries: ["Are there any ongoing legal or regulatory issues disclosed in the 10-K that could potentially impact the company's future operations or financial performance?"]
+    }
+  ],
+  "10-Q": [
+    {
+      topic: "Quarterly Revenue and Earnings Trends",
+      queries: ["How does the company's revenue and earnings for this quarter compare to the same quarter in the previous year? What are the factors driving any significant changes?"]
+    },
+    {
+      topic: "Gross and Operating Margin Analysis",
+      queries: ["What are the current gross and operating margins, and how do they compare to previous quarters? Are there any specific factors such as changes in cost of goods sold or operational efficiencies impacting these margins?"]
+    },
+    {
+      topic: "Changes in Balance Sheet Items",
+      queries: ["What significant changes, if any, are observed in the balance sheet items such as cash, inventory, accounts receivable, or long-term debt compared to the last quarter?"]
+    },
+    {
+      topic: "Cash Flow Statement Insights",
+      queries: ["What does the cash flow statement indicate about the company’s operating, investing, and financing activities in this quarter? Are there any notable changes or trends compared to previous quarters?"]
+    },
+    {
+      topic: "Updates on Risk Factors and Management's Discussion",
+      queries: ["Are there any new risk factors mentioned in this 10-Q compared to the previous filings? What insights does the management’s discussion and analysis section provide about the company's current challenges and future strategies?"]
+    },
+    {
+      topic: "Segment and Geographical Performance",
+      queries: ["How did different business segments and geographical areas perform this quarter? Are there any segments or regions showing particularly strong or weak performance?"]
+    },
+    {
+      topic: "Guidance and Future Outlook",
+      queries: ["Has the company provided any guidance or updated outlook for the coming quarters? How does this compare with analyst expectations and previous forecasts?"]
+    }
+  ],
+  "8-K": [
+    {
+      topic: "Nature of the Major Event",
+      queries: ["What is the specific event or series of events reported in the 8-K? How does this event align with or diverge from the company's previous announcements and strategies?"]
+    },
+    {
+      topic: "Financial Impact",
+      queries: ["What immediate or long-term financial impact could this event have on the company? Are there any projections or estimates provided regarding its effect on revenues, expenses, or earnings?"]
+    },
+    {
+      topic: "Management Changes",
+      queries: ["If the 8-K reports a change in key management personnel, what are the credentials of the incoming executives, and what potential impact could their leadership have on the company's direction and performance?"]
+    },
+    {
+      topic: "Acquisitions or Disposals",
+      queries: ["In cases of acquisitions or disposals reported, what are the terms of the deal, and how do they align with the company's strategic objectives? What synergies or efficiencies are expected from this move?"]
+    },
+    {
+      topic: "Regulatory or Legal Issues",
+      queries: ["If the filing relates to legal or regulatory actions, what are the nature and potential consequences of these issues? How might they affect the company's operations and reputation?"]
+    },
+    {
+      topic: "Changes in Financial Condition or Accounting Principles",
+      queries: ["Are there any significant changes in the company's financial condition or modifications in accounting principles or estimates? How might these changes affect the interpretation of past financial statements?"]
+    },
+    {
+      topic: "Other Material Events",
+      queries: ["For other material events such as entering into or terminating a material definitive agreement, issuing bankruptcy, or completing a significant capital raising activity, what are the details and implications of these events?"]
+    }
+  ],
+    "S-1": [
+    {
+      topic: "Business Model and Revenue Streams",
+      queries: ["What is the company's business model, and what are its primary revenue streams? How has the company's revenue grown in recent years, and what are the key drivers of this growth?"]
+    },
+    {
+      topic: "Competitive Landscape",
+      queries: ["Who are the company's main competitors, and what is the company's competitive position within its industry? How does the company differentiate itself in terms of products, services, or technology?"]
+    },
+    {
+      topic: "Use of Proceeds",
+      queries: ["How does the company intend to use the proceeds from the IPO? Are there specific investments, debt repayments, acquisitions, or other strategic initiatives outlined?"]
+    },
+    {
+      topic: "Risk Factors",
+      queries: ["What risk factors does the company disclose in the S-1? How do these risks, such as market competition, regulatory challenges, or dependence on key suppliers or customers, potentially impact the company's future operations and financial health?"]
+    },
+    {
+      topic: "Management and Governance",
+      queries: ["Who are the key members of the company's management and board of directors, and what is their experience? What governance structures are in place, and how might these impact shareholder rights and company oversight?"]
+    },
+    {
+      topic: "Financial Health and Indebtedness",
+      queries: ["What is the company's financial condition based on the balance sheet, income statement, and cash flow statement? How much debt does the company have, and what are the terms and conditions of this debt?"]
+    },
+    {
+      topic: "Growth Strategy and Future Outlook",
+      queries: ["What growth strategies does the company outline in the S-1? Are there plans for geographical expansion, new product lines, or technological advancements?"]
+    }
+  ],
+  "S-3": [
+    {
+      topic: "Purpose of the Offering",
+      queries: ["What is the specific purpose for this offering? Why is the company choosing to raise additional capital at this time?"]
+    },
+    {
+      topic: "Use of Proceeds",
+      queries: ["How does the company intend to use the proceeds from this offering? Are there specific projects, debt repayments, acquisitions, or other strategic initiatives outlined?"]
+    },
+    {
+      topic: "Impact on Shareholder Value",
+      queries: ["How might this offering impact current shareholders in terms of dilution of ownership, earnings per share, and overall market value?"]
+    },
+    {
+      topic: "Financial Health of the Company",
+      queries: ["What is the current financial health of the company as indicated in the S-3? Does the balance sheet suggest a strong position to manage additional capital effectively?"]
+    },
+    {
+      topic: "Market Conditions and Timing",
+      queries: ["What are the current market conditions, and how might they affect the success of this offering? Why has the company chosen this particular time for the offering?"]
+    },
+    {
+      topic: "Historical Performance and Future Outlook",
+      queries: ["What does the company’s historical financial performance indicate about its ability to utilize additional capital effectively? What are the company's growth prospects and future outlook as detailed in the filing?"]
+    },
+    {
+      topic: "Details of the Securities Being Offered",
+      queries: ["What are the specific details of the securities being offered? Are they common shares, preferred shares, warrants, or convertible securities, and what are the terms associated with them?"]
+    }
+  ],
+  "F-3": [
+    {
+      topic: "Transaction Details",
+      queries: ["What specific transactions are reported on the Form 4? Are they purchases, sales, option exercises, or other types of transactions?"]
+    },
+    {
+      topic: "Insider Trading Patterns",
+      queries: ["Do the reported transactions indicate a pattern or trend in insider trading activity? Are insiders predominantly buying or selling shares?"]
+    },
+    {
+      topic: "Timing of Transactions",
+      queries: ["What is the timing of these transactions in relation to recent company announcements, earnings reports, or significant market events? Is there any correlation that might be insightful?"]
+    },
+    {
+      topic: "Volume and Price of Transactions",
+      queries: ["What is the volume of shares transacted, and at what price? How does this compare to the current market price?"]
+    },
+    {
+      topic: "Insider Ownership Levels",
+      queries: ["How do these transactions affect the insider's total ownership stake in the company? Does it signal a change in confidence or commitment to the company?"]
+    },
+    {
+      topic: "Company Performance and Prospects",
+      queries: ["Considering the company's recent performance and future prospects, how might these insider transactions be interpreted? Do they align with the overall business outlook and market sentiment?"]
+    }
+  ],
+  "13D": [
+    {
+      topic: "Identity and Background of the Filer",
+      queries: ["Who is the individual or group filing the Form 13D, and what is their background or history in the market? Do they have a track record of activism or significant investment moves?"]
+    },
+    {
+      topic: "Purpose of the Acquisition",
+      queries: ["What is the stated purpose of acquiring these shares as mentioned in the filing? Is the investor seeking to influence management, pursue major changes, or is it purely for investment purposes?"]
+    },
+    {
+      topic: "Size and Nature of the Stake",
+      queries: ["What percentage of the company's shares does the filer now hold, and what class of shares have they acquired? Does this stake give them significant voting power or influence?"]
+    },
+    {
+      topic: "Potential Changes Proposed",
+      queries: ["Does the filer propose any changes to the company's business, such as changes in strategy, management, board composition, or operations?"]
+    },
+    {
+      topic: "Source of Funds for the Acquisition",
+      queries: ["How did the filer finance the acquisition of these shares? Was it through cash, debt, or other means, and what does this suggest about their commitment and financial capacity?"]
+    },
+    {
+      topic: "Market and Industry Implications",
+      queries: ["What are the potential implications of this stake acquisition on the market’s perception of the company, and how might it impact the company's position within its industry?"]
+    }
+  ],
+  "SC13G": [
+    {
+      topic: "Investor's Identity and Background",
+      queries: ["Who is the investor filing the SC 13G?"]
+    },
+    {
+      topic: "Nature of Investment",
+      queries: ["Given that this is a 'passive' filing, what is the investor's stated purpose or intention behind holding these shares? Are there indications that the investor might shift to a more active role in the future?"]
+    },
+    {
+      topic: "Size of Stake and Voting Power",
+      queries: ["What percentage of the company's shares does the filing represent, and what level of voting power or influence does this stake confer?"]
+    },
+    {
+      topic: "Change in Ownership Levels",
+      queries: ["Has there been a recent change in the level of ownership by this investor, and if so, what might have motivated this change?"]
+    },
+    {
+      topic: "Potential Impact on the Company",
+      queries: ["What are the potential implications of this investment for the company, particularly in terms of market perception, stock liquidity,and investor base diversity?"]
+    }
+  ],
+  "14A": [
+    {
+      topic: "Executive Compensation",
+      queries: ["How is the executive compensation structured? Does it align with the company's performance and shareholder interests? Are there any significant changes from previous years?"]
+    },
+    {
+      topic: "Board of Directors Composition and Nominees",
+      queries: ["What is the composition of the board in terms of experience, diversity, and skill set? Are the new nominees suitable and beneficial for the company's future direction?"]
+    },
+    {
+      topic: "Corporate Governance Practices",
+      queries: ["What are the company's corporate governance practices? Are there any concerns regarding independence, board structure, or shareholder rights?"]
+    },
+    {
+      topic: "Shareholder Proposals",
+      queries: ["Are there any shareholder proposals included in the proxy statement? What are the implications of these proposals, and how might they impact the company's operations or governance?"]
+    },
+    {
+      topic: "Voting Policies and Procedures",
+      queries: ["What are the voting policies and procedures? Are there any contentious issues that might lead to significant voting disagreements among shareholders?"]
+    },
+    {
+      topic: "Audit and Financial Information",
+      queries: ["What information is provided about the company's auditor? Are there any concerns or noteworthy points in the auditor's report or in the financial statements?"]
+    },
+    {
+      topic: "Executive Succession Planning",
+      queries: ["Does the DEF 14A provide insights into the company's executive succession planning? How well-prepared is the company for potential leadership transitions?"]
+    }
+  ],
+  "6K": [
+    {
+      topic: "Recent Financial Performance",
+      queries: ["What does the latest 6-K filing reveal about the company's recent financial performance? How do the reported figures compare to previous periods and analyst expectations?"]
+    },
+    {
+      topic: "Material Changes or Updates",
+      queries: ["Are there any material changes or significant updates disclosed in the filing, such as changes in business strategy, major contracts, or corporate governance?"]
+    },
+    {
+      topic: "Regulatory and Legal Compliance",
+      queries: ["Does the filing indicate any regulatory or legal issues the company is facing in its home country or internationally? How might these impact its operations and reputation?"]
+    },
+    {
+      topic: "Currency and Economic Risks",
+      queries: ["Considering the company operates in a foreign market, what currency or economic risks are disclosed, and how might these affect its financial stability and profitability?"]
+    },
+    {
+      topic: "International Expansion and Market Penetration",
+      queries: ["What insights does the filing provide regarding the company's international expansion efforts or market penetration in new regions?"]
+    },
+    {
+      topic: "Operational and Supply Chain Updates",
+      queries: ["Are there any significant operational or supply chain updates that could affect the company's efficiency, production capacity, or cost structure?"]
+    }
+  ],
+  "20-F": [
+    {
+      topic: "Financial Statements and Performance Analysis",
+      queries: ["How do the company's audited financial statements presented in the 20-F compare with previous years? Are there significant trends or changes in revenue, profit margins, expenses, or other key financial metrics?"]
+    },
+    {
+      topic: "Risk Factors Specific to the Company and Its Home Country",
+      queries: ["What are the specific risk factors identified by the company, especially those unique to its home country's political, economic, and regulatory environment? How might these risks impact the company's operations and financial stability?"]
+    },
+    {
+      topic: "Corporate Governance and Management Practices",
+      queries: ["What does the Form 20-F reveal about the company’s corporate governance and management practices? Are there any concerns regarding executive compensation, board structure, shareholder rights, or compliance with U.S. and home country regulations?"]
+    },
+    {
+      topic: "Operational Strategies and Market Position",
+      queries: ["What insights does the report provide regarding the company's operational strategies, market position, and competitive landscape in its primary markets?"]
+    },
+    {
+      topic: "Legal Proceedings and Regulatory Compliance",
+      queries: ["re there any significant legal proceedings or regulatory compliance issues disclosed that could potentially impact the company's operations or reputation?"]
+    },
+    {
+      topic: "Foreign Currency and Economic Exposure",
+      queries: ["How does the company manage its exposure to foreign currency fluctuations and other economic risks inherent in operating across multiple countries?"]
+    },
+    {
+      topic: "Outlook and Future Plans",
+      queries: ["What does the company's management discussion and analysis section indicate about its future plans, growth prospects, and strategies for dealing with challenges in its industry and markets?"]
+    }
+  ],
+  "N-1A": [
+    {
+      topic: "Investment Objectives and Strategies",
+      queries: ["What are the fund's stated investment objectives and strategies as outlined in the N-1A? How does the fund intend to achieve these objectives?"]
+    },
+    {
+      topic: "Fund Management and Experience",
+      queries: ["Who are the fund's managers, and what is their experience and track record in fund management? How stable is the management team?"]
+    },
+    {
+      topic: "Risk Factors and Asset Allocation",
+      queries: ["What are the primary risks associated with the fund’s investment strategy? How is the fund’s portfolio allocated across different asset classes?"]
+    },
+    {
+      topic: "Performance History",
+      queries: ["What is the fund’s historical performance, and how does it compare to its benchmark indices and peer funds? Are there any specific periods of underperformance or outperformance?"]
+    },
+    {
+      topic: "Fee Structure",
+      queries: ["What are the fees associated with the fund, including management fees, administrative fees, and other expenses? How do these fees compare to industry averages?"]
+    },
+    {
+      topic: "Distribution Policy",
+      queries: ["What is the fund’s policy on distributions? Does the fund pay dividends or capital gains distributions, and if so, what is the historical frequency and size of these distributions?"]
+    },
+    {
+      topic: "Redemption Policies and Restrictions",
+      queries: ["What are the fund’s policies regarding redemptions? Are there any restrictions or penalties for early withdrawal or frequent trading?"]
+    }
+  ],
+  "ECQ": [
+    {
+      topic: "Revenue and Profit Drivers",
+      queries: ["What are the primary drivers behind the revenue and profit figures reported in this earnings call? Are these drivers sustainable in the long term?"]
+    },
+    {
+      topic: "Guidance and Future Projections",
+      queries: ["How does the company's guidance for future quarters compare to current performance? Are the projections realistic given market conditions and the company's historical performance?"]
+    },
+    {
+      topic: "Management's Confidence and Tone",
+      queries: ["What is the tone and level of confidence exhibited by the management during the call? Do their statements reflect optimism, caution, or uncertainty about the company's future?"]
+    },
+    {
+      topic: "Comparison with Industry Trends",
+      queries: ["How does the company's performance align with broader industry trends? Are they gaining or losing market share, and how are they positioned against competitors?"]
+    },
+    {
+      topic: "Operational Challenges and Solutions",
+      queries: ["What operational challenges were discussed during the call? Did management provide clear strategies or solutions to address these challenges?"]
+    },
+    {
+      topic: "Capital Allocation and Investment Priorities",
+      queries: ["How is the company allocating its capital? Are investments being made in growth areas, and is there a clear strategy behind the allocation decisions?"]
+    },
+    {
+      topic: "Risk Factors and Mitigation Plans",
+      queries: ["What risks did management identify for the upcoming quarters? What plans or strategies are in place to mitigate these risks?"]
+    }
+  ],
+}

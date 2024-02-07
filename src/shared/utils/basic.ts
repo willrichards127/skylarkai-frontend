@@ -120,3 +120,12 @@ export const currencyFormat = (q: number) => {
     currency: "USD",
   }).format(q);
 };
+
+export const myRandomInts = (quantity: number, max: number) => {
+  const arr = []
+  while (arr.length < quantity) {
+    const candidateInt = Math.floor(Math.random() * max);
+    if (arr.indexOf(candidateInt) === -1) arr.push(candidateInt)
+  }
+  return arr
+}

@@ -16,9 +16,11 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ChatPanel from "../../../../components/ChatPanel";
 import { ICustomInstance } from "./interface";
 import { loadStoreValue } from "../../../../shared/utils/storage";
-import { scrollToAndHighlightInIFrame } from "../../../../shared/utils/basic";
-import { useGetSuggestionsQuery } from "../../../../redux/services/transcriptAPI";
+import { myRandomInts, scrollToAndHighlightInIFrame } from "../../../../shared/utils/basic";
+// import { useGetSuggestionsQuery } from "../../../../redux/services/transcriptAPI";
 import { addDownloadButtons } from "../../../../shared/utils/xlsx";
+import { ITopic } from "../../../../redux/interfaces";
+import { suggestionDict as suggestions } from "../../../../shared/models/constants";
 
 export const Chat = ({
   instance,
@@ -32,9 +34,9 @@ export const Chat = ({
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const tagRef = useRef<string>("");
   const { sys_graph_id } = useSelector((state: any) => state.userAuthSlice);
-  const { isLoading, data: suggestions } = useGetSuggestionsQuery({
-    analysis_type: "edgar",
-  });
+  // const { isLoading, data: suggestions } = useGetSuggestionsQuery({
+  //   analysis_type: "edgar",
+  // });
   const [file, setFile] = useState<any>();
   const viewFile = useMemo(
     () =>
@@ -110,11 +112,32 @@ export const Chat = ({
     };
   }, [onloadIframe]);
 
+  const selectedSuggestions = useMemo(() => {
+    if (suggestions && instance.instance_metadata.docs.length) {
+      const formTypes = instance.instance_metadata.docs.map(doc => doc.form_type);
+      if (formTypes.length < 2) {
+        if (suggestions[formTypes[0]]) {
+          return myRandomInts(3, suggestions[formTypes[0]].length).map(index => suggestions[formTypes[0]][index])
+        }
+      } else {
+        return formTypes.reduce<ITopic[]>((prev: ITopic[], formType: string) => {
+          if (suggestions[formType]) {
+            const random = myRandomInts(1, suggestions[formType].length);
+            return [...prev, suggestions[formType][random[0]]];
+          } else {
+            return prev;
+          }
+        }, []);
+      }
+    }
+  }, [instance]);
+
   return (
     <Box sx={{ height: "100%" }}>
       <Backdrop
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={isLoading}
+        // open={isLoading}
+        open={false}
       >
         <CircularProgress color="inherit" />
       </Backdrop>
@@ -170,13 +193,7 @@ export const Chat = ({
                 )}
                 onJumpTo={onJumpTo}
                 analysis_type="edgar"
-                suggestions={
-                  suggestions
-                    ? suggestions.filter(
-                        (sug) => sug.topic !== "insider_transactions"
-                      )
-                    : []
-                }
+                suggestions={selectedSuggestions}
               />
             </Box>
           }

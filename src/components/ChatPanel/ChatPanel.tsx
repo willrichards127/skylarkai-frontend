@@ -102,22 +102,28 @@ export const ChatPanel = memo(
       );
     }, []);
 
-    const onChooseTopic = useCallback(
-      (topicId: string) => {
-        setChatHistory((prev) => [
-          ...prev,
-          {
-            type: "suggestions",
-            content: suggestions.find((sug) => sug.topic === topicId)!.queries,
-          },
-        ]);
-      },
-      [suggestions]
-    );
-
     const onChooseSuggestion = useCallback((suggest: string) => {
       setSuggestion(suggest);
     }, []);
+
+    const onChooseTopic = useCallback(
+      (topicId: string) => {
+        const queries = suggestions.find((sug) => sug.topic === topicId)!.queries;
+        if (queries.length == 1) {
+          const query = queries[0];
+          onChooseSuggestion(query);
+        } else if (queries.length > 1) {
+          setChatHistory((prev) => [
+            ...prev,
+            {
+              type: "suggestions",
+              content: suggestions.find((sug) => sug.topic === topicId)!.queries,
+            },
+          ]);
+        }
+      },
+      [suggestions, onChooseSuggestion]
+    );
 
     useEffect(() => {
       if (loadingChatHistory || !chatHistoryData || !chatHistoryData.length)
