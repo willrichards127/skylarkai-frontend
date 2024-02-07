@@ -53722,3 +53722,653 @@ export const suggestionDict: {[x: string]: ITopic[]} = {
     }
   ],
 }
+
+export const REPORTS_DICT: Record<string, any> = {
+  commercialduediligence: {
+    label: "Commercial Due Diligence Report",
+    template: `
+			Commercial Due Diligence Report
+		`,
+    parent: true,
+  },
+  marketanalysis: {
+    label: "Market Analysis",
+    question:
+      "Provide me market analysis of this company with measurable values.",
+    template: `
+		  Market Analysis
+    `,
+  },
+  competitoranalysis: {
+    label: "Competitor Analysis",
+    question:
+      "Provide me competitor analysis for this company with measurable metrics values.",
+    template: `
+      Competitor Analysis
+		`,
+  },
+  customeranalysis: {
+    label: "Customer Analysis",
+    question:
+      "Provide me customer analysis for this company with measurable metrics values.",
+    template: `
+      Customer Analysis
+			`,
+  },
+  productserviceanalysis: {
+    label: "Product/Service Assessment",
+    question:
+      "Provide me product/service assessment analysis for this company with measurable metrics values.",
+    template: `
+      Product/Service Assessment Analysis
+		`,
+  },
+  regulatoryfinancialduediligence: {
+    label: "Regulatory Environment",
+    question: "Provide me regulatory environment report for this company.",
+    template: `
+      Regulatory Environment
+		`,
+  },
+  debtandliabilities: {
+    label: "Debt and Liabilities",
+    question: "Provide me debt and liabilities report for this company.",
+    template: ``,
+  },
+  financialduediligence: {
+    label: "Financial Due Diligence Report",
+    template: `
+      Financial Due Diligence Report
+		`,
+    parent: true,
+  },
+  financials: {
+    label: "Financial Statement Analysis",
+    question:
+      "Provide me financial statement analysis for this company with measurable metrics values.",
+    template: `
+      Financial Statement Analysis
+		`,
+  },
+  cashflow: {
+    label: "Cash Flow Statement",
+    template: `Cash Flow Statement`,
+  },
+  historicalfinancialperformance: {
+    label: "Historical Financial Performance",
+    question:
+      "Provide me historical financial performance analysis for this company with measurable metrics values.",
+    template: `Historical Financial Performance`,
+  },
+  growth: {
+    label: "Revenue Growth",
+    question:
+      "Provide me revenue growth analysis for this company with measurable metrics values.",
+    template: `Revenue Growth`,
+  },
+  financials_ratio: {
+    label: "Financial Ratios",
+    question:
+      "Provide me financial ratios analysis for this company with measurable metrics values.",
+    template: `Financial Ratios`,
+  },
+  profitability: {
+    label: "Profitability Margins",
+    question:
+      "Provide me financial ratios analysis for this company with measurable metrics values.",
+    template: `Profitability Margins`,
+  },
+  projectionsandassumptions: {
+    label: "Projections and Assumptions",
+    question:
+      "Provide me projections and assumptions analysis for this company with measurable metrics values.",
+    template: `
+      Projections and Assumptions
+		`,
+  },
+  offbalancesheetitems: {
+    label: "Off-balance Sheet Items",
+    question:
+      "Provide me off-balance sheet items analysis for this company with measurable metrics values.",
+    template: `
+      Off-balance Sheet Items
+		`,
+  },
+  taxation: {
+    label: "Taxation",
+    question:
+      "Provide me taxation analysis for this company with measurable metrics values.",
+    template: `
+      Taxation
+		`,
+  },
+  qualityofearnsanalysis: {
+    label: "Quality of Earns Analysis Report",
+    template: `
+      ## Quality of Earns Analysis Report
+			### Executive Summary			
+		`,
+    parent: true,
+  },
+  nonrecurringrevenuestreams: {
+    label: "Non-recurring Revenue Streams",
+    template: `
+			### Non-recurring Revenue Breakdown
+			### Non-recurring Revenue Trends
+			### Non-recurring vs. Recurring Revenue
+		`,
+  },
+  revenuerecognitionpolicies: {
+    label: "Revenue Recognition Policies",
+    template: `
+			### Revenue Recognition Methods
+			### Impact of Policies on Financial Statements
+			### Disclosure of Significant Judgments and Estimates
+		`,
+  },
+  unusualexpenseitems: {
+    label: "Unusual Expense Items",
+    template: `
+			### Unusual Expense Breakdown
+			### Unusual Expense Trends
+			### Unusual vs. Regular Expenses
+		`,
+  },
+  earningmanipulationindicators: {
+    label: "Earnings Manipulation Indicators",
+    template: `
+			### Earnings Manipulation Indicators
+			### Trend Analysis of Indicators
+			### Comparison with Industry Benchmarks
+		`,
+  },
+  adjustmentstoreportedearnings: {
+    label: "Adjustments to Reported Earnings",
+    template: `
+			### Adjustments to Reported Earnings Breakdown
+			### Impact of Adjustments on Earnings
+			### Adjustments by Category
+		`,
+  },
+  workingcapitalanalysis: {
+    label: "Working Capital Analysis Report",
+    template: ``,
+    parent: true,
+  },
+  inventoryturnover: {
+    label: "Inventory Turnover",
+    template: `
+			### Inventory Turnover Ratio
+			### Inventory Turnover Comparison
+		`,
+  },
+  dayssalesofinventory: {
+    label: "Days Sales of Inventory (DSI)",
+    template: `
+			### DSI Ratio
+			### DSI Comparison
+		`,
+  },
+  cashconversioncycle: {
+    label: "Cash Conversion Cycle",
+    template: `
+			### Cash Conversion Cycle
+			### CCC Comparison
+		`,
+  },
+  seasonalvariationsinworkingcapital: {
+    label: "Seasonal Variations in Working Capital",
+    template: `
+			### Seasonal Working Capital Variations
+			### Working Capital Analysis Summary
+		`,
+  },
+  esgduediligence: {
+    label: "ESG Due Diligence Report",
+    template: `
+      ## ESG Due Diligence Report
+			### Executive Summary
+		`,
+    parent: true,
+  },
+  environmentalimpactassessment: {
+    label: "Environmental Impact Assessment",
+    template: `
+			### Environmental Baseline Assessment			
+			### Impact Assessment and Mitigation
+			### Social and Economic Assessment
+		`,
+  },
+  socialresponsibilitypractices: {
+    label: "Social Responsibility & Practices",
+    template: `
+			### Corporate Social Responsibility (CSR) Initiatives			
+			### Diversity, Equity, and Inclusion (DE&I)
+		`,
+  },
+  corporategovernance: {
+    label: "Corporate Governance",
+    template: `
+			### Key findings and Observations
+			### Board of Directors and Governance Structure			
+			### Shareholder Engagement and Proxy Voting
+		`,
+  },
+  ethicalsupplychainanalysis: {
+    label: "Ethical Supply Chain Analysis",
+    template: `
+			### Supply Chain Transparency and Compliance
+			### Ethical Sourcing and Sustainable Practices
+		`,
+  },
+  energyandcarbonfootprint: {
+    label: "Energy and Carbon Footprint",
+    template: `
+			### Energy Consumption and Efficiency
+			### Carbon Footprint and Emission Reduction
+		`,
+  },
+};
+
+export const EdgarFilings = [
+  {
+    label: "Issued & pending Warrants",
+    value: "issued_pending_warrants",
+    question:
+      "Provide details of all warrants issued till today and pending warrants",
+  },
+  {
+    label: "Exercised Warrants",
+    value: "exercised_warrants",
+    question: "Provide details of all excercised warrants",
+  },
+  // {
+  //   label: 'Form S-10',
+  //   value: 's-10'
+  // },
+  // {
+  //   label: 'Form 10-K',
+  //   value: '10-k'
+  // },
+  // {
+  //   label: 'Form 10-Q',
+  //   value: '10-q'
+  // },
+  // {
+  //   label: 'Form 424B',
+  //   value: '424B'
+  // },
+  // {
+  //   label: 'Form 8-K',
+  //   value: '8-K'
+  // },
+];
+
+export const ACCEPT_TEMPLATE_NODE_DICT: Record<string, string[]> = {
+  // Template: ["File", "Webcrawler"],
+  Comparison: ["File", "Webcrawler", "Template"],
+  "GPT-3.5": [
+    "Webcrawler",
+    "Input",
+    "GPT-3.5",
+    "Anthropic",
+    "Chroma",
+    "Pinecone",
+    "Comparison",
+    "Template",
+    "GoogleSearch",
+  ],
+  Anthropic: [
+    "Webcrawler",
+    "Input",
+    "GPT-3.5",
+    "Anthropic",
+    "Chroma",
+    "Pinecone",
+    "Comparison",
+    "Template",
+    "GoogleSearch",
+  ],
+  File: ["PitchBook", "Sky", "Edgar"],
+  Chroma: ["File", "CustomAPI", "GoogleSearch", "YahooFinance", "Webcrawler"],
+  Pinecone: [
+    "File",
+    "CustomAPI",
+    "GoogleSearch",
+    "YahooFinance",
+    "Webcrawler",
+    "PitchBook",
+  ],
+  Output: ["GPT-3.5", "Anthropic", "GoogleSearch", "CustomAPI", "YahooFinance"],
+  GoogleSearch: ["Input"],
+};
+
+export const TASKS_DICT: Record<string, any> = {
+  "Diligence Reports": {
+    "Commerical Due Diligence Report": {
+      "Market Analysis": [
+        "Market size and segmentation data",
+        "Growth rates and trends in the industry",
+        "Customer demographics and behavior studies",
+        "Market research reports and industry studies",
+        "Regulatory environment and compliance requirements",
+      ],
+      "Competitive Landscape": [
+        "Competitor financials and market shares",
+        "SWOT analysis",
+        "Product and service comparisons",
+        "Marketing strategies and distribution channels of competitors",
+        "Entry barriers and threat of new entrants",
+      ],
+      "Customer Segmentation": [
+        "Customer databases and CRM records",
+        "Sales data by customer segment",
+        "Customer satisfaction surveys and feedback",
+        "Loyalty and retention metrics",
+        "Customer acquisition costs and lifetime value analysis",
+      ],
+      "Product/Service Analysis": [
+        "Detailed product or service catalogs",
+        "Pricing strategies and discount structures",
+        "Product lifecycle stage",
+        "Revenue and profitability by product or service line",
+        "Research and development pipeline",
+      ],
+      "Sales and Marketing Efficiency": [
+        "Marketing spend and ROI analysis",
+        "Sales funnel and conversion rates",
+        "Channel effectiveness and partner performance data",
+        "Brand awareness and perception studies",
+        "Digital marketing analytics and web traffic data",
+      ],
+      "Supply Chain and Operations Review": [
+        "Supplier contracts and terms",
+        "Inventory management systems data",
+        "Logistics and distribution network analysis",
+        "Production capacity and utilization rates",
+        "Quality control and return rates",
+      ],
+      "Regulatory Compliance": [
+        "Compliance audit reports",
+        "Regulatory filings and correspondence",
+        "Product or service certifications",
+        "Pending legislation or regulatory changes that could impact the business",
+      ],
+      "Strategic Fit Analysis": [
+        "Strategic plan of the acquiring company",
+        "Alignment of the target company's products/services with the acquirer's portfolio",
+        "Synergies and integration plans",
+        "Cultural and operational compatibility assessments",
+      ],
+      "Growth Opportunities": [
+        "New market entry analysis",
+        "Potential for product or service expansion",
+        "Cross-selling and up-selling opportunities",
+        "Analysis of potential strategic partnerships or alliances",
+      ],
+      "Risk Assessment": [
+        "Risk registers and mitigation plans",
+        "Historical data on risk incidents and their impact",
+        "Insurance policies and coverage details",
+        "Sensitivity analysis for key business drivers",
+      ],
+      "Financial Impact": [
+        "Pro forma financial models incorporating CDD findings",
+        "Impact analysis on revenue, margins, and EBITDA",
+        "Valuation models including discounted cash flow (DCF) and comparables",
+        "Investment thesis and deal rationale documentation",
+      ],
+      "Final Report": [
+        "Executive summary",
+        "Detailed analysis",
+        "Strategic recommendations and action plans",
+        "Appendices",
+      ],
+    },
+    "Financial Due Diligence Report": {
+      "Financial Data Collection": [
+        "Historical financial statements",
+        "Tax returns and filings",
+        "Bank statements",
+        "Sales and purchase ledgers",
+        "Capital expenditure records",
+        "Debt agreements",
+      ],
+      "Historical Financial Analysis": [
+        "Year-over-year financial statements",
+        "Quarterly financial reports",
+        "Revenue and expense trends",
+        "Gross and net profit margins",
+        "EBITDA trends",
+      ],
+      "Accounting Policies Review": [
+        "Accounting policy documents",
+        "Notes to financial statements",
+        "Audit reports",
+        "Revenue recognition policies",
+        "Inventory valuation methods",
+      ],
+      "Revenue Recognition Analysis": [
+        "Sales contracts and agreements",
+        "Deferred revenue schedules",
+        "Customer invoices and receipts",
+        "Revenue by product line or service",
+      ],
+      "Expense & Margin Analysis": [
+        "Cost of goods sold records",
+        "Operating expenses breakdown",
+        "Vendor and supplier contracts",
+        "Margin analysis by product or service",
+      ],
+      "Internal Control Evaluation": [
+        "Internal control policy documents",
+        "Previous internal and external audit reports",
+        "Fraud risk assessments",
+        "Control testing results",
+      ],
+      "Financial Reporting Compliance": [
+        "Compliance reports",
+        "Correspondence with regulatory bodies",
+        "Summary of past compliance issues and resolutions",
+      ],
+      "Debt & Liabilities Assessment": [
+        "Loan agreements",
+        "Amortization schedules",
+        "Contingent liabilities details",
+        "Legal proceedings affecting financial liabilities",
+      ],
+      "Future Financial Projections": [
+        "Business plans and forecasts",
+        "Budgets and financial projections",
+        "Sensitivity analyses",
+        "Industry growth projections",
+      ],
+      "Adjusted EBITDA Calculation": [
+        "EBITDA reconciliation schedules",
+        "Non-recurring expenses and income",
+        "Adjustments for synergies and cost-saving initiatives",
+      ],
+      "Working Capital Assessment": [
+        "Current assets and liabilities",
+        "Inventory levels and turnover rates",
+        "Accounts receivable and payable aging reports",
+      ],
+      "Financial Health Indicators": [
+        "Liquidity ratios",
+        "Solvency ratios",
+        "Profitability ratios",
+      ],
+      "Final Report": [
+        "Consolidated findings",
+        "Executive summary",
+        "Detailed analysis",
+        "Appendices",
+      ],
+    },
+    "Quality of Earnings Analysis Report": {
+      "Income Statement Analysis": [
+        "Monthly or quarterly income statements",
+        "Breakdown of revenue streams",
+        "Gross and operating margins",
+        "Non-operating income and expenses",
+      ],
+      "Balance Sheet Review": [
+        "Current and non-current assets",
+        "Short-term and long-term liabilities",
+        "Shareholder equity details",
+        "Notes on significant balance sheet items",
+      ],
+      "Revenue & Sales Analysis": [
+        "Sales by product or service",
+        "Customer concentration details",
+        "Seasonality effects on sales",
+        "Pricing strategies and discounts",
+      ],
+      "Cost of Goods Sold Analysis": [
+        "Direct material, labor, and overhead costs",
+        "Inventory valuation reports",
+        "Supplier and vendor terms",
+        "Production efficiency metrics",
+      ],
+      "Asset Quality Review": [
+        "Fixed asset registers",
+        "Depreciation schedules",
+        "Impairment testing results",
+        "Capitalization policies",
+      ],
+      "Liabilities & Provisions Assessment": [
+        "Details of long-term debt",
+        "Warranty and return provisions",
+        "Legal contingencies",
+        "Tax liabilities",
+      ],
+      "Non-Recurring Items Identification": [
+        "List of one-time expenses and revenues",
+        "Supporting documentation for unusual items",
+        "Analysis of their impact on earnings",
+      ],
+      "Depreciation & Amortization Methods": [
+        "Depreciation methods and rates",
+        "Amortization schedules for intangible assets",
+        "Changes in accounting estimates",
+      ],
+      "Debt & Interest Analysis": [
+        "Interest rate terms",
+        "Debt covenants",
+        "Maturity profiles",
+        "Refinancing plans or history",
+      ],
+      "Normalized Earnings Calculation": [
+        "Adjustments for non-recurring items",
+        "Normalization of above or below the line items",
+        "Recurring revenue and expense trends",
+      ],
+      "Earnings Quality Assessment": [
+        "Analysis of cash flow vs. net income",
+        "Revenue recognition timing issues",
+        "Earnings manipulation indicators",
+      ],
+      "Final Report": [
+        "Summary of normalized earnings",
+        "Analysis of earnings sustainability",
+        "Recommendations for investors or acquirers",
+      ],
+    },
+    "Working Capital Analysis Report": {
+      "Inventory Turnover": [],
+      "Days Sales of Inventory (DSI)": [],
+      "Cash Conversion Cycle": [],
+      "Seasonal Variations in Working Capital": [],
+      "Final Report": ["Executive summary", "Detailed analysis", "Appendices"],
+    },
+    "ESG Due Diligence Report": {
+      "Environmental Impact Assessment": [],
+      "Social Responsibility & Practices": [],
+      "Corporate Governance": [],
+      "Ethical Supply Chain Analysis": [],
+      "Energy and Carbon Footprint": [],
+      "Final Report": ["Executive summary", "Detailed analysis", "Appendices"],
+    },
+    "Post-Merger Integration Checklist": {
+      "Integration Preparation": [
+        "Finalize Integration Plan",
+        "Establish Integration Management Office (IMO)",
+        "Communicate Integration Strategy to Employees",
+      ],
+      "Day One Readiness": [
+        "Legal and Regulatory Compliance",
+        "Branding and Marketing Alignment",
+        "IT Systems and Access Rights",
+      ],
+      "First 30 Days": [
+        "Cultural Integration Initiatives",
+        "Quick Wins Identification and Implementation",
+        "Key Personnel Retention Strategies",
+      ],
+      "30-60 Days": [
+        "Consolidation of Operations",
+        "Alignment of Policies and Procedures",
+        "Integration of Financial Reporting",
+      ],
+      "60-100 Days": [
+        "Ongoing Cultural Integration Activities",
+        "Optimization of Combined Operations",
+        "Performance Tracking Against KPIs",
+      ],
+      "Ongoing Integration": [
+        "Long-Term Strategic Initiatives",
+        "Continuous Improvement Programs",
+        "Lessons Learned and Best Practices Documentation",
+      ],
+    },
+    "100-Day Plan": {
+      "Executive Summary": [
+        "Objectives of the 100-Day Plan",
+        "Expected Outcomes",
+      ],
+      "Strategic Priorities": [
+        "Key Strategic Initiatives",
+        "Alignment with Overall Business Strategy",
+      ],
+      "Action Items": [
+        "Detailed Action Plan by Department",
+        "Ownership and Accountability",
+      ],
+      "Communication Plan": [
+        "Internal Communication Strategy",
+        "External Stakeholder Engagement",
+      ],
+      "Performance Metrics": [
+        "Definition of Success Metrics",
+        "Monitoring and Reporting Framework",
+      ],
+      "Review Points": ["30-Day Review", "60-Day Review", "100-Day Review"],
+      "Risk Management": [
+        "Identification of Potential Risks",
+        "Mitigation Strategies",
+      ],
+      Conclusion: ["Next Steps Post-100 Days", "Long-Term Integration Goals"],
+      Appendix: [
+        "Contact Information for Key Personnel",
+        "Additional Resources and Refer",
+      ],
+    },
+    // "Synergy Analysis Report": {},
+    // "Closing Checklist": {},
+  },
+  "Sentiment Analysis": [
+    "Cultural Fit Assessment",
+    "Risk Identification",
+    "Stakeholder Engagement",
+    "Opportunity Exploration",
+    "Communication Strategy Development",
+    "Change Management",
+    "Post-Merger Integration Planning",
+    "Performance Benchmarking",
+    "Decision Making Support",
+    "Conflict Resolution",
+  ],
+  "Enterprise Chatbot": {},
+  "Compare Documents": {},
+  "Investment memo": {},
+};
