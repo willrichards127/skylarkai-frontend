@@ -5,34 +5,35 @@ import type { BaseQueryFn } from "@reduxjs/toolkit/query";
 import axios from "axios";
 import type { AxiosRequestConfig, AxiosError } from "axios";
 import { clearUserInfo, updateTokenAsync } from "../features/authSlice";
+import { loadStoreValue } from "../../shared/utils/storage";
 
 export const baseQuery = retry(
-  async (args, api, extraOptions) => {
-    const result = await fetchBaseQuery({
-      baseUrl: import.meta.env.VITE_API_URL,
-      prepareHeaders: (headers, api) => {
-        const auth = (api.getState() as any).userAuthSlice;
-        if (!auth.token) {
-          // do action for logout
-          return headers;
-        }
-        if (auth.token) {
-          headers.set("Authorization", `Bearer ${auth.token}`);
-        }
-        return headers;
-      },
-    })(args, api, extraOptions);
+	async (args, api, extraOptions) => {
+		const result = await fetchBaseQuery({
+			baseUrl: import.meta.env.VITE_ENTERPRISE_API_URL,
+			prepareHeaders: (headers) => {
+				const token = loadStoreValue("token");
+				if (!token) {
+					// do action for logout
+					return headers;
+				}
+				if (token) {
+					headers.set("Authorization", `Bearer ${token}`);
+				}
+				return headers;
+			},
+		})(args, api, extraOptions);
 
-    // if any error, need to logout
-    // if (result.error) {
-    // 	// getState().
-    //   window.location.href = "/auth/login";
-    // }
-    return result;
-  },
-  {
-    maxRetries: 0,
-  }
+		// if any error, need to try to call this api again
+		// if (!!result.error) {
+		// 	clearItems();
+		// 	window.location.href = "/auth/login";
+		// }
+		return result;
+	},
+	{
+		maxRetries: 0,
+	}
 );
 
 export const axiosBaseQuery =

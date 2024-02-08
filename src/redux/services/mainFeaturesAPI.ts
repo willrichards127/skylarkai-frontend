@@ -6,7 +6,7 @@ import { IMainFeature } from "../interfaces";
 export const mainFeaturesApi = createApi({
   reducerPath: "mainFeaturesApi",
   baseQuery: axiosBaseQueryWithReauth({
-    baseUrl: import.meta.env.VITE_API_URL,
+    baseUrl: import.meta.env.VITE_PREMIUM_API_URL,
     isGuarded: false,
   }),
   endpoints: (builder) => ({
