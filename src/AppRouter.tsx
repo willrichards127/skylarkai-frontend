@@ -25,14 +25,15 @@ import ProfilePage from "./pages/portal/profile/ProfilePage";
 const LandingPage = lazy(() => import("./pages/landing"));
 
 const ForgotPasswordForm = lazy(
-  () => import("./pages/auth/ForgotPasswordForm")
+  () => import("./pages/auth_premium/ForgotPasswordForm")
 );
 const ForgotPasswordOTPForm = lazy(
-  () => import("./pages/auth/ForgotPasswordOTPForm")
+  () => import("./pages/auth_premium/ForgotPasswordOTPForm")
 );
-const RegisterForm = lazy(() => import("./pages/auth/RegisterForm"));
-const RegisterOTPForm = lazy(() => import("./pages/auth/RegisterOTPForm"));
-const LoginForm = lazy(() => import("./pages/auth/LoginForm"));
+const RegisterForm = lazy(() => import("./pages/auth_premium/RegisterForm"));
+const RegisterOTPForm = lazy(() => import("./pages/auth_premium/RegisterOTPForm"));
+const LoginForm = lazy(() => import("./pages/auth_premium/LoginForm"));
+const LoginFormEnterprise = lazy(() => import("./pages/auth_enterprise/LoginForm"));
 
 const HelpPage = lazy(() => import("./pages/help"));
 const SupportPage = lazy(() => import("./pages/support"));
@@ -92,6 +93,11 @@ function AppRouter() {
           {
             path: "/login",
             element: <LoginForm />,
+            errorElement: <ErrorBoundary />,
+          },
+          {
+            path: "/login-enterprise",
+            element: <LoginFormEnterprise />,
             errorElement: <ErrorBoundary />,
           },
           {
