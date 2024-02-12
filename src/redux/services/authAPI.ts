@@ -1,5 +1,5 @@
-import { setItem } from "../../shared/utils/localstorage";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { saveStoreValue } from "../../shared/utils/storage";
 
 export const authApi = createApi({
 	reducerPath: "authApi",
@@ -40,7 +40,7 @@ export const authApi = createApi({
 				},
 			}),
 			transformResponse: (response: { token: string; user_id: number }) => {
-				setItem("token", response.token);
+				saveStoreValue("token", response.token);
 				return response;
 			},
 		}),

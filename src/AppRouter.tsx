@@ -120,6 +120,43 @@ function AppRouter() {
             element: <ForgotPasswordOTPForm />,
             errorElement: <ErrorBoundary />,
           },
+          // portal routing
+          {
+            path: "/main/reports",
+            element: <ReportsPage />
+          },
+          {
+            path: "/main/reports/:reportId",
+            element: <ReportDetailPage />
+          },
+          {
+            path: "/main/setups",
+            element: <SetupsPage />
+          },
+          {
+            path: "/main/setups/:setupId",
+            element: <SetupDetailPage />
+          },
+          {
+            path: "/main/orders",
+            element: <OrdersPage />
+          },
+          {
+            path: "/main/companies",
+            element: <CompaniesPage />
+          },
+          {
+            path: "/main/companies/:companyId",
+            element: <CompanyDetailPage />
+          },
+          {
+            path: "/main/companies/:companyId/:orderId",
+            element: <OrderDetailPage />
+          },
+          {
+            path: "/main/profile",
+            element: <ProfilePage />
+          },
           {
             element: <ProtectedRoute isAllowed={!!token && !!user} />,
             errorElement: <ErrorBoundary />,
@@ -139,43 +176,6 @@ function AppRouter() {
               {
                 path: "/premium/:featureId",
                 element: <FeaturePage />,
-              },
-              // portal routing
-              {
-                path: "/main/reports",
-                element: <ReportsPage />
-              },
-              {
-                path: "/main/reports/:reportId",
-                element: <ReportDetailPage />
-              },
-              {
-                path: "/main/setups",
-                element: <SetupsPage />
-              },
-              {
-                path: "/main/setups/:setupId",
-                element: <SetupDetailPage />
-              },
-              {
-                path: "/main/orders",
-                element: <OrdersPage />
-              },
-              {
-                path: "/main/companies",
-                element: <CompaniesPage />
-              },
-              {
-                path: "/main/companies/:companyId",
-                element: <CompanyDetailPage />
-              },
-              {
-                path: "/main/companies/:companyId/:orderId",
-                element: <OrderDetailPage />
-              },
-              {
-                path: "/main/profile",
-                element: <ProfilePage />
               },
             ],
           },
