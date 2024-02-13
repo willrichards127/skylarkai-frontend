@@ -12,18 +12,28 @@ import { ProtectedRoute } from "./ProtectedRoute";
 import { currentUser } from "./redux/features/authSlice";
 import { useAddUserActivityMutation } from "./redux/services/userAPI";
 import FeaturePage from "./pages/premium/feature";
+import ReportsPage from "./pages/portal/reports/ReportsPage";
+import ReportDetailPage from "./pages/portal/reports/ReportDetailPage";
+import SetupsPage from "./pages/portal/setups/SetupsPage";
+import SetupDetailPage from "./pages/portal/setups/SetupDetailPage";
+import OrdersPage from "./pages/portal/workorders/OrdersPage";
+import OrderDetailPage from "./pages/portal/workorders/OrderDetailPage";
+import CompaniesPage from "./pages/portal/workorders/CompaniesPage";
+import CompanyDetailPage from "./pages/portal/workorders/CompanyDetailPage";
+import ProfilePage from "./pages/portal/profile/ProfilePage";
 
 const LandingPage = lazy(() => import("./pages/landing"));
 
 const ForgotPasswordForm = lazy(
-  () => import("./pages/auth/ForgotPasswordForm")
+  () => import("./pages/auth_premium/ForgotPasswordForm")
 );
 const ForgotPasswordOTPForm = lazy(
-  () => import("./pages/auth/ForgotPasswordOTPForm")
+  () => import("./pages/auth_premium/ForgotPasswordOTPForm")
 );
-const RegisterForm = lazy(() => import("./pages/auth/RegisterForm"));
-const RegisterOTPForm = lazy(() => import("./pages/auth/RegisterOTPForm"));
-const LoginForm = lazy(() => import("./pages/auth/LoginForm"));
+const RegisterForm = lazy(() => import("./pages/auth_premium/RegisterForm"));
+const RegisterOTPForm = lazy(() => import("./pages/auth_premium/RegisterOTPForm"));
+const LoginForm = lazy(() => import("./pages/auth_premium/LoginForm"));
+const LoginFormEnterprise = lazy(() => import("./pages/auth_enterprise/LoginForm"));
 
 const HelpPage = lazy(() => import("./pages/help"));
 const SupportPage = lazy(() => import("./pages/support"));
@@ -86,6 +96,11 @@ function AppRouter() {
             errorElement: <ErrorBoundary />,
           },
           {
+            path: "/login-enterprise",
+            element: <LoginFormEnterprise />,
+            errorElement: <ErrorBoundary />,
+          },
+          {
             path: "/register",
             element: <RegisterForm />,
             errorElement: <ErrorBoundary />,
@@ -104,6 +119,43 @@ function AppRouter() {
             path: "/forgot_password_otp",
             element: <ForgotPasswordOTPForm />,
             errorElement: <ErrorBoundary />,
+          },
+          // portal routing
+          {
+            path: "/main/reports",
+            element: <ReportsPage />
+          },
+          {
+            path: "/main/reports/:reportId",
+            element: <ReportDetailPage />
+          },
+          {
+            path: "/main/setups",
+            element: <SetupsPage />
+          },
+          {
+            path: "/main/setups/:setupId",
+            element: <SetupDetailPage />
+          },
+          {
+            path: "/main/orders",
+            element: <OrdersPage />
+          },
+          {
+            path: "/main/companies",
+            element: <CompaniesPage />
+          },
+          {
+            path: "/main/companies/:companyId",
+            element: <CompanyDetailPage />
+          },
+          {
+            path: "/main/companies/:companyId/:orderId",
+            element: <OrderDetailPage />
+          },
+          {
+            path: "/main/profile",
+            element: <ProfilePage />
           },
           {
             element: <ProtectedRoute isAllowed={!!token && !!user} />,

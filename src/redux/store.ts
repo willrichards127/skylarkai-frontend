@@ -4,6 +4,12 @@ import { userAuthSlice } from "./features/authSlice";
 import { userApi } from "./services/userAPI";
 import { mainFeaturesApi } from "./services/mainFeaturesAPI";
 import { transcriptApi } from "./services/transcriptAPI";
+
+import { authApi } from "./services/authAPI";
+import { setupApi } from "./services/setupApi";
+import { reportApi } from "./services/reportApi";
+import { workOrderApi } from "./services/workOrderApi";
+
 import { loadStoreValue } from "../shared/utils/storage";
 
 // Global error handler
@@ -29,6 +35,10 @@ export const store = configureStore({
     [userApi.reducerPath]: userApi.reducer,
     [mainFeaturesApi.reducerPath]: mainFeaturesApi.reducer,
     [transcriptApi.reducerPath]: transcriptApi.reducer,
+    [setupApi.reducerPath]: setupApi.reducer,
+		[reportApi.reducerPath]: reportApi.reducer,
+		[workOrderApi.reducerPath]: workOrderApi.reducer,
+    [authApi.reducerPath]: authApi.reducer,
   },
   devTools: import.meta.env.VITE_NODE_ENV !== "production",
   middleware: (getDefaultMiddleware) =>
@@ -36,6 +46,10 @@ export const store = configureStore({
       userApi.middleware,
       mainFeaturesApi.middleware,
       transcriptApi.middleware,
+      authApi.middleware,
+      setupApi.middleware,
+			reportApi.middleware,
+			workOrderApi.middleware,
       rtkQueryErrorLogger,
     ]),
 });

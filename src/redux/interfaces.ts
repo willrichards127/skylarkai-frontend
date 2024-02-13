@@ -114,3 +114,10 @@ export interface ITopic {
   topic: string;
   queries: string[];
 }
+
+export interface IResponseAnswer {
+	question?: string;
+	answer: string;
+	data: string[];
+	question_history?: string[][] | string[] | string;
+}

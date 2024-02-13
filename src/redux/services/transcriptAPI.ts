@@ -17,7 +17,7 @@ import { parseTransaction } from "../../shared/utils/string";
 export const transcriptApi = createApi({
   reducerPath: "transcriptApi",
   baseQuery: axiosBaseQueryWithReauth({
-    baseUrl: import.meta.env.VITE_API_URL,
+    baseUrl: import.meta.env.VITE_PREMIUM_API_URL,
     isGuarded: true,
   }),
   tagTypes: ["FeatureInstance", "FetchFileLog"],

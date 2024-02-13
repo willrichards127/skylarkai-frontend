@@ -19,7 +19,7 @@ export const registerAPI = createAsyncThunk(
   async (userData: IUser) => {
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}register`,
+        `${import.meta.env.VITE_PREMIUM_API_URL}register`,
         userData
       );
       return response.data;
@@ -37,7 +37,7 @@ export const loginAPI = createAsyncThunk(
   async ({ email, password }: { email: string; password: string }) => {
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}login`,
+        `${import.meta.env.VITE_PREMIUM_API_URL}login`,
         {
           email,
           password,
@@ -45,7 +45,7 @@ export const loginAPI = createAsyncThunk(
       );
       // get system graph id
       const responseSystemGraph = await axios.get(
-        `${import.meta.env.VITE_API_URL}system_graph_id`,
+        `${import.meta.env.VITE_PREMIUM_API_URL}system_graph_id`,
         {
           headers: {
             Authorization: `Bearer ${response.data.token}`,
@@ -69,7 +69,7 @@ export const loginAPI = createAsyncThunk(
 );
 
 export const subscriptionAPI = createAsyncThunk("subscriptions", async () => {
-  const response = await axios(`${import.meta.env.VITE_API_URL}subscriptions`);
+  const response = await axios(`${import.meta.env.VITE_PREMIUM_API_URL}subscriptions`);
 
   if (response.status !== 200) {
     return {
@@ -84,7 +84,7 @@ export const verifyEmailAPI = createAsyncThunk(
   async ({ token }: { token: string }) => {
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}verify_register_email?token=${token}`,
+        `${import.meta.env.VITE_PREMIUM_API_URL}verify_register_email?token=${token}`,
         {
           token,
         }
