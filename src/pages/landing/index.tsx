@@ -23,13 +23,13 @@ import { bottomNavHeight } from "../../shared/models/constants";
 import { useGetSubScriptionFeaturesQuery } from "../../redux/services/mainFeaturesAPI";
 import { Stack } from "@mui/system";
 
-export const featureImgDict: Record<string, string> = {
-  "sec_filing.png": secFilingImg,
-  "investment_memo.png": investmentImg,
-  "insider_transactions.png": insiderTransactionImg,
-  "analyze_earnings.png": analyzeEarningImg,
-  "compare.png": compareDocImg,
-  "sentiment.png": sentimentImg,
+const featureImgDict: Record<string, string> = {
+  "sec_filing": secFilingImg,
+  "investment_memo": investmentImg,
+  "insider_transactions": insiderTransactionImg,
+  "analyze_earnings": analyzeEarningImg,
+  "compare": compareDocImg,
+  "sentiment": sentimentImg,
 };
 
 export default function LandingPage() {

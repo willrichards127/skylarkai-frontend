@@ -10,6 +10,7 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  Button,
 } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -20,6 +21,8 @@ import {
   FeaturesIcon,
   HelpIcon as Help2Icon,
   SupportIcon,
+  WelcomeIcon,
+  AdvancedFeaturesIcon,
 } from "../../components/Svgs";
 import { Notifications } from "./Notifications";
 import { XPopmenu } from "../../components/XPopmenu";
@@ -134,106 +137,160 @@ export const MainAppBar = memo(() => {
         }}
       >
         <Box
-          sx={{ display: "flex", alignItems: "center", gap: 2, height: "100%" }}
-        >          
+          sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "100%" }}
+        >
           <Box
-            sx={{
-              ml: 4,
-            }}
+            sx={{ display: "flex", alignItems: "center", gap: 2, height: "100%" }}
           >
-            <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+            {user.subscription_id === 3 &&
               <Box
                 component={Link}
-                to="/premium"
+                to="/welcome"
                 sx={{
-                  display: "flex",
-                  gap: 1,
-                  alignItems: "center",
+                  ml: 4,
                   color: "white",
                   textDecoration: "none",
                   fontSize: 14,
-                  fontWeight: location.pathname.includes("/premium")
+                  fontWeight: location.pathname.includes("/help")
                     ? "bold"
                     : "normal",
-                  opacity: location.pathname.includes("/premium")
-                    ? 1
-                    : 0.3,
+                  opacity: location.pathname.includes("/help") ? 1 : 0.3,
                 }}
               >
-                <FeaturesIcon />
-                Features
+                <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                  <WelcomeIcon />
+                  Welcome
+                </Box>
               </Box>
-              <Box onClick={onFeatures} sx={{ cursor: "pointer", pt: 1 }}>
-                <ExpandMoreIcon />
+            }
+            <Box
+              sx={{
+                ml: 4,
+              }}
+            >
+              <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                <Box
+                  component={Link}
+                  to="/premium"
+                  sx={{
+                    display: "flex",
+                    gap: 1,
+                    alignItems: "center",
+                    color: "white",
+                    textDecoration: "none",
+                    fontSize: 14,
+                    fontWeight: location.pathname.includes("/premium")
+                      ? "bold"
+                      : "normal",
+                    opacity: location.pathname.includes("/premium")
+                      ? 1
+                      : 0.3,
+                  }}
+                >
+                  <FeaturesIcon />
+                  Features
+                </Box>
+                <Box onClick={onFeatures} sx={{ cursor: "pointer", pt: 1 }}>
+                  <ExpandMoreIcon />
+                </Box>
+                <Menu
+                  anchorEl={anchorEl}
+                  open={open}
+                  onClose={() => setAnchorEl(null)}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
+                  }}
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                >
+                  {(features || []).map((feature) => (
+                    <MenuItem
+                      key={feature.id}
+                      selected={
+                        location.pathname === `/premium/${feature.id}`
+                      }
+                      onClick={() => {
+                        setAnchorEl(null);
+                        navigate(`/premium/${feature.id}`);
+                      }}
+                    >
+                      {feature.feature}
+                    </MenuItem>
+                  ))}
+                </Menu>
               </Box>
-              <Menu
-                anchorEl={anchorEl}
-                open={open}
-                onClose={() => setAnchorEl(null)}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left",
-                }}
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
+            </Box>
+            {user.subscription_id === 3 &&
+              <Box
+                component={Link}
+                to="/advanced-features"
+                sx={{
+                  ml: 4,
+                  color: "white",
+                  textDecoration: "none",
+                  fontSize: 14,
+                  fontWeight: location.pathname.includes("/help")
+                    ? "bold"
+                    : "normal",
+                  opacity: location.pathname.includes("/help") ? 1 : 0.3,
                 }}
               >
-                {(features || []).map((feature) => (
-                  <MenuItem
-                    key={feature.id}
-                    selected={
-                      location.pathname === `/premium/${feature.id}`
-                    }
-                    onClick={() => {
-                      setAnchorEl(null);
-                      navigate(`/premium/${feature.id}`);
-                    }}
-                  >
-                    {feature.feature}
-                  </MenuItem>
-                ))}
-              </Menu>
+                <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                  <AdvancedFeaturesIcon />
+                  Advanced Features
+                </Box>
+              </Box>
+            }
+            <Box
+              component={Link}
+              to="/help"
+              sx={{
+                ml: 4,
+                color: "white",
+                textDecoration: "none",
+                fontSize: 14,
+                fontWeight: location.pathname.includes("/help")
+                  ? "bold"
+                  : "normal",
+                opacity: location.pathname.includes("/help") ? 1 : 0.3,
+              }}
+            >
+              <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                <Help2Icon />
+                Help
+              </Box>
+            </Box>
+            <Box
+              component={Link}
+              to="/support"
+              sx={{
+                ml: 4,
+                color: "white",
+                textDecoration: "none",
+                fontSize: 14,
+                fontWeight: location.pathname.includes("/support")
+                  ? "bold"
+                  : "normal",
+                opacity: location.pathname.includes("/support") ? 1 : 0.3,
+              }}
+            >
+              <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                <SupportIcon />
+                Support
+              </Box>
             </Box>
           </Box>
-          <Box
-            component={Link}
-            to="/help"
-            sx={{
-              ml: 4,
-              color: "white",
-              textDecoration: "none",
-              fontSize: 14,
-              fontWeight: location.pathname.includes("/help")
-                ? "bold"
-                : "normal",
-              opacity: location.pathname.includes("/help") ? 1 : 0.3,
-            }}
-          >
-            <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-              <Help2Icon />
-              Help
-            </Box>
-          </Box>
-          <Box
-            component={Link}
-            to="/support"
-            sx={{
-              ml: 4,
-              color: "white",
-              textDecoration: "none",
-              fontSize: 14,
-              fontWeight: location.pathname.includes("/support")
-                ? "bold"
-                : "normal",
-              opacity: location.pathname.includes("/support") ? 1 : 0.3,
-            }}
-          >
-            <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-              <SupportIcon />
-              Support
-            </Box>
-          </Box>
+          {user.subscription_id === 3 &&
+            <Button
+              variant="contained"
+              sx={{ minWidth: 160 }}
+            >
+              Access Enterprise Portal
+            </Button>
+          }
         </Box>
       </Box>
     </AppBar>

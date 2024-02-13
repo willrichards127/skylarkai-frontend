@@ -53,7 +53,7 @@ const LoginForm = memo(() => {
   useEffect(() => {
     if (isLoggedIn) {
       if (userInfo.user_role === 2) {
-        navigate("/admin");
+        navigate("/portal");
       } else {
         navigate("/premium");
       }

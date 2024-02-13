@@ -1,32 +1,27 @@
-import { useCallback } from "react";
+import { FC, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Grid, Box, CircularProgress, Typography } from "@mui/material";
 import { currentUser } from "../../redux/features/authSlice";
 import Layout from "../layouts/Layout";
-import { FeatureCard } from "../../components/FeatureCard";
-import { LeftNavbar } from "./components/sub-components/LeftNavbar";
+import { FeatureCard } from "./components/FeatureCard";
+
 import { useGetSubScriptionFeaturesQuery } from "../../redux/services/mainFeaturesAPI";
+import { AnalyzeEarningsFeatureIcon, ChatFeatureIcon, CompareFeatureIcon, FinanceFeatureIcon, InsiderTransactionFeatureIcon, InvestmentFeatureIcon, SecFilingFeatureIcon, SentimentFeatureIcon } from "../../components/Svgs";
 
-import { leftNavWidth } from "../../shared/models/constants";
 
-import secFilingImg from "../../assets/premium/sec_filing.png";
-import investmentImg from "../../assets/premium/investment_memo.png";
-import insiderTransactionImg from "../../assets/premium/insider_transactions.png";
-import analyzeEarningImg from "../../assets/premium/analyze_earnings.png";
-import compareDocImg from "../../assets/premium/compare.png";
-import sentimentImg from "../../assets/premium/sentiment.png";
-
-const featureImgDict: Record<string, string> = {
-  "sec_filing": secFilingImg,
-  "investment_memo": investmentImg,
-  "insider_transactions": insiderTransactionImg,
-  "analyze_earnings": analyzeEarningImg,
-  "compare": compareDocImg,
-  "sentiment": sentimentImg,
+const featureImgDict: Record<string, FC> = {
+  "sec_filing": SecFilingFeatureIcon,
+  "investment_memo": InvestmentFeatureIcon,
+  "insider_transactions": InsiderTransactionFeatureIcon,
+  "analyze_earnings": AnalyzeEarningsFeatureIcon,
+  "compare": CompareFeatureIcon,
+  "sentiment": SentimentFeatureIcon,
+  "chat": ChatFeatureIcon,
+  "finance": FinanceFeatureIcon,
 };
 
-export default function FeaturesPage() {
+export default function HomePage() {
   const navigate = useNavigate();
   const { userInfo } = useSelector(currentUser);
   const { isLoading, data: features } = useGetSubScriptionFeaturesQuery({
@@ -48,28 +43,24 @@ export default function FeaturesPage() {
           height: "100%",
         }}
       >
-        <LeftNavbar />
         <Box
-          sx={{ width: `calc(100% - ${leftNavWidth}px)`, overflowY: "auto" }}
+          sx={{ width: `100%`, overflowY: "auto" }}
         >
           <Box
             sx={{ display: "flex", flexDirection: "column", height: "100%" }}
           >
             <Box pt={6} px={6}>
               <Typography variant="h4" textAlign="center" gutterBottom>
-                Welcome to Skylark Analyst
+                Welcome to Skylark AI - Enterprise
               </Typography>
               <Typography
                 variant="body1"
                 color="grey"
                 textAlign="center"
                 gutterBottom
+                sx={{ maxWidth: 820, marginLeft: "auto", marginRight: "auto" }}
               >
-                Skylark makes integrating AI into your engineering and business
-                processes seamless and efficient. Automate complex tasks,
-                streamline workflows, and unlock the full potential of your
-                operations with Skylark’s user-friendly AI solutions, tailored
-                to meet your unique business needs.
+                Skylark makes integrating AI into your engineering and business processes seamless and efficient. Automate complex tasks, streamline workflows, and unlock the full potential of your operations with Skylark’s user-friendly AI solutions, tailored to meet your unique business needs
               </Typography>
               <Box
                 sx={{
@@ -100,9 +91,7 @@ export default function FeaturesPage() {
                           thumbnail={featureImgDict[feature.img_url]}
                           label={feature.feature}
                           onCard={() => onCard(+feature.id)}
-                          desc={feature.description}
                           size="md"
-                          bgcolor="#181818"
                         />
                       </Grid>
                     ))}
