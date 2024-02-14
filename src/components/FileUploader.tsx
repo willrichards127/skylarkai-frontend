@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, ReactNode } from "react";
 import { useDropzone } from "react-dropzone";
 import useDrivePicker from 'react-google-drive-picker'
 import { ReactOneDriveFilePicker } from "react-onedrive-filepicker";
-import { Box, Typography, LinearProgress } from "@mui/material";
+import { Box, Typography, LinearProgress, Stack } from "@mui/material";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import { DataRoomIcon, DropBoxIcon, GoogleDriveIcon, OneDriveIcon } from "./Svgs";
 
@@ -24,12 +24,12 @@ const CloudButton = ({
   name,
   icon,
   onClick
-} : {
+}: {
   name: string,
   icon: ReactNode,
   onClick?: () => void;
 }) => (
-  <Box 
+  <Box
     sx={{
       boxSizing: "border-box",
       minWidth: 108,
@@ -46,7 +46,7 @@ const CloudButton = ({
       "&:hover": {
         borderColor: "#A9B6FF"
       }
-    }} 
+    }}
     onClick={onClick}
   >
     {icon}
@@ -75,13 +75,13 @@ export const FileUploader = ({
   multiple?: boolean;
   cloud?: boolean;
 }) => {
-  const [openPicker] = useDrivePicker();  
+  const [openPicker] = useDrivePicker();
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
-      if( limit ) {
+      if (limit) {
         for (let i = 0; i < acceptedFiles.length; i++) {
-          if ( acceptedFiles[i].size > limit) {
+          if (acceptedFiles[i].size > limit) {
             return;
           }
         }
@@ -113,65 +113,65 @@ export const FileUploader = ({
       gapi.client.init({
         apiKey: "AIzaSyCENVD-OrG_k45HHXvRQH5dpSSPe2lPfZ8"
       })
-      .then(() => {
-        let tokenInfo = gapi.auth.getToken();
-        openPicker({
-          clientId: "78710376447-lbbsjg6rhon7a2q4t658g771t2j99kon.apps.googleusercontent.com",
-          developerKey: "AIzaSyCENVD-OrG_k45HHXvRQH5dpSSPe2lPfZ8",
-          viewId: "DOCS",
-          token: tokenInfo?.access_token,
-          supportDrives: true,
-          multiselect: multiple,
-          callbackFunction: (data) => {
-            if (data.action === 'cancel') {
-              console.log('User clicked cancel/close button')
-              return;
-            }
-            if (!tokenInfo) {
-              tokenInfo = gapi.auth.getToken();
-            }
-            
-            const fetchOptions = {
-              headers: {
-                Authorization: `Bearer ${tokenInfo.access_token}`,
-              },
-            };
-            const driveFileUrl = 'https://www.googleapis.com/drive/v3/files';
-            Promise.all(data.docs.map(async (doc) => {
-              let response;
-              if( 
-                doc.mimeType === "application/vnd.google-apps.document" ||
-                doc.mimeType === "application/vnd.google-apps.spreadsheet" ||
-                doc.mimeType === "application/vnd.google-apps.presentation"
-              ) {
-                response = await fetch(
-                  `${driveFileUrl}/${doc.id}/export?mimeType=application/pdf`,
-                  fetchOptions
-                );
-              } else {
-                response = await fetch(
-                  `${driveFileUrl}/${doc.id}?alt=media`,
-                  fetchOptions
-                );
+        .then(() => {
+          let tokenInfo = gapi.auth.getToken();
+          openPicker({
+            clientId: "78710376447-lbbsjg6rhon7a2q4t658g771t2j99kon.apps.googleusercontent.com",
+            developerKey: "AIzaSyCENVD-OrG_k45HHXvRQH5dpSSPe2lPfZ8",
+            viewId: "DOCS",
+            token: tokenInfo?.access_token,
+            supportDrives: true,
+            multiselect: multiple,
+            callbackFunction: (data) => {
+              if (data.action === 'cancel') {
+                console.log('User clicked cancel/close button')
+                return;
               }
-              return {
-                ...doc,
-                blob: await response.blob()
+              if (!tokenInfo) {
+                tokenInfo = gapi.auth.getToken();
               }
-            })).then((responses) => {
-              onUploadCompleted(responses.map((doc) => 
-                new File([doc.blob], doc.name)
-              ))
-            });
-          },
+
+              const fetchOptions = {
+                headers: {
+                  Authorization: `Bearer ${tokenInfo.access_token}`,
+                },
+              };
+              const driveFileUrl = 'https://www.googleapis.com/drive/v3/files';
+              Promise.all(data.docs.map(async (doc) => {
+                let response;
+                if (
+                  doc.mimeType === "application/vnd.google-apps.document" ||
+                  doc.mimeType === "application/vnd.google-apps.spreadsheet" ||
+                  doc.mimeType === "application/vnd.google-apps.presentation"
+                ) {
+                  response = await fetch(
+                    `${driveFileUrl}/${doc.id}/export?mimeType=application/pdf`,
+                    fetchOptions
+                  );
+                } else {
+                  response = await fetch(
+                    `${driveFileUrl}/${doc.id}?alt=media`,
+                    fetchOptions
+                  );
+                }
+                return {
+                  ...doc,
+                  blob: await response.blob()
+                }
+              })).then((responses) => {
+                onUploadCompleted(responses.map((doc) =>
+                  new File([doc.blob], doc.name)
+                ))
+              });
+            },
+          })
         })
-      })
     })
   }
 
   const handleDropBox = () => {
     (window as any).Dropbox.choose({
-      success: function(files: Dropbox.ChooserFile[]) {
+      success: function (files: Dropbox.ChooserFile[]) {
         Promise.all(files.map(async (file) => {
           const response = await fetch(file.link)
           return {
@@ -179,22 +179,22 @@ export const FileUploader = ({
             blob: await response.blob()
           }
         })).then((responses) => {
-          onUploadCompleted(responses.map((doc) => 
+          onUploadCompleted(responses.map((doc) =>
             new File([doc.blob], doc.name)
           ))
         });
       },
-      cancel: function () { console.log("cancelled")},
+      cancel: function () { console.log("cancelled") },
       linkType: 'direct',
       multiple: multiple
     });
   }
 
   return (
-    <Box sx={{ width: "100%" }}>
-      <div {...getRootProps()} style={{ width: "100%" }}>
-        <input 
-          {...getInputProps()} 
+    <Stack direction={"row"} spacing={2} style={{ width: "100%" }}>
+      <Box {...getRootProps()} flex={1}>
+        <input
+          {...getInputProps()}
           multiple={multiple}
           accept={accept?.join(",")}
         />
@@ -242,33 +242,33 @@ export const FileUploader = ({
               </Typography>
             ))}
         </Box>
-      </div>
-      {cloud &&
-      <Box sx={{ mt: 1.5 }}>
-        <Typography sx={{ opacity: 0.7, textAlign: "center", mb: 1.5 }}>or</Typography>
-        <Box>
-          <Typography variant="body1" fontWeight={600} mb={2}>Upload from Drive</Typography>
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-            <CloudButton name="Google Drive" icon={<GoogleDriveIcon />} onClick={handleGoogleDrive}/>
-            <ReactOneDriveFilePicker
-              clientID="80dadb7e-58c4-44b3-a03b-c91a068139dc"
-              action="query"
-              multiSelect={!!multiple}
-              onSuccess={(result) => {
-                  alert(JSON.stringify(result));
-              }}
-              onCancel={(result) => {
-                  alert(JSON.stringify(result));
-              }}
-            >
-              <CloudButton name="One Drive" icon={<OneDriveIcon />} />
-            </ReactOneDriveFilePicker>
-            <CloudButton name="Dropbox" icon={<DropBoxIcon />} onClick={handleDropBox}/>
-            <CloudButton name="Data Room" icon={<DataRoomIcon />} />
-          </Box>
-        </Box>
       </Box>
+      {cloud &&
+        <>
+          <Typography sx={{ opacity: 0.7, textAlign: "center", mb: 1.5 }}>or</Typography>
+          <Box flex={1}>
+            <Typography variant="body1" fontWeight={600} mb={2}>Upload from Drive</Typography>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+              <CloudButton name="Google Drive" icon={<GoogleDriveIcon />} onClick={handleGoogleDrive} />
+              <ReactOneDriveFilePicker
+                clientID="80dadb7e-58c4-44b3-a03b-c91a068139dc"
+                action="query"
+                multiSelect={!!multiple}
+                onSuccess={(result) => {
+                  alert(JSON.stringify(result));
+                }}
+                onCancel={(result) => {
+                  alert(JSON.stringify(result));
+                }}
+              >
+                <CloudButton name="One Drive" icon={<OneDriveIcon />} />
+              </ReactOneDriveFilePicker>
+              <CloudButton name="Dropbox" icon={<DropBoxIcon />} onClick={handleDropBox} />
+              <CloudButton name="Data Room" icon={<DataRoomIcon />} />
+            </Box>
+          </Box>
+        </>
       }
-    </Box>
+    </Stack>
   );
 };

@@ -84,7 +84,8 @@ export const CompanySelector = ({
           <TextField
             {...params}
             size="small"
-            label="Company Name"
+            label="Company"
+            placeholder="Select Company"
             onClick={onInputAction}
           />
         )}
