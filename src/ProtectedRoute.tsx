@@ -1,5 +1,6 @@
 import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
+import Layout from "./pages/layouts/Layout";
 
 export const ProtectedRoute = ({
   isAllowed,
@@ -14,5 +15,5 @@ export const ProtectedRoute = ({
     return <Navigate to={redirectPath} replace />;
   }
 
-  return children ? children : <Outlet />;
+  return children ? children : <Layout><Outlet /></Layout>;
 };

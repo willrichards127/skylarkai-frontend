@@ -45,7 +45,7 @@ const CompletedOrderPanel = memo(
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       (report: string, subreport: string) => {
         navigate(
-          `/main/reports/97?reportType=marketanalysis&setupId=16&viewMode=active`
+          `/portal/reports/97?reportType=marketanalysis&setupId=16&viewMode=active`
         );
       },
       [navigate]

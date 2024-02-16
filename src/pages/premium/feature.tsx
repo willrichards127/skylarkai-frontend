@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useParams } from "react-router-dom";
-import Layout from "../layouts/Layout";
 import AskSecFilingsFeature from "./components/sec-filings";
 import InvestmentMemoFeature from "./components/investment-memo";
 import InsiderTransactionFeature from "./components/insider-transactions";
@@ -8,6 +7,7 @@ import AnalyzeEarningCallsFeature from "./components/analyze-earnings";
 import CompareDocumentsFeature from "./components/compare-documents";
 import SentimentalAnalysisFeature from "./components/sentimental-analysis";
 import ChatDataFeature from "./components/chat-data";
+import FinanceFeature from "./components/finance";
 
 const compDict: Record<number, any> = {
   1: AskSecFilingsFeature,
@@ -16,15 +16,14 @@ const compDict: Record<number, any> = {
   4: AnalyzeEarningCallsFeature,
   5: CompareDocumentsFeature,
   6: SentimentalAnalysisFeature,
-  10: ChatDataFeature,
+  7: ChatDataFeature,
+  8: FinanceFeature,
 };
 
 export default function FeaturePage() {
   const { featureId } = useParams();
   const FeatureComp = compDict[+featureId!];
   return (
-    <Layout>
-      <FeatureComp featureId={+featureId!} />
-    </Layout>
+    <FeatureComp featureId={+featureId!} />
   );
 }

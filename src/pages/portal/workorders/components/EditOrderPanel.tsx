@@ -105,7 +105,7 @@ const EditOrderPanel = memo(
     useEffect(() => {
       if (isSuccess) {
         navigate(
-          `/main/companies/${companyId}/${data.id}?&company_name=${companyName}&work_order_name=${data.work_order_name}&view_mode=summary`
+          `/portal/companies/${companyId}/${data.id}?&company_name=${companyName}&work_order_name=${data.work_order_name}&view_mode=summary`
         );
       }
     }, [navigate, companyId, data, companyName, isSuccess]);
@@ -113,7 +113,7 @@ const EditOrderPanel = memo(
     useEffect(() => {
       if (!isLoadingAdd && addedData) {
         navigate(
-          `/main/companies/${companyId}/${addedData.id}?&company_name=${companyName}&work_order_name=${addedData.work_order_name}&view_mode=summary`
+          `/portal/companies/${companyId}/${addedData.id}?&company_name=${companyName}&work_order_name=${addedData.work_order_name}&view_mode=summary`
         );
       }
     }, [navigate, companyId, companyName, isLoadingAdd, addedData]);

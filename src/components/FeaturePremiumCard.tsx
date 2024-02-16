@@ -24,7 +24,7 @@ const sizeDict = {
   },
 };
 
-export const FeatureCard = memo(
+export const FeaturePremiumCard = memo(
   ({
     thumbnail,
     label,

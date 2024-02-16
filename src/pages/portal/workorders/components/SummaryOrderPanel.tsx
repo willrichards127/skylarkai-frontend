@@ -51,7 +51,7 @@ const SummaryOrderPanel = memo(
     /** FIXME: React Navigate */
     const onEdit = useCallback(() => {
       navigate(
-        `/main/companies/${companyId}/${data.id}?&company_name=${companyName}&work_order_name=${data.work_order_name}&view_mode=edit`
+        `/portal/companies/${companyId}/${data.id}?&company_name=${companyName}&work_order_name=${data.work_order_name}&view_mode=edit`
       );
     }, [navigate, companyId, data, companyName]);
 
@@ -72,7 +72,7 @@ const SummaryOrderPanel = memo(
     useEffect(() => {
       if (isSuccess) {
         navigate(
-          `/main/companies/${companyId}/${data.id}?&company_name=${companyName}&work_order_name=${data.work_order_name}&view_mode=wip`
+          `/portal/companies/${companyId}/${data.id}?&company_name=${companyName}&work_order_name=${data.work_order_name}&view_mode=wip`
         );
       }
     }, [navigate, companyId, data, companyName, isSuccess]);

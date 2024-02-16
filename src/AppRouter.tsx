@@ -21,7 +21,6 @@ import OrderDetailPage from "./pages/portal/workorders/OrderDetailPage";
 import CompaniesPage from "./pages/portal/workorders/CompaniesPage";
 import CompanyDetailPage from "./pages/portal/workorders/CompanyDetailPage";
 import ProfilePage from "./pages/portal/profile/ProfilePage";
-import HomePage from "./pages/portal";
 
 // const LandingPage = lazy(() => import("./pages/landing"));
 
@@ -94,8 +93,9 @@ function AppRouter() {
             path: "/login",
             element: <LoginForm />,
             errorElement: <ErrorBoundary />,
-          },          
+          },
           {
+
             path: "/register",
             element: <RegisterForm />,
             errorElement: <ErrorBoundary />,
@@ -115,47 +115,6 @@ function AppRouter() {
             element: <ForgotPasswordOTPForm />,
             errorElement: <ErrorBoundary />,
           },
-          // portal routing
-          {
-            path: "/main/reports",
-            element: <ReportsPage />,
-          },
-          {
-            path: "/main/reports/:reportId",
-            element: <ReportDetailPage />,
-          },
-          {
-            path: "/main/setups",
-            element: <SetupsPage />,
-          },
-          {
-            path: "/main/setups/:setupId",
-            element: <SetupDetailPage />,
-          },
-          {
-            path: "/main/orders",
-            element: <OrdersPage />,
-          },
-          {
-            path: "/main/companies",
-            element: <CompaniesPage />,
-          },
-          {
-            path: "/main/companies/:companyId",
-            element: <CompanyDetailPage />,
-          },
-          {
-            path: "/main/companies/:companyId/:orderId",
-            element: <OrderDetailPage />,
-          },
-          {
-            path: "/main/profile",
-            element: <ProfilePage />,
-          },
-          {
-            path: "/portal",
-            element: <HomePage />,
-          },
           {
             element: <ProtectedRoute isAllowed={!!token && !!user} />,
             errorElement: <ErrorBoundary />,
@@ -174,12 +133,49 @@ function AppRouter() {
                 element: <SupportPage />,
               },
               {
-                path: "/premium",
+                path: "/welcome",
                 element: <FeaturesPage />,
               },
               {
-                path: "/premium/:featureId",
+                path: "/features/:featureId",
                 element: <FeaturePage />,
+              },
+              // portal routing
+              {
+                path: "/portal/reports",
+                element: <ReportsPage />,
+              },
+              {
+                path: "/portal/reports/:reportId",
+                element: <ReportDetailPage />,
+              },
+              {
+                path: "/portal/setups",
+                element: <SetupsPage />,
+              },
+              {
+                path: "/portal/setups/:setupId",
+                element: <SetupDetailPage />,
+              },
+              {
+                path: "/portal/orders",
+                element: <OrdersPage />,
+              },
+              {
+                path: "/portal/companies",
+                element: <CompaniesPage />,
+              },
+              {
+                path: "/portal/companies/:companyId",
+                element: <CompanyDetailPage />,
+              },
+              {
+                path: "/portal/companies/:companyId/:orderId",
+                element: <OrderDetailPage />,
+              },
+              {
+                path: "/portal/profile",
+                element: <ProfilePage />,
               },
             ],
           },
