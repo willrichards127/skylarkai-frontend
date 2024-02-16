@@ -221,16 +221,16 @@ export const MainAppBar = memo(() => {
             </Box>
             <Box
               component={Link}
-              to="/portal/analysis"
+              to="/portal/reports"
               sx={{
                 ml: 4,
                 color: "white",
                 textDecoration: "none",
                 fontSize: 14,
-                fontWeight: location.pathname.includes("/portal/analysis")
+                fontWeight: location.pathname.includes("/portal/reports")
                   ? "bold"
                   : "normal",
-                opacity: location.pathname.includes("/portal/analysis") ? 1 : 0.3,
+                opacity: location.pathname.includes("/portal/reports") ? 1 : 0.3,
               }}
             >
               <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
