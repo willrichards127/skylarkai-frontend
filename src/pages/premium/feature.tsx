@@ -16,8 +16,8 @@ const compDict: Record<number, any> = {
   4: AnalyzeEarningCallsFeature,
   5: CompareDocumentsFeature,
   6: SentimentalAnalysisFeature,
-  10: ChatDataFeature,
-  11: FinanceFeature,
+  7: ChatDataFeature,
+  8: FinanceFeature,
 };
 
 export default function FeaturePage() {
