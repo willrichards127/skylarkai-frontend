@@ -15,7 +15,7 @@ const CompaniesContainer = memo(() => {
   const onCard = useCallback(
     (company: { id: number; company_name: string }) => {
       navigate(
-        `/main/companies/${company.id}?company_name=${company.company_name}`
+        `/portal/companies/${company.id}?company_name=${company.company_name}`
       );
     },
     [navigate]

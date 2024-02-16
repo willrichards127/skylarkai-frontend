@@ -52,17 +52,17 @@ export const NewReportModal = memo(
     const onSubmit = useCallback(() => {
       if (documentType === "report") {
         navigate(
-          `/main/reports/new?setupId=${form.company}&reportType=${form.report}&documentType=${documentType}`
+          `/portal/reports/new?setupId=${form.company}&reportType=${form.report}&documentType=${documentType}`
         );
       } else {
         navigate(
-          `/main/reports/new?setupId=${form.company}&documentType=${documentType}&filingType=${filing}`
+          `/portal/reports/new?setupId=${form.company}&documentType=${documentType}&filingType=${filing}`
         );
       }
     }, [navigate, form, documentType, filing]);
 
     const onCreateNew = useCallback(() => {
-      navigate("/main/setups/");
+      navigate("/portal/setups/");
     }, [navigate]);
 
     const onChangeDocumentType = (

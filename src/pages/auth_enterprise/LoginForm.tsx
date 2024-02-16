@@ -43,7 +43,7 @@ const LoginForm = memo(() => {
 
 	useEffect(() => {
 		if (!isError && !!data) {
-			navigate("/main/reports");
+			navigate("/portal/reports");
 		}
 	}, [navigate, isError, data]);
 

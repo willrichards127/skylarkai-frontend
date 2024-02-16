@@ -35,9 +35,9 @@ const SetupsContainer = memo(({ hasNewCard }: { hasNewCard?: boolean }) => {
   const onCard = useCallback(
     (setupId?: string) => {
       if (setupId) {
-        navigate(`/main/setups/${setupId}`);
+        navigate(`/portal/setups/${setupId}`);
       } else {
-        navigate("/main/setups/new");
+        navigate("/portal/setups/new");
       }
     },
     [navigate]

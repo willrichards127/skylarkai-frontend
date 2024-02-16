@@ -42,7 +42,7 @@ export const HeaderPanel = memo(
           zIndex: 1,
         }}
       >
-        <IconButton href="/main/reports">
+        <IconButton href="/portal/reports">
           <ChevronLeftIcon />
         </IconButton>
         <Divider orientation="vertical" flexItem />

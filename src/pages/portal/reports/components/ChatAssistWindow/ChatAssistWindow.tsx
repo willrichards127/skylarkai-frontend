@@ -421,11 +421,11 @@ export const ChatAssistWindow = memo(
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", py: 2 }}>
-          <IconButton href="/main/reports">
+          <IconButton href="/portal/reports">
             <ArrowBackIcon />
           </IconButton>
           <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
-            <Link underline="hover" color="inherit" href="/main/reports">
+            <Link underline="hover" color="inherit" href="/portal/reports">
               Reports
             </Link>
             <Link underline="hover" color="inherit" href="#" onClick={onClose}>
