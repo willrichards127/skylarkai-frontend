@@ -31,7 +31,8 @@ const DndListItem = memo(({ item }: { item: ITemplateNode }) => {
 			<Box width={18} height={18} sx={{ position: "relative" }}>
 				<img
 					src={`/categories/${item.name}.png`}
-					sizes='2vw, 2vw'
+					width={"100%"}
+					height={"100%"}
 					alt={item.label}
 				/>
 			</Box>
