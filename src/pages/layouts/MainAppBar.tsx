@@ -28,7 +28,6 @@ import { Notifications } from "./Notifications";
 import { XPopmenu } from "../../components/XPopmenu";
 import { currentUser, clearUserInfo } from "../../redux/features/authSlice";
 import { HeaderConfig } from "../../shared/models/constants";
-import { useGetSubScriptionFeaturesQuery } from "../../redux/services/mainFeaturesAPI";
 import { useAddUserActivityMutation } from "../../redux/services/userAPI";
 
 const profileDropdownItems = [
@@ -55,14 +54,11 @@ const profileDropdownItems = [
 ];
 
 export const MainAppBar = memo(() => {
-  const { userInfo: user } = useSelector(currentUser);
+  const { user } = useSelector(currentUser);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { data: features } = useGetSubScriptionFeaturesQuery({
-    subscription_id: user.subscription_id,
-  });
   const [addActivity] = useAddUserActivityMutation();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -108,7 +104,7 @@ export const MainAppBar = memo(() => {
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <Box textAlign="right">
                 <Typography variant="body2" fontWeight="bold">
-                  {user.username}
+                  {user!.username}
                 </Typography>
                 <Typography variant="caption">USA</Typography>
               </Box>
@@ -142,7 +138,7 @@ export const MainAppBar = memo(() => {
           <Box
             sx={{ display: "flex", alignItems: "center", gap: 2, height: "100%" }}
           >
-            {user.subscription_id === 3 &&
+            {user!.is_enterprise &&
               <Box
                 component={Link}
                 to="/welcome"
@@ -206,7 +202,7 @@ export const MainAppBar = memo(() => {
                     horizontal: "right",
                   }}
                 >
-                  {(features || []).map((feature) => (
+                  {(user!.main_features || []).map((feature) => (
                     <MenuItem
                       key={feature.id}
                       selected={
@@ -223,7 +219,7 @@ export const MainAppBar = memo(() => {
                 </Menu>
               </Box>
             </Box>
-            {user.subscription_id === 3 &&
+            {user!.is_enterprise &&
               <Box
                 component={Link}
                 to="/advanced-features"
@@ -283,7 +279,7 @@ export const MainAppBar = memo(() => {
               </Box>
             </Box>
           </Box>
-          {user.subscription_id === 3 &&
+          {user!.is_enterprise &&
             <Button
               variant="contained"
               sx={{ minWidth: 160 }}

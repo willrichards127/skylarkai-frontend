@@ -19,7 +19,7 @@ const LoginForm = memo(() => {
 
   const [clearActivities] = useClearUserActivitiesMutation();
 
-  const { loading, userInfo, error } = useSelector(currentUser);
+  const { loading, user, error } = useSelector(currentUser);
   
   const dispatch = useDispatch();
   const [form, setForm] = useState<{
@@ -29,7 +29,7 @@ const LoginForm = memo(() => {
     email: "",
     password: "",
   });
-  const isLoggedIn = !!userInfo && !loading;
+  const isLoggedIn = !!user && !loading;
 
   const onClear = useCallback(() => {
     clearActivities({ email: form.email });
@@ -52,13 +52,13 @@ const LoginForm = memo(() => {
 
   useEffect(() => {
     if (isLoggedIn) {
-      if (userInfo.user_role === 2) {
-        navigate("/portal");
+      if (user.user_role === 4) { // admin role
+        navigate("/admin");
       } else {
         navigate("/premium");
       }
     }
-  }, [navigate, isLoggedIn, userInfo]);
+  }, [navigate, isLoggedIn, user]);
 
   useEffect(() => {
     if (!token) return;

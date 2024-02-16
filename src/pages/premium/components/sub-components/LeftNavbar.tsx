@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 import CircleIcon from "@mui/icons-material/Circle";
 import { leftNavWidth } from "../../../../shared/models/constants";
-import { useGetSubScriptionFeaturesQuery } from "../../../../redux/services/mainFeaturesAPI";
 import { IMainFeature } from "../../../../redux/interfaces";
 
 export const LeftNavbar = ({
@@ -24,11 +23,7 @@ export const LeftNavbar = ({
   const { featureId } = useParams();
 
   const navigate = useNavigate();
-  const { userInfo: user } = useSelector(currentUser);
-
-  const { data: features } = useGetSubScriptionFeaturesQuery({
-    subscription_id: user.subscription_id,
-  });
+  const { user } = useSelector(currentUser);
 
   const onItem = useCallback(
     (itemId: number) => {
@@ -47,7 +42,7 @@ export const LeftNavbar = ({
       }}
     >
       <List sx={{ maxHeight: 480, overflowY: "auto" }}>
-        {(features || []).map((item: IMainFeature) => (
+        {(user!.main_features || []).map((item: IMainFeature) => (
           <ListItem disablePadding key={item.id}>
             <ListItemButton
               selected={featureId === item.id.toString()}

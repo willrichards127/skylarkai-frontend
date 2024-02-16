@@ -6,7 +6,7 @@ import { IUser } from "../interfaces";
 export const userApi = createApi({
   reducerPath: "userApi",
   baseQuery: axiosBaseQueryWithReauth({
-    baseUrl: import.meta.env.VITE_PREMIUM_API_URL,
+    baseUrl: import.meta.env.VITE_API_URL,
     isGuarded: true,
   }),
   tagTypes: ["Users"],

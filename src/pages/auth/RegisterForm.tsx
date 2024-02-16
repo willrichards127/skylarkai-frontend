@@ -1,26 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import {
   registerAPI,
-  subscriptionAPI,
   currentUser,
 } from "../../redux/features/authSlice";
-import { Box, Typography, Stack, TextField, MenuItem } from "@mui/material";
+import { Box, Typography, Stack, TextField } from "@mui/material";
 import { LeftArrowDecorator, RightArrowDecorator } from "../../components/Svgs";
 import { NeutralButton } from "../../components/buttons/NeutralButton";
-import { ISubscription } from "../../redux/interfaces";
 
 const RegisterForm = memo(() => {
-  const { loading, userInfo, subscriptions } = useSelector(currentUser);
+  const { loading, user } = useSelector(currentUser);
   const dispatch = useDispatch();
   const [form, setForm] = useState<{
     email: string;
     username: string;
     phone?: string;
     password: string;
-    subscription_id: number;
+    subscription_id?: number;
     company: string;
     company_website?: string;
   }>({
@@ -28,7 +26,6 @@ const RegisterForm = memo(() => {
     username: "",
     phone: "",
     password: "",
-    subscription_id: 2,
     company: "",
     company_website: "",
   });
@@ -48,13 +45,6 @@ const RegisterForm = memo(() => {
     },
     [dispatch, form]
   );
-
-  useEffect(() => {
-    const fetchSubscriptions = async () => {
-      await dispatch(subscriptionAPI() as any);
-    };
-    fetchSubscriptions();
-  }, [dispatch]);
 
   return (
     <Box
@@ -80,9 +70,9 @@ const RegisterForm = memo(() => {
           <Typography variant="h5">Registration</Typography>
           <LeftArrowDecorator />
         </Box>
-        {userInfo ? (
+        {user ? (
           <Typography variant="h6" textAlign="center" p={2} gutterBottom>
-            We've sent a verification email. Please check your email.
+            We will review your credentials and get you back soon.
           </Typography>
         ) : (
           <>
@@ -150,27 +140,7 @@ const RegisterForm = memo(() => {
                     onChange={onChangeValues}
                     autoComplete="nope"
                   />
-                </Stack>
-                <Stack spacing={2} direction="row">
-                  <TextField
-                    select
-                    disabled
-                    label="Subscription Type"
-                    name="subscription_id"
-                    value={form.subscription_id}
-                    onChange={onChangeValues}
-                    sx={{ minWidth: 312 }}
-                  >
-                    {(subscriptions || []).map((ss: ISubscription) => (
-                      <MenuItem
-                        key={ss.subscription_id}
-                        value={ss.subscription_id}
-                      >
-                        {ss.subscription_name}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </Stack>
+                </Stack>                
               </Stack>
               <Box textAlign="center">
                 <NeutralButton

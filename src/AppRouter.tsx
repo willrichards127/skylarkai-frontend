@@ -7,7 +7,7 @@ import {
   useRouteError,
 } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { Box, CircularProgress } from "@mui/material";
+import { Backdrop, CircularProgress } from "@mui/material";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { currentUser } from "./redux/features/authSlice";
 import { useAddUserActivityMutation } from "./redux/services/userAPI";
@@ -23,18 +23,21 @@ import CompanyDetailPage from "./pages/portal/workorders/CompanyDetailPage";
 import ProfilePage from "./pages/portal/profile/ProfilePage";
 import HomePage from "./pages/portal";
 
-const LandingPage = lazy(() => import("./pages/landing"));
+// const LandingPage = lazy(() => import("./pages/landing"));
+
+const AdminPage = lazy(() => import("./pages/admin"));
 
 const ForgotPasswordForm = lazy(
-  () => import("./pages/auth_premium/ForgotPasswordForm")
+  () => import("./pages/auth/ForgotPasswordForm")
 );
 const ForgotPasswordOTPForm = lazy(
-  () => import("./pages/auth_premium/ForgotPasswordOTPForm")
+  () => import("./pages/auth/ForgotPasswordOTPForm")
 );
-const RegisterForm = lazy(() => import("./pages/auth_premium/RegisterForm"));
-const RegisterOTPForm = lazy(() => import("./pages/auth_premium/RegisterOTPForm"));
-const LoginForm = lazy(() => import("./pages/auth_premium/LoginForm"));
-const LoginFormEnterprise = lazy(() => import("./pages/auth_enterprise/LoginForm"));
+const RegisterForm = lazy(() => import("./pages/auth/RegisterForm"));
+const RegisterOTPForm = lazy(
+  () => import("./pages/auth/RegisterOTPForm")
+);
+const LoginForm = lazy(() => import("./pages/auth/LoginForm"));
 
 const HelpPage = lazy(() => import("./pages/help"));
 const SupportPage = lazy(() => import("./pages/support"));
@@ -47,7 +50,7 @@ const ErrorBoundary = () => {
 };
 
 function AppRouter() {
-  const { userInfo: user, token } = useSelector(currentUser);
+  const { user, token } = useSelector(currentUser);
   if (!user || !token) {
     redirect("/login");
   }
@@ -68,16 +71,12 @@ function AppRouter() {
   return (
     <Suspense
       fallback={
-        <Box
-          sx={{
-            p: 4,
-            width: "100%",
-            display: "flex",
-            justifyContent: "center",
-          }}
+        <Backdrop
+          sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open
         >
-          <CircularProgress />
-        </Box>
+          <CircularProgress color="inherit" />
+        </Backdrop>
       }
     >
       <RouterProvider
@@ -88,19 +87,14 @@ function AppRouter() {
           },
           {
             path: "/",
-            element: <LandingPage />,
+            element: <LoginForm />,
             errorElement: <ErrorBoundary />,
           },
           {
             path: "/login",
             element: <LoginForm />,
             errorElement: <ErrorBoundary />,
-          },
-          {
-            path: "/login-enterprise",
-            element: <LoginFormEnterprise />,
-            errorElement: <ErrorBoundary />,
-          },
+          },          
           {
             path: "/register",
             element: <RegisterForm />,
@@ -124,39 +118,39 @@ function AppRouter() {
           // portal routing
           {
             path: "/main/reports",
-            element: <ReportsPage />
+            element: <ReportsPage />,
           },
           {
             path: "/main/reports/:reportId",
-            element: <ReportDetailPage />
+            element: <ReportDetailPage />,
           },
           {
             path: "/main/setups",
-            element: <SetupsPage />
+            element: <SetupsPage />,
           },
           {
             path: "/main/setups/:setupId",
-            element: <SetupDetailPage />
+            element: <SetupDetailPage />,
           },
           {
             path: "/main/orders",
-            element: <OrdersPage />
+            element: <OrdersPage />,
           },
           {
             path: "/main/companies",
-            element: <CompaniesPage />
+            element: <CompaniesPage />,
           },
           {
             path: "/main/companies/:companyId",
-            element: <CompanyDetailPage />
+            element: <CompanyDetailPage />,
           },
           {
             path: "/main/companies/:companyId/:orderId",
-            element: <OrderDetailPage />
+            element: <OrderDetailPage />,
           },
           {
             path: "/main/profile",
-            element: <ProfilePage />
+            element: <ProfilePage />,
           },
           {
             path: "/portal",
@@ -166,6 +160,11 @@ function AppRouter() {
             element: <ProtectedRoute isAllowed={!!token && !!user} />,
             errorElement: <ErrorBoundary />,
             children: [
+              // admin only
+              {
+                path: "/admin",
+                element: <AdminPage />,
+              },
               {
                 path: "/help",
                 element: <HelpPage />,

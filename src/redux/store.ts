@@ -25,7 +25,7 @@ const rtkQueryErrorLogger: Middleware = () => (next) => (action) => {
 export const store = configureStore({
   preloadedState: {
     userAuthSlice: {
-      userInfo: loadStoreValue("user-info"),
+      user: loadStoreValue("user-info"),
       token: loadStoreValue("token"),
       sys_graph_id: loadStoreValue("sys_graph_id"),
     },

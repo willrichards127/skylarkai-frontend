@@ -1,15 +1,12 @@
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { Grid, Box, CircularProgress, Typography } from "@mui/material";
+import { Grid, Box, Typography } from "@mui/material";
 import { currentUser } from "../../redux/features/authSlice";
 import Layout from "../layouts/Layout";
 import { FeatureCard } from "../../components/FeatureCard";
 import { LeftNavbar } from "./components/sub-components/LeftNavbar";
-import { useGetSubScriptionFeaturesQuery } from "../../redux/services/mainFeaturesAPI";
-
 import { leftNavWidth } from "../../shared/models/constants";
-
 import secFilingImg from "../../assets/premium/sec_filing.png";
 import investmentImg from "../../assets/premium/investment_memo.png";
 import insiderTransactionImg from "../../assets/premium/insider_transactions.png";
@@ -28,10 +25,7 @@ const featureImgDict: Record<string, string> = {
 
 export default function FeaturesPage() {
   const navigate = useNavigate();
-  const { userInfo } = useSelector(currentUser);
-  const { isLoading, data: features } = useGetSubScriptionFeaturesQuery({
-    subscription_id: userInfo.subscription_id,
-  });
+  const { user } = useSelector(currentUser);  
 
   const onCard = useCallback(
     (featureId: number) => {
@@ -78,15 +72,13 @@ export default function FeaturesPage() {
                   justifyContent: "center",
                 }}
               >
-                {isLoading ? (
-                  <CircularProgress />
-                ) : (
+                
                   <Grid
                     container
                     rowSpacing={{ xs: 2, sm: 2, md: 2, lg: 4 }}
                     columnSpacing={{ xs: 2, sm: 2, md: 2 }}
                   >
-                    {(features || []).map((feature) => (
+                    {(user!.main_features || []).map((feature) => (
                       <Grid
                         item
                         xs={12}
@@ -107,7 +99,6 @@ export default function FeaturesPage() {
                       </Grid>
                     ))}
                   </Grid>
-                )}
               </Box>
             </Box>
           </Box>

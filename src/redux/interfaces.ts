@@ -3,35 +3,32 @@ export interface ISubscription {
   subscription_id: number;
   subscription_name: string;
 }
+export interface IMainFeature {
+  id: number;
+  feature: string;
+  description?: string;
+  img_url: string;
+}
 export interface IUser {
   user_id?: number;
   email: string;
   username: string;
-  // tenant_id: number;
-  subscription_id: number;
-  subscription_name?: string;
-  user_role?: number;
+  user_role?: number; // persona id
+  main_features?: IMainFeature[];
   company: string;
   company_website?: string;
   phone?: string;
   password?: string;
-  // personaId?: number;
   is_active?: boolean;
+  is_enterprise?: boolean;
   created_at?: string;
 }
 export interface IUserAuth {
-  userInfo?: IUser;
-  subscriptions?: ISubscription[];
+  user?: IUser;
   sys_graph_id?: number;
   token?: string;
   loading?: boolean;
   error?: boolean; // only for clear activities
-}
-export interface IMainFeature {
-  id: number;
-  feature: string;
-  description: string;
-  img_url: string;
 }
 
 export interface ITranscript {

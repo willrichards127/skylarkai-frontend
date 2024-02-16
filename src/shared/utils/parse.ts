@@ -383,3 +383,18 @@ export const convertCSVToTable = (data: string[][]) => {
     .join("");
   return `<table><thead><tr>${header}</tr></thead><tbody>${rows}</tbody></table>`;
 };
+
+export const parseObj = (inputString: string) => {
+  const arr = [];
+  try {
+    const jsonMatches = inputString.match(/{[^{}]+}/g) || [];
+    for (const jsonSection of jsonMatches) {
+      const jsonObj = JSON.parse(jsonSection);
+      arr.push(jsonObj);
+    }
+    return arr;
+  } catch (e) {
+    console.log(e);
+    return [];
+  }
+};

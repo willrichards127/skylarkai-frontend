@@ -4,7 +4,7 @@ import { saveStoreValue } from "../../shared/utils/storage";
 export const authApi = createApi({
 	reducerPath: "authApi",
 	baseQuery: fetchBaseQuery({
-		baseUrl: import.meta.env.VITE_ENTERPRISE_API_URL,
+		baseUrl: import.meta.env.VITE_API_URL,
 	}),
 	endpoints: (builder) => ({
 		registerUser: builder.mutation<

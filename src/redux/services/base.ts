@@ -10,7 +10,7 @@ import { loadStoreValue } from "../../shared/utils/storage";
 export const baseQuery = retry(
 	async (args, api, extraOptions) => {
 		const result = await fetchBaseQuery({
-			baseUrl: import.meta.env.VITE_ENTERPRISE_API_URL,
+			baseUrl: import.meta.env.VITE_API_URL,
 			prepareHeaders: (headers) => {
 				const token = loadStoreValue("token");
 				if (!token) {

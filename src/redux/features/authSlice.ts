@@ -6,12 +6,10 @@ import { IUser, IUserAuth } from "../interfaces";
 import { removeStoreValue, saveStoreValue } from "../../shared/utils/storage";
 
 const initialState: IUserAuth = {
-  userInfo: undefined,
+  user: undefined,
   token: undefined,
-  sys_graph_id: undefined,
   loading: false,
   error: undefined,
-  subscriptions: [],
 };
 
 export const registerAPI = createAsyncThunk(
@@ -113,7 +111,7 @@ export const userAuthSlice = createSlice({
   initialState,
   reducers: {
     reset: (state) => {
-      state.userInfo = undefined;
+      state.user = undefined;
       state.token = undefined;
       state.loading = false;
       state.error = undefined;
@@ -128,7 +126,7 @@ export const userAuthSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(registerAPI.pending, (state) => {
       state.loading = true;
-      state.userInfo = undefined;
+      state.user = undefined;
       state.token = undefined;
     }),
       builder.addCase(registerAPI.fulfilled, (state, { payload }) => {
@@ -137,11 +135,11 @@ export const userAuthSlice = createSlice({
           errorHandler(state, payload.error);
           return;
         }
-        state.userInfo = payload;
+        state.user = payload;
       }),
       builder.addCase(loginAPI.pending, (state) => {
         state.loading = true;
-        state.userInfo = undefined;
+        state.user = undefined;
         state.token = undefined;
       }),
       builder.addCase(loginAPI.fulfilled, (state, { payload }) => {
@@ -157,20 +155,13 @@ export const userAuthSlice = createSlice({
           errorHandler(state, "This user registeration is under the review.");
           return;
         }
-        state.userInfo = payload;
+        state.user = payload;
         state.token = payload.token;
         state.sys_graph_id = payload.sys_graph_id;
         saveStoreValue("user-info", payload);
         saveStoreValue("token", payload.token);
         saveStoreValue("sys_graph_id", payload.sys_graph_id);
-      }),
-      builder.addCase(subscriptionAPI.pending, (state) => {
-        state.loading = true;
-      }),
-      builder.addCase(subscriptionAPI.fulfilled, (state, { payload }) => {
-        state.loading = false;
-        state.subscriptions = payload;
-      }),
+      }),      
       builder.addCase(verifyEmailAPI.pending, (state) => {
         state.loading = true;
       }),
@@ -183,4 +174,4 @@ const { reset, updateToken } = userAuthSlice.actions;
 export const clearUserInfo = () => (dispatch: any) => dispatch(reset());
 export const updateTokenAsync = (newToken: string) => (dispatch: any) =>
   dispatch(updateToken(newToken));
-export const currentUser = (state: any) => state.userAuthSlice;
+export const currentUser = (state: any) => state.userAuthSlice as IUserAuth;
