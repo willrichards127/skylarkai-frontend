@@ -20,7 +20,7 @@ export interface IUser {
   phone?: string;
   password?: string;
   is_active?: boolean;
-  is_enterprise?: boolean;
+  user_categorization_id?: number;
   created_at?: string;
 }
 export interface IUserAuth {

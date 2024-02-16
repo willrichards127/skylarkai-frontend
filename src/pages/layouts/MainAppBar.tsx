@@ -303,7 +303,7 @@ export const MainAppBar = memo(() => {
             <Box
               sx={{ display: "flex", alignItems: "center", gap: 2, height: "100%" }}
             >
-              {user!.is_enterprise &&
+              {user!.user_categorization_id === 2 &&
                 <Box
                   component={Link}
                   to="/welcome"
@@ -384,7 +384,7 @@ export const MainAppBar = memo(() => {
                   </Menu>
                 </Box>
               </Box>
-              {user!.is_enterprise &&
+              {user!.user_categorization_id === 2 &&
                 <Box
                   component={Link}
                   to="/advanced-features"
@@ -444,7 +444,7 @@ export const MainAppBar = memo(() => {
                 </Box>
               </Box>
             </Box>
-            {user!.is_enterprise &&
+            {user!.user_categorization_id === 2 &&
               <Link to="/portal/reports">
                 <Button
                   variant="contained"

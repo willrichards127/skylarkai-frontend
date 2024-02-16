@@ -63,7 +63,7 @@ export default function FeaturesPage() {
         height: "100%",
       }}
     >
-      {user?.is_enterprise ?
+      {user!.user_categorization_id === 2 ?
         <>
           <Box sx={{ width: `100%`, overflowY: "auto" }}>
             <Box
