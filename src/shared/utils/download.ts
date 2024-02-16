@@ -34,7 +34,7 @@ export const downloadPdf = async ({
     };
 
     const response = await fetch(
-      `${import.meta.env.VITE_PREMIUM_API_URL}downloadfile/${graph_id}`,
+      `${import.meta.env.VITE_API_URL}downloadfile/${graph_id}`,
       requestOptions as any
     );
 

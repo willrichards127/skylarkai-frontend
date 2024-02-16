@@ -88,7 +88,7 @@ export const Chat = ({
     };
 
     fetch(
-      `${import.meta.env.VITE_PREMIUM_API_URL}downloadfile/${sys_graph_id!}`,
+      `${import.meta.env.VITE_API_URL}downloadfile/${sys_graph_id!}`,
       requestOptions as any
     )
       .then((response) => response.blob())
