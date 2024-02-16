@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import {
   AppBar,
@@ -23,6 +23,8 @@ import {
   SupportIcon,
   WelcomeIcon,
   AdvancedFeaturesIcon,
+  AnalysisIcon,
+  ToolsIcon,
 } from "../../components/Svgs";
 import { Notifications } from "./Notifications";
 import { XPopmenu } from "../../components/XPopmenu";
@@ -58,6 +60,8 @@ export const MainAppBar = memo(() => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const isPortal = useMemo(() => location.pathname.includes("/portal/"), [location]);
 
   const [addActivity] = useAddUserActivityMutation();
 
@@ -132,33 +136,29 @@ export const MainAppBar = memo(() => {
           px: 4,
         }}
       >
-        <Box
-          sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "100%" }}
-        >
+        {isPortal ?
           <Box
             sx={{ display: "flex", alignItems: "center", gap: 2, height: "100%" }}
           >
-            {user!.is_enterprise &&
-              <Box
-                component={Link}
-                to="/welcome"
-                sx={{
-                  ml: 4,
-                  color: "white",
-                  textDecoration: "none",
-                  fontSize: 14,
-                  fontWeight: location.pathname.includes("/help")
-                    ? "bold"
-                    : "normal",
-                  opacity: location.pathname.includes("/help") ? 1 : 0.3,
-                }}
-              >
-                <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-                  <WelcomeIcon />
-                  Welcome
-                </Box>
+            <Box
+              component={Link}
+              to="/portal/dashboard"
+              sx={{
+                ml: 4,
+                color: "white",
+                textDecoration: "none",
+                fontSize: 14,
+                fontWeight: location.pathname.includes("/portal/dashboard")
+                  ? "bold"
+                  : "normal",
+                opacity: location.pathname.includes("/portal/dashboard") ? 1 : 0.3,
+              }}
+            >
+              <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                <WelcomeIcon />
+                Dashooard
               </Box>
-            }
+            </Box>
             <Box
               sx={{
                 ml: 4,
@@ -167,7 +167,7 @@ export const MainAppBar = memo(() => {
               <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
                 <Box
                   component={Link}
-                  to="/premium"
+                  to="/welcome"
                   sx={{
                     display: "flex",
                     gap: 1,
@@ -175,10 +175,10 @@ export const MainAppBar = memo(() => {
                     color: "white",
                     textDecoration: "none",
                     fontSize: 14,
-                    fontWeight: location.pathname.includes("/premium")
+                    fontWeight: location.pathname.includes("/features")
                       ? "bold"
                       : "normal",
-                    opacity: location.pathname.includes("/premium")
+                    opacity: location.pathname.includes("/features")
                       ? 1
                       : 0.3,
                   }}
@@ -206,11 +206,11 @@ export const MainAppBar = memo(() => {
                     <MenuItem
                       key={feature.id}
                       selected={
-                        location.pathname === `/premium/${feature.id}`
+                        location.pathname === `/features/${feature.id}`
                       }
                       onClick={() => {
                         setAnchorEl(null);
-                        navigate(`/premium/${feature.id}`);
+                        navigate(`/features/${feature.id}`);
                       }}
                     >
                       {feature.feature}
@@ -219,27 +219,44 @@ export const MainAppBar = memo(() => {
                 </Menu>
               </Box>
             </Box>
-            {user!.is_enterprise &&
-              <Box
-                component={Link}
-                to="/advanced-features"
-                sx={{
-                  ml: 4,
-                  color: "white",
-                  textDecoration: "none",
-                  fontSize: 14,
-                  fontWeight: location.pathname.includes("/help")
-                    ? "bold"
-                    : "normal",
-                  opacity: location.pathname.includes("/help") ? 1 : 0.3,
-                }}
-              >
-                <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-                  <AdvancedFeaturesIcon />
-                  Advanced Features
-                </Box>
+            <Box
+              component={Link}
+              to="/portal/analysis"
+              sx={{
+                ml: 4,
+                color: "white",
+                textDecoration: "none",
+                fontSize: 14,
+                fontWeight: location.pathname.includes("/portal/analysis")
+                  ? "bold"
+                  : "normal",
+                opacity: location.pathname.includes("/portal/analysis") ? 1 : 0.3,
+              }}
+            >
+              <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                <AnalysisIcon />
+                Analysis
               </Box>
-            }
+            </Box>
+            <Box
+              component={Link}
+              to="/help"
+              sx={{
+                ml: 4,
+                color: "white",
+                textDecoration: "none",
+                fontSize: 14,
+                fontWeight: location.pathname.includes("/help")
+                  ? "bold"
+                  : "normal",
+                opacity: location.pathname.includes("/help") ? 1 : 0.3,
+              }}
+            >
+              <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                <ToolsIcon />
+                Tools
+              </Box>
+            </Box>
             <Box
               component={Link}
               to="/help"
@@ -279,15 +296,167 @@ export const MainAppBar = memo(() => {
               </Box>
             </Box>
           </Box>
-          {user!.is_enterprise &&
-            <Button
-              variant="contained"
-              sx={{ minWidth: 160 }}
+          :
+          <Box
+            sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "100%" }}
+          >
+            <Box
+              sx={{ display: "flex", alignItems: "center", gap: 2, height: "100%" }}
             >
-              Access Enterprise Portal
-            </Button>
-          }
-        </Box>
+              {user!.is_enterprise &&
+                <Box
+                  component={Link}
+                  to="/welcome"
+                  sx={{
+                    ml: 4,
+                    color: "white",
+                    textDecoration: "none",
+                    fontSize: 14,
+                    fontWeight: location.pathname.includes("/welcome")
+                      ? "bold"
+                      : "normal",
+                    opacity: location.pathname.includes("/welcome") ? 1 : 0.3,
+                  }}
+                >
+                  <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                    <WelcomeIcon />
+                    Welcome
+                  </Box>
+                </Box>
+              }
+              <Box
+                sx={{
+                  ml: 4,
+                }}
+              >
+                <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                  <Box
+                    component={Link}
+                    to="/welcome"
+                    sx={{
+                      display: "flex",
+                      gap: 1,
+                      alignItems: "center",
+                      color: "white",
+                      textDecoration: "none",
+                      fontSize: 14,
+                      fontWeight: location.pathname.includes("/features")
+                        ? "bold"
+                        : "normal",
+                      opacity: location.pathname.includes("/features")
+                        ? 1
+                        : 0.3,
+                    }}
+                  >
+                    <FeaturesIcon />
+                    Features
+                  </Box>
+                  <Box onClick={onFeatures} sx={{ cursor: "pointer", pt: 1 }}>
+                    <ExpandMoreIcon />
+                  </Box>
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={open}
+                    onClose={() => setAnchorEl(null)}
+                    anchorOrigin={{
+                      vertical: "bottom",
+                      horizontal: "left",
+                    }}
+                    transformOrigin={{
+                      vertical: "top",
+                      horizontal: "right",
+                    }}
+                  >
+                    {(user!.main_features || []).map((feature) => (
+                      <MenuItem
+                        key={feature.id}
+                        selected={
+                          location.pathname === `/features/${feature.id}`
+                        }
+                        onClick={() => {
+                          setAnchorEl(null);
+                          navigate(`/features/${feature.id}`);
+                        }}
+                      >
+                        {feature.feature}
+                      </MenuItem>
+                    ))}
+                  </Menu>
+                </Box>
+              </Box>
+              {user!.is_enterprise &&
+                <Box
+                  component={Link}
+                  to="/advanced-features"
+                  sx={{
+                    ml: 4,
+                    color: "white",
+                    textDecoration: "none",
+                    fontSize: 14,
+                    fontWeight: location.pathname.includes("/advanced-features")
+                      ? "bold"
+                      : "normal",
+                    opacity: location.pathname.includes("/advanced-features") ? 1 : 0.3,
+                  }}
+                >
+                  <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                    <AdvancedFeaturesIcon />
+                    Advanced Features
+                  </Box>
+                </Box>
+              }
+              <Box
+                component={Link}
+                to="/help"
+                sx={{
+                  ml: 4,
+                  color: "white",
+                  textDecoration: "none",
+                  fontSize: 14,
+                  fontWeight: location.pathname.includes("/help")
+                    ? "bold"
+                    : "normal",
+                  opacity: location.pathname.includes("/help") ? 1 : 0.3,
+                }}
+              >
+                <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                  <Help2Icon />
+                  Help
+                </Box>
+              </Box>
+              <Box
+                component={Link}
+                to="/support"
+                sx={{
+                  ml: 4,
+                  color: "white",
+                  textDecoration: "none",
+                  fontSize: 14,
+                  fontWeight: location.pathname.includes("/support")
+                    ? "bold"
+                    : "normal",
+                  opacity: location.pathname.includes("/support") ? 1 : 0.3,
+                }}
+              >
+                <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                  <SupportIcon />
+                  Support
+                </Box>
+              </Box>
+            </Box>
+            {user!.is_enterprise &&
+              <Link to="/portal/reports">
+                <Button
+                  variant="contained"
+                  sx={{ minWidth: 160 }}
+                >
+                  Access Enterprise Portal
+                </Button>
+              </Link>
+            }
+          </Box>
+        }
+
       </Box>
     </AppBar>
   );

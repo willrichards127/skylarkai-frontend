@@ -3,7 +3,6 @@ import {
   Box,
   Card,
   CardHeader,
-  CardMedia,
   CardActionArea,
 } from "@mui/material";
 
@@ -24,7 +23,7 @@ const sizeDict = {
   },
 };
 
-export const FeatureCard = memo(
+export const FeatureEnterpriseCard = memo(
   ({
     thumbnail: Icon,
     label,

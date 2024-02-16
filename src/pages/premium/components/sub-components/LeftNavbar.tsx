@@ -27,7 +27,7 @@ export const LeftNavbar = ({
 
   const onItem = useCallback(
     (itemId: number) => {
-      navigate(`/premium/${itemId}`);
+      navigate(`/features/${itemId}`);
     },
     [navigate]
   );

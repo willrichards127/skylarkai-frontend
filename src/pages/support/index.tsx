@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { Box, Chip, Typography, Button } from "@mui/material";
-import Layout from "../layout/Layout";
 import AddIcon from "@mui/icons-material/Add";
-import { XTable } from "../../../components/table";
+import { XTable } from "../../components/table";
 import { NewTicketModal } from "./components/NewTicketModal";
 import HourglassTopIcon from "@mui/icons-material/HourglassTop";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
@@ -90,7 +89,7 @@ const statusColorDict: Record<string, any> = {
 export default function SupportPage() {
   const [ticketModal, showTicketModal] = useState<boolean>(false);
   return (
-    <Layout>
+    <>
       <Box sx={{ height: "100%", p: 8 }}>
         <Box
           sx={{
@@ -160,6 +159,6 @@ export default function SupportPage() {
           onClose={() => showTicketModal(false)}
         />
       )}
-    </Layout>
+    </>
   );
 }

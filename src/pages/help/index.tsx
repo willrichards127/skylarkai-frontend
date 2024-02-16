@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCallback, useMemo, useState } from "react";
 import { Box, Typography, Button } from "@mui/material";
-import Layout from "../layouts/Layout";
 import { helpNavWidth } from "../../shared/models/constants";
 import { CircleLogo } from "../../components/Svgs";
 import { NavItem } from "./components/NavItem";
@@ -76,97 +75,95 @@ export default function HelpPage() {
   }, [selectedPage]);
 
   return (
-    <Layout>
-      <Box sx={{ display: "flex", height: "100%" }}>
-        <Box
-          sx={{
-            width: helpNavWidth,
-            p: 2,
-            bgcolor: "#292943",
-            overflowY: "auto",
-          }}
-        >
-          <Box sx={{ bgcolor: "#202024", borderRadius: 2, p: 2 }}>
-            <Box sx={{ display: "flex", gap: 1, alignItems: "center", mb: 3 }}>
-              <CircleLogo width={37} height={35} />
-              <Typography variant="h5" color="primary.main">
-                Welcome To Skylark AI
-              </Typography>
-            </Box>
-            <Box pl={6}>
-              {menu.map((option) => (
-                <NavItem
-                  key={option.page}
-                  label={
-                    <Typography variant="h6" fontWeight="bold" mb={1}>
-                      {option.label}
-                    </Typography>
-                  }
-                  selected={selectedPage === option.page}
-                  onClick={() => onClickItem(option.page)}
-                />
-              ))}
-            </Box>
+    <Box sx={{ display: "flex", height: "100%" }}>
+      <Box
+        sx={{
+          width: helpNavWidth,
+          p: 2,
+          bgcolor: "#292943",
+          overflowY: "auto",
+        }}
+      >
+        <Box sx={{ bgcolor: "#202024", borderRadius: 2, p: 2 }}>
+          <Box sx={{ display: "flex", gap: 1, alignItems: "center", mb: 3 }}>
+            <CircleLogo width={37} height={35} />
+            <Typography variant="h5" color="primary.main">
+              Welcome To Skylark AI
+            </Typography>
           </Box>
-        </Box>
-        <Box sx={{ flex: 1, p: 8, position: "relative", overflowY: "auto" }}>
-          {selectedPage === 1 && <IntroductionPage />}
-          {selectedPage === 2 && <AskSECFilingsPage />}
-          {selectedPage === 3 && <InvestmentmemoPage />}
-          {selectedPage === 4 && <ViewInsiderTransactionsPage />}
-          {selectedPage === 5 && <CompareAnalyzeEarningCallsPage />}
-          {selectedPage === 6 && <CompareDocumentsPage />}
-          {selectedPage === 7 && <SentimentalAnalysisPage />}
-          <Box
-            sx={{
-              position: "fixed",
-              bottom: 32,
-              right: 32,
-              display: "flex",
-              gap: 2,
-            }}
-          >
-            {selectedPage > 1 && (
-              <Button
-                variant="contained"
-                sx={{ minWidth: 220, bgcolor: "secondary.dark" }}
-                onClick={onPrev}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <ArrowBackIosIcon sx={{ color: "grey" }} />
-                  <Box textAlign="right">
-                    <Typography variant="body2" color="primary.main">
-                      Previous
-                    </Typography>
-                    <Typography variant="body2" color="grey">
-                      {prevButtonLabel}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Button>
-            )}
-            {selectedPage < menu.length && (
-              <Button
-                variant="contained"
-                sx={{ minWidth: 220 }}
-                onClick={onNext}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <Box textAlign="left">
-                    <Typography variant="body2" color="black">
-                      Next
-                    </Typography>
-                    <Typography variant="body2" color="black">
-                      {nextButtonLabel}
-                    </Typography>
-                  </Box>
-                  <ArrowForwardIosIcon sx={{ color: "black" }} />
-                </Box>
-              </Button>
-            )}
+          <Box pl={6}>
+            {menu.map((option) => (
+              <NavItem
+                key={option.page}
+                label={
+                  <Typography variant="h6" fontWeight="bold" mb={1}>
+                    {option.label}
+                  </Typography>
+                }
+                selected={selectedPage === option.page}
+                onClick={() => onClickItem(option.page)}
+              />
+            ))}
           </Box>
         </Box>
       </Box>
-    </Layout>
+      <Box sx={{ flex: 1, p: 8, position: "relative", overflowY: "auto" }}>
+        {selectedPage === 1 && <IntroductionPage />}
+        {selectedPage === 2 && <AskSECFilingsPage />}
+        {selectedPage === 3 && <InvestmentmemoPage />}
+        {selectedPage === 4 && <ViewInsiderTransactionsPage />}
+        {selectedPage === 5 && <CompareAnalyzeEarningCallsPage />}
+        {selectedPage === 6 && <CompareDocumentsPage />}
+        {selectedPage === 7 && <SentimentalAnalysisPage />}
+        <Box
+          sx={{
+            position: "fixed",
+            bottom: 32,
+            right: 32,
+            display: "flex",
+            gap: 2,
+          }}
+        >
+          {selectedPage > 1 && (
+            <Button
+              variant="contained"
+              sx={{ minWidth: 220, bgcolor: "secondary.dark" }}
+              onClick={onPrev}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 4 }}>
+                <ArrowBackIosIcon sx={{ color: "grey" }} />
+                <Box textAlign="right">
+                  <Typography variant="body2" color="primary.main">
+                    Previous
+                  </Typography>
+                  <Typography variant="body2" color="grey">
+                    {prevButtonLabel}
+                  </Typography>
+                </Box>
+              </Box>
+            </Button>
+          )}
+          {selectedPage < menu.length && (
+            <Button
+              variant="contained"
+              sx={{ minWidth: 220 }}
+              onClick={onNext}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <Box textAlign="left">
+                  <Typography variant="body2" color="black">
+                    Next
+                  </Typography>
+                  <Typography variant="body2" color="black">
+                    {nextButtonLabel}
+                  </Typography>
+                </Box>
+                <ArrowForwardIosIcon sx={{ color: "black" }} />
+              </Box>
+            </Button>
+          )}
+        </Box>
+      </Box>
+    </Box>
   );
 }
