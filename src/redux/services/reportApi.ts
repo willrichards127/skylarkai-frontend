@@ -53,8 +53,7 @@ export const reportApi: any = createApi({
       }
     >({
       query: ({ report, companyCode, companyName, question }) =>
-        `${report}?companycode=${companyCode}&companyname=${companyName}${
-          question ? "&question=" + question : ""
+        `${report}?companycode=${companyCode}&companyname=${companyName}${question ? "&question=" + question : ""
         }`,
     }),
 
@@ -197,16 +196,16 @@ export const reportApi: any = createApi({
             }, "");
 
             console.log("finalResult: ", finalResult);
-            const summaryReponse: any = await apiBaseQuery({
-              url: `chatwithdata/${setupId}`,
-              method: "POST",
-              body: {
-                data: finalResult,
-                question: `Executive summary for ${REPORTS_DICT[queryType].label}.`,
-              },
-            });
+            // const summaryReponse: any = await apiBaseQuery({
+            //   url: `chatwithdata/${setupId}`,
+            //   method: "POST",
+            //   body: {
+            //     data: finalResult,
+            //     question: `Executive summary for ${REPORTS_DICT[queryType].label}.`,
+            //   },
+            // });
 
-            console.log("summaryReponse: ", summaryReponse);
+            // console.log("summaryReponse: ", summaryReponse);
             let reportFinal: string = "";
             reportFinal += `
               <h1>${REPORTS_DICT[queryType].label}</h1>
@@ -216,7 +215,6 @@ export const reportApi: any = createApi({
               <p>STAF 7 is a technology company headquartered in San Francisco. It was founded in 2010 and currently employs around 5000 people.
               The company generated $2.5 billion in revenue in 2020. In 2021, STAF 7's revenue grew to $3 billion.</p>
               <h2>Executive Summary</h2>
-              ${summaryReponse.data.answer}
               ${finalResult}
             `;
             for (const removeRegex of removeRegexes) {
@@ -229,7 +227,11 @@ export const reportApi: any = createApi({
             const jsonResponse: any = await apiBaseQuery({
               // url: `${queryType}/${setupId}`,
               url: `${queryType}/${setupId}?llm=${"BOTH"}`,
+              // url: `customquery_ent?graph_id=${setupId}`,
               method: "POST",
+              // body: {
+              //   "question": queryType,
+              // }
             });
             console.log(jsonResponse, "jsonresponse for individual report ---");
 
@@ -249,7 +251,7 @@ export const reportApi: any = createApi({
               },
             });
             console.log(templateResponse, "templateResponse---");
-            let reportFinal: string = templateResponse.data.filled_template;
+            let reportFinal: string = templateResponse.data.filled_template.length ? templateResponse.data.filled_template[0] : "";
             for (const removeRegex of removeRegexes) {
               reportFinal = reportFinal.replace(removeRegex, "");
             }
@@ -269,7 +271,7 @@ export const reportApi: any = createApi({
         }
       },
     }),
-    getReport: builder.mutation<
+    getReport: builder.query<
       any,
       {
         reportId: number;
@@ -287,7 +289,7 @@ export const reportApi: any = createApi({
             url: `reports/${reportId}?view_mode=${viewMode}`,
           });
 
-          return {
+                    return {
             data: reportResponse.data,
           };
         } catch (e) {
@@ -348,16 +350,18 @@ export const reportApi: any = createApi({
             url: `reports?view_mode=${viewMode}`,
           });
 
-          const updatedReports = reportsReponse.data.map((response: any) => ({
-            ...response,
-            ...(viewMode === "active" && {
-              report_name: response.report_metadata.reportname,
-            }),
-            graph_name: setupsReponse.data.find(
-              (setup: ISetup) => setup.id === response.graph_id
-            )!.name,
-          }));
-          console.log(updatedReports, "updatedReports---");
+          const updatedReports = reportsReponse.data.map((response: any) => {
+            return {
+              ...response,
+              ...(viewMode === "active" && {
+                report_name: response.report_name,
+              }),
+              graph_name: setupsReponse.data.find(
+                (setup: ISetup) => setup.id === +response.graph_id
+              )!.name,
+            }
+          });
+
           const groups = groupBy("graph_name")(updatedReports);
 
           return {
@@ -531,7 +535,8 @@ export const {
   useGenerateReportMutation,
   useGetReportsQuery,
   useLazyGetReportsQuery,
-  useGetReportMutation,
+  useGetReportQuery,
+  useLazyGetReportQuery,
   useDeleteReportMutation,
   useGetChatWithDataMutation,
   useGenerateWarrantReportMutation,

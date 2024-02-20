@@ -74,9 +74,9 @@ export const setupApi = createApi({
         method: setupId ? "PUT" : "POST",
         body: setupId
           ? {
-              ...(setupId !== undefined && { graph_id: setupId }),
-              ...setup,
-            }
+            ...(setupId !== undefined && { graph_id: setupId }),
+            ...setup,
+          }
           : setup,
       }),
     }),
@@ -87,6 +87,20 @@ export const setupApi = createApi({
       }),
       invalidatesTags: ["Setup"],
     }),
+    ingestFiles: builder.mutation<void, { setupId: number; companyName: string; analysisType: string; files: File[] }>({
+      query: ({ setupId, companyName, analysisType, files }) => {
+        const formData = new FormData();
+        formData.append("analysis_type", analysisType);
+        for (const file of files) {
+          formData.append("files", file);
+        }
+        return {
+          url: `ingestfiles?graph_id=${setupId}&company_name=${companyName}`,
+          method: "POST",
+          body: formData,
+        };
+      },
+    }),
     uploadFiles: builder.mutation<void, { setupId: number; files: any }>({
       query: ({ setupId, files }) => {
         return {
@@ -96,8 +110,8 @@ export const setupApi = createApi({
         };
       },
     }),
-    executeGraph: builder.mutation<any, { setup: ISetup }>({
-      async queryFn({ setup }, __, ___, apiBaseQuery) {
+    executeGraph: builder.mutation<any, { setup: ISetup; analysisType: string }>({
+      async queryFn({ setup, analysisType }, __, ___, apiBaseQuery) {
         try {
           // save current graph
           const updateResponse: any = await apiBaseQuery({
@@ -107,10 +121,25 @@ export const setupApi = createApi({
           });
 
           // execute the graph
-          await apiBaseQuery({
-            url: `graphs/${setup.id}/execute`,
-            method: "POST",
-          });
+          // await apiBaseQuery({
+          //   url: `graphs/${setup.id}/execute`,
+          //   method: "POST",
+          // });
+
+          const uploadNode = setup.nodes.find(node => node.template_node_id === 2);
+          if (uploadNode) {
+            const formData = new FormData();
+            formData.append("analysis_type", analysisType);
+            for (const file of uploadNode.properties?.files) {
+              formData.append("files", file);
+            }
+            await apiBaseQuery({
+              url: `ingestfiles?graph_id=${setup.id}&company_name=${setup.name}`,
+              method: "POST",
+              body: formData,
+            });
+          }
+
 
           return {
             data: {
@@ -177,9 +206,9 @@ export const setupApi = createApi({
               "CSV Output"
             )
               ? executionResponse.data.data.substring(
-                  0,
-                  executionResponse.data.data.indexOf("CSV Output:")
-                )
+                0,
+                executionResponse.data.data.indexOf("CSV Output:")
+              )
               : executionResponse.data.data;
             console.log(finalResult, "finalResult---");
             let replaced = finalResult.replace('<investment_memo>', '');
@@ -218,6 +247,7 @@ export const {
   useDeleteSetupMutation,
   useGetSetupsQuery,
   useGetSetupQuery,
+  useIngestFilesMutation,
   useUploadFilesMutation,
   useExecuteGraphMutation,
   useExecuteNodeMutation,

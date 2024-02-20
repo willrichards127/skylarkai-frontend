@@ -87,13 +87,13 @@ export const ReportTabContainer = memo(
               <XCard
                 key={card.id}
                 id={card.id}
-                label={REPORTS_DICT[card.report_name].label}
+                label={REPORTS_DICT[card.report_metadata.reportname].label}
                 updatedAt={getDate(
                   new Date(card.created_at || card.executed_at)
                 )}
                 moreItems={moreItems}
                 onMoreItem={(menuItemId) => onMoreItem(card.id, menuItemId)}
-                onCard={() => onCard(card.id, card.graph_id, card.report_name)}
+                onCard={() => onCard(card.id, card.graph_id, card.report_metadata.reportname)}
                 width={400}
                 height={100}
               />

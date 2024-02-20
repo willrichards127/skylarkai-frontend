@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@dnd-kit/core": "^6.0.8",
-		"@dnd-kit/sortable": "^7.0.2",
+    "@dnd-kit/sortable": "^7.0.2",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.15.2",
@@ -31,6 +31,7 @@
     "cheerio": "^1.0.0-rc.12",
     "file-saver": "^2.0.5",
     "html-to-pdfmake": "^2.5.1",
+    "marked": "^12.0.0",
     "pdfmake": "^0.2.9",
     "react": "^18.2.0",
     "react-apexcharts": "^1.4.1",

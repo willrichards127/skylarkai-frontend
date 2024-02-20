@@ -14,13 +14,21 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { marked } from "marked";
 import { HeaderPanel } from "../components/HeaderPanel";
 import { IndexView } from "./IndexView";
 import { ExportModal } from "../../../../components/modals/ExportModal";
-import ChatPanel from "../../../../components/ChatBotChatPanel";
 import { SortableItemWrapper } from "./SortableItemWrapper";
 import { getNewId, categoryParser, convertCSVToTable } from "../../../../shared/utils/parse";
 import { useSaveReportMutation } from "../../../../redux/services/reportApi";
+import { UtilPanel } from "../components/UtilPanel";
+import { BottomPanel } from "../components/BottomPanel";
+import { ChatAssistWindow } from "../components/ChatAssistWindow";
+
+marked.use({
+  pedantic: false,
+  gfm: true,
+});
 
 export const MarketAnalysisReport = memo(
   ({
@@ -38,19 +46,20 @@ export const MarketAnalysisReport = memo(
   }) => {
     const printRef = useRef();
     const initialReportItems = useMemo(
-      () => customizedContent || categoryParser(reportContent),
+      () => customizedContent || categoryParser(marked.parse(reportContent) as string),
       [reportContent, customizedContent]
     );
 
-    const [chatWindow, showChatWindow] = useState<boolean>(false);
+    const [uploadedFiles, setUploadedFiles] = useState<Record<string, File>>();
     const [exportModal, showExportModal] = useState<boolean>(false);
+    const [chatAssist, showChatAssist] = useState<boolean>(false);
 
     const [reportItems, setReportItems] =
       useState<{ key: string; value: any }[]>(initialReportItems);
     const [itemIds, setItemIds] = useState<string[]>(
       initialReportItems.map((item) => item.key)
     );
-    
+
     const [saveReport, { isSuccess }] = useSaveReportMutation({});
 
     const onPrint = useCallback(() => {
@@ -72,14 +81,10 @@ export const MarketAnalysisReport = memo(
         content: mdTemplate,
         custom: reportItems,
       });
-    }, [saveReport, reportId, setupId, reportType, reportItems, itemIds]);
+    }, [saveReport, reportId, setupId, reportType, reportItems]);
 
     const onDelete = useCallback(() => {
       showExportModal(true);
-    }, []);
-
-    const onChatWindow = useCallback(() => {
-      showChatWindow((prev) => !prev);
     }, []);
 
     const onDragEnd = useCallback((event: any) => {
@@ -152,6 +157,22 @@ export const MarketAnalysisReport = memo(
       );
     }, []);
 
+    const onChatAssist = useCallback(() => {
+      showChatAssist(true);
+    }, []);
+
+    const onUploadedFile = useCallback((type: string, file: File) => {
+      setUploadedFiles((prev) => ({ ...prev, [type]: file }));
+    }, []);
+
+    const onRemoveFiles = useCallback((type: string, filename: string) => {
+      setUploadedFiles((prev) => {
+        const update = { ...prev };
+        delete update[type];
+        return update;
+      });
+    }, []);
+
     // Item content
     const onItemChanged = useCallback(
       (
@@ -185,51 +206,78 @@ export const MarketAnalysisReport = memo(
     }, [isSuccess]);
 
     return (
-      <Box>
-        <HeaderPanel
-          onPrint={onPrint}
-          onRerunReport={() => {}}
-          onChatWindow={onChatWindow}
-          onSave={onSave}
-          onDelete={onDelete}
-          top={136}
-          right={32}
+      <Box sx={{ display: "flex", height: "100%" }}>
+        <UtilPanel
+          onRemoveFiles={onRemoveFiles}
+          onChatAssist={onChatAssist}
+          uploadedFiles={uploadedFiles}
         />
-        <Box ref={printRef}>
-          <IndexView items={reportItems} />
-          <DndContext onDragEnd={onDragEnd}>
-            <SortableContext
-              items={itemIds}
-              strategy={verticalListSortingStrategy}
-            >
-              {itemIds.map((itemId) => (
-                <SortableItemWrapper
-                  key={itemId}
-                  itemId={itemId}
-                  item={reportItems.find((item) => item.key === itemId)!.value}
-                  onAddNew={() => onAddNew(itemId)}
-                  onRemove={() => onRemove(itemId)}
-                  onAddUploadedFile={(data) => onAddUploadedFile(itemId, data)}
-                  onItemChanged={(changedValue, tagName, visualType) =>
-                    onItemChanged(itemId, changedValue, tagName, visualType)
-                  }
-                />
-              ))}
-            </SortableContext>
-          </DndContext>
-        </Box>
-        {chatWindow && (
-          <Box sx={{ position: "fixed", bottom: 32, right: 32 }}>
-            <ChatPanel setupId={+setupId!} isFloating content={reportContent} />
-          </Box>
-        )}
-        {exportModal && (
-          <ExportModal
-            open={exportModal}
-            exportContent={printRef.current}
-            onClose={() => showExportModal(false)}
+        <Box sx={{ position: "relative", flex: 1 }}>
+          <HeaderPanel
+            setupId={+setupId}
+            reportType={reportType}
+            onPrint={onPrint}
+            onSave={onSave}
+            onDelete={onDelete}
           />
-        )}
+          <Box sx={{ px: 4, py: 2, height: "calc(100% - 270px)" }}>
+            <Box
+              ref={printRef}
+              sx={{
+                px: 32,
+                bgcolor: "black",
+                py: 4,
+                height: "100%",
+                overflowY: "auto",
+              }}
+            >
+              <IndexView items={reportItems} />
+              <DndContext onDragEnd={onDragEnd}>
+                <SortableContext
+                  items={itemIds}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {itemIds.map((itemId) => (
+                    <SortableItemWrapper
+                      key={itemId}
+                      itemId={itemId}
+                      item={
+                        reportItems.find((item) => item.key === itemId)!.value
+                      }
+                      onAddNew={() => onAddNew(itemId)}
+                      onRemove={() => onRemove(itemId)}
+                      onAddUploadedFile={(data) =>
+                        onAddUploadedFile(itemId, data)
+                      }
+                      onItemChanged={(changedValue, tagName, visualType) =>
+                        onItemChanged(itemId, changedValue, tagName, visualType)
+                      }
+                    />
+                  ))}
+                </SortableContext>
+              </DndContext>
+            </Box>
+          </Box>
+          <BottomPanel
+            onChatAssist={onChatAssist}
+            onUploadedFile={onUploadedFile}
+            onRerun={() => {}}
+          />
+          {exportModal && (
+            <ExportModal
+              open={exportModal}
+              exportContent={printRef.current}
+              onClose={() => showExportModal(false)}
+            />
+          )}
+          {chatAssist && (
+            <ChatAssistWindow
+              reportType={reportType}
+              onClose={() => showChatAssist(false)}
+              onExportChat={() => {}}
+            />
+          )}
+        </Box>
       </Box>
     );
   }

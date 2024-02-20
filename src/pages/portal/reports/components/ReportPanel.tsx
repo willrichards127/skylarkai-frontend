@@ -1,12 +1,10 @@
 import { memo, useEffect, useRef, useCallback, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Box, IconButton } from "@mui/material";
-import { UtilPanel } from "./UtilPanel";
 import { CircleSpinner } from "../../../../components/loading-spinners/CircleSpinner";
-import { ChatAssistWindow } from "./ChatAssistWindow";
 import {
   useGenerateReportMutation,
-  useGetReportMutation,
+  useLazyGetReportQuery,
   useGenerateWarrantReportMutation,
 } from "../../../../redux/services/reportApi";
 import { MarketAnalysisReport } from "../templates/MarketAnalysisReport";
@@ -25,14 +23,13 @@ const ReportPanel = memo(({ reportId }: { reportId: string }) => {
   const parentRef = useRef<any>();
 
   const [upward, setUpward] = useState<boolean>(false);
-  const [chatAssist, showChatAssist] = useState<boolean>(false);
 
   const [
     generateReport,
     { isLoading: loadingGenerateReport, data: generatedData },
   ] = useGenerateReportMutation();
   const [getReport, { isLoading: loadingReport, data: reportData }] =
-    useGetReportMutation();
+    useLazyGetReportQuery();
 
   const [
     generateWarrantReport,
@@ -86,85 +83,69 @@ const ReportPanel = memo(({ reportId }: { reportId: string }) => {
     parentRef.current.scrollTop = 0;
   }, []);
 
-  const onChatAssist = useCallback(() => {
-    showChatAssist(true);
-  }, []);
-
   return (
-    <Box sx={{ height: "100%", display: "flex", justifyContent: "center" }}>
-      <UtilPanel onChatAssist={onChatAssist} />
-
-      <Box sx={{ flex: 1, p: 2 }}>
-        {loadingGenerateReport || loadingReport || loadingWarrant ? (
-          <Box
-            sx={{ display: "flex", justifyContent: "center", width: "100%" }}
-          >
-            <CircleSpinner
-              size={120}
-              description={isNew ? "Generating report..." : "Reading report..."}
-            />
-          </Box>
-        ) : (
-          <Box
-            ref={parentRef}
-            sx={{
-              bgcolor: "rgba(0, 0, 0, 0.1)",
-              borderRadius: 2,
-              display: "flex",
-              alignItems: "center",
-              flexDirection: "column",
-              height: "100%",
-              overflowY: "auto",
-              px: 8,
-              py: 8,
-              position: "relative",
-            }}
-            onScroll={onScroll}
-          >
-            <Box width="75%">
-              {!!generatedData && (
-                <MarketAnalysisReport
-                  reportContent={generatedData}
-                  setupId={setupId!}
-                  reportType={reportType!}
-                />
-              )}
-              {!!reportData && (
-                <MarketAnalysisReport
-                  reportId={+reportId}
-                  reportContent={
-                    viewMode === "active" ? reportData.content : null
-                  }
-                  customizedContent={
-                    viewMode === "active"
-                      ? reportData.custom_metadata
-                      : reportData.result
-                  }
-                  setupId={setupId!}
-                  reportType={reportType!}
-                />
-              )}
-              {!!warrantData && (
-                <MarketAnalysisReport
-                  reportContent={warrantData}
-                  setupId={setupId!}
-                  reportType={reportType!}
-                />
-              )}
-            </Box>
-            {upward && (
-              <Box sx={{ position: "fixed", bottom: 32, right: 32 }}>
-                <IconButton onClick={onUpward}>
-                  <ArrowCircleUpIcon />
-                </IconButton>
-              </Box>
+    <Box sx={{ width: "100%", height: "100%" }}>
+      {loadingGenerateReport || loadingReport || loadingWarrant ? (
+        <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
+          <CircleSpinner
+            size={120}
+            description={isNew ? "Generating report..." : "Reading report..."}
+          />
+        </Box>
+      ) : (
+        <Box
+          ref={parentRef}
+          sx={{
+            bgcolor: "rgba(0, 0, 0, 0.1)",
+            display: "flex",
+            alignItems: "center",
+            flexDirection: "column",
+            height: "100%",
+            // overflowY: "auto",
+            // px: 8,
+            // pb: 8,
+            position: "relative",
+          }}
+          onScroll={onScroll}
+        >
+          <Box width="100%" height="100%">
+            {!!generatedData && (
+              <MarketAnalysisReport
+                reportContent={generatedData}
+                setupId={setupId!}
+                reportType={reportType!}
+              />
+            )}
+            {!!reportData && (
+              <MarketAnalysisReport
+                reportId={+reportId}
+                reportContent={
+                  viewMode === "active" ? reportData.content : null
+                }
+                customizedContent={
+                  viewMode === "active"
+                    ? reportData.custom_metadata
+                    : reportData.result
+                }
+                setupId={setupId!}
+                reportType={reportType!}
+              />
+            )}
+            {!!warrantData && (
+              <MarketAnalysisReport
+                reportContent={warrantData}
+                setupId={setupId!}
+                reportType={reportType!}
+              />
             )}
           </Box>
-        )}
-      </Box>
-      {chatAssist && (
-        <Box sx={{ position: "fixed", left: 128, bottom: 32 }}>
-          <ChatAssistWindow onClose={() => showChatAssist(false)} />
+          {upward && (
+            <Box sx={{ position: "fixed", bottom: 32, right: 32 }}>
+              <IconButton onClick={onUpward}>
+                <ArrowCircleUpIcon />
+              </IconButton>
+            </Box>
+          )}
         </Box>
       )}
     </Box>

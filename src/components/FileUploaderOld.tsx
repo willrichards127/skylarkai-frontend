@@ -62,7 +62,7 @@ export const FileUploader = memo(
                 Click to upload or drag and drop
               </Typography>
               <Typography variant="subtitle2" color="text.secondary">
-                (.pdf, .txt, .csv, .xls)
+                (.pdf, .txt, .csv, .html)
               </Typography>
             </>
           )}
