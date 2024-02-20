@@ -1,4 +1,5 @@
 import { memo, useCallback } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import {
   colors,
   InputAdornment,
@@ -9,6 +10,7 @@ import {
   Button,
   TextField,
 } from "@mui/material";
+import { currentUser } from "../../redux/features/authSlice";
 import { XTable } from "../../components/table";
 
 const statusColorDict: Record<number, any> = {
@@ -23,6 +25,7 @@ const statusColorDict: Record<number, any> = {
 };
 
 const AdminPage = () => {
+  const { user } = useSelector(currentUser);
   return (
     <Box
     >
