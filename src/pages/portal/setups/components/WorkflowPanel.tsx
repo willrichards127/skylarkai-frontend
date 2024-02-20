@@ -224,6 +224,7 @@ const WorkflowPanel = memo(
 					nodes: dbNodes,
 					edges: dbEdges,
 				},
+				analysisType: "financial_diligence",
 			});
 		}, [executeGraph, nodes, edges]);
 

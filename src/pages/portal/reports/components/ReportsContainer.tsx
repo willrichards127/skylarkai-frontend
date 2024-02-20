@@ -1,15 +1,15 @@
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useState } from "react";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { NewReportModal } from "./NewReportModal";
 import { ReportTabContainer } from "./ReportTabContainer";
-import { useLazyGetReportsQuery } from "../../../../redux/services/reportApi";
+import { useGetReportsQuery } from "../../../../redux/services/reportApi";
 
 const ReportsContainer = memo(() => {
   const [viewMode, setViewMode] = useState<string>("active");
   const [newReportModal, showNewReportModal] = useState<boolean>(false);
-  const [getReports, { isFetching: fetchingReports, data: reportsData }] =
-    useLazyGetReportsQuery();
+  const { isFetching: fetchingReports, data: reportsData } =
+    useGetReportsQuery({ viewMode });
 
   const onNewReportModal = useCallback(() => {
     showNewReportModal(true);
@@ -21,12 +21,6 @@ const ReportsContainer = memo(() => {
     },
     []
   );
-
-  useEffect(() => {
-    getReports({
-      viewMode,
-    });
-  }, [getReports, viewMode]);
 
   return (
     <Box sx={{ height: "calc(100% - 64px)" }}>
