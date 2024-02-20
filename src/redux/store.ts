@@ -2,7 +2,7 @@ import { configureStore, isRejectedWithValue } from "@reduxjs/toolkit";
 import type { Middleware } from "@reduxjs/toolkit";
 import { userAuthSlice } from "./features/authSlice";
 import { userApi } from "./services/userAPI";
-import { mainFeaturesApi } from "./services/mainFeaturesAPI";
+import { adminApi } from "./services/adminAPI";
 import { transcriptApi } from "./services/transcriptAPI";
 
 import { authApi } from "./services/authAPI";
@@ -33,7 +33,7 @@ export const store = configureStore({
   reducer: {
     [userAuthSlice.reducerPath]: userAuthSlice.reducer,
     [userApi.reducerPath]: userApi.reducer,
-    [mainFeaturesApi.reducerPath]: mainFeaturesApi.reducer,
+    [adminApi.reducerPath]: adminApi.reducer,
     [transcriptApi.reducerPath]: transcriptApi.reducer,
     [setupApi.reducerPath]: setupApi.reducer,
 		[reportApi.reducerPath]: reportApi.reducer,
@@ -44,7 +44,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({}).concat([
       userApi.middleware,
-      mainFeaturesApi.middleware,
+      adminApi.middleware,
       transcriptApi.middleware,
       authApi.middleware,
       setupApi.middleware,

@@ -3,8 +3,8 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQueryWithReauth } from "./base";
 import { IMainFeature } from "../interfaces";
 
-export const mainFeaturesApi = createApi({
-  reducerPath: "mainFeaturesApi",
+export const adminApi = createApi({
+  reducerPath: "adminApi",
   baseQuery: axiosBaseQueryWithReauth({
     baseUrl: import.meta.env.VITE_API_URL,
     isGuarded: false,
@@ -56,4 +56,4 @@ export const mainFeaturesApi = createApi({
 });
 
 export const { useGetFeaturesQuery, useGetSubScriptionFeaturesQuery } =
-  mainFeaturesApi;
+  adminApi;

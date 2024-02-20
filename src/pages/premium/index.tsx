@@ -26,12 +26,12 @@ import {
 } from "../../components/Svgs";
 
 const featurePremiumImgDict: Record<string, string> = {
-  "sec_filing": secFilingImg,
-  "investment_memo": investmentImg,
-  "insider_transactions": insiderTransactionImg,
-  "analyze_earnings": analyzeEarningImg,
-  "compare": compareDocImg,
-  "sentiment": sentimentImg,
+  sec_filing: secFilingImg,
+  investment_memo: investmentImg,
+  insider_transactions: insiderTransactionImg,
+  analyze_earnings: analyzeEarningImg,
+  compare: compareDocImg,
+  sentiment: sentimentImg,
 };
 
 const featureEnterpriseImgDict: Record<string, FC> = {
@@ -63,7 +63,7 @@ export default function FeaturesPage() {
         height: "100%",
       }}
     >
-      {user!.user_categorization_id === 2 ?
+      {user!.user_categorization_id === 2 && user!.user_role !== 4 ? (
         <>
           <Box sx={{ width: `100%`, overflowY: "auto" }}>
             <Box
@@ -78,13 +78,17 @@ export default function FeaturesPage() {
                   color="grey"
                   textAlign="center"
                   gutterBottom
-                  sx={{ maxWidth: 820, marginLeft: "auto", marginRight: "auto" }}
+                  sx={{
+                    maxWidth: 820,
+                    marginLeft: "auto",
+                    marginRight: "auto",
+                  }}
                 >
-                  Skylark makes integrating AI into your engineering and business
-                  processes seamless and efficient. Automate complex tasks,
-                  streamline workflows, and unlock the full potential of your
-                  operations with Skylark’s user-friendly AI solutions, tailored
-                  to meet your unique business needs
+                  Skylark makes integrating AI into your engineering and
+                  business processes seamless and efficient. Automate complex
+                  tasks, streamline workflows, and unlock the full potential of
+                  your operations with Skylark’s user-friendly AI solutions,
+                  tailored to meet your unique business needs
                 </Typography>
                 <Box
                   sx={{
@@ -122,8 +126,9 @@ export default function FeaturesPage() {
             </Box>
           </Box>
         </>
-        :
-        <><LeftNavbar />
+      ) : (
+        <>
+          <LeftNavbar />
           <Box
             sx={{ width: `calc(100% - ${leftNavWidth}px)`, overflowY: "auto" }}
           >
@@ -140,11 +145,11 @@ export default function FeaturesPage() {
                   textAlign="center"
                   gutterBottom
                 >
-                  Skylark makes integrating AI into your engineering and business
-                  processes seamless and efficient. Automate complex tasks,
-                  streamline workflows, and unlock the full potential of your
-                  operations with Skylark’s user-friendly AI solutions, tailored
-                  to meet your unique business needs.
+                  Skylark makes integrating AI into your engineering and
+                  business processes seamless and efficient. Automate complex
+                  tasks, streamline workflows, and unlock the full potential of
+                  your operations with Skylark’s user-friendly AI solutions,
+                  tailored to meet your unique business needs.
                 </Typography>
                 <Box
                   sx={{
@@ -153,7 +158,6 @@ export default function FeaturesPage() {
                     justifyContent: "center",
                   }}
                 >
-
                   <Grid
                     container
                     rowSpacing={{ xs: 2, sm: 2, md: 2, lg: 4 }}
@@ -183,9 +187,9 @@ export default function FeaturesPage() {
                 </Box>
               </Box>
             </Box>
-          </Box></>
-      }
-
+          </Box>
+        </>
+      )}
     </Box>
   );
 }
