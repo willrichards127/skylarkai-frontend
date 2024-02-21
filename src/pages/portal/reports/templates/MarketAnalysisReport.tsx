@@ -14,7 +14,6 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { marked } from "marked";
 import { HeaderPanel } from "../components/HeaderPanel";
 import { IndexView } from "./IndexView";
 import { ExportModal } from "../../../../components/modals/ExportModal";
@@ -25,12 +24,7 @@ import { UtilPanel } from "../components/UtilPanel";
 import { BottomPanel } from "../components/BottomPanel";
 import { ChatAssistWindow } from "../components/ChatAssistWindow";
 
-marked.use({
-  pedantic: false,
-  gfm: true,
-});
-
-export const MarketAnalysisReport = memo(
+export const MarketAnalysisReport =
   ({
     reportId,
     reportContent,
@@ -46,10 +40,9 @@ export const MarketAnalysisReport = memo(
   }) => {
     const printRef = useRef();
     const initialReportItems = useMemo(
-      () => customizedContent || categoryParser(marked.parse(reportContent) as string),
+      () => customizedContent || categoryParser(reportContent),
       [reportContent, customizedContent]
     );
-
     const [uploadedFiles, setUploadedFiles] = useState<Record<string, File>>();
     const [exportModal, showExportModal] = useState<boolean>(false);
     const [chatAssist, showChatAssist] = useState<boolean>(false);
@@ -185,13 +178,13 @@ export const MarketAnalysisReport = memo(
           prev.map((item) =>
             item.key === itemId
               ? {
-                  ...item,
-                  value: {
-                    tag: tagName,
-                    ...(visualType && { visual: visualType }),
-                    content: changedItemContent,
-                  },
-                }
+                ...item,
+                value: {
+                  tag: tagName,
+                  ...(visualType && { visual: visualType }),
+                  content: changedItemContent,
+                },
+              }
               : item
           )
         );
@@ -261,7 +254,7 @@ export const MarketAnalysisReport = memo(
           <BottomPanel
             onChatAssist={onChatAssist}
             onUploadedFile={onUploadedFile}
-            onRerun={() => {}}
+            onRerun={() => { }}
           />
           {exportModal && (
             <ExportModal
@@ -274,13 +267,12 @@ export const MarketAnalysisReport = memo(
             <ChatAssistWindow
               reportType={reportType}
               onClose={() => showChatAssist(false)}
-              onExportChat={() => {}}
+              onExportChat={() => { }}
             />
           )}
         </Box>
       </Box>
     );
-  }
-);
+  };
 
 MarketAnalysisReport.displayName = "MarketAnalysisReport";

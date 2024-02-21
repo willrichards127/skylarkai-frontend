@@ -11,7 +11,7 @@ import { MarketAnalysisReport } from "../templates/MarketAnalysisReport";
 import { REPORTS_DICT, EdgarFilings } from "../../../../shared/models/constants";
 import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
 
-const ReportPanel = memo(({ reportId }: { reportId: string }) => {
+const ReportPanel = ({ reportId }: { reportId: string }) => {
   const isNew = reportId === "new";
   const [searchParams] = useSearchParams();
   const reportType = searchParams.get("reportType"); // report api name
@@ -150,7 +150,7 @@ const ReportPanel = memo(({ reportId }: { reportId: string }) => {
       )}
     </Box>
   );
-});
+};
 
 ReportPanel.displayName = "ReportPanel";
 

@@ -120,6 +120,7 @@ export const SortableItemWrapper = memo(
         {isEdit ? (
           <ItemEditor onClickAway={onClickAway} initialItem={item} />
         ) : (
+          // <div dangerouslySetInnerHTML={{"__html": item.content}} />
           <ReactMarkdown
             rehypePlugins={[rehypeRaw as any]}
             components={{

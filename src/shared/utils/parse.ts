@@ -61,91 +61,97 @@ const getColumnType = (columnLabel: string, rows: Record<string, string>[]) => {
 };
 
 const convertObjTable = (data: any) => {
-  if (!data[0].props.children[0].props.children)
-    return {
-      headers: [],
-      rows: [],
-    };
-  const columns = data[0].props.children[0].props.children.map((column: any) =>
-    column.props.children && column.props.children.length
-      ? column.props.children[0]
-      : ""
-  );
+  try {
+    if (!data[0].props.children.props.children)
+      return {
+        headers: [],
+        rows: [],
+      };
 
-  const rows = (data && data.length >= 1 ? data[1].props.children : []).map(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (row: any) =>
+    const columns = data[0].props.children.props.children.map((column: any) =>
+      column.props.children && column.props.children.length
+        ? column.props.children[0]
+        : ""
+    );
+
+    const rows = (data && data.length >= 1 ? data[1].props.children : []).map(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      row.props.children.map((cell: any) =>
-        cell.props.children && cell.props.children.length
-          ? cell.props.children[0]
-          : ""
-      )
-  );
+      (row: any) =>
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        row.props.children.map((cell: any) =>
+          cell.props.children && cell.props.children.length
+            ? cell.props.children[0]
+            : ""
+        )
+    );
 
-  const objRows: Record<string, any>[] = [];
+    const objRows: Record<string, any>[] = [];
 
-  for (let i = 0; i < rows.length; i++) {
-    const row: Record<string, string> = {};
+    for (let i = 0; i < rows.length; i++) {
+      const row: Record<string, string> = {};
 
-    for (let j = 0; j < columns.length; j++) {
-      row[columns[j]] = rows[i][j];
+      for (let j = 0; j < columns.length; j++) {
+        row[columns[j]] = rows[i][j];
+      }
+      objRows.push(row);
     }
-    objRows.push(row);
-  }
 
-  return {
-    headers: columns,
-    rows: objRows,
-  };
+    return {
+      headers: columns,
+      rows: objRows,
+    };
+  } catch (err) {
+
+  }
 };
 
 export const parseTable = (data: any) => {
   const json = convertObjTable(data);
-
-  const columns = json.headers.map((header: string) => ({
-    label: header,
-    ...getColumnType(header, json.rows),
-  }));
-  return {
-    columns,
-    rows: json.rows.map((row: any) => {
-      const newRow: Record<string, string> = {};
-      for (const key in row) {
-        const column = columns.find((col: any) => col.label === key);
-        if (
-          row[key] &&
-          !["N/A", "NA"].includes(row[key]) &&
-          column!.type === "numeric"
-        ) {
-          newRow[key] = row[key].replace(/\$|%|billion|million/g, "");
-        } else if (
-          column!.type === "numeric" &&
-          ["N/A", "NA"].includes(row[key])
-        ) {
-          newRow[key] = "0";
-        } else {
-          newRow[key] = row[key];
+  if (json) {
+    const columns = json.headers.map((header: string) => ({
+      label: header,
+      ...getColumnType(header, json.rows),
+    }));
+    return {
+      columns,
+      rows: json.rows.map((row: any) => {
+        const newRow: Record<string, string> = {};
+        for (const key in row) {
+          const column = columns.find((col: any) => col.label === key);
+          if (
+            row[key] &&
+            !["N/A", "NA"].includes(row[key]) &&
+            column!.type === "numeric"
+          ) {
+            newRow[key] = row[key].replace(/\$|%|billion|million/g, "");
+          } else if (
+            column!.type === "numeric" &&
+            ["N/A", "NA"].includes(row[key])
+          ) {
+            newRow[key] = "0";
+          } else {
+            newRow[key] = row[key];
+          }
         }
-      }
-      return newRow;
-    }),
-  };
+        return newRow;
+      }),
+    };
+  }
 };
 
 export const parse2Apex = (
   table: {
     columns: (
       | {
-          type: string;
-          unit?: undefined;
-          label: string;
-        }
+        type: string;
+        unit?: undefined;
+        label: string;
+      }
       | {
-          unit: string;
-          type: string;
-          label: string;
-        }
+        unit: string;
+        type: string;
+        label: string;
+      }
     )[];
     rows: Record<string, string>[];
   },

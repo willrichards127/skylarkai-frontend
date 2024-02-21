@@ -225,13 +225,8 @@ export const reportApi: any = createApi({
             };
           } else {
             const jsonResponse: any = await apiBaseQuery({
-              // url: `${queryType}/${setupId}`,
-              url: `${queryType}/${setupId}?llm=${"BOTH"}`,
-              // url: `customquery_ent?graph_id=${setupId}`,
+              url: `${queryType}/${setupId}?llm=${"OpenAI"}`,
               method: "POST",
-              // body: {
-              //   "question": queryType,
-              // }
             });
             console.log(jsonResponse, "jsonresponse for individual report ---");
 
@@ -250,8 +245,7 @@ export const reportApi: any = createApi({
                   ${template}`,
               },
             });
-            console.log(templateResponse, "templateResponse---");
-            let reportFinal: string = templateResponse.data.filled_template.length ? templateResponse.data.filled_template[0] : "";
+            let reportFinal: string = templateResponse.data.filled_template || "";
             for (const removeRegex of removeRegexes) {
               reportFinal = reportFinal.replace(removeRegex, "");
             }
@@ -302,6 +296,7 @@ export const reportApi: any = createApi({
           };
         }
       },
+      keepUnusedDataFor: 0
     }),
     markReport: builder.mutation<any, { reportId: number }>({
       query: ({ reportId }) => ({

@@ -49,7 +49,7 @@ export const XWidget = memo(
   }: any) => {
     const table = useMemo(() => parseTable(rest.children), [rest.children]);
     const hasSameUnit = useMemo(() => {
-      const units = table.columns
+      const units = (table?.columns || [])
         .filter((col: any) => col.type === "numeric")
         .map((col: any) => col.unit)
         .filter((unit: any) => !!unit)
@@ -61,6 +61,9 @@ export const XWidget = memo(
     }, [table]);
 
     const xAxisLabels = useMemo(() => {
+      if (!table) {
+        return []
+      }
       const labels = table.columns
         .filter((col: any) => col.type === "category")
         .map((item: any) => item.label);
@@ -71,9 +74,9 @@ export const XWidget = memo(
     }, [table]);
     const yAxisLabels = useMemo(
       () =>
-        table.columns
+        table ? table.columns
           .filter((col: any) => col.type === "numeric")
-          .map((item: any) => item.label),
+          .map((item: any) => item.label) : [],
       [table]
     );
 
@@ -85,17 +88,20 @@ export const XWidget = memo(
     ]);
 
     const chartConfigs = useMemo(
-      () =>
-        parse2Apex(
-          table,
-          selectedXAxisLabel,
-          hasSameUnit ? selectedYAxisLabels : yAxisLabels,
-          hasSameUnit
-        ),
+      () => {
+        if (table) {
+          return parse2Apex(
+            table,
+            selectedXAxisLabel,
+            hasSameUnit ? selectedYAxisLabels : yAxisLabels,
+            hasSameUnit
+          )
+        }
+      },
       [table, selectedXAxisLabel, selectedYAxisLabels, yAxisLabels, hasSameUnit]
     );
 
-    const disableLineAndArea = useMemo(() => table.rows.length <= 1, [table]);
+    const disableLineAndArea = useMemo(() => table ? table.rows.length <= 1 : true, [table]);
 
     const onChangeXAxisLabel = useCallback((value: string) => {
       setSelectedXAxisLabel(value);
@@ -103,42 +109,46 @@ export const XWidget = memo(
     const onChangeYAxisLabels = useCallback((values: string[]) => {
       setSelectedYAxisLabels(values);
     }, []);
+
     return (
-      <Box sx={{ display: "flex", flexDirection: "column", mt: 4, mb: 8 }}>
-        {visualType === "table" ? (
-          <Box
-            component="table"
-            {...rest}
-            style={{
-              borderCollapse: "collapse",
-            }}
+      table && chartConfigs ?
+        <Box sx={{ display: "flex", flexDirection: "column", mt: 4, mb: 8 }}>
+          {visualType === "table" ? (
+            <Box
+              component="table"
+              {...rest}
+              style={{
+                borderCollapse: "collapse",
+              }}
+            />
+          ) : (
+            <Box>
+              {chartConfigs.map((chartConfig, index) => (
+                <Chart
+                  key={index}
+                  chartType={visualType as TChartType}
+                  chartConfig={chartConfig as any}
+                />
+              ))}
+            </Box>
+          )}
+          <ChartDrawer
+            open={isVisualize}
+            visualType={visualType}
+            xAxisLabels={xAxisLabels}
+            yAxisLabels={yAxisLabels}
+            currentXAxisLabel={selectedXAxisLabel}
+            currentYAxisLabels={selectedYAxisLabels}
+            onClose={onCloseVisualize}
+            onChangeXAxisLabel={onChangeXAxisLabel}
+            onChangeYAxisLabels={onChangeYAxisLabels}
+            onChangeVisualType={onChangeVisualType}
+            isOneLabel={!hasSameUnit || ["pie", "donut"].includes(visualType)}
+            disableLineAndArea={disableLineAndArea}
           />
-        ) : (
-          <Box>
-            {chartConfigs.map((chartConfig, index) => (
-              <Chart
-                key={index}
-                chartType={visualType as TChartType}
-                chartConfig={chartConfig as any}
-              />
-            ))}
-          </Box>
-        )}
-        <ChartDrawer
-          open={isVisualize}
-          visualType={visualType}
-          xAxisLabels={xAxisLabels}
-          yAxisLabels={yAxisLabels}
-          currentXAxisLabel={selectedXAxisLabel}
-          currentYAxisLabels={selectedYAxisLabels}
-          onClose={onCloseVisualize}
-          onChangeXAxisLabel={onChangeXAxisLabel}
-          onChangeYAxisLabels={onChangeYAxisLabels}
-          onChangeVisualType={onChangeVisualType}
-          isOneLabel={!hasSameUnit || ["pie", "donut"].includes(visualType)}
-          disableLineAndArea={disableLineAndArea}
-        />
-      </Box>
+        </Box>
+        :
+        null
     );
   }
 );
