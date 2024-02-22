@@ -171,7 +171,7 @@ export const MainAppBar = memo(() => {
               >
                 <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
                   <WelcomeIcon />
-                  Dashooard
+                  Dashboard
                 </Box>
               </Box>
               <Box

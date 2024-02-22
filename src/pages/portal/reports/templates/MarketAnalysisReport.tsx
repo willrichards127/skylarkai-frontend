@@ -22,6 +22,7 @@ import { UtilPanel } from "../components/UtilPanel";
 import { BottomPanel } from "../components/BottomPanel";
 import { ChatAssistWindow } from "../components/ChatAssistWindow";
 import { useLazyGetFilesDataQuery } from "../../../../redux/services/transcriptAPI";
+import { scrollToAndHighlightText } from "../../../../shared/utils/string";
 
 export const MarketAnalysisReport = ({
   reportId,
@@ -216,6 +217,15 @@ export const MarketAnalysisReport = ({
     [getFileData]
   );
 
+  const onSearchText = useCallback((searchText: string) => {
+    setTimeout(() => {
+      scrollToAndHighlightText(
+        printRef.current!,
+        searchText
+      );
+    }, 100);
+  }, []);
+
   useEffect(() => {
     if (isSuccess) {
       toast.success("The report is updated successfully.");
@@ -227,7 +237,9 @@ export const MarketAnalysisReport = ({
       <UtilPanel
         onRemoveFiles={onRemoveFiles}
         onChatAssist={onChatAssist}
+        onUploadedFile={onUploadedFile}
         uploadedFiles={uploadedFiles}
+        onSearchText={onSearchText}
       />
       <Box sx={{ position: "relative", flex: 1 }}>
         <HeaderPanel
@@ -237,7 +249,7 @@ export const MarketAnalysisReport = ({
           onSave={onSave}
           onDelete={onDelete}
         />
-        <Box sx={{ px: 4, py: 2, height: "calc(100% - 270px)" }}>
+        <Box sx={{ px: 4, py: 2, height: "calc(100% - 200px)" }}>
           <Box
             ref={printRef}
             sx={{

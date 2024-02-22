@@ -1,8 +1,15 @@
-import { memo, useCallback } from "react";
+import { memo, useCallback, useState } from "react";
 import { Badge, Box, MenuItem } from "@mui/material";
 import { XSidebar } from "../../../../components/XSidebar";
 import { IMenuItem } from "../../../../shared/models/interfaces";
-import { SearchIcon, NewFileIcon, CloneIcon, BotWhiteIcon } from "../../../../components/Svgs";
+import {
+  SearchIcon,
+  NewFileIcon,
+  CloneIcon,
+  BotWhiteIcon,
+} from "../../../../components/Svgs";
+import { FileUploadModal } from "./FileUploadModal";
+import { SearchTextModal } from "./SearchTextModal";
 import DescriptionIcon from "@mui/icons-material/Description";
 import CancelIcon from "@mui/icons-material/Cancel";
 
@@ -13,7 +20,7 @@ const utilItems: IMenuItem[] = [
     clickable: true,
   },
   {
-    id: "new-report",
+    id: "upload-file",
     content: <NewFileIcon />,
     clickable: true,
   },
@@ -34,15 +41,25 @@ export const UtilPanel = memo(
     uploadedFiles,
     onChatAssist,
     onRemoveFiles,
+    onUploadedFile,
+    onSearchText
   }: {
     onRemoveFiles: (type: string, filename: string) => void;
     uploadedFiles?: Record<string, File>;
     onChatAssist: () => void;
+    onUploadedFile: (type: string, file: File) => void;
+    onSearchText: (search: string) => void;
   }) => {
+    const [fileUploadModal, showFileUploadModal] = useState<boolean>(false);
+    const [searchTextModal, showSearchTextModal] = useState<boolean>(false);
     const onMeunItem = useCallback(
       (menuItemId: string) => {
         if (menuItemId === "chatbot") {
           onChatAssist();
+        } else if (menuItemId === "upload-file") {
+          showFileUploadModal(true);
+        } else if(menuItemId === 'search') {
+          showSearchTextModal(true);
         }
       },
       [onChatAssist]
@@ -73,7 +90,7 @@ export const UtilPanel = memo(
           </Box>
           {!!uploadedFiles && !!Object.keys(uploadedFiles).length && (
             <>
-              <Box textAlign="center" my={1}>
+              <Box textAlign="center" mt={1} fontSize={12}>
                 Files
               </Box>
               <Box
@@ -114,6 +131,20 @@ export const UtilPanel = memo(
             </>
           )}
         </Box>
+        {fileUploadModal && (
+          <FileUploadModal
+            open={fileUploadModal}
+            onClose={() => showFileUploadModal(false)}
+            onUpladedFile={(file) => onUploadedFile("file", file)}
+          />
+        )}
+        {searchTextModal && (
+          <SearchTextModal
+            open={searchTextModal}
+            onClose={() => showSearchTextModal(false)}
+            onSearch={onSearchText}
+          />
+        )}
       </XSidebar>
     );
   }
