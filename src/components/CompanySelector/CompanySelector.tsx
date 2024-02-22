@@ -130,14 +130,16 @@ export const CompanySelector = ({
               </ToggleButton>
             ))}
           </ToggleButtonGroup>
-          <Button
-            variant="outlined"
-            size="small"
-            disabled={!value?.ticker}
-            onClick={onShowFetchModal}
-          >
-            Download files
-          </Button>
+          {analysisType === "transcript" && (
+            <Button
+              variant="outlined"
+              size="small"
+              disabled={!value?.ticker}
+              onClick={onShowFetchModal}
+            >
+              Download files
+            </Button>
+          )}
         </Box>
       )}
       {fetchModal && (

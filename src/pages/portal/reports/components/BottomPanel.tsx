@@ -2,10 +2,10 @@ import { memo, useState } from "react";
 import { Box, Button } from "@mui/material";
 import {
   BotDarkIcon,
-  LikeIcon,
-  DislikeIcon,
-  RefreshIcon,
-  ExportIcon,
+  // LikeIcon,
+  // DislikeIcon,
+  // RefreshIcon,
+  // ExportIcon,
   CropIcon,
 } from "../../../../components/Svgs";
 
@@ -27,13 +27,12 @@ export const BottomPanel = memo(
     return (
       <Box
         sx={{
-          pb: 1,
           px: 4,
-          height: 140,
+          height: 60,
           zIndex: 1,
         }}
       >
-        <Box
+        {/* <Box
           sx={{
             bgcolor: "black",
             height: 60,
@@ -76,8 +75,8 @@ export const BottomPanel = memo(
               Export
             </Button>
           </Box>
-        </Box>
-        <Box sx={{ display: "flex", gap: 2, pt: 2 }}>
+        </Box> */}
+        <Box sx={{ display: "flex", gap: 2, }}>
           <Button
             variant="contained"
             startIcon={<BotDarkIcon />}

@@ -13,6 +13,7 @@ import BarChartIcon from "@mui/icons-material/BarChart";
 import CancelIcon from "@mui/icons-material/Cancel";
 import AddIcon from "@mui/icons-material/Add";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
+import { parseCitationInReport2 } from "../../../../shared/utils/string";
 
 const styles = {
   csvReader: {
@@ -29,6 +30,7 @@ export const SortableItemWrapper = memo(
     onRemove,
     onItemChanged,
     onAddUploadedFile,
+    onJumpTo,
   }: {
     itemId: string;
     item: {
@@ -44,6 +46,13 @@ export const SortableItemWrapper = memo(
       tagName: string,
       visualType?: string
     ) => void;
+    onJumpTo: ({
+      filename,
+      quote,
+    }: {
+      filename: string;
+      quote: string;
+    }) => void;
   }) => {
     const { CSVReader } = useCSVReader();
     const { attributes, listeners, setNodeRef, transform, transition } =
@@ -97,11 +106,14 @@ export const SortableItemWrapper = memo(
       [onItemChanged, item]
     );
 
-    const onUploadAccepted = useCallback((results: any) => {
-      if (results.data?.length > 0) {
-        onAddUploadedFile(results.data);
-      }
-    }, [onAddUploadedFile]);
+    const onUploadAccepted = useCallback(
+      (results: any) => {
+        if (results.data?.length > 0) {
+          onAddUploadedFile(results.data);
+        }
+      },
+      [onAddUploadedFile]
+    );
 
     return (
       <div
@@ -117,15 +129,92 @@ export const SortableItemWrapper = memo(
         onMouseOut={onMouseOut}
         onDoubleClick={onEdit}
       >
+        {!isEdit && hover && (
+          <Box>
+            <Box
+              sx={{
+                pointerEvents: 'none',
+                position: "absolute",
+                top: -8,
+                left: -8,
+                right: -8,
+                bottom: -8,
+                boxSizing: "content-box",
+                MozBoxSizing: "content-box",
+                WebkitBoxSizing: "content-box",
+                border: `1px solid ${colors.grey[800]}`,
+              }}
+            />
+            <DragIndicatorIcon
+              {...listeners}
+              sx={{ position: "absolute", right: -32, top: 0, cursor: "grab" }}
+            />
+            <Box
+              sx={{
+                position: "absolute",
+                display: "flex",
+                gap: 0.5,
+                right: 0,
+                top: -36,
+              }}
+            >
+              <IconButton size="small" onClick={onAddNew}>
+                <AddIcon sx={{ fontSize: 16 }} />
+              </IconButton>
+              <CSVReader onUploadAccepted={onUploadAccepted}>
+                {({ getRootProps }: any) => (
+                  <div style={styles.csvReader}>
+                    <IconButton size="small" {...getRootProps()}>
+                      <UploadFileIcon sx={{ fontSize: 16 }} />
+                    </IconButton>
+                  </div>
+                )}
+              </CSVReader>
+              {item.tag === "table" && (
+                <IconButton size="small" onClick={onShowVisualization}>
+                  <BarChartIcon sx={{ fontSize: 16 }} />
+                </IconButton>
+              )}
+              <IconButton size="small" onClick={onRemove}>
+                <CancelIcon sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Box>
+          </Box>
+        )}
         {isEdit ? (
           <ItemEditor onClickAway={onClickAway} initialItem={item} />
         ) : (
-          // <div dangerouslySetInnerHTML={{"__html": item.content}} />
           <ReactMarkdown
             rehypePlugins={[rehypeRaw as any]}
             components={{
-              code: (props) => <p {...props as any} />,
+              code: (props) => <p {...(props as any)} />,
               pre: (props) => <div {...(props as any)} />,
+              li: (props) => {
+                if (
+                  props.children &&
+                  typeof props.children === "string" &&
+                  props.children.includes("Document Title")
+                ) {
+                  const citations = parseCitationInReport2(props.children);
+                  if (citations.sections?.length) {
+                    return (
+                      <li
+                        {...props}
+                        style={{
+                          color: "#2196F3",
+                          textDecoration: "underline",
+                          cursor: "pointer",
+                          zIndex: 99999,
+                        }}
+                        onClick={() => onJumpTo(citations.sections[0])}
+                      >
+                        [{citations.sections[0].filename}]
+                      </li>
+                    );
+                  } else return <li {...props}>{citations.content}</li>;
+                }
+                return <li {...props} />;
+              },
               table: (props) => (
                 <XWidget
                   {...props}
@@ -162,68 +251,7 @@ export const SortableItemWrapper = memo(
             {item.content}
           </ReactMarkdown>
         )}
-        {!isEdit && (
-          <Box
-            sx={{
-              position: "absolute",
-              top: -28,
-              left: -8,
-              right: -48,
-              bottom: -8,
-            }}
-          />
-        )}
-        {!isEdit && hover && (
-          <Box>
-            <Box
-              sx={{
-                position: "absolute",
-                top: -8,
-                left: -8,
-                right: -8,
-                bottom: -8,
-                boxSizing: "content-box",
-                MozBoxSizing: "content-box",
-                WebkitBoxSizing: "content-box",
-                border: `1px solid ${colors.grey[800]}`,
-              }}
-            />
-            <DragIndicatorIcon
-              {...listeners}
-              sx={{ position: "absolute", right: -32, top: 0, cursor: "grab" }}
-            />
-            <Box
-              sx={{
-                position: "absolute",
-                display: "flex",
-                gap: 0.5,
-                right: 0,
-                top: -36,
-              }}
-            >
-              <IconButton size="small" onClick={onAddNew}>
-                <AddIcon sx={{ fontSize: 16 }} />
-              </IconButton>
-              <CSVReader onUploadAccepted={onUploadAccepted}>
-                {({ getRootProps }: any) => (
-                  <div style={styles.csvReader}>
-                    <IconButton size="small" {...getRootProps()}>
-                      <UploadFileIcon sx={{ fontSize: 16 }} />
-                    </IconButton>
-                  </div>
-                )}
-              </CSVReader>              
-              {item.tag === "table" && (
-                <IconButton size="small" onClick={onShowVisualization}>
-                  <BarChartIcon sx={{ fontSize: 16 }} />
-                </IconButton>
-              )}
-              <IconButton size="small" onClick={onRemove}>
-                <CancelIcon sx={{ fontSize: 16 }} />
-              </IconButton>
-            </Box>
-          </Box>
-        )}
+        
       </div>
     );
   }
