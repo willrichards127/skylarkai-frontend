@@ -33,7 +33,7 @@ export const ItemEditor = memo(
       <ClickAwayListener onClickAway={onClickAwayAction}>
         <div>
           <Editor
-            apiKey={process.env.tinymceAPIKey}
+            apiKey={import.meta.env.VITE_TINYMCE_API_KEY}
             onInit={(_, editor) => (editorRef.current = editor)}
             inline
             initialValue={initialItem.content}

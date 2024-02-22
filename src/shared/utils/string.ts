@@ -143,6 +143,38 @@ const cleanUp2 = (inputString: string, limitWordCount = 5) => {
   }
 };
 
+const cleanUp3 = (inputString: string, limitWordCount = 5) => {
+  // replace all `("` and `")` with `"`
+  let result = inputString.replace(/\("\s?/g, '"');
+  result = result.replace(/"\)/g, '"');
+  // replace all `(` and `)` with `"`;
+  result = result.replace(/[()]/g, '"');
+  let filename: string = "",
+    quote: string = "";
+  try {
+    const parsed = JSON.parse(result);
+    if (parsed.citation) {
+      filename = parsed.citation["Document Title"];
+      quote = parsed.citation["Direct Quote"];
+    } else if (parsed["Document Title"]) {
+      filename = parsed["Document Title"];
+      quote = parsed["Direct Quote"];
+    } else {
+      filename = Object.keys(parsed)[0];
+      quote = Object.values<string>(parsed)[0];
+    }
+    // reduce the count of words of quote
+    const splited = quote.split(" ");
+    quote =
+      splited.length > limitWordCount
+        ? splited.slice(0, limitWordCount).join(" ")
+        : quote;
+    return { filename, quote };
+  } catch (e) {
+    return undefined;
+  }
+};
+
 export const parseCitationInReport = (
   documentContent: string,
   limitWordCount = 5
@@ -176,26 +208,79 @@ export const parseCitationInReport = (
   return content;
 };
 
+export const parseCitationInReport2 = (
+  documentContent: string,
+  limitWordCount = 5
+) => {
+  // step 1. remove all ```
+  let content: string = documentContent.replace(/```/g, "");
+
+  let startIndex = -1;
+  let braceCount = 0;
+  const sections = [];
+
+  for (let i = 0; i < content.length; i++) {
+    if (content[i] === "{") {
+      if (braceCount === 0) {
+        startIndex = i;
+      }
+      braceCount++;
+    } else if (content[i] === "}") {
+      braceCount--;
+      if (braceCount === 0 && startIndex !== -1) {
+        const section = cleanUp3(
+          content.substring(startIndex, i + 1),
+          limitWordCount
+        );
+        if (!section) {
+          content =
+            content.slice(0, startIndex) +
+            content.substring(startIndex, i + 1) +
+            content.slice(i + 1);
+        } else {
+          content = content.slice(0, startIndex) + content.slice(i + 1);
+          sections.push(section);
+        }
+        i = startIndex; // Reset index to re-scan the string
+        startIndex = -1;
+      }
+    }
+  }
+  if (sections.length > 0) {
+    return { content, sections };
+  }
+
+  return { content };
+};
+
 export const scrollToAndHighlightText = (
   container: HTMLDivElement,
   searchText: string
 ) => {
+  let reducedSearchText = searchText;
   const text = container.textContent || container.innerText;
-  const index = text.indexOf(searchText);
-  if (index !== -1) {
+  const timesLimit = 7;
+  const reduceStep = 2;
+  let index = -1,
+    times = 0;
+  while (index === -1) {
+    index = text.indexOf(reducedSearchText);
+    console.log(index, "pending index===");
+    if (index !== -1) {
+      const range = document.createRange();
+      range.setStart(container.firstChild!, index);
+      range.setEnd(container.firstChild!, index + searchText.length);
 
-    const range = document.createRange();
-    range.setStart(container.firstChild!, index);
-    range.setEnd(container.firstChild!, index + searchText.length);
-
-    const rect = range.getBoundingClientRect();
-
-    container.scrollTop =
-      rect.top + container.scrollTop - container.clientHeight / 2;
-
-    const span = document.createElement("span");
-    span.style.backgroundColor = "yellow"; // You can customize the highlight color
-    range.surroundContents(span);
+      const span = document.createElement("span");
+      span.style.backgroundColor = "yellow"; // You can customize the highlight color
+      range.surroundContents(span);
+      span.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    if (times === timesLimit) return;
+    reducedSearchText = reducedSearchText.slice(0, -reduceStep);
+    console.log(reducedSearchText, "reducedSearchText");
+    times++;
   }
 };
 
