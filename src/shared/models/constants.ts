@@ -53734,9 +53734,14 @@ export const REPORTS_DICT: Record<string, any> = {
   marketanalysis: {
     label: "Market Analysis",
     question:
-      "Provide me market analysis of this company with measurable values.",
+      "Provide me market analysis of this company with measurable values.This report will include the following categories: Market Overview, Market Opportunities, Market Size, Trends and Growth, and Conclusions and Recommendations and other metrics.",
     template: `
-		  Market Analysis
+    ### Market Size and Growth				
+    Include a table showing Year, Quarter, Total Market Size (millions), Market Growth Rate.
+    ### Competitive Landscape				
+    Include a table showing Year, Quarter, Competitor, Market Share, Key Strengths.
+    ### Market Segmentation				
+    Include a table showing Year, Quarter, Market Segment, Segment Size (millions), Growth Rate, Key Trends.    
     `,
   },
   competitoranalysis: {
@@ -53744,7 +53749,10 @@ export const REPORTS_DICT: Record<string, any> = {
     question:
       "Provide me competitor analysis for this company with measurable metrics values.",
     template: `
-      Competitor Analysis
+    ### Competitor Overview			
+    ### Product/Service Comparison		
+    Include a table showing Year, Quarter, Competitor, Product/Service, Key Features, Pricing Strategy, Market Share.
+    ### Market Share Trend    
 		`,
   },
   customeranalysis: {
@@ -53752,15 +53760,21 @@ export const REPORTS_DICT: Record<string, any> = {
     question:
       "Provide me customer analysis for this company with measurable metrics values.",
     template: `
-      Customer Analysis
-			`,
+    ### Customer Demographics
+    Include a table showing Age Group, Number of Customers, Percentage of Total.
+    ### Customer Behavior
+    Include a table showing Customer Segment, Average Purchase Frequency (times/year), Average Basket Size, Customer Lifetime Value.   
+		`,
   },
   productserviceanalysis: {
     label: "Product/Service Assessment",
     question:
       "Provide me product/service assessment analysis for this company with measurable metrics values.",
     template: `
-      Product/Service Assessment Analysis
+    ### Product/Service Features and Ratings 
+    Include a table showing Product/Service, Key Features, Quality Rating (1-5), User Satisfaction Rate.
+    ### Performance Metrics
+    Include a table showing Product/Service, Sales (Units/Revenue), Market Share Rate, Customer Retention Rate.    
 		`,
   },
   regulatoryfinancialduediligence: {

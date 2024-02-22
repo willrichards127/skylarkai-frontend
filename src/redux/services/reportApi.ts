@@ -133,127 +133,119 @@ export const reportApi: any = createApi({
           ],
         };
         try {
-          if (DDDict[queryType]) {
-            const reportsReponse: any = await apiBaseQuery({
-              url: "reports",
-            });
-            console.log(reportsReponse, "reportsReponse---");
-            const reportsForSetupId = reportsReponse.data.filter(
-              (report: any) =>
-                report.graph_id === setupId &&
-                DDDict[queryType].includes(report.report_name)
-            );
+          /*
+                    if (DDDict[queryType]) {
+                      const reportsReponse: any = await apiBaseQuery({
+                        url: "reports",
+                      });
+                      
+                      const reportsForSetupId = reportsReponse.data.filter(
+                        (report: any) =>
+                          report.graph_id === setupId &&
+                          DDDict[queryType].includes(report.report_name)
+                      );
+          
+                      const promises: Promise<unknown>[] = [];
+                      for (const { id } of reportsForSetupId) {
+                        const promise = new Promise((resolve) =>
+                          resolve(
+                            apiBaseQuery({
+                              url: `reports/${id}`,
+                            })
+                          )
+                        );
+                        promises.push(promise);
+                      }
+          
+                      const responses = await Promise.all(promises);
+                      const pairs: Record<string, any> = {};
+                      for (const query of DDDict[queryType]) {
+                        const matched: any = responses.find(
+                          (response: any) => response.data.report_name === query
+                        );
+                        if (matched) {
+                          pairs[query] = matched.data.report_data;
+                        }
+                      }
+          
+                      const finalPromises: Promise<unknown>[] = [];
+                      for (const [query, { data, answer }] of Object.entries(pairs)) {
+                        const promise = new Promise((resolve) =>
+                          resolve(
+                            apiBaseQuery({
+                              url: `generate_report/${setupId}`,
+                              method: "POST",
+                              body: {
+                                data: JSON.stringify({
+                                  answer,
+                                  data,
+                                }),
+                                report_name: query,
+                                template: template,
+                              },
+                            })
+                          )
+                        );
+                        finalPromises.push(promise);
+                      }
+                      const finalResponses = await Promise.all(finalPromises);
+                      
+                      // const summaryReponse: any = await apiBaseQuery({
+                      //   url: `chatwithdata/${setupId}`,
+                      //   method: "POST",
+                      //   body: {
+                      //     data: finalResult,
+                      //     question: `Executive summary for ${REPORTS_DICT[queryType].label}.`,
+                      //   },
+                      // });
+          
+                      // console.log("summaryReponse: ", summaryReponse);
+                      let reportFinal: string = "";
+                      reportFinal += `
+                        <h1>${REPORTS_DICT[queryType].label}</h1>
+                        <p>Created: ${new Date().toDateString()}</p>
+          
+                        <h2>Company Overview</h2>
+                        <p>STAF 7 is a technology company headquartered in San Francisco. It was founded in 2010 and currently employs around 5000 people.
+                        The company generated $2.5 billion in revenue in 2020. In 2021, STAF 7's revenue grew to $3 billion.</p>
+                        <h2>Executive Summary</h2>
+                        ${finalResult}
+                      `;
+                      for (const removeRegex of removeRegexes) {
+                        reportFinal = reportFinal.replace(removeRegex, "");
+                      }
+                      return {
+                        data: reportFinal,
+                      };
+                    } else {
+          */
+          const jsonResponse: any = await apiBaseQuery({
+            url: `${queryType}/${setupId}?llm=${"OpenAI"}`,
+            method: "POST",
+          });
 
-            const promises: Promise<unknown>[] = [];
-            for (const { id } of reportsForSetupId) {
-              const promise = new Promise((resolve) =>
-                resolve(
-                  apiBaseQuery({
-                    url: `reports/${id}`,
-                  })
-                )
-              );
-              promises.push(promise);
-            }
-
-            const responses = await Promise.all(promises);
-            const pairs: Record<string, any> = {};
-            for (const query of DDDict[queryType]) {
-              const matched: any = responses.find(
-                (response: any) => response.data.report_name === query
-              );
-              if (matched) {
-                pairs[query] = matched.data.report_data;
-              }
-            }
-
-            const finalPromises: Promise<unknown>[] = [];
-            for (const [query, { data, answer }] of Object.entries(pairs)) {
-              const promise = new Promise((resolve) =>
-                resolve(
-                  apiBaseQuery({
-                    url: `generate_report/${setupId}`,
-                    method: "POST",
-                    body: {
-                      data: JSON.stringify({
-                        answer,
-                        data,
-                      }),
-                      report_name: query,
-                      template: "",
-                    },
-                  })
-                )
-              );
-              finalPromises.push(promise);
-            }
-            const finalResponses = await Promise.all(finalPromises);
-            console.log(finalResponses, "finalResponses---");
-
-            const finalResult = finalResponses.reduce((cv, pv: any) => {
-              cv += pv.data.filled_template;
-              return cv;
-            }, "");
-
-            console.log("finalResult: ", finalResult);
-            // const summaryReponse: any = await apiBaseQuery({
-            //   url: `chatwithdata/${setupId}`,
-            //   method: "POST",
-            //   body: {
-            //     data: finalResult,
-            //     question: `Executive summary for ${REPORTS_DICT[queryType].label}.`,
-            //   },
-            // });
-
-            // console.log("summaryReponse: ", summaryReponse);
-            let reportFinal: string = "";
-            reportFinal += `
-              <h1>${REPORTS_DICT[queryType].label}</h1>
-              <p>Created: ${new Date().toDateString()}</p>
-
-              <h2>Company Overview</h2>
-              <p>STAF 7 is a technology company headquartered in San Francisco. It was founded in 2010 and currently employs around 5000 people.
-              The company generated $2.5 billion in revenue in 2020. In 2021, STAF 7's revenue grew to $3 billion.</p>
-              <h2>Executive Summary</h2>
-              ${finalResult}
-            `;
-            for (const removeRegex of removeRegexes) {
-              reportFinal = reportFinal.replace(removeRegex, "");
-            }
-            return {
-              data: reportFinal,
-            };
-          } else {
-            const jsonResponse: any = await apiBaseQuery({
-              url: `${queryType}/${setupId}?llm=${"OpenAI"}`,
-              method: "POST",
-            });
-            console.log(jsonResponse, "jsonresponse for individual report ---");
-
-            const templateResponse: any = await apiBaseQuery({
-              url: `generate_report/${setupId}`,
-              method: "POST",
-              body: {
-                data: JSON.stringify({
-                  answer: jsonResponse.data.answer,
-                  data: jsonResponse.data.data,
-                }),
-                report_name: queryType,
-                execute_query: true,
-                template: `
+          const templateResponse: any = await apiBaseQuery({
+            url: `reports`,
+            method: "POST",
+            body: {
+              data: JSON.stringify({
+                answer: jsonResponse.data.answer,
+                data: jsonResponse.data.data,
+              }),
+              graph_id: setupId,
+              report_name: queryType,
+              execute_query: true,
+              template: `
                   <h1>${REPORTS_DICT[queryType].label} Report</h1>
                   ${template}`,
-              },
-            });
-            let reportFinal: string = templateResponse.data.filled_template || "";
-            for (const removeRegex of removeRegexes) {
-              reportFinal = reportFinal.replace(removeRegex, "");
-            }
-            console.log(reportFinal, "reportFinal---");
-            return {
-              data: reportFinal,
-            };
-          }
+            },
+          });
+          let generatedId: number = templateResponse.data.new_id;
+
+          return {
+            data: generatedId,
+          };
+          // }
         } catch (e) {
           return {
             error: {
@@ -269,21 +261,18 @@ export const reportApi: any = createApi({
       any,
       {
         reportId: number;
-        queryType: string;
-        template: string;
-        viewMode: string;
       }
     >({
       async queryFn(args, __, ___, apiBaseQuery) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { reportId, viewMode = "active", queryType, template } = args;
+        const { reportId } = args;
 
         try {
           const reportResponse: any = await apiBaseQuery({
-            url: `reports/${reportId}?view_mode=${viewMode}`,
+            url: `reports/${reportId}`,
           });
 
-                    return {
+          return {
             data: reportResponse.data,
           };
         } catch (e) {
@@ -300,14 +289,14 @@ export const reportApi: any = createApi({
     }),
     markReport: builder.mutation<any, { reportId: number }>({
       query: ({ reportId }) => ({
-        url: `mark_as_active/${reportId}`,
-        method: "POST",
+        url: `reports/${reportId}/marked`,
+        method: "PUT",
       }),
       invalidatesTags: ["Report"],
     }),
     deleteReport: builder.mutation<any, { reportId: number; viewMode: string }>({
-      query: ({ reportId, viewMode = 'active' }) => ({
-        url: `reports/${reportId}?view_mode=${viewMode}`,
+      query: ({ reportId }) => ({
+        url: `reports/${reportId}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Report"],
@@ -316,18 +305,14 @@ export const reportApi: any = createApi({
       any,
       {
         reportId?: number;
-        setupId: number;
-        reportName: string;
         content: string;
         custom: Record<string, any>;
       }
     >({
-      query: ({ reportId, setupId, reportName, content, custom }) => ({
-        url: `save_report/${setupId}`,
-        method: "POST",
+      query: ({ reportId, content, custom }) => ({
+        url: `reports/${reportId}`,
+        method: "PUT",
         body: {
-          ...(reportId && { report_id: reportId }),
-          report_name: reportName,
           data: content,
           custom,
         },

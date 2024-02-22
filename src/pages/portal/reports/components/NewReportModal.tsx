@@ -15,6 +15,7 @@ import {
 import { XModal } from "../../../../components/XModal";
 import { NeutralLoadingButton } from "../../../../components/buttons/NeutralLoadingButton";
 import { useGetSetupsQuery } from "../../../../redux/services/setupApi";
+import { useGenerateReportMutation, useGenerateWarrantReportMutation } from "../../../../redux/services/reportApi";
 import {
   REPORTS_DICT,
   EdgarFilings,
@@ -24,6 +25,16 @@ export const NewReportModal = memo(
   ({ open, onClose }: { open: boolean; onClose: () => void }) => {
     const navigate = useNavigate();
     const { isLoading, data } = useGetSetupsQuery();
+    const [
+      generateReport,
+      { isLoading: isGeneratingReport, isSuccess: isGeneratedReport, data: generatedReportId },
+    ] = useGenerateReportMutation();
+
+    const [
+      generateWarrantReport,
+      { isLoading: isGeneratingWarrantReport, isSuccess: isGeneratedWarrantReport, data: generatedWarrantReportId },
+    ] = useGenerateWarrantReportMutation();
+
     const [documentType, setDocumentType] = useState<string>("report");
     const [form, setForm] = useState<{
       company?: number;
@@ -51,15 +62,20 @@ export const NewReportModal = memo(
     /** FIXME: React Navigate */
     const onSubmit = useCallback(() => {
       if (documentType === "report") {
-        navigate(
-          `/portal/reports/new?setupId=${form.company}&reportType=${form.report}&documentType=${documentType}`
-        );
+        generateReport({
+          setupId: form.company!,
+          queryType: form.report!,
+          template: REPORTS_DICT[form.report!].template,
+        });
       } else {
-        navigate(
-          `/portal/reports/new?setupId=${form.company}&documentType=${documentType}&filingType=${filing}`
-        );
+        const matched = EdgarFilings.find((item) => item.value === filing);
+        generateWarrantReport({
+          setupId: form.company,
+          question: matched!.question,
+          reportName: matched!.value,
+        });
       }
-    }, [navigate, form, documentType, filing]);
+    }, [navigate, form, documentType, filing, generateReport, generateWarrantReport]);
 
     const onCreateNew = useCallback(() => {
       navigate("/portal/setups/");
@@ -75,6 +91,22 @@ export const NewReportModal = memo(
       if (isLoading || !data || !data.length) return;
       setForm((prev) => ({ ...prev, company: +data[0].id! }));
     }, [isLoading, data]);
+
+    useEffect(() => {
+      if (isGeneratedReport && generatedReportId) {
+        navigate(
+          `/portal/reports/${generatedReportId}?reportType=${form.report}&setupId=${form.company}`
+        );
+      }
+    }, [navigate, isGeneratedReport, generatedReportId]);
+
+    useEffect(() => {
+      if (isGeneratedWarrantReport && generatedWarrantReportId) {
+        navigate(
+          `/portal/reports/${generatedWarrantReportId}?reportType=${form.report}&setupId=${form.company}`
+        );
+      }
+    }, [navigate, isGeneratedWarrantReport, generatedWarrantReportId]);
 
     return (
       <XModal
@@ -106,7 +138,7 @@ export const NewReportModal = memo(
           </Box>
         }
       >
-        {isLoading ? (
+        {isLoading || isGeneratingReport || isGeneratingWarrantReport ? (
           <Box textAlign="center" p={4}>
             <CircularProgress />
           </Box>

@@ -1,74 +1,34 @@
-import { memo, useEffect, useRef, useCallback, useState } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Box, IconButton } from "@mui/material";
 import { CircleSpinner } from "../../../../components/loading-spinners/CircleSpinner";
-import {
-  useGenerateReportMutation,
-  useLazyGetReportQuery,
-  useGenerateWarrantReportMutation,
-} from "../../../../redux/services/reportApi";
+import { useLazyGetReportQuery } from "../../../../redux/services/reportApi";
 import { MarketAnalysisReport } from "../templates/MarketAnalysisReport";
-import { REPORTS_DICT, EdgarFilings } from "../../../../shared/models/constants";
+import { REPORTS_DICT } from "../../../../shared/models/constants";
 import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
 
 const ReportPanel = ({ reportId }: { reportId: string }) => {
-  const isNew = reportId === "new";
   const [searchParams] = useSearchParams();
   const reportType = searchParams.get("reportType"); // report api name
-  const documentType = searchParams.get("documentType");
-  const filingType = searchParams.get("filingType");
   const setupId = searchParams.get("setupId");
-  const viewMode = searchParams.get("viewMode");
 
   const parentRef = useRef<any>();
 
   const [upward, setUpward] = useState<boolean>(false);
 
-  const [
-    generateReport,
-    { isLoading: loadingGenerateReport, data: generatedData },
-  ] = useGenerateReportMutation();
   const [getReport, { isLoading: loadingReport, data: reportData }] =
     useLazyGetReportQuery();
 
-  const [
-    generateWarrantReport,
-    { isLoading: loadingWarrant, data: warrantData },
-  ] = useGenerateWarrantReportMutation();
-
   useEffect(() => {
-    if (isNew && documentType === "report") {
-      generateReport({
-        setupId: +setupId!,
-        queryType: reportType!,
-        template: REPORTS_DICT[reportType!].template,
-      });
-    } else if (isNew && documentType === "filing") {
-      const matched = EdgarFilings.find((item) => item.value === filingType);
-      generateWarrantReport({
-        setupId: +setupId!,
-        question: matched!.question,
-        reportName: matched!.value,
-      });
-    } else {
-      getReport({
-        reportId: +reportId,
-        queryType: reportType!,
-        template: REPORTS_DICT[reportType!].template,
-        viewMode: viewMode!,
-      });
-    }
+    getReport({
+      reportId: +reportId,
+      queryType: reportType!,
+      template: REPORTS_DICT[reportType!].template,
+    });
   }, [
-    documentType,
     getReport,
-    generateWarrantReport,
-    generateReport,
-    setupId,
-    isNew,
     reportType,
     reportId,
-    filingType,
-    viewMode,
   ]);
 
   const onScroll = useCallback(() => {
@@ -85,11 +45,11 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
 
   return (
     <Box sx={{ width: "100%", height: "100%" }}>
-      {loadingGenerateReport || loadingReport || loadingWarrant ? (
+      {loadingReport ? (
         <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
           <CircleSpinner
             size={120}
-            description={isNew ? "Generating report..." : "Reading report..."}
+            description={"Reading report..."}
           />
         </Box>
       ) : (
@@ -109,31 +69,11 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
           onScroll={onScroll}
         >
           <Box width="100%" height="100%">
-            {!!generatedData && (
-              <MarketAnalysisReport
-                reportContent={generatedData}
-                setupId={setupId!}
-                reportType={reportType!}
-              />
-            )}
             {!!reportData && (
               <MarketAnalysisReport
                 reportId={+reportId}
-                reportContent={
-                  viewMode === "active" ? reportData.content : null
-                }
-                customizedContent={
-                  viewMode === "active"
-                    ? reportData.custom_metadata
-                    : reportData.result
-                }
-                setupId={setupId!}
-                reportType={reportType!}
-              />
-            )}
-            {!!warrantData && (
-              <MarketAnalysisReport
-                reportContent={warrantData}
+                reportContent={reportData.content}
+                customizedContent={reportData.custom_metadata}
                 setupId={setupId!}
                 reportType={reportType!}
               />
