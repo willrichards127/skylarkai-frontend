@@ -25,6 +25,7 @@ import {
   useLazyGetFilesDataQuery,
 } from "../../../../redux/services/transcriptAPI";
 import { investmentTemplateDict } from "../../../../shared/models/constants";
+import { useLazyGetReportQuery } from "../../../../redux/services/reportApi";
 
 const generateMD = (
   categories: { category: string; questions: string[] }[]
@@ -60,9 +61,10 @@ export const ReviewFiles = ({
   const [getFilesData, { isLoading: loadingFilesdata }] =
     useLazyGetFilesDataQuery();
 
-  const [generateReport, { isLoading: loadingReport }] =
+  const [generateReport, { isLoading: generatingReport }] =
     useGenerateInvestmentReportMutation();
 
+  const [getReport, { isLoading: loadingReport }] = useLazyGetReportQuery();
   const [selectedTab, setSelectedTab] = useState<string>("All");
 
   const onNextStep = useCallback(async () => {
@@ -77,8 +79,7 @@ export const ReviewFiles = ({
           analysis_type: "transcript",
         })),
       }).unwrap();
-      console.log(responseFileData, "###responseFileData");
-      const responseReport = await generateReport({
+      const responseReportId = await generateReport({
         template: generateMD(
           investmentTemplateDict[instance.instance_metadata!.template_name!]
         ),
@@ -89,26 +90,22 @@ export const ReviewFiles = ({
           }, {}),
         }),
       }).unwrap();
-      console.log(responseReport, "Generated report");
+      const content = await getReport({
+        reportId: responseReportId,
+      }).unwrap();
+      console.log(content, "###responseFileData");
       const responseInstance = await createInstance({
         ...instance,
         instance_metadata: {
           ...instance.instance_metadata,
-          report: responseReport?.length > 0 ? responseReport[0] : "",
-        },        
+          report: content.content || "",
+        },
       }).unwrap();
-      onNext({...responseInstance, saved: true} as ICustomInstance);
+      onNext({ ...responseInstance, saved: true } as ICustomInstance);
     } catch (e) {
       console.log("Error in next step", e);
     }
-  }, [
-    createInstance,
-    ingestFiles,
-    generateReport,
-    getFilesData,
-    onNext,
-    instance,
-  ]);
+  }, [ingestFiles, instance, getFilesData, generateReport, getReport, createInstance, onNext]);
 
   return (
     <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
@@ -117,6 +114,7 @@ export const ReviewFiles = ({
         open={
           loadingCreateInstance ||
           loadingIngest ||
+          generatingReport ||
           loadingReport ||
           loadingFilesdata
         }

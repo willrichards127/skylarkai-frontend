@@ -572,13 +572,16 @@ export const transcriptApi = createApi({
         const graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
         try {
           const response: any = await apiBaseQuery({
-            url: `generate_report/${graph_id}`,
+            url: `reports`,
             method: "POST",
             data: {
+              graph_id: graph_id,
               execute_query,
               report_name,
               template,
-              data,
+              data: JSON.stringify({
+                answer: data,
+              }),
               is_file_with_content,
               is_template_with_content,
               llm,
@@ -586,7 +589,7 @@ export const transcriptApi = createApi({
           });
 
           return {
-            data: response.data.filled_template,
+            data: response.data.new_id,
           };
         } catch (e) {
           return {

@@ -16,8 +16,9 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { ICustomInstance } from "./interfaces";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 import { generatePdf } from "../../../../shared/utils/pdf-generator";
-import { removeCitations } from "../../../../shared/utils/string";
+// import { removeCitations } from "../../../../shared/utils/string";
 
 export const Report = ({
   instance,
@@ -82,6 +83,7 @@ export const Report = ({
         >
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeRaw as any]}
             components={{
               pre: (props) => <div {...(props as any)} />,
               table: (props) => (
@@ -118,7 +120,7 @@ export const Report = ({
               ),
             }}
           >
-            {removeCitations(instance.instance_metadata.report || "")}
+            {instance.instance_metadata.report}
           </ReactMarkdown>
         </Box>
       </Box>
