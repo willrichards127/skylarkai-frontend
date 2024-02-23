@@ -71,6 +71,7 @@ export interface IEdgarFile {
   title?: string;
   filing_date: string;
   form_type: string;
+  url: string;
 }
 
 export interface ITransaction {
@@ -88,6 +89,7 @@ export interface ITransaction {
   OfficerTitle: string;
   transaction_dump: string;
   footnotes: string;
+  url: string;
   file_name: string;
   reported_date: string;
 }

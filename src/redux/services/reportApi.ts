@@ -90,48 +90,48 @@ export const reportApi: any = createApi({
     >({
       async queryFn(args, __, ___, apiBaseQuery) {
         const { setupId, queryType, template } = args;
-        const DDDict: Record<string, string[]> = {
-          commercialduediligence: [
-            "marketanalysis",
-            "competitoranalysis",
-            "customeranalysis",
-            "productserviceanalysis",
-            "regulatoryfinancialduediligence",
-          ],
-          financialduediligence: [
-            "financials",
-            "cashflow",
-            "historicalfinancialperformance",
-            "financials_ratio",
-            "growth",
-            "profitability",
-            "projectionsandassumptions",
-            "offbalancesheetitems",
-            "taxation",
-          ],
-          qualityofearnsanalysis: [
-            "nonrecurringrevenuestreams",
-            "revenuerecognitionpolicies",
-            "unusualexpenseitems",
-            "earningmanipulationindicators",
-            "adjustmentstoreportedearnings",
-          ],
-          workingcapitalanalysis: [
-            "inventoryturnover",
-            "dayssalesofinventory",
-            // "customquery:Accounts Receivable & Collection Period",
-            // "customquery:Accounts Payable & Payment Period",
-            "cashconversioncycle",
-            "seasonalvariationsinworkingcapital",
-          ],
-          esgduediligence: [
-            "environmentalimpactassessment",
-            "socialresponsibilitypractices",
-            "corporategovernance",
-            "ethicalsupplychainanalysis",
-            "energyandcarbonfootprint",
-          ],
-        };
+        // const DDDict: Record<string, string[]> = {
+        //   commercialduediligence: [
+        //     "marketanalysis",
+        //     "competitoranalysis",
+        //     "customeranalysis",
+        //     "productserviceanalysis",
+        //     "regulatoryfinancialduediligence",
+        //   ],
+        //   financialduediligence: [
+        //     "financials",
+        //     "cashflow",
+        //     "historicalfinancialperformance",
+        //     "financials_ratio",
+        //     "growth",
+        //     "profitability",
+        //     "projectionsandassumptions",
+        //     "offbalancesheetitems",
+        //     "taxation",
+        //   ],
+        //   qualityofearnsanalysis: [
+        //     "nonrecurringrevenuestreams",
+        //     "revenuerecognitionpolicies",
+        //     "unusualexpenseitems",
+        //     "earningmanipulationindicators",
+        //     "adjustmentstoreportedearnings",
+        //   ],
+        //   workingcapitalanalysis: [
+        //     "inventoryturnover",
+        //     "dayssalesofinventory",
+        //     // "customquery:Accounts Receivable & Collection Period",
+        //     // "customquery:Accounts Payable & Payment Period",
+        //     "cashconversioncycle",
+        //     "seasonalvariationsinworkingcapital",
+        //   ],
+        //   esgduediligence: [
+        //     "environmentalimpactassessment",
+        //     "socialresponsibilitypractices",
+        //     "corporategovernance",
+        //     "ethicalsupplychainanalysis",
+        //     "energyandcarbonfootprint",
+        //   ],
+        // };
         try {
           /*
                     if (DDDict[queryType]) {
@@ -240,7 +240,7 @@ export const reportApi: any = createApi({
                   ${template}`,
             },
           });
-          let generatedId: number = templateResponse.data.new_id;
+          const generatedId: number = templateResponse.data.new_id;
 
           return {
             data: generatedId,
@@ -263,48 +263,48 @@ export const reportApi: any = createApi({
     >({
       async queryFn(args, __, ___, apiBaseQuery) {
         const { reportId, setupId, queryType, template } = args;
-        const DDDict: Record<string, string[]> = {
-          commercialduediligence: [
-            "marketanalysis",
-            "competitoranalysis",
-            "customeranalysis",
-            "productserviceanalysis",
-            "regulatoryfinancialduediligence",
-          ],
-          financialduediligence: [
-            "financials",
-            "cashflow",
-            "historicalfinancialperformance",
-            "financials_ratio",
-            "growth",
-            "profitability",
-            "projectionsandassumptions",
-            "offbalancesheetitems",
-            "taxation",
-          ],
-          qualityofearnsanalysis: [
-            "nonrecurringrevenuestreams",
-            "revenuerecognitionpolicies",
-            "unusualexpenseitems",
-            "earningmanipulationindicators",
-            "adjustmentstoreportedearnings",
-          ],
-          workingcapitalanalysis: [
-            "inventoryturnover",
-            "dayssalesofinventory",
-            // "customquery:Accounts Receivable & Collection Period",
-            // "customquery:Accounts Payable & Payment Period",
-            "cashconversioncycle",
-            "seasonalvariationsinworkingcapital",
-          ],
-          esgduediligence: [
-            "environmentalimpactassessment",
-            "socialresponsibilitypractices",
-            "corporategovernance",
-            "ethicalsupplychainanalysis",
-            "energyandcarbonfootprint",
-          ],
-        };
+        // const DDDict: Record<string, string[]> = {
+        //   commercialduediligence: [
+        //     "marketanalysis",
+        //     "competitoranalysis",
+        //     "customeranalysis",
+        //     "productserviceanalysis",
+        //     "regulatoryfinancialduediligence",
+        //   ],
+        //   financialduediligence: [
+        //     "financials",
+        //     "cashflow",
+        //     "historicalfinancialperformance",
+        //     "financials_ratio",
+        //     "growth",
+        //     "profitability",
+        //     "projectionsandassumptions",
+        //     "offbalancesheetitems",
+        //     "taxation",
+        //   ],
+        //   qualityofearnsanalysis: [
+        //     "nonrecurringrevenuestreams",
+        //     "revenuerecognitionpolicies",
+        //     "unusualexpenseitems",
+        //     "earningmanipulationindicators",
+        //     "adjustmentstoreportedearnings",
+        //   ],
+        //   workingcapitalanalysis: [
+        //     "inventoryturnover",
+        //     "dayssalesofinventory",
+        //     // "customquery:Accounts Receivable & Collection Period",
+        //     // "customquery:Accounts Payable & Payment Period",
+        //     "cashconversioncycle",
+        //     "seasonalvariationsinworkingcapital",
+        //   ],
+        //   esgduediligence: [
+        //     "environmentalimpactassessment",
+        //     "socialresponsibilitypractices",
+        //     "corporategovernance",
+        //     "ethicalsupplychainanalysis",
+        //     "energyandcarbonfootprint",
+        //   ],
+        // };
         try {
           /*
                     if (DDDict[queryType]) {
@@ -410,7 +410,7 @@ export const reportApi: any = createApi({
                   ${template}`,
             },
           });
-          let filledTemplate: string = templateResponse.data.filled_template;
+          const filledTemplate: string = templateResponse.data.filled_template;
 
           return {
             data: filledTemplate,
@@ -455,7 +455,6 @@ export const reportApi: any = createApi({
           };
         }
       },
-      keepUnusedDataFor: 0
     }),
     markReport: builder.mutation<any, { reportId: number }>({
       query: ({ reportId }) => ({

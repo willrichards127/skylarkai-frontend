@@ -26,6 +26,7 @@ export const Report = ({
   instance: ICustomInstance;
   onGotoMain: () => void;
 }) => {
+  console.log(instance, 'insta===')
   const ref = useRef<HTMLDivElement>(null);
 
   const onExport = useCallback(() => {
@@ -61,7 +62,7 @@ export const Report = ({
         <Box mr="auto" />
         <Typography variant="body2">
           Template File:{" "}
-          {instance.instance_metadata?.template || "Default Template"}
+          {instance.instance_metadata?.template_name || "Default Template"}
         </Typography>
       </Box>
       <Box sx={{ height: "calc(100% - 120px)", position: "relative" }}>

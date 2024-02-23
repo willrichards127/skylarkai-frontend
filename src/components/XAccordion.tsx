@@ -43,13 +43,15 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
 
 export const XAccordion = ({
   options,
+  defaultExpanded = false,
 }: {
+  defaultExpanded?: boolean;
   options: { summary: React.ReactNode; detail: React.ReactNode }[];
 }) => {
   return (
     <div>
       {options.map((option) => (
-        <Accordion>
+        <Accordion defaultExpanded={defaultExpanded}>
           <AccordionSummary>
             <Typography>{option.summary}</Typography>
           </AccordionSummary>
