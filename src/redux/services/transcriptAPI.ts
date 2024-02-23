@@ -285,6 +285,7 @@ export const transcriptApi = createApi({
           };
         }
       },
+      keepUnusedDataFor: 0,
     }),
     customQuery: builder.mutation<
       IChat,
@@ -407,7 +408,7 @@ export const transcriptApi = createApi({
           const merged = [].concat(
             ...responses
               .filter((response) => !!response.data)
-              .map((response) => (response.data as any)[0].text_content)
+              .map((response) => (response.data as any))
           );
           return {
             data: merged,
@@ -520,7 +521,7 @@ export const transcriptApi = createApi({
           };
         }
       },
-    }),
+    }),    
     getSiteContent: builder.mutation<any, { website_url: string }>({
       query: ({ website_url }) => ({
         url: "crawler",

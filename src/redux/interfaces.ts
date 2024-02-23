@@ -71,6 +71,7 @@ export interface IEdgarFile {
   title?: string;
   filing_date: string;
   form_type: string;
+  url: string;
 }
 
 export interface ITransaction {

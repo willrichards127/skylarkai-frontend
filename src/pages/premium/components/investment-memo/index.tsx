@@ -139,14 +139,14 @@ const InvestmentMemoFeature = ({ featureId }: { featureId: number }) => {
       },
     });
   }, [featureId]);
-
+  
   return (
     <Box sx={{ display: "flex", height: "100%" }}>
       <LeftNavbar
         featureNavSection={
           <>
             <Divider />
-            {!!instance.instance_metadata?.template_name && (
+            {instance.step !== 'create_instance' && !!instance.instance_metadata?.template_name && (
               <Box sx={{ pl: 3, py: 2 }}>
                 <Typography variant="body1" gutterBottom>
                   Selected Template
@@ -174,16 +174,31 @@ const InvestmentMemoFeature = ({ featureId }: { featureId: number }) => {
                     spacing={1}
                     sx={{ maxHeight: 320, overflowY: "auto", pr: 4 }}
                   >
-                    {instance.instance_metadata.uploaded_files.map((file) => (
-                      <DocumentChip
-                        key={file.name}
-                        label={file.name}
-                        deletable={instance.step === "upload_template"}
-                        selected={false}
-                        onClick={() => onClickUploadedFile(file)}
-                        onDelete={() => onRemoveUploadedFile(file.name)}
-                      />
-                    ))}
+                    {!instance.saved 
+                      ? instance.instance_metadata.uploaded_files.map(
+                          (file) => (
+                            <DocumentChip
+                              key={file.name}
+                              label={file.name}
+                              deletable={instance.step === "upload_template"}
+                              selected={false}
+                              onClick={() => onClickUploadedFile(file)}
+                              onDelete={() => onRemoveUploadedFile(file.name)}
+                            />
+                          )
+                        )
+                      : instance.instance_metadata.uploaded_file_names.map(
+                          (filename) => (
+                            <DocumentChip
+                              key={filename}
+                              label={filename}
+                              deletable={instance.step === "upload_template"}
+                              selected={false}
+                              onClick={() => {}}
+                              onDelete={() => onRemoveUploadedFile(filename)}
+                            />
+                          )
+                        )}
                   </Stack>
                 </Box>
               </>

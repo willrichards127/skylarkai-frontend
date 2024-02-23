@@ -50,15 +50,6 @@ export const UploadTemplate = ({
 
   const onTemplateFileUploaded = useCallback(
     (file: File) => {
-      // const reader = new FileReader();
-      // reader.onload = (e) => {
-      //   if (typeof e.target?.result === "string") {
-      //     setFileContent(e.target.result);
-      //   }
-      // };
-      // reader.readAsDataURL(files[0]);
-      // setFile(files[0]);
-      // onUploadedTemplate(files[0].name);
       setUploadedTemplate(file);
       onUploadedTemplate(file);
     },

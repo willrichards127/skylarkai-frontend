@@ -39,7 +39,7 @@ export const ChatPanel = memo(
       useGetChatHistoryQuery({ feature_instance_id });
     const [addChat] = useAddChatMutation();
     const [getAnswer, { isLoading, data }] = useCustomQueryMutation();
-
+    console.log(analysis_type, 'analysis_type===')
     const onSend = useCallback(
       async (question: string) => {
         setSuggestion("");

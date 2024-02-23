@@ -31,9 +31,9 @@ const generateMD = (
 ): string => {
   return categories.reduce(
     (a: string, c: { category: string; questions: string[] }) => {
-      a += `## ${c.category} \n`;
+      a += `## ${c.category} \n\n`;
       for (const question of c.questions) {
-        a += `** ${question} ** \n\n`;
+        a += `- **${question}** \n`;
       }
       a += "\n\n";
       return a;
@@ -71,7 +71,7 @@ export const ReviewFiles = ({
         analysis_type: "transcript",
         files: instance.instance_metadata.uploaded_files,
       });
-      const responseFileData = await getFilesData({
+      const responseFileData: any = await getFilesData({
         docs: instance.instance_metadata.uploaded_files.map((file) => ({
           name: file.name,
           analysis_type: "transcript",
@@ -82,26 +82,31 @@ export const ReviewFiles = ({
         template: generateMD(
           investmentTemplateDict[instance.instance_metadata!.template_name!]
         ),
-        data: responseFileData.join('\n\n'),
+        data: JSON.stringify({
+          answer: responseFileData.reduce((a: any, c: any) => {
+            a[c.file_name] = c.text_content;
+            return a;
+          }, {}),
+        }),
       }).unwrap();
-      console.log(responseReport, 'Generated report');
-      // const responseInstance = await createInstance({
-      //   ...instance,
-      //   instance_metadata: {
-      //     template: file?.name || "",
-      //     report: responseReport?.length > 0 ? responseReport[0] : "",
-      //   },
-      // }).unwrap();
-      // onNext(responseInstance as ICustomInstance);
+      console.log(responseReport, "Generated report");
+      const responseInstance = await createInstance({
+        ...instance,
+        instance_metadata: {
+          ...instance.instance_metadata,
+          report: responseReport?.length > 0 ? responseReport[0] : "",
+        },        
+      }).unwrap();
+      onNext({...responseInstance, saved: true} as ICustomInstance);
     } catch (e) {
       console.log("Error in next step", e);
     }
   }, [
-    // createInstance,
+    createInstance,
     ingestFiles,
     generateReport,
     getFilesData,
-    // onNext,
+    onNext,
     instance,
   ]);
 
