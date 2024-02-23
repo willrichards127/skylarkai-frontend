@@ -30,12 +30,14 @@ export const MarketAnalysisReport = ({
   customizedContent,
   setupId,
   reportType,
+  onRerun,
 }: {
   reportId?: number;
   reportContent: any;
   customizedContent?: { key: string; value: any }[];
   reportType: string;
   setupId: string;
+  onRerun: () => void;
 }) => {
   const printRef = useRef();
 
@@ -291,7 +293,7 @@ export const MarketAnalysisReport = ({
         <BottomPanel
           onChatAssist={onChatAssist}
           onUploadedFile={onUploadedFile}
-          onRerun={() => {}}
+          onRerun={onRerun}
         />
         {exportModal && (
           <ExportModal

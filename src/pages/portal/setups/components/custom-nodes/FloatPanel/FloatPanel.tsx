@@ -44,6 +44,7 @@ import { ElasticSearchNode } from "../nodes/dataloaders/ElasticSearchNode";
 import { YoutubuNode } from "../nodes/dataloaders/YoutubuNode";
 import { GoogleDriveNode } from "../nodes/dataloaders/GoogleDriveNode";
 import { DataSearchNode } from "../nodes/dataloaders/DataSearchNode";
+import { SkylarkDBNode } from "../nodes/vectors/SkylarkDBNode";
 // key is corresponding to items.name
 const ComponentDict: Record<
   string,
@@ -66,6 +67,7 @@ const ComponentDict: Record<
   Template: DocTemplateNode,
   Comparison: CompareDocumentsNode,
   Pinecone: PineconeNode,
+  SkyDatabase: SkylarkDBNode,
   Chroma: ChromaNode,
   YahooFinance: YahooFinanceNode,
   PitchBook: PitchbookNode,

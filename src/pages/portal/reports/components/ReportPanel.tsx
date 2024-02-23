@@ -2,7 +2,7 @@ import { useEffect, useRef, useCallback, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Box, IconButton } from "@mui/material";
 import { CircleSpinner } from "../../../../components/loading-spinners/CircleSpinner";
-import { useLazyGetReportQuery } from "../../../../redux/services/reportApi";
+import { useLazyGetReportQuery, useReGenerateReportMutation } from "../../../../redux/services/reportApi";
 import { MarketAnalysisReport } from "../templates/MarketAnalysisReport";
 import { REPORTS_DICT } from "../../../../shared/models/constants";
 import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
@@ -15,6 +15,11 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
   const parentRef = useRef<any>();
 
   const [upward, setUpward] = useState<boolean>(false);
+
+  const [
+    reGenerateReport,
+    { isLoading: isGeneratingReport, isSuccess: isGeneratedReport, data: generatedData },
+  ] = useReGenerateReportMutation();
 
   const [getReport, { isLoading: loadingReport, data: reportData }] =
     useLazyGetReportQuery();
@@ -43,13 +48,22 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
     parentRef.current.scrollTop = 0;
   }, []);
 
+  const OnRerun = () => {
+    reGenerateReport({
+      reportId: reportId,
+      setupId: setupId!,
+      queryType: reportType!,
+      template: REPORTS_DICT[reportType!].template,
+    });
+  }
+
   return (
     <Box sx={{ width: "100%", height: "100%" }}>
-      {loadingReport ? (
+      {loadingReport || isGeneratingReport ? (
         <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
           <CircleSpinner
             size={120}
-            description={"Reading report..."}
+            description={isGeneratingReport ? "Generating report..." : "Reading report..."}
           />
         </Box>
       ) : (
@@ -72,10 +86,11 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
             {!!reportData && (
               <MarketAnalysisReport
                 reportId={+reportId}
-                reportContent={reportData.content}
-                customizedContent={reportData.custom_metadata}
+                reportContent={isGeneratedReport ? generatedData : reportData.content}
+                customizedContent={isGeneratedReport ? undefined : reportData.custom_metadata}
                 setupId={setupId!}
                 reportType={reportType!}
+                onRerun={OnRerun}
               />
             )}
           </Box>

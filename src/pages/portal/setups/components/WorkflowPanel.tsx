@@ -186,7 +186,6 @@ const WorkflowPanel = memo(
 					x: event.clientX - reactFlowBounds.left,
 					y: event.clientY - reactFlowBounds.top,
 				});
-
 				setNodes((prev) => {
 					const order =
 						prev.filter(
@@ -209,7 +208,7 @@ const WorkflowPanel = memo(
 			},
 			[reactFlowInstance, setupId, categoryDict, setNodes]
 		);
-
+		console.log("==========", nodes)
 		const onExport = useCallback(() => {
 			showDeployModal(true);
 		}, []);

@@ -53781,7 +53781,8 @@ export const REPORTS_DICT: Record<string, any> = {
     label: "Regulatory Environment",
     question: "Provide me regulatory environment report for this company.",
     template: `
-      Regulatory Environment
+    ### Regulatory Compliance Overview
+    ### Legal Risks    
 		`,
   },
   debtandliabilities: {
@@ -53812,7 +53813,11 @@ export const REPORTS_DICT: Record<string, any> = {
     label: "Historical Financial Performance",
     question:
       "Provide me historical financial performance analysis for this company with measurable metrics values.",
-    template: `Historical Financial Performance`,
+    template: `### Revenue and Profit
+    Include a table showing Year, Quarter, Total Revenue (in millions), Net Profit (in millions).
+    ### Key Financial Ratios
+    Include a table showing Year, Quarter, Earnings per Share (EPS), Price-to-Earnings (P/E) Ratio, Debt-to-Equity Ratio, Return on Equity (ROE).
+    `,
   },
   growth: {
     label: "Revenue Growth",
@@ -53837,7 +53842,12 @@ export const REPORTS_DICT: Record<string, any> = {
     question:
       "Provide me projections and assumptions analysis for this company with measurable metrics values.",
     template: `
-      Projections and Assumptions
+    ### Revenue Projections
+    Include a table showing Year, Quarter, Projected Revenue (in millions), Assumptions.
+    ### Expense Projections
+    Include a table showing Year, Quarter, Projected Operating Expenses (in millions), Assumptions.
+    ### Profit and Loss Projection
+    Include a table showing Year, Quarter, Projected Net Income (in millions), Assumptions.    
 		`,
   },
   offbalancesheetitems: {
@@ -53845,7 +53855,11 @@ export const REPORTS_DICT: Record<string, any> = {
     question:
       "Provide me off-balance sheet items analysis for this company with measurable metrics values.",
     template: `
-      Off-balance Sheet Items
+    ### Off-Balance Sheet Items Overview			
+    ### Lease Obligations
+    Include a table showing Year, Quarter, Operating Lease Obligations (in millions), Finance Lease Obligations (in millions).
+    ### Contingent Liabilities and Guarantees
+    Include a table showing Year, Quarter, Type of Contingent Liability, Amount (in millions), Likelihood of Occurrence, Potential Impact on Financials.    
 		`,
   },
   taxation: {
@@ -53853,7 +53867,12 @@ export const REPORTS_DICT: Record<string, any> = {
     question:
       "Provide me taxation analysis for this company with measurable metrics values.",
     template: `
-      Taxation
+    ### Tax Expense Analysis
+    Include a table showing Year, Quarter, Total Revenue (in millions), Income Before Tax (in millions), Tax Expense (in millions), Effective Tax Rate.
+    ### Tax Credits and Incentives
+    Include a table showing Year, Quarter, Research and Development Credits (in millions), Investment Tax Credits (in millions), Other Tax Incentives (in millions).
+    ### Transfer Pricing Analysis
+    Include a table showing Year, Quarter, Intercompany Transactions (in millions), Transfer Pricing Methodology, Tax Implications, Compliance Status.    
 		`,
   },
   qualityofearnsanalysis: {
@@ -54027,6 +54046,7 @@ export const ACCEPT_TEMPLATE_NODE_DICT: Record<string, string[]> = {
     "GPT-3.5",
     "Anthropic",
     "Chroma",
+    "SkyDatabase",
     "Pinecone",
     "Comparison",
     "Template",
@@ -54038,6 +54058,7 @@ export const ACCEPT_TEMPLATE_NODE_DICT: Record<string, string[]> = {
     "GPT-3.5",
     "Anthropic",
     "Chroma",
+    "SkyDatabase",
     "Pinecone",
     "Comparison",
     "Template",
@@ -54045,6 +54066,7 @@ export const ACCEPT_TEMPLATE_NODE_DICT: Record<string, string[]> = {
   ],
   File: ["PitchBook", "Sky", "Edgar"],
   Chroma: ["File", "CustomAPI", "GoogleSearch", "YahooFinance", "Webcrawler"],
+  SkyDatabase: ["File", "CustomAPI", "GoogleSearch", "YahooFinance", "Webcrawler"],
   Pinecone: [
     "File",
     "CustomAPI",
