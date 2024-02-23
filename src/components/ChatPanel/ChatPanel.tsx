@@ -172,7 +172,7 @@ export const ChatPanel = memo(
               alignItems: "center",
             }}
           >
-            <Typography variant="body1">Skye Chat</Typography>
+            <Typography variant="body1">Sky Chat</Typography>
             <Box mr="auto" />
             <TextField
               size="small"
@@ -190,7 +190,7 @@ export const ChatPanel = memo(
                 },
               }}
             >
-              {["OpenAI", "Anthropic", "Mistral"].map((item) => (
+              {["SkyEngine", "Sky2Engine"].map((item) => (
                 <option key={item} value={item}>
                   {item}
                 </option>

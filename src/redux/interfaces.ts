@@ -89,6 +89,7 @@ export interface ITransaction {
   OfficerTitle: string;
   transaction_dump: string;
   footnotes: string;
+  url: string;
   file_name: string;
   reported_date: string;
 }

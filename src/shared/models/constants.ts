@@ -117,7 +117,10 @@ export const investmentTemplate = `
 # Investment Memo Template\n\n ## Executive Summary\n- **Investment Thesis:** Brief overview of the investment opportunity.\n- **Key Metrics:** Summary of financial and operational metrics.\n- **Recommendation:** Proposed action (buy, hold, sell).\n\n## Company Overview\n- **Company Description:** Brief description of the company.\n- **Industry Analysis:** Overview of the industry and market trends.\n- **Competitive Positioning:** Analysis of the company's position in the market.\n\n## Financial Analysis\n- **Revenue Analysis:** Breakdown of revenue streams and growth.\n- **Profitability Analysis:** Examination of margins and profit trends.\n- **Balance Sheet Analysis:** Assessment of financial health (assets, liabilities, equity).\n- **Cash Flow Analysis:** Evaluation of operational, investing, and financing cash flows.\n\n## Strategic Analysis\n- **Business Model:** Analysis of the company's business model and its sustainability.\n- **Growth Strategy:** Review of the company's growth plans and potential.\n- **Risks and Mitigation:** Identification of potential risks and mitigation strategies.\n\n## Management and Governance\n- **Management Team:** Overview of the management team's background and experience.\n- **Corporate Governance:** Assessment of governance structures and policies.\n\n## Investment Rationale\n- **Value Proposition:** Justification of the investment value.\n- **Investment Risk:** Analysis of potential investment risks.\n- **Exit Strategies:** Potential exit options and scenarios.\n\n## Financial Projections and Valuation\n- **Projection Summary:** Future financial projections.\n- **Valuation Analysis:** Valuation methods and outcomes (e.g., DCF, comparables).\n\n## Appendices\n- **Additional Data:** Any additional relevant data or information.\n- **Sources:** References and sources of information."
 `;
 
-export const investmentTemplateDict: Record<string, {category: string; questions: string[]}[]> = {
+export const investmentTemplateDict: Record<
+  string,
+  { category: string; questions: string[] }[]
+> = {
   "Default VC 1": [
     {
       category: "Overview",
@@ -53948,6 +53951,20 @@ export const suggestionDict: { [x: string]: ITopic[] } = {
       topic: "Risk Factors and Mitigation Plans",
       queries: [
         "What risks did management identify for the upcoming quarters? What plans or strategies are in place to mitigate these risks?",
+      ],
+    },
+  ],
+  "4": [
+    {
+      topic: "Insider transaction",
+      queries: [
+        "Analyze recent insider trading activities as reported in Form 4 filings, including buys, sells, and option exercises.",
+        "Identify patterns or trends in insider transactions and discuss their potential implications for the company's stock.",
+        "Evaluate the alignment of insider trading activities with significant corporate events or financial disclosures.",
+        "Discuss the volume and frequency of insider transactions and how they compare to industry norms.",
+        "Analyze the behavior of specific executives or directors in terms of their insider trading activities.",
+        "Assess whether recent insider transactions reflect confidence or concern regarding the company's future prospects.",
+        "Review any large or unusual insider transactions and their potential impact on investor sentiment.",
       ],
     },
   ],
