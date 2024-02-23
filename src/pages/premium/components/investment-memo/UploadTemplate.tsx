@@ -3,270 +3,148 @@ import { useCallback, useEffect, useState } from "react";
 import {
   Box,
   Button,
-  colors,
   Breadcrumbs,
+  TextField,
   Link,
   Typography,
   Divider,
-  RadioGroup,
-  Radio,
-  FormControlLabel,
-  Backdrop,
-  CircularProgress,
+  Autocomplete,
   Stack,
 } from "@mui/material";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { FileUploader } from "../../../../components/FileUploader";
 import { ICustomInstance } from "./interfaces";
-import {
-  useCreateFeatureInstanceMutation,
-  useIngestFilesMutation,
-  useGenerateInvestmentReportMutation,
-  useGetSiteContentMutation,
-  useLazyGetFilesDataQuery,
-} from "../../../../redux/services/transcriptAPI";
-import { investmentTemplate } from "../../../../shared/models/constants";
-import { getDomainFromUrl } from "../../../../shared/utils/basic";
+import { investmentTemplateDict } from "../../../../shared/models/constants";
 
 export const UploadTemplate = ({
   instance,
   onUploadedTemplate,
+  onSelectDefaultTemplate,
+  onUploadedCompanyFiles,
   onNext,
   onGotoMain,
 }: {
   instance: ICustomInstance;
-  onUploadedTemplate: (doc?: string) => void;
-  onNext: (args: ICustomInstance) => void;
+  onUploadedTemplate: (file: File) => void;
+  onSelectDefaultTemplate: (templateName: string) => void;
+  onUploadedCompanyFiles: (files: File[]) => void;
+  onNext: () => void;
   onGotoMain: () => void;
 }) => {
-  const [createInstance, { isLoading: loadingCreateInstance }] =
-    useCreateFeatureInstanceMutation();
+  const [defaultTemplate, setDefaultTemplate] = useState<string>(
+    Object.keys(investmentTemplateDict)[0]
+  );
 
-  const [ingestFiles, { isLoading: loadingIngest }] = useIngestFilesMutation();
-  const [getFilesData, { isLoading: loadingFilesdata }] =
-    useLazyGetFilesDataQuery();
-  const [scrapeWebContent, { isLoading: loadingWebContent }] =
-    useGetSiteContentMutation();
+  const [uploadedTemplate, setUploadedTemplate] = useState<File | undefined>();
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
-  const [generateReport, { isLoading: loadingReport }] =
-    useGenerateInvestmentReportMutation();
+  const onChangeDefaultTemplate = useCallback(
+    (_: React.SyntheticEvent<Element, Event>, newValue: string | null) => {
+      setDefaultTemplate(newValue || Object.keys(investmentTemplateDict)[0]);
+      onSelectDefaultTemplate(
+        newValue || Object.keys(investmentTemplateDict)[0]
+      );
+    },
+    [onSelectDefaultTemplate]
+  );
 
-  const [file, setFile] = useState<File | undefined>();
-  const [fileContent, setFileContent] = useState<string>("");
-  const [uploadType, setUploadType] = useState<"default" | "custom">("default");
+  const onTemplateFileUploaded = useCallback(
+    (file: File) => {
+      // const reader = new FileReader();
+      // reader.onload = (e) => {
+      //   if (typeof e.target?.result === "string") {
+      //     setFileContent(e.target.result);
+      //   }
+      // };
+      // reader.readAsDataURL(files[0]);
+      // setFile(files[0]);
+      // onUploadedTemplate(files[0].name);
+      setUploadedTemplate(file);
+      onUploadedTemplate(file);
+    },
+    [onUploadedTemplate]
+  );
 
-  const onFileUploaded = useCallback(
+  const onCompanyFilesUploaded = useCallback(
     (files: File[]) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (typeof e.target?.result === "string") {
-          setFileContent(e.target.result);
-        }
-      };
-      reader.readAsDataURL(files[0]);
-      setFile(files[0]);
-      onUploadedTemplate(files[0].name);
+      setUploadedFiles(files);
+      onUploadedCompanyFiles(files);
     },
-    [onUploadedTemplate]
+    [onUploadedCompanyFiles]
   );
-
-  const onChangeUploadType = useCallback(
-    (_: React.ChangeEvent<HTMLInputElement>, value: string) => {
-      setUploadType(value as "default" | "custom");
-      setFile(undefined);
-      if (value === "default") {
-        onUploadedTemplate();
-      } else {
-        setFileContent("");
-      }
-    },
-    [onUploadedTemplate]
-  );
-
-  const onNextStep = useCallback(async () => {
-    try {
-      const resWebContent: any = await scrapeWebContent({
-        website_url: getDomainFromUrl(instance.company_url!),
-      }).unwrap();
-
-      let template = "";
-      if (file) {
-        await ingestFiles({
-          analysis_type: "template",
-          files: [file],
-        });
-        const responseFileData = await getFilesData({
-          docs: [{ name: file.name, analysis_type: "template" }],
-        }).unwrap();        
-        template =
-          responseFileData?.length > 0 ? responseFileData[0] : "";
-      }
-      const responseReport = await generateReport({
-        template: template || investmentTemplate,
-        data: Object.values(resWebContent.text_content).join("\n"),
-      }).unwrap();
-      const responseInstance = await createInstance({
-        ...instance,
-        instance_metadata: {
-          template: file?.name || "",
-          report: responseReport?.length > 0 ? responseReport[0] : "",
-        },
-      }).unwrap();
-      onNext(responseInstance as ICustomInstance);
-    } catch (e) {
-      console.log("Error in next step", e);
-    }
-  }, [
-    createInstance,
-    ingestFiles,
-    scrapeWebContent,
-    generateReport,
-    getFilesData,
-    onNext,
-    file,
-    instance,
-  ]);
 
   useEffect(() => {
-    if(uploadType === 'default') {
-      setFileContent(investmentTemplate);
-    }
-  }, [uploadType])
+    setDefaultTemplate(
+      instance.instance_metadata.template_name ||
+        Object.keys(investmentTemplateDict)[0]
+    );
+    setUploadedTemplate(
+      instance.instance_metadata.uploaded_template_file || undefined
+    );
+    setUploadedFiles(instance.instance_metadata.uploaded_files);
+  }, [instance]);
 
   return (
     <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
-      <Backdrop
-        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={
-          loadingCreateInstance ||
-          loadingIngest ||
-          loadingReport ||
-          loadingFilesdata ||
-          loadingWebContent
-        }
-      >
-        <CircularProgress color="inherit" />
-      </Backdrop>
       <Box sx={{ display: "flex", alignItems: "center" }}>
         <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
           <Link underline="hover" color="inherit" href="#" onClick={onGotoMain}>
             Create Investment Memo
           </Link>
-          <Typography color="text.primary">Select Template</Typography>
+          <Typography color="text.primary">
+            Choose Template & Upload Company Specific Documents
+          </Typography>
         </Breadcrumbs>
         <Box mr="auto" />
         <Button
           variant="contained"
           sx={{ minWidth: 140 }}
-          onClick={onNextStep}
-          disabled={uploadType === 'custom' && !file}
+          onClick={onNext}
+          disabled={!uploadedFiles.length}
         >
           Next
         </Button>
       </Box>
-      <Divider sx={{ my: 2 }} />
-      <Stack spacing={2}>
-        <Typography variant="body2" gutterBottom>
-          Choose Template for Investement memo report.
+      <Stack spacing={2} mt={2}>
+        <Divider sx={{ my: 2 }} />
+        <Typography variant="body1" fontWeight="bold" gutterBottom>
+          Choose Template
         </Typography>
-        <RadioGroup
-          value={uploadType}
-          onChange={onChangeUploadType}
-          name="radio-buttons-group"
-        >
-          <Box sx={{ display: "flex", gap: 2 }}>
-            <FormControlLabel
-              value="default"
-              control={<Radio />}
-              label="Use Default"
-            />
-            <FormControlLabel
-              value="custom"
-              control={<Radio />}
-              label="Upload Investment Memo Template"
-            />
-          </Box>
-        </RadioGroup>
-        {uploadType === "custom" && (
-          <Box sx={{ width: 320 }}>
+        <Stack spacing={2} direction="row">
+          <Autocomplete
+            options={Object.keys(investmentTemplateDict)}
+            getOptionLabel={(option) => option}
+            fullWidth
+            value={defaultTemplate}
+            onChange={onChangeDefaultTemplate}
+            renderInput={(params) => (
+              <TextField {...params} size="small" label="Templates" />
+            )}
+          />
+          <Typography sx={{ opacity: 0.7, textAlign: "center", mb: 1.5 }}>
+            or
+          </Typography>
+          <Box sx={{ width: "100%" }}>
             <FileUploader
-              initialFiles={file ? [file] : []}
-              onUploadCompleted={onFileUploaded}
+              initialFiles={uploadedTemplate ? [uploadedTemplate] : []}
+              onUploadCompleted={(files) => onTemplateFileUploaded(files[0])}
               isOneFileOnly
+              layoutDirection="column"
+              cloud
             />
           </Box>
-        )}
+        </Stack>
+        <Divider sx={{ my: 2 }} />
+        <Typography variant="body1" fontWeight="bold" gutterBottom>
+          Upload Company Specific Documents
+        </Typography>
+        <FileUploader
+          initialFiles={uploadedFiles}
+          onUploadCompleted={(files) => onCompanyFilesUploaded(files)}
+          multiple
+          cloud
+        />
       </Stack>
-      <Divider sx={{ my: 2 }} />
-      {!!fileContent && (
-        <Box
-          sx={{
-            position: "relative",
-            display: "flex",
-            justifyContent: "center",
-            overflowY: "auto",
-            height: "calc(100% - 170px)",
-          }}
-        >
-          {uploadType === "custom" ? (
-            <iframe src={fileContent} width="80%" height="100%" />
-          ) : (
-            <Box
-              sx={{
-                width: "80%",
-                bgcolor: "white",
-                color: "black",
-                px: 10,
-                py: 8,
-                position: "absolute",
-              }}
-            >
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  pre: (props) => <div {...(props as any)} />,
-                  table: (props) => (
-                    <table
-                      {...props}
-                      style={{
-                        borderCollapse: "collapse",
-                        margin: "4px 2px",
-                        overflowX: "auto",
-                      }}
-                    />
-                  ),
-                  th: (props) => (
-                    <th
-                      {...props}
-                      style={{
-                        textAlign: "center",
-                        padding: "2px 4px",
-                        color: "white",
-                        background: "black",
-                        border: `1px solid ${colors.grey[500]}`,
-                      }}
-                    />
-                  ),
-                  td: (props) => (
-                    <td
-                      {...props}
-                      style={{
-                        textAlign: "center",
-                        padding: "4px 8px",
-                        border: `1px solid ${colors.grey[500]}`,
-                      }}
-                    />
-                  ),
-                }}
-              >
-                {fileContent}
-              </ReactMarkdown>
-            </Box>
-          )}
-        </Box>
-      )}
     </Box>
   );
 };

@@ -191,7 +191,7 @@ export const reportApi: any = createApi({
             console.log(finalResponses, "finalResponses---");
 
             const finalResult = finalResponses.reduce((cv, pv: any) => {
-              cv += pv.data.filled_template;
+              cv += pv.data.content;
               return cv;
             }, "");
 
@@ -211,10 +211,6 @@ export const reportApi: any = createApi({
               <h1>${REPORTS_DICT[queryType].label}</h1>
               <p>Created: ${new Date().toDateString()}</p>
 
-              <h2>Company Overview</h2>
-              <p>STAF 7 is a technology company headquartered in San Francisco. It was founded in 2010 and currently employs around 5000 people.
-              The company generated $2.5 billion in revenue in 2020. In 2021, STAF 7's revenue grew to $3 billion.</p>
-              <h2>Executive Summary</h2>
               ${finalResult}
             `;
             for (const removeRegex of removeRegexes) {
@@ -225,8 +221,13 @@ export const reportApi: any = createApi({
             };
           } else {
             const jsonResponse: any = await apiBaseQuery({
-              url: `${queryType}/${setupId}?llm=${"OpenAI"}`,
+              // url: `${queryType}/${setupId}`,
+              url: `${queryType}/${setupId}?llm=${"BOTH"}`,
+              // url: `customquery_ent?graph_id=${setupId}`,
               method: "POST",
+              // body: {
+              //   "question": queryType,
+              // }
             });
             console.log(jsonResponse, "jsonresponse for individual report ---");
 
@@ -245,7 +246,8 @@ export const reportApi: any = createApi({
                   ${template}`,
               },
             });
-            let reportFinal: string = templateResponse.data.filled_template || "";
+            console.log(templateResponse, "templateResponse---");
+            let reportFinal: string = templateResponse.data.filled_template.length ? templateResponse.data.filled_template[0] : "";
             for (const removeRegex of removeRegexes) {
               reportFinal = reportFinal.replace(removeRegex, "");
             }
@@ -296,7 +298,6 @@ export const reportApi: any = createApi({
           };
         }
       },
-      keepUnusedDataFor: 0
     }),
     markReport: builder.mutation<any, { reportId: number }>({
       query: ({ reportId }) => ({

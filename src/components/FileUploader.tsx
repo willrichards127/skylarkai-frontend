@@ -64,6 +64,7 @@ export const FileUploader = ({
   accept,
   multiple,
   cloud,
+  layoutDirection = 'row'
 }: {
   initialFiles?: File[]
   loading?: boolean;
@@ -74,6 +75,7 @@ export const FileUploader = ({
   accept?: string[];
   multiple?: boolean;
   cloud?: boolean;
+  layoutDirection?: 'row' | 'column'
 }) => {
   const [openPicker] = useDrivePicker();
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
@@ -86,7 +88,6 @@ export const FileUploader = ({
           }
         }
       }
-
 
       setUploadedFiles(acceptedFiles);
       onUploadCompleted(acceptedFiles);
@@ -191,7 +192,7 @@ export const FileUploader = ({
   }
 
   return (
-    <Stack direction={"row"} spacing={2} style={{ width: "100%" }}>
+    <Stack direction={layoutDirection} spacing={2} style={{ width: "100%" }}>
       <Box {...getRootProps()} flex={1}>
         <input
           {...getInputProps()}
@@ -245,9 +246,9 @@ export const FileUploader = ({
       </Box>
       {cloud &&
         <>
-          <Typography sx={{ opacity: 0.7, textAlign: "center", mb: 1.5 }}>or</Typography>
+          <Typography sx={{ opacity: 0.7, textAlign: "center" }}>or</Typography>
           <Box flex={1}>
-            <Typography variant="body1" fontWeight={600} mb={2}>Upload from Drive</Typography>
+            <Typography variant="body1" fontWeight={600} mb={1}>Upload from Drive</Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
               <CloudButton name="Google Drive" icon={<GoogleDriveIcon />} onClick={handleGoogleDrive} />
               <ReactOneDriveFilePicker
