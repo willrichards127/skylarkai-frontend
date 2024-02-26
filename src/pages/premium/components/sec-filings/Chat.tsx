@@ -109,22 +109,27 @@ export const Chat = ({
       );
       if (formTypes.length < 2) {
         if (suggestions[formTypes[0]]) {
-          return myRandomInts(3, suggestions[formTypes[0]].length).map(
-            (index) => suggestions[formTypes[0]][index]
-          );
+          return myRandomInts(
+            suggestions[formTypes[0]].length < 3
+              ? suggestions[formTypes[0]].length
+              : 3,
+            suggestions[formTypes[0]].length
+          ).map((index) => suggestions[formTypes[0]][index]);
         }
       } else {
-        return formTypes.reduce<ITopic[]>(
-          (prev: ITopic[], formType: string) => {
+        return formTypes
+          .reduce<ITopic[]>((prev: ITopic[], formType: string) => {
             if (suggestions[formType]) {
               const random = myRandomInts(1, suggestions[formType].length);
               return [...prev, suggestions[formType][random[0]]];
             } else {
               return prev;
             }
-          },
-          []
-        );
+          }, [])
+          .filter(
+            (value: ITopic, index: number, self: ITopic[]) =>
+              index === self.findIndex((v) => value.topic === v.topic)
+          );
       }
     }
   }, [instance]);
