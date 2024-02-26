@@ -44,7 +44,7 @@ export const Report = ({
   const [tab, setTab] = useState<string>("compare_report");
 
   const [getFileData, { isLoading }] = useLazyGetFilesDataQuery();
-  const [fileContents, setFileContents] = useState<string[]>([]);
+  const [fileContents, setFileContents] = useState<{file_name: string; text_content: string;}[]>([]);
 
   const onExport = useCallback(() => {
     generatePdf(ref.current!.innerHTML, "Compare documents");
@@ -213,7 +213,7 @@ export const Report = ({
                 }}
                 ref={file1Ref}
               >
-                {fileContents.length ? fileContents[0] : ""}
+                {fileContents.length ? fileContents[0].text_content : ""}
               </Box>
             }
             rightPanel={
@@ -229,7 +229,7 @@ export const Report = ({
                 }}
                 ref={file2Ref}
               >
-                {fileContents.length ? fileContents[1] : ""}
+                {fileContents.length > 1 ? fileContents[1].text_content : ""}
               </Box>
             }
           />
