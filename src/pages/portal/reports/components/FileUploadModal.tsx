@@ -16,7 +16,7 @@ export const FileUploadModal = memo(
     onClose: () => void;
   }) => {
     const [uploadFile, setUploadFile] = useState<File>();
-    const onUpload = useCallback((files: any, pureFiles: File[]) => {
+    const onUpload = useCallback((_: any, pureFiles: File[]) => {
       setUploadFile(pureFiles[0]);
     }, []);
 

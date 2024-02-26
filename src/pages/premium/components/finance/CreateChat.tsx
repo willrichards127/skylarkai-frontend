@@ -65,7 +65,7 @@ export const CreateChat = ({
     }));
   }, []);
 
-  const onFileUploaded = useCallback((selectedFiles: File[]) => {
+  const onFileUploaded = useCallback(() => {
 
   }, []);
 

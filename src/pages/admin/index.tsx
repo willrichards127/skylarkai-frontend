@@ -1,31 +1,12 @@
-import { memo, useCallback } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import {
-  colors,
-  InputAdornment,
-  Chip,
   Box,
   Typography,
-  Avatar,
-  Button,
-  TextField,
 } from "@mui/material";
 import { currentUser } from "../../redux/features/authSlice";
-import { XTable } from "../../components/table";
-
-const statusColorDict: Record<number, any> = {
-  2: {
-    color: "error",
-    label: "Inactive",
-  },
-  3: {
-    color: "success",
-    label: "Active",
-  },
-};
 
 const AdminPage = () => {
-  const { user } = useSelector(currentUser);
+  useSelector(currentUser);
   return (
     <Box
     >

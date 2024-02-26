@@ -8,7 +8,6 @@ import { UploadDocuments } from "./UploadDocuments";
 
 // import { FAQIcon } from "../../../../../components/Svgs";
 import { leftNavWidth } from "../../../../shared/models/constants";
-import { uniqueArr } from "../../../../shared/utils/basic";
 import { DocumentChip } from "../../../../components/DocumentChip";
 import { ICustomInstance } from "./interface";
 import { IEdgarFile } from "../../../../redux/interfaces";
@@ -23,17 +22,6 @@ const FinanceFeature = ({ featureId }: { featureId: number }) => {
     instance_metadata: { docs: [] },
   });
 
-  const onChangeDocuments = useCallback(({ docs }: { docs: IEdgarFile[] }) => {
-    setInstance((prev) => ({
-      ...prev,
-      instance_metadata: {
-        docs: uniqueArr(
-          [...(prev.instance_metadata?.docs || []), ...docs],
-          ["file_name"]
-        ) as IEdgarFile[],
-      },
-    }));
-  }, []);
 
   const onRemoveFile = useCallback((removeFilename: string) => {
     setInstance((prev) => ({

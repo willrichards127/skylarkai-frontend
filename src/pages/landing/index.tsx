@@ -11,7 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Logo } from "../../components/Svgs";
-import { FeatureCard } from "../../components/FeaturePremiumCard";
+import { FeaturePremiumCard as FeatureCard } from "../../components/FeaturePremiumCard";
 import secFilingImg from "../../assets/premium/sec_filing.png";
 import investmentImg from "../../assets/premium/investment_memo.png";
 import insiderTransactionImg from "../../assets/premium/insider_transactions.png";

@@ -3,32 +3,19 @@ import { useCallback, useState } from "react";
 import {
   Box,
   Button,
-  TextField,
-  Autocomplete,
-  Checkbox,
-  Chip,
   Breadcrumbs,
   Link,
   Typography,
-  Divider,
   Backdrop,
   CircularProgress,
-  Stack,
 } from "@mui/material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
-import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import { FileUploader } from "../../../../components/FileUploader";
-import { SplitContainer } from "../../../../components/SplitContainer";
 import { ICustomInstance } from "./interface";
 import {
   useCreateFeatureInstanceMutation,
-  useIngestFilesMutation,
-  useCompareDocumentsMutation,
 } from "../../../../redux/services/transcriptAPI";
 
-const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
-const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 export const UploadDocuments = ({
   instance,

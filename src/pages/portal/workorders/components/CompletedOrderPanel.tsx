@@ -16,8 +16,6 @@ import { useGetWorkOrderQuery } from "../../../../redux/services/workOrderApi";
 const CompletedOrderPanel = memo(
   ({
     orderId,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    companyId,
     companyName,
     workOrderName,
   }: {
@@ -43,7 +41,7 @@ const CompletedOrderPanel = memo(
     /** FIXME: React Navigate */
     const onViewReport = useCallback(
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      (report: string, subreport: string) => {
+      (_report: string, _subreport: string) => {
         navigate(
           `/portal/reports/97?reportType=marketanalysis&setupId=16&viewMode=active`
         );

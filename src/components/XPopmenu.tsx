@@ -6,7 +6,7 @@ import React, {
   useCallback,
 } from "react";
 import { Divider, Menu, MenuItem } from "@mui/material";
-import { IMenuItem } from "../models/interfaces";
+import { IMenuItem } from "../shared/models/interfaces";
 
 export const XPopmenu = memo(
   ({

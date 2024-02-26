@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { Box } from "@mui/material";
 
 import ViewListOutlinedIcon from "@mui/icons-material/ViewListOutlined";

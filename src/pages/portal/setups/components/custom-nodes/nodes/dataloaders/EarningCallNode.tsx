@@ -1,5 +1,4 @@
-import React, { memo, useState } from "react";
-import { useReactFlow } from "reactflow";
+import { memo, useState } from "react";
 import TreeView, { flattenTree } from "react-accessible-treeview";
 import { Box } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -8,7 +7,7 @@ import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import IndeterminateCheckBoxIcon from "@mui/icons-material/IndeterminateCheckBox";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { Handlers } from "../../Handlers";
-import { ITemplateNode } from "@/shared/models/interfaces";
+import { ITemplateNode } from "../../../../../../../shared/models/interfaces";
 
 const files = {
   name: "",
@@ -64,9 +63,8 @@ const CustomCheckBoxIcon = ({
 };
 
 export const EarningCallNode = memo(
-  ({ nodeId, nodeContent }: { nodeId: string; nodeContent: ITemplateNode }) => {
-    const { setNodes } = useReactFlow();
-    const [selectedIds, setSelectedIds] = useState([]);
+  ({ nodeId }: { nodeId: string; nodeContent: ITemplateNode }) => {
+    const [selectedIds] = useState([]);
 
     return (
       <Box position="relative">
