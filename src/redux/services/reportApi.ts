@@ -500,16 +500,19 @@ export const reportApi: any = createApi({
           });
 
           const updatedReports = reportsReponse.data.map((response: any) => {
-            return {
-              ...response,
-              ...(viewMode === "active" && {
-                report_name: response.report_name,
-              }),
-              graph_name: setupsReponse.data.find(
-                (setup: ISetup) => setup.id === +response.graph_id
-              )!.name,
+            const graph = setupsReponse.data.find(
+              (setup: ISetup) => setup.id === +response.graph_id
+            );
+            if (graph) {
+              return {
+                ...response,
+                ...(viewMode === "active" && {
+                  report_name: response.report_name,
+                }),
+                graph_name: graph.name,
+              }
             }
-          });
+          }).filter((report: any) => report);
 
           const groups = groupBy("graph_name")(updatedReports);
 
