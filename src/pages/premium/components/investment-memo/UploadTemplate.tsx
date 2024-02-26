@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -8,8 +8,8 @@ import {
   Link,
   Typography,
   Divider,
-  Autocomplete,
   Stack,
+  MenuItem,
 } from "@mui/material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { FileUploader } from "../../../../components/FileUploader";
@@ -39,11 +39,9 @@ export const UploadTemplate = ({
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
   const onChangeDefaultTemplate = useCallback(
-    (_: React.SyntheticEvent<Element, Event>, newValue: string | null) => {
-      setDefaultTemplate(newValue || Object.keys(investmentTemplateDict)[0]);
-      onSelectDefaultTemplate(
-        newValue || Object.keys(investmentTemplateDict)[0]
-      );
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setDefaultTemplate(e.target.value);
+      onSelectDefaultTemplate(e.target.value);
     },
     [onSelectDefaultTemplate]
   );
@@ -102,16 +100,19 @@ export const UploadTemplate = ({
           Choose Template
         </Typography>
         <Stack spacing={2} direction="row">
-          <Autocomplete
-            options={Object.keys(investmentTemplateDict)}
-            getOptionLabel={(option) => option}
+          <TextField
+            select
             fullWidth
             value={defaultTemplate}
             onChange={onChangeDefaultTemplate}
-            renderInput={(params) => (
-              <TextField {...params} size="small" label="Templates" />
-            )}
-          />
+            size="small"
+          >
+            {Object.keys(investmentTemplateDict).map((item, index) => (
+              <MenuItem key={item} value={item} disabled={index !== 0}>
+                {item}
+              </MenuItem>
+            ))}
+          </TextField>
           <Typography sx={{ opacity: 0.7, textAlign: "center", mb: 1.5 }}>
             or
           </Typography>
