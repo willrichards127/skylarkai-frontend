@@ -552,6 +552,7 @@ export const transcriptApi = createApi({
         is_file_with_content?: boolean;
         is_template_with_content?: boolean;
         llm?: string;
+        company_name: string;
         execute_query?: boolean;
       }
     >({
@@ -563,6 +564,7 @@ export const transcriptApi = createApi({
           data,
           is_file_with_content = true,
           is_template_with_content = true,
+          company_name,
           llm = "OpenAI",
         },
         api,
@@ -582,6 +584,7 @@ export const transcriptApi = createApi({
               data: JSON.stringify({
                 answer: data,
               }),
+              company_name,
               is_file_with_content,
               is_template_with_content,
               llm,

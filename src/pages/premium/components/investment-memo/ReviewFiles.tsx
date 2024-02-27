@@ -105,6 +105,7 @@ export const ReviewFiles = ({
         data: JSON.stringify({
           answer: data,
         }),
+        company_name: instance.company_name
       }).unwrap();
       const content = await getReport({
         reportId: responseReportId,
