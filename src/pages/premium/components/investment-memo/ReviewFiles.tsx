@@ -25,7 +25,6 @@ import {
   useLazyGetFilesDataQuery,
   useGetSiteContentMutation,
 } from "../../../../redux/services/transcriptAPI";
-import { investmentTemplateDict } from "../../../../shared/models/constants";
 import { useLazyGetReportQuery } from "../../../../redux/services/reportApi";
 
 const generateMD = (
@@ -55,7 +54,6 @@ export const ReviewFiles = ({
   onNext: (args: ICustomInstance) => void;
   onGotoMain: () => void;
 }) => {
-  console.log(instance, "instance===");
   const [createInstance, { isLoading: loadingCreateInstance }] =
     useCreateFeatureInstanceMutation();
 
@@ -103,10 +101,7 @@ export const ReviewFiles = ({
       }
       console.log(webContent, fileData, data, "###BBB");
       const responseReportId = await generateReport({
-        template: generateMD(
-          instance.instance_metadata.template_content ||
-            investmentTemplateDict[instance.instance_metadata!.template_name!]
-        ),
+        template: generateMD(instance.instance_metadata.template_content),
         data: JSON.stringify({
           answer: data,
         }),
@@ -136,6 +131,8 @@ export const ReviewFiles = ({
     createInstance,
     onNext,
   ]);
+
+  console.log(instance, "##instance===");
 
   return (
     <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
@@ -178,10 +175,7 @@ export const ReviewFiles = ({
           >
             {[
               { category: "All" },
-              ...(instance.instance_metadata.template_content ||
-                investmentTemplateDict[
-                  instance.instance_metadata!.template_name!
-                ]),
+              ...instance.instance_metadata.template_content,
             ].map((item) => (
               <Tab
                 key={item.category}
@@ -195,22 +189,19 @@ export const ReviewFiles = ({
           {selectedTab === "All" ? (
             <XAccordion
               defaultExpanded
-              options={(
-                instance.instance_metadata.template_content ||
-                investmentTemplateDict[
-                  instance.instance_metadata!.template_name!
-                ]
-              ).map((item) => ({
-                summary: item.category,
-                detail: item.questions.map((question, index) => (
-                  <p key={question}>
-                    {index + 1}. {question}
-                  </p>
-                )),
-              }))}
+              options={instance.instance_metadata.template_content.map(
+                (item) => ({
+                  summary: item.category,
+                  detail: item.questions.map((question, index) => (
+                    <p key={question}>
+                      {index + 1}. {question}
+                    </p>
+                  )),
+                })
+              )}
             />
           ) : (
-            investmentTemplateDict[instance.instance_metadata!.template_name!]
+            instance.instance_metadata.template_content
               .find((item) => item.category === selectedTab)!
               .questions.map((question, index) => (
                 <p key={question}>

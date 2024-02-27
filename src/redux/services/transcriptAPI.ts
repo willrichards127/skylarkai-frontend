@@ -539,7 +539,7 @@ export const transcriptApi = createApi({
         url: "crawler",
         method: "POST",
         data: {
-          url: "https://" + website_url,
+          url: website_url,
         },
       }),
     }),
