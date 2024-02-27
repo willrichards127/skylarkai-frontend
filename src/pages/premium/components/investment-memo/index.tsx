@@ -19,9 +19,10 @@ const InvestmentMemoFeature = ({ featureId }: { featureId: number }) => {
     instance_name: "",
     company_name: "",
     ticker: "",
+    company_url: "",
     instance_metadata: {
       template_name: Object.keys(investmentTemplateDict)[0],
-      template_content: "",
+      template_content: investmentTemplateDict["Default VC 1"],
       uploaded_file_names: [],
       uploaded_files: [],
     },
@@ -49,9 +50,10 @@ const InvestmentMemoFeature = ({ featureId }: { featureId: number }) => {
       ...prev,
       ...args,
       ...(!args.saved && {
+        company_url: "",
         instance_metadata: {
           template_name: Object.keys(investmentTemplateDict)[0],
-          template_content: "",
+          template_content: investmentTemplateDict["Default VC 1"],
           uploaded_template_file: undefined,
           uploaded_files: [],
           uploaded_file_names: [],
@@ -62,9 +64,10 @@ const InvestmentMemoFeature = ({ featureId }: { featureId: number }) => {
     }));
   }, []);
 
-  const onSecondStepCompleted = useCallback(() => {
+  const onSecondStepCompleted = useCallback((website?: string) => {
     setInstance((prev) => ({
       ...prev,
+      company_url: website,
       step: "review_files",
     }));
   }, []);
@@ -85,31 +88,45 @@ const InvestmentMemoFeature = ({ featureId }: { featureId: number }) => {
     }));
   }, []);
 
-  const onSelectDefaultTemplate = useCallback((name: string) => {
-    setInstance((prev) => ({
-      ...prev,
-      instance_metadata: {
-        ...prev.instance_metadata,
-        template_name: name,
-      },
-    }));
-  }, []);
+  const onSelectDefaultTemplate = useCallback(
+    (
+      name: string,
+      templateContent: { category: string; questions: string[] }[]
+    ) => {
+      setInstance((prev) => ({
+        ...prev,
+        instance_metadata: {
+          ...prev.instance_metadata,
+          template_name: name,
+          template_content: templateContent
+        },
+      }));
+    },
+    []
+  );
 
   const onClickUploadedFile = useCallback((file: File) => {
     viewFileRef.current = file;
     showViewFileModal(true);
   }, []);
 
-  const onUploadedTemplate = useCallback((file: File) => {
-    setInstance((prev) => ({
-      ...prev,
-      instance_metadata: {
-        ...prev.instance_metadata,
-        template_name: file.name,
-        uploaded_template_file: file,
-      },
-    }));
-  }, []);
+  const onUploadedTemplate = useCallback(
+    (
+      file: File,
+      templateContent: { category: string; questions: string[] }[]
+    ) => {
+      setInstance((prev) => ({
+        ...prev,
+        instance_metadata: {
+          ...prev.instance_metadata,
+          template_name: file.name,
+          uploaded_template_file: file,
+          template_content: templateContent,
+        },
+      }));
+    },
+    []
+  );
 
   const onUploadedCompanyFiles = useCallback((files: File[]) => {
     setInstance((prev) => ({
@@ -129,9 +146,10 @@ const InvestmentMemoFeature = ({ featureId }: { featureId: number }) => {
       instance_name: "",
       company_name: "",
       ticker: "",
+      company_url: "",
       instance_metadata: {
         template_name: Object.keys(investmentTemplateDict)[0],
-        template_content: "",
+        template_content: investmentTemplateDict["Default VC 1"],
         uploaded_template_file: undefined,
         uploaded_files: [],
         uploaded_file_names: [],
@@ -139,31 +157,32 @@ const InvestmentMemoFeature = ({ featureId }: { featureId: number }) => {
       },
     });
   }, [featureId]);
-  
+
   return (
     <Box sx={{ display: "flex", height: "100%" }}>
       <LeftNavbar
         featureNavSection={
           <>
             <Divider />
-            {instance.step !== 'create_instance' && !!instance.instance_metadata?.template_name && (
-              <Box sx={{ pl: 3, py: 2 }}>
-                <Typography variant="body1" gutterBottom>
-                  Selected Template
-                </Typography>
-                <Stack
-                  spacing={1}
-                  sx={{ maxHeight: 320, overflowY: "auto", pr: 4 }}
-                >
-                  <DocumentChip
-                    label={instance.instance_metadata?.template_name}
-                    deletable={false}
-                    selected={false}
-                    onClick={() => {}}
-                  />
-                </Stack>
-              </Box>
-            )}
+            {instance.step !== "create_instance" &&
+              !!instance.instance_metadata?.template_name && (
+                <Box sx={{ pl: 3, py: 2 }}>
+                  <Typography variant="body1" gutterBottom>
+                    Selected Template
+                  </Typography>
+                  <Stack
+                    spacing={1}
+                    sx={{ maxHeight: 320, overflowY: "auto", pr: 4 }}
+                  >
+                    <DocumentChip
+                      label={instance.instance_metadata?.template_name}
+                      deletable={false}
+                      selected={false}
+                      onClick={() => {}}
+                    />
+                  </Stack>
+                </Box>
+              )}
             {instance.instance_metadata.uploaded_file_names.length > 0 && (
               <>
                 <Box sx={{ pl: 3, py: 2 }}>
@@ -174,7 +193,7 @@ const InvestmentMemoFeature = ({ featureId }: { featureId: number }) => {
                     spacing={1}
                     sx={{ maxHeight: 320, overflowY: "auto", pr: 4 }}
                   >
-                    {!instance.saved 
+                    {!instance.saved
                       ? instance.instance_metadata.uploaded_files.map(
                           (file) => (
                             <DocumentChip

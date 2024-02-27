@@ -129,58 +129,6 @@ export const SortableItemWrapper = memo(
         onMouseOut={onMouseOut}
         onDoubleClick={onEdit}
       >
-        {!isEdit && hover && (
-          <Box>
-            <Box
-              sx={{
-                pointerEvents: 'none',
-                position: "absolute",
-                top: -8,
-                left: -8,
-                right: -8,
-                bottom: -8,
-                boxSizing: "content-box",
-                MozBoxSizing: "content-box",
-                WebkitBoxSizing: "content-box",
-                border: `1px solid ${colors.grey[800]}`,
-              }}
-            />
-            <DragIndicatorIcon
-              {...listeners}
-              sx={{ position: "absolute", right: -32, top: 0, cursor: "grab" }}
-            />
-            <Box
-              sx={{
-                position: "absolute",
-                display: "flex",
-                gap: 0.5,
-                right: 0,
-                top: -36,
-              }}
-            >
-              <IconButton size="small" onClick={onAddNew}>
-                <AddIcon sx={{ fontSize: 16 }} />
-              </IconButton>
-              <CSVReader onUploadAccepted={onUploadAccepted}>
-                {({ getRootProps }: any) => (
-                  <div style={styles.csvReader}>
-                    <IconButton size="small" {...getRootProps()}>
-                      <UploadFileIcon sx={{ fontSize: 16 }} />
-                    </IconButton>
-                  </div>
-                )}
-              </CSVReader>
-              {item.tag === "table" && (
-                <IconButton size="small" onClick={onShowVisualization}>
-                  <BarChartIcon sx={{ fontSize: 16 }} />
-                </IconButton>
-              )}
-              <IconButton size="small" onClick={onRemove}>
-                <CancelIcon sx={{ fontSize: 16 }} />
-              </IconButton>
-            </Box>
-          </Box>
-        )}
         {isEdit ? (
           <ItemEditor onClickAway={onClickAway} initialItem={item} />
         ) : (
@@ -251,7 +199,57 @@ export const SortableItemWrapper = memo(
             {item.content}
           </ReactMarkdown>
         )}
-        
+        {!isEdit && hover && (
+          <Box>
+            <Box
+              sx={{
+                position: "absolute",
+                top: -8,
+                left: -8,
+                right: -8,
+                bottom: -8,
+                boxSizing: "content-box",
+                MozBoxSizing: "content-box",
+                WebkitBoxSizing: "content-box",
+                border: `1px solid ${colors.grey[800]}`,
+              }}
+            />
+            <DragIndicatorIcon
+              {...listeners}
+              sx={{ position: "absolute", right: -32, top: 0, cursor: "grab" }}
+            />
+            <Box
+              sx={{
+                position: "absolute",
+                display: "flex",
+                gap: 0.5,
+                right: 0,
+                top: -36,
+              }}
+            >
+              <IconButton size="small" onClick={onAddNew}>
+                <AddIcon sx={{ fontSize: 16 }} />
+              </IconButton>
+              <CSVReader onUploadAccepted={onUploadAccepted}>
+                {({ getRootProps }: any) => (
+                  <div style={styles.csvReader}>
+                    <IconButton size="small" {...getRootProps()}>
+                      <UploadFileIcon sx={{ fontSize: 16 }} />
+                    </IconButton>
+                  </div>
+                )}
+              </CSVReader>
+              {item.tag === "table" && (
+                <IconButton size="small" onClick={onShowVisualization}>
+                  <BarChartIcon sx={{ fontSize: 16 }} />
+                </IconButton>
+              )}
+              <IconButton size="small" onClick={onRemove}>
+                <CancelIcon sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Box>
+          </Box>
+        )}
       </div>
     );
   }

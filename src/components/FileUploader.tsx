@@ -95,7 +95,7 @@ export const FileUploader = ({
     [onUploadCompleted, limit]
   );
 
-  const { getRootProps, getInputProps } = useDropzone({
+  const { getRootProps, getInputProps, open } = useDropzone({
     onDrop,
     multiple: !isOneFileOnly,
     disabled,
@@ -265,7 +265,7 @@ export const FileUploader = ({
                 <CloudButton name="One Drive" icon={<OneDriveIcon />} />
               </ReactOneDriveFilePicker>
               <CloudButton name="Dropbox" icon={<DropBoxIcon />} onClick={handleDropBox} />
-              <CloudButton name="Data Room" icon={<DataRoomIcon />} />
+              <CloudButton name="Data Room" icon={<DataRoomIcon />} onClick={open}/>
             </Box>
           </Box>
         </>

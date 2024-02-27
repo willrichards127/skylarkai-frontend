@@ -50,8 +50,8 @@ export const XAccordion = ({
 }) => {
   return (
     <div>
-      {options.map((option) => (
-        <Accordion defaultExpanded={defaultExpanded}>
+      {options.map((option, index) => (
+        <Accordion defaultExpanded={defaultExpanded} key={`panel-${index}`}>
           <AccordionSummary>
             <Typography>{option.summary}</Typography>
           </AccordionSummary>

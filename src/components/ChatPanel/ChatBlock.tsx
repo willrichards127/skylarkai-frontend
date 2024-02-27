@@ -152,7 +152,7 @@ export const ChatBlock = memo(
                   a: (props: any) => (
                     <a
                       {...props}
-                      style={{ color: "blue" }}
+                      style={{ color: "white" }}
                       onClick={() => onJumpTo(props.href)}
                     />
                   ),

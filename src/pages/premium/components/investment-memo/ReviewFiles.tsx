@@ -23,6 +23,7 @@ import {
   useIngestFilesMutation,
   useGenerateInvestmentReportMutation,
   useLazyGetFilesDataQuery,
+  useGetSiteContentMutation,
 } from "../../../../redux/services/transcriptAPI";
 import { investmentTemplateDict } from "../../../../shared/models/constants";
 import { useLazyGetReportQuery } from "../../../../redux/services/reportApi";
@@ -54,10 +55,13 @@ export const ReviewFiles = ({
   onNext: (args: ICustomInstance) => void;
   onGotoMain: () => void;
 }) => {
+  console.log(instance, "instance===");
   const [createInstance, { isLoading: loadingCreateInstance }] =
     useCreateFeatureInstanceMutation();
 
   const [ingestFiles, { isLoading: loadingIngest }] = useIngestFilesMutation();
+  const [getWebsiteContent, { isLoading: loadingWebContent }] =
+    useGetSiteContentMutation();
   const [getFilesData, { isLoading: loadingFilesdata }] =
     useLazyGetFilesDataQuery();
 
@@ -69,25 +73,42 @@ export const ReviewFiles = ({
 
   const onNextStep = useCallback(async () => {
     try {
-      await ingestFiles({
-        analysis_type: "transcript",
-        files: instance.instance_metadata.uploaded_files,
-      });
-      const responseFileData: any = await getFilesData({
-        docs: instance.instance_metadata.uploaded_files.map((file) => ({
-          name: file.name,
+      let webContent, fileData;
+      if (instance.company_url) {
+        webContent = await getWebsiteContent({
+          website_url: instance.company_url,
+        }).unwrap();
+      }
+      if (instance.instance_metadata.uploaded_files.length > 0) {
+        await ingestFiles({
           analysis_type: "transcript",
-        })),
-      }).unwrap();
+          files: instance.instance_metadata.uploaded_files,
+        });
+        fileData = await getFilesData({
+          docs: instance.instance_metadata.uploaded_files.map((file) => ({
+            name: file.name,
+            analysis_type: "transcript",
+          })),
+        }).unwrap();
+      }
+      let data = {};
+      if (fileData) {
+        data = fileData.reduce((a: any, c: any) => {
+          a[c.file_name] = c.text_content;
+          return a;
+        }, {});
+      }
+      if (webContent) {
+        data = { ...data, website_content: webContent.text_content };
+      }
+      console.log(webContent, fileData, data, "###BBB");
       const responseReportId = await generateReport({
         template: generateMD(
-          investmentTemplateDict[instance.instance_metadata!.template_name!]
+          instance.instance_metadata.template_content ||
+            investmentTemplateDict[instance.instance_metadata!.template_name!]
         ),
         data: JSON.stringify({
-          answer: responseFileData.reduce((a: any, c: any) => {
-            a[c.file_name] = c.text_content;
-            return a;
-          }, {}),
+          answer: data,
         }),
       }).unwrap();
       const content = await getReport({
@@ -105,7 +126,16 @@ export const ReviewFiles = ({
     } catch (e) {
       console.log("Error in next step", e);
     }
-  }, [ingestFiles, instance, getFilesData, generateReport, getReport, createInstance, onNext]);
+  }, [
+    ingestFiles,
+    instance,
+    getFilesData,
+    generateReport,
+    getWebsiteContent,
+    getReport,
+    createInstance,
+    onNext,
+  ]);
 
   return (
     <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
@@ -116,6 +146,7 @@ export const ReviewFiles = ({
           loadingIngest ||
           generatingReport ||
           loadingReport ||
+          loadingWebContent ||
           loadingFilesdata
         }
       >
@@ -147,9 +178,10 @@ export const ReviewFiles = ({
           >
             {[
               { category: "All" },
-              ...investmentTemplateDict[
-                instance.instance_metadata!.template_name!
-              ],
+              ...(instance.instance_metadata.template_content ||
+                investmentTemplateDict[
+                  instance.instance_metadata!.template_name!
+                ]),
             ].map((item) => (
               <Tab
                 key={item.category}
@@ -163,9 +195,12 @@ export const ReviewFiles = ({
           {selectedTab === "All" ? (
             <XAccordion
               defaultExpanded
-              options={investmentTemplateDict[
-                instance.instance_metadata!.template_name!
-              ].map((item) => ({
+              options={(
+                instance.instance_metadata.template_content ||
+                investmentTemplateDict[
+                  instance.instance_metadata!.template_name!
+                ]
+              ).map((item) => ({
                 summary: item.category,
                 detail: item.questions.map((question, index) => (
                   <p key={question}>
