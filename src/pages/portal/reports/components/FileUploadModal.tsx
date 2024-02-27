@@ -12,18 +12,18 @@ export const FileUploadModal = memo(
   }: {
     title?: string;
     open: boolean;
-    onUpladedFile: (file: File) => void;
+    onUpladedFile: (file: File[]) => void;
     onClose: () => void;
   }) => {
-    const [uploadFile, setUploadFile] = useState<File>();
+    const [uploadFiles, setUploadFiles] = useState<File[]>([]);
     const onUpload = useCallback((_: any, pureFiles: File[]) => {
-      setUploadFile(pureFiles[0]);
+      setUploadFiles(pureFiles);
     }, []);
 
     const onImport = useCallback(() => {
-      onUpladedFile(uploadFile!);
+      onUpladedFile(uploadFiles);
       onClose();
-    }, [onUpladedFile, onClose, uploadFile]);
+    }, [onUpladedFile, onClose, uploadFiles]);
 
     return (
       <XModal
@@ -38,7 +38,7 @@ export const FileUploadModal = memo(
             </Button>
             <Button
               variant="contained"
-              disabled={!uploadFile}
+              disabled={!uploadFiles.length}
               onClick={onImport}
             >
               Import

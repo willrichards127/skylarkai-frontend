@@ -17,7 +17,7 @@ export const BottomPanel = memo(
     onUploadedFile,
     onRerun,
   }: {
-    onUploadedFile: (type: string, file: File) => void;
+    onUploadedFile: (type: string, file: File[]) => void;
     onChatAssist: () => void;
     onRerun: () => void;
   }) => {
@@ -117,7 +117,8 @@ export const BottomPanel = memo(
           <FileUploadModal
             open={fileUploadModal}
             onClose={() => showFileUploadModal(false)}
-            onUpladedFile={(file) => onUploadedFile("file", file)}
+            onUpladedFile={(files) => onUploadedFile("file", files)}
+            
           />
         )}
         {templateUploadModal && (
@@ -125,7 +126,7 @@ export const BottomPanel = memo(
             title="Template Upload"
             open={templateUploadModal}
             onClose={() => showTemplateUploadModal(false)}
-            onUpladedFile={(file) => onUploadedFile("template", file)}
+            onUpladedFile={(files) => onUploadedFile("template", files)}
           />
         )}
       </Box>

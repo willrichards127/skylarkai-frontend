@@ -17,27 +17,27 @@ import {
   categoryParser,
   convertCSVToTable,
 } from "../../../../shared/utils/parse";
-import { useSaveReportMutation } from "../../../../redux/services/reportApi";
 import { UtilPanel } from "../components/UtilPanel";
 import { BottomPanel } from "../components/BottomPanel";
 import { ChatAssistWindow } from "../components/ChatAssistWindow";
 import { useLazyGetFilesDataQuery } from "../../../../redux/services/transcriptAPI";
 import { scrollToAndHighlightText } from "../../../../shared/utils/string";
+import { ISetup } from "../../../../shared/models/interfaces";
 
 export const MarketAnalysisReport = ({
-  reportId,
+  setup,
   reportContent,
   customizedContent,
-  setupId,
   reportType,
+  onSave,
   onRerun,
 }: {
-  reportId?: number;
+  setup: ISetup;
   reportContent: any;
   customizedContent?: { key: string; value: any }[];
   reportType: string;
-  setupId: string;
-  onRerun: () => void;
+  onSave: (content: { key: string; value: any }[]) => void;
+  onRerun: (append?: Record<string, File[]>) => void;
 }) => {
   const printRef = useRef();
 
@@ -52,7 +52,7 @@ export const MarketAnalysisReport = ({
     quote_content: string;
   }>();
   const [getFileData] = useLazyGetFilesDataQuery();
-  const [uploadedFiles, setUploadedFiles] = useState<Record<string, File>>();
+  const [uploadedFiles, setUploadedFiles] = useState<Record<string, File[]>>();
   const [exportModal, showExportModal] = useState<boolean>(false);
   const [refFileModal, showRefFileModal] = useState<boolean>(false);
   const [chatAssist, showChatAssist] = useState<boolean>(false);
@@ -63,28 +63,13 @@ export const MarketAnalysisReport = ({
     initialReportItems.map((item) => item.key)
   );
 
-  const [saveReport, { isSuccess }] = useSaveReportMutation({});
-
   const onPrint = useCallback(() => {
     showExportModal(true);
   }, []);
 
-  const onSave = useCallback(() => {
-    const mdTemplate = reportItems.reduce(
-      (pv: string, cv: { key: string; value: any }) => {
-        pv += cv.value.content;
-        return pv;
-      },
-      ""
-    );
-    saveReport({
-      ...(reportId && { reportId }),
-      setupId: +setupId,
-      reportName: reportType,
-      content: mdTemplate,
-      custom: reportItems,
-    });
-  }, [saveReport, reportId, setupId, reportType, reportItems]);
+  const handleSave = useCallback(() => {
+    onSave(reportItems)
+  }, [onSave, reportItems]);
 
   const onDelete = useCallback(() => {
     showExportModal(true);
@@ -161,14 +146,19 @@ export const MarketAnalysisReport = ({
     showChatAssist(true);
   }, []);
 
-  const onUploadedFile = useCallback((type: string, file: File) => {
-    setUploadedFiles((prev) => ({ ...prev, [type]: file }));
+  const onUploadedFile = useCallback((type: string, files: File[]) => {
+    setUploadedFiles((prev) => ({ ...prev, [type]: files }));
   }, []);
 
-  const onRemoveFiles = useCallback((type: string) => {
+  const onRemoveFiles = useCallback((type: string, filename: string) => {
     setUploadedFiles((prev) => {
       const update = { ...prev };
-      delete update[type];
+      const removeFiles = update[type].filter(f => f.name !== filename);
+      if (removeFiles.length) {
+        update[type] = removeFiles;
+      } else {
+        delete update[type];
+      }
       return update;
     });
   }, []);
@@ -185,13 +175,13 @@ export const MarketAnalysisReport = ({
         prev.map((item) =>
           item.key === itemId
             ? {
-                ...item,
-                value: {
-                  tag: tagName,
-                  ...(visualType && { visual: visualType }),
-                  content: changedItemContent,
-                },
-              }
+              ...item,
+              value: {
+                tag: tagName,
+                ...(visualType && { visual: visualType }),
+                content: changedItemContent,
+              },
+            }
             : item
         )
       );
@@ -228,11 +218,9 @@ export const MarketAnalysisReport = ({
     }, 100);
   }, []);
 
-  useEffect(() => {
-    if (isSuccess) {
-      toast.success("The report is updated successfully.");
-    }
-  }, [isSuccess]);
+  const handleRerun = () => {
+    onRerun(uploadedFiles)
+  }
 
   return (
     <Box sx={{ display: "flex", height: "100%" }}>
@@ -245,10 +233,10 @@ export const MarketAnalysisReport = ({
       />
       <Box sx={{ position: "relative", flex: 1 }}>
         <HeaderPanel
-          setupId={+setupId}
+          companyName={setup.name!}
           reportType={reportType}
           onPrint={onPrint}
-          onSave={onSave}
+          onSave={handleSave}
           onDelete={onDelete}
         />
         <Box sx={{ px: 4, py: 2, height: "calc(100% - 200px)" }}>
@@ -293,7 +281,7 @@ export const MarketAnalysisReport = ({
         <BottomPanel
           onChatAssist={onChatAssist}
           onUploadedFile={onUploadedFile}
-          onRerun={onRerun}
+          onRerun={handleRerun}
         />
         {exportModal && (
           <ExportModal
@@ -306,7 +294,7 @@ export const MarketAnalysisReport = ({
           <ChatAssistWindow
             reportType={reportType}
             onClose={() => showChatAssist(false)}
-            onExportChat={() => {}}
+            onExportChat={() => { }}
           />
         )}
         {refFileModal && refFileRef.current && (

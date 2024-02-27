@@ -247,6 +247,7 @@ export const {
   useDeleteSetupMutation,
   useGetSetupsQuery,
   useGetSetupQuery,
+  useLazyGetSetupQuery,
   useIngestFilesMutation,
   useUploadFilesMutation,
   useExecuteGraphMutation,

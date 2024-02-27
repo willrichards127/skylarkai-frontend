@@ -2,10 +2,12 @@ import { useEffect, useRef, useCallback, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Box, IconButton } from "@mui/material";
 import { CircleSpinner } from "../../../../components/loading-spinners/CircleSpinner";
-import { useLazyGetReportQuery, useReGenerateReportMutation } from "../../../../redux/services/reportApi";
+import { useLazyGetReportQuery, useReGenerateReportMutation, useSaveReportMutation } from "../../../../redux/services/reportApi";
 import { MarketAnalysisReport } from "../templates/MarketAnalysisReport";
 import { REPORTS_DICT } from "../../../../shared/models/constants";
 import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
+import { useIngestFilesMutation, useLazyGetSetupQuery } from "../../../../redux/services/setupApi";
+import { toast } from "react-toastify";
 
 const ReportPanel = ({ reportId }: { reportId: string }) => {
   const [searchParams] = useSearchParams();
@@ -17,12 +19,17 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
   const [upward, setUpward] = useState<boolean>(false);
 
   const [
-    reGenerateReport,
+    regenerateReport,
     { isLoading: isGeneratingReport, isSuccess: isGeneratedReport, data: generatedData },
   ] = useReGenerateReportMutation();
 
   const [getReport, { isLoading: loadingReport, data: reportData }] =
     useLazyGetReportQuery();
+
+  const [getSetup, { isLoading: loadingSetup, data: setupData }] = useLazyGetSetupQuery();
+  const [saveReport, { isSuccess: isSaved }] = useSaveReportMutation({});
+
+  const [ingestFiles, { isLoading: ingestingFiles }] = useIngestFilesMutation();
 
   useEffect(() => {
     getReport({
@@ -34,6 +41,17 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
     getReport,
     reportType,
     reportId,
+  ]);
+
+  useEffect(() => {
+    if (setupId) {
+      getSetup({
+        setupId: +setupId
+      });
+    }
+  }, [
+    getSetup,
+    setupId,
   ]);
 
   const onScroll = useCallback(() => {
@@ -48,8 +66,17 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
     parentRef.current.scrollTop = 0;
   }, []);
 
-  const OnRerun = () => {
-    reGenerateReport({
+  const OnRerun = async (append?: Record<string, File[]>) => {
+    if (append && append['file'] && setupData) {
+      await ingestFiles({
+        setupId: +setupId!,
+        companyName: setupData.name!,
+        analysisType: "financial_diligence",
+        files: append['file']
+      });
+    }
+
+    regenerateReport({
       reportId: reportId,
       setupId: setupId!,
       queryType: reportType!,
@@ -57,9 +84,32 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
     });
   }
 
+  const onSave = (reportItems: { key: string; value: any }[]) => {
+    const mdTemplate = reportItems.reduce(
+      (pv: string, cv: { key: string; value: any }) => {
+        pv += cv.value.content;
+        return pv;
+      },
+      ""
+    );
+    saveReport({
+      ...(reportId && { reportId }),
+      setupId: +setupId!,
+      reportName: reportType,
+      content: mdTemplate,
+      custom: reportItems,
+    });
+  }
+
+  useEffect(() => {
+    if (isSaved) {
+      toast.success("The report is updated successfully.");
+    }
+  }, [isSaved]);
+
   return (
     <Box sx={{ width: "100%", height: "100%" }}>
-      {loadingReport || isGeneratingReport ? (
+      {loadingReport || isGeneratingReport || loadingSetup || ingestingFiles ? (
         <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
           <CircleSpinner
             size={120}
@@ -83,14 +133,14 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
           onScroll={onScroll}
         >
           <Box width="100%" height="100%">
-            {!!reportData && (
+            {!!reportData && !!setupData && (
               <MarketAnalysisReport
-                reportId={+reportId}
+                setup={setupData}
                 reportContent={isGeneratedReport ? generatedData : reportData.content}
                 customizedContent={isGeneratedReport ? undefined : reportData.custom_metadata}
-                setupId={setupId!}
                 reportType={reportType!}
                 onRerun={OnRerun}
+                onSave={onSave}
               />
             )}
           </Box>

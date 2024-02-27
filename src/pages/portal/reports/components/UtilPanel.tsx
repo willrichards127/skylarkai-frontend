@@ -45,9 +45,9 @@ export const UtilPanel = memo(
     onSearchText
   }: {
     onRemoveFiles: (type: string, filename: string) => void;
-    uploadedFiles?: Record<string, File>;
+    uploadedFiles?: Record<string, File[]>;
     onChatAssist: () => void;
-    onUploadedFile: (type: string, file: File) => void;
+    onUploadedFile: (type: string, file: File[]) => void;
     onSearchText: (search: string) => void;
   }) => {
     const [fileUploadModal, showFileUploadModal] = useState<boolean>(false);
@@ -58,7 +58,7 @@ export const UtilPanel = memo(
           onChatAssist();
         } else if (menuItemId === "upload-file") {
           showFileUploadModal(true);
-        } else if(menuItemId === 'search') {
+        } else if (menuItemId === 'search') {
           showSearchTextModal(true);
         }
       },
@@ -101,31 +101,33 @@ export const UtilPanel = memo(
                   bgcolor: "rgba(0,0,0,0.2)",
                 }}
               >
-                {Object.entries(uploadedFiles).map(([type, file]) => (
-                  <MenuItem
-                    key={file.name}
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      textOverflow: "ellipsis",
-                      overflow: "hidden",
-                      whiteSpace: "nowrap",
-                    }}
-                    title={file.name}
+                {Object.entries(uploadedFiles).map(([type, files]) => (
+                  files.map(file =>
+                    <MenuItem
+                      key={`${type}-${file.name}`}
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        textOverflow: "ellipsis",
+                        overflow: "hidden",
+                        whiteSpace: "nowrap",
+                      }}
+                      title={file.name}
                     // onClick={() => onMeunItem(item.id)}
-                  >
-                    <Badge
-                      badgeContent={
-                        <CancelIcon
-                          sx={{ fontSize: 16 }}
-                          onClick={() => onRemoveFile(type, file.name)}
-                        />
-                      }
                     >
-                      <DescriptionIcon />
-                    </Badge>
-                    <Box sx={{ fontSize: 10 }}>{file.name}</Box>
-                  </MenuItem>
+                      <Badge
+                        badgeContent={
+                          <CancelIcon
+                            sx={{ fontSize: 16 }}
+                            onClick={() => onRemoveFile(type, file.name)}
+                          />
+                        }
+                      >
+                        <DescriptionIcon />
+                      </Badge>
+                      <Box sx={{ fontSize: 10 }}>{file.name}</Box>
+                    </MenuItem>
+                  )
                 ))}
               </Box>
             </>
