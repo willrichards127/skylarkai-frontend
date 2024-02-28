@@ -53,6 +53,7 @@ export const ChatContentBox = forwardRef(
             onChooseSuggestion={onChooseSuggestion}
             onJumpTo={onJumpTo}
             insider_transaction={insider_transaction}
+            chats={chats}
           />
         ))}
       </Box>

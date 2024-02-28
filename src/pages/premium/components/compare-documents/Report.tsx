@@ -18,16 +18,21 @@ import {
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import IosShareIcon from "@mui/icons-material/IosShare";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import EmailIcon from "@mui/icons-material/Email";
 import { ICustomInstance } from "./interfaces";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { SplitContainer } from "../../../../components/SplitContainer";
 import { useLazyGetFilesDataQuery } from "../../../../redux/services/transcriptAPI";
-import { generatePdf } from "../../../../shared/utils/pdf-generator";
+import {
+  generatePdf,
+  getPdfInBase64,
+} from "../../../../shared/utils/pdf-generator";
 import {
   parseCitationInReport,
   scrollToAndHighlightText,
 } from "../../../../shared/utils/string";
+import { SendEmailModal } from "../../../../components/modals/SendEmailModal";
 
 export const Report = ({
   instance,
@@ -36,6 +41,9 @@ export const Report = ({
   instance: ICustomInstance;
   onGotoMain: () => void;
 }) => {
+  const emailContentRef = useRef<
+    { subject?: string; content: string } | undefined
+  >();
   const tagRef = useRef<string>("");
   const ref = useRef<HTMLDivElement>();
   const file1Ref = useRef<HTMLDivElement>();
@@ -44,10 +52,26 @@ export const Report = ({
   const [tab, setTab] = useState<string>("compare_report");
 
   const [getFileData, { isLoading }] = useLazyGetFilesDataQuery();
-  const [fileContents, setFileContents] = useState<{file_name: string; text_content: string;}[]>([]);
+  const [fileContents, setFileContents] = useState<
+    { file_name: string; text_content: string }[]
+  >([]);
+  const [emailModal, showEmailModal] = useState<boolean>(false);
 
   const onExport = useCallback(() => {
     generatePdf(ref.current!.innerHTML, "Compare documents");
+  }, []);
+
+  const onSendEmail = useCallback(async () => {
+    const base64str = await getPdfInBase64(
+      `<h1>Compare documents</h1><br />${ref.current!.innerHTML}`,
+      "Skylark"
+    );
+
+    emailContentRef.current = {
+      subject: "Compare documents Report",
+      content: base64str,
+    };
+    showEmailModal(true);
   }, []);
 
   const onChangeTab = useCallback(
@@ -113,6 +137,14 @@ export const Report = ({
           <Typography color="text.primary">Compare Documents Report</Typography>
         </Breadcrumbs>
         <Box mr="auto" />
+        <Button
+          variant="contained"
+          startIcon={<EmailIcon />}
+          sx={{ minWidth: 140, mr: 1 }}
+          onClick={onSendEmail}
+        >
+          Send Email
+        </Button>
         <Button
           variant="contained"
           startIcon={<IosShareIcon />}
@@ -235,6 +267,14 @@ export const Report = ({
           />
         )}
       </Box>
+      {emailModal && (
+        <SendEmailModal
+          open={emailModal}
+          onClose={() => showEmailModal(false)}
+          content={emailContentRef.current!.content}
+          initialSubject={emailContentRef.current!.subject}
+        />
+      )}
     </Box>
   );
 };

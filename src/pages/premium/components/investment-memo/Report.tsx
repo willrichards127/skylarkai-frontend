@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   colors,
   Box,
@@ -12,12 +12,17 @@ import {
 } from "@mui/material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import IosShareIcon from "@mui/icons-material/IosShare";
+import EmailIcon from "@mui/icons-material/Email";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { ICustomInstance } from "./interfaces";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
-import { generatePdf } from "../../../../shared/utils/pdf-generator";
+import {
+  generatePdf,
+  getPdfInBase64,
+} from "../../../../shared/utils/pdf-generator";
+import { SendEmailModal } from "../../../../components/modals/SendEmailModal";
 // import { removeCitations } from "../../../../shared/utils/string";
 
 export const Report = ({
@@ -27,11 +32,27 @@ export const Report = ({
   instance: ICustomInstance;
   onGotoMain: () => void;
 }) => {
-  console.log(instance, 'insta===')
+  const emailContentRef = useRef<
+    { subject?: string; content: string } | undefined
+  >();
   const ref = useRef<HTMLDivElement>(null);
+  const [emailModal, showEmailModal] = useState<boolean>(false);
 
   const onExport = useCallback(() => {
     generatePdf(ref.current!.innerHTML, "Investment memo");
+  }, []);
+
+  const onSendEmail = useCallback(async () => {
+    const base64str = await getPdfInBase64(
+      `<h1>Investment memo</h1><br />${ref.current!.innerHTML}`,
+      "Skylark"
+    );
+
+    emailContentRef.current = {
+      subject: "Investment Memo Report",
+      content: base64str,
+    };
+    showEmailModal(true);
   }, []);
 
   return (
@@ -47,6 +68,14 @@ export const Report = ({
           <Typography color="text.primary">Report</Typography>
         </Breadcrumbs>
         <Box mr="auto" />
+        <Button
+          variant="contained"
+          startIcon={<EmailIcon />}
+          sx={{ minWidth: 140, mr: 1 }}
+          onClick={onSendEmail}
+        >
+          Send Email
+        </Button>
         <Button
           variant="contained"
           startIcon={<IosShareIcon />}
@@ -124,6 +153,14 @@ export const Report = ({
           </ReactMarkdown>
         </Box>
       </Box>
+      {emailModal && (
+        <SendEmailModal
+          open={emailModal}
+          onClose={() => showEmailModal(false)}
+          content={emailContentRef.current!.content}
+          initialSubject={emailContentRef.current!.subject}
+        />
+      )}
     </Box>
   );
 };

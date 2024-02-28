@@ -695,6 +695,50 @@ export const transcriptApi = createApi({
       }),
       invalidatesTags: ["FetchFileLog"],
     }),
+    sendReportsViaEmails: builder.mutation<
+      any,
+      {
+        base64str: string;
+        emails: string[];
+        subject?: string;
+      }
+    >({
+      async queryFn(
+        { base64str, emails, subject = 'Report' },
+        _,
+        __,
+        apiBaseQuery
+      ) {
+        
+        try {
+          const formdata = new FormData();
+          formdata.append('file_content_base64', base64str);
+          formdata.append('subject', subject);
+          emails.forEach((email) => {
+            formdata.append("email_addresses", email);
+          });
+
+          const response: any = await apiBaseQuery({
+            url: `send_email`,
+            method: "POST",
+            data: formdata,
+          });
+          console.log(response, 'email: response')
+
+          return {
+            data: response.data,
+          };
+        } catch (e) {
+          return {
+            error: {
+              status: 404,
+              statusText: e,
+              data: "Error in send email API",
+            },
+          };
+        }
+      },
+    }),   
   }),
 });
 
@@ -753,4 +797,7 @@ export const {
   useGetFetchFileLogsQuery,
   useLazyGetFetchFileLogsQuery,
   useUpdateFetchFileLogMutation,
+
+  // send email
+  useSendReportsViaEmailsMutation
 } = transcriptApi;

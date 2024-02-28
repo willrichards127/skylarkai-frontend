@@ -1,25 +1,31 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { memo, useMemo } from "react";
+import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { colors, Box, Typography } from "@mui/material";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import EmailIcon from "@mui/icons-material/Email";
 import { DotSpinner } from "../DotSpinner";
+import { XIconButton } from "../buttons/XIconButton";
 import { SkylarkChatBotIcon, UserChatIcon } from "../Svgs";
 import { IChat } from "../../redux/interfaces";
 import { parseCitation } from "../../shared/utils/string";
+import { SendEmailModal } from "../modals/SendEmailModal";
+import { getPdfInBase64 } from "../../shared/utils/pdf-generator";
 
 export const ChatBlock = memo(
   ({
     loading = false,
     chat,
     insider_transaction,
+    chats,
     onChooseTopic,
     onChooseSuggestion,
     onJumpTo,
   }: {
     loading?: boolean;
     chat: IChat;
+    chats: IChat[];
     insider_transaction?: boolean;
     onChooseTopic: (topicId: string) => void;
     onChooseSuggestion: (suggestion: string) => void;
@@ -30,11 +36,39 @@ export const ChatBlock = memo(
     const isTopic = chat.type === "topic";
     const isSuggestions = chat.type === "suggestions";
 
+    const ref = useRef<HTMLDivElement>();
+    const emailContentRef = useRef<
+      { subject?: string; content: string } | undefined
+    >();
+
+    const [blogHovered, setBlogHovered] = useState<boolean>(false);
+    const [emailModal, showEmailModal] = useState<boolean>(false);
+
     const answer = useMemo(() => {
       if (isBot) {
-        return parseCitation(chat.content as string, insider_transaction ? 2 : 4); // limited words of each quote to 5
+        return parseCitation(
+          chat.content as string,
+          insider_transaction ? 2 : 4
+        ); // limited words of each quote to 5
       }
     }, [isBot, chat.content, insider_transaction]);
+
+    const onMouseOver = useCallback(() => {
+      setBlogHovered(true);
+    }, []);
+    const onMouseOut = useCallback(() => {
+      setBlogHovered(false);
+    }, []);
+
+    const onSendViaEmail = useCallback(async (question: string) => {
+      if (!ref.current) return;
+      const base64str = await getPdfInBase64(ref.current.innerHTML, "Skylark");
+      emailContentRef.current = {
+        subject: question,
+        content: base64str,
+      };
+      showEmailModal(true);
+    }, []);
 
     return (
       <Box
@@ -104,7 +138,7 @@ export const ChatBlock = memo(
                     p: 0.5,
                     fontSize: 12,
                     color: colors.grey[300],
-                    pointerEvents: loading ? 'none' : 'auto',
+                    pointerEvents: loading ? "none" : "auto",
                     "&:hover": {
                       cursor: "pointer",
                       color: "white",
@@ -135,9 +169,12 @@ export const ChatBlock = memo(
               px: 1,
               alignItems: "start",
               width: isBot ? "100%" : "auto",
+              position: "relative",
             }}
+            onMouseOver={onMouseOver}
+            onMouseOut={onMouseOut}
           >
-            <Box width="100%" fontSize={13}>
+            <Box width="100%" fontSize={13} ref={ref}>
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
@@ -191,7 +228,35 @@ export const ChatBlock = memo(
                 {isBot ? answer : (chat.content as string)}
               </ReactMarkdown>
             </Box>
+            {blogHovered && isBot && (
+              <XIconButton
+                size="small"
+                variant="contained"
+                sxProps={{
+                  "&.MuiButtonBase-root": {
+                    minHeight: 31,
+                    minWidth: 31,
+                  },
+                  position: "absolute",
+                  right: 4,
+                  top: 4,
+                }}
+                onClick={() =>
+                  onSendViaEmail(chats[chats.length - 2].content.toString())
+                }
+              >
+                <EmailIcon />
+              </XIconButton>
+            )}
           </Box>
+        )}
+        {emailModal && (
+          <SendEmailModal
+            open={emailModal}
+            onClose={() => showEmailModal(false)}
+            content={emailContentRef.current!.content}
+            initialSubject={emailContentRef.current!.subject}
+          />
         )}
       </Box>
     );
