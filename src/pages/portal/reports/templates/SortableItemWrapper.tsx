@@ -178,8 +178,6 @@ export const SortableItemWrapper = memo(
                   style={{
                     textAlign: "center",
                     padding: "4px 8px",
-                    color: "white",
-                    background: "black",
                     border: `1px solid ${colors.grey[500]}`,
                   }}
                 />

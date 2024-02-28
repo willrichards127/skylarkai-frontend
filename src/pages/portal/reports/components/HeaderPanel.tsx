@@ -5,6 +5,7 @@ import { DeleteIcon, CalendarIcon } from "../../../../components/Svgs";
 import PrintIcon from "@mui/icons-material/Print";
 import SaveIcon from "@mui/icons-material/Save";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import EmailIcon from "@mui/icons-material/Email";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { Link } from "react-router-dom";
 import { REPORTS_DICT } from "../../../../shared/models/constants";
@@ -16,12 +17,14 @@ export const HeaderPanel = memo(
     onSave,
     onDelete,
     onPrint,
+    onSendEmail
   }: {
     companyName: string;
     reportType: string;
     onPrint: () => void;
     onDelete: () => void;
     onSave: () => void;
+    onSendEmail: () => void;
   }) => {
     return (
       <Box
@@ -66,6 +69,14 @@ export const HeaderPanel = memo(
               </Box>
             </Box>
           </Box>
+          <Button
+            size="small"
+            variant="contained"
+            startIcon={<EmailIcon />}
+            onClick={onSendEmail}
+          >
+            Send via Email
+          </Button>
           <Button
             size="small"
             variant="contained"

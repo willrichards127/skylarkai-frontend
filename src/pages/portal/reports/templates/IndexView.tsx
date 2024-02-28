@@ -13,7 +13,7 @@ export const IndexView = memo(
 
     return (
       headingTags.length ?
-        <Box sx={{ minHeight: 1200, width: "100%" }}>
+        <Box sx={{ minHeight: 1200, width: "100%" }} className="no-print">
           {headingTags.map(({ key, value }) => (
             <ReactMarkdown
               key={key}

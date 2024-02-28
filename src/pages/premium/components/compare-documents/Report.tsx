@@ -143,7 +143,7 @@ export const Report = ({
           sx={{ minWidth: 140, mr: 1 }}
           onClick={onSendEmail}
         >
-          Send Email
+          Send via Email
         </Button>
         <Button
           variant="contained"

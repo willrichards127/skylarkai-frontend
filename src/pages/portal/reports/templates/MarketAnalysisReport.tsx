@@ -12,6 +12,7 @@ import { HeaderPanel } from "../components/HeaderPanel";
 import { IndexView } from "./IndexView";
 import { ExportModal } from "../../../../components/modals/ExportModal";
 import { RefFileModal } from "../components/RefFileModal";
+import { SendEmailModal } from "../../../../components/modals/SendEmailModal";
 import { SortableItemWrapper } from "./SortableItemWrapper";
 import {
   getNewId,
@@ -24,6 +25,8 @@ import { ChatAssistWindow } from "../components/ChatAssistWindow";
 import { useLazyGetFilesDataQuery } from "../../../../redux/services/transcriptAPI";
 import { scrollToAndHighlightText } from "../../../../shared/utils/string";
 import { ISetup } from "../../../../shared/models/interfaces";
+import { REPORTS_DICT } from "../../../../shared/models/constants";
+import { getPdfInBase64 } from "../../../../shared/utils/pdf-generator";
 
 export const MarketAnalysisReport = ({
   setup,
@@ -40,7 +43,7 @@ export const MarketAnalysisReport = ({
   onSave: (content: { key: string; value: any }[]) => void;
   onRerun: (append?: Record<string, File[]>) => void;
 }) => {
-  const printRef = useRef();
+  const printRef = useRef<HTMLDivElement>();
 
   const initialReportItems = useMemo(
     () => customizedContent || categoryParser(reportContent),
@@ -52,11 +55,16 @@ export const MarketAnalysisReport = ({
     text_content: string;
     quote_content: string;
   }>();
+  const emailContentRef = useRef<
+    { subject?: string; content: string } | undefined
+  >();
+
   const [getFileData] = useLazyGetFilesDataQuery();
   const [uploadedFiles, setUploadedFiles] = useState<Record<string, File[]>>();
   const [exportModal, showExportModal] = useState<boolean>(false);
   const [refFileModal, showRefFileModal] = useState<boolean>(false);
   const [chatAssist, showChatAssist] = useState<boolean>(false);
+  const [emailModal, showEmailModal] = useState<boolean>(false);
 
   const [reportItems, setReportItems] =
     useState<{ key: string; value: any }[]>(initialReportItems);
@@ -68,8 +76,24 @@ export const MarketAnalysisReport = ({
     showExportModal(true);
   }, []);
 
+  const onSendEmail = useCallback(async () => {
+    if (!printRef.current) return;
+    const container = document.createElement("div");
+    container.appendChild(printRef.current!.cloneNode(true));
+    const removeItems = container.querySelectorAll(".no-print");
+    for (const item of removeItems) {
+      item.remove();
+    }
+    const base64str = await getPdfInBase64(container.innerHTML, "Skylark");
+    emailContentRef.current = {
+      subject: `${REPORTS_DICT[reportType].label} Report`,
+      content: base64str,
+    };
+    showEmailModal(true);
+  }, [reportType]);
+
   const handleSave = useCallback(() => {
-    onSave(reportItems)
+    onSave(reportItems);
   }, [onSave, reportItems]);
 
   const onDelete = useCallback(() => {
@@ -154,7 +178,7 @@ export const MarketAnalysisReport = ({
   const onRemoveFiles = useCallback((type: string, filename: string) => {
     setUploadedFiles((prev) => {
       const update = { ...prev };
-      const removeFiles = update[type].filter(f => f.name !== filename);
+      const removeFiles = update[type].filter((f) => f.name !== filename);
       if (removeFiles.length) {
         update[type] = removeFiles;
       } else {
@@ -176,13 +200,13 @@ export const MarketAnalysisReport = ({
         prev.map((item) =>
           item.key === itemId
             ? {
-              ...item,
-              value: {
-                tag: tagName,
-                ...(visualType && { visual: visualType }),
-                content: changedItemContent,
-              },
-            }
+                ...item,
+                value: {
+                  tag: tagName,
+                  ...(visualType && { visual: visualType }),
+                  content: changedItemContent,
+                },
+              }
             : item
         )
       );
@@ -212,16 +236,13 @@ export const MarketAnalysisReport = ({
 
   const onSearchText = useCallback((searchText: string) => {
     setTimeout(() => {
-      scrollToAndHighlightText(
-        printRef.current!,
-        searchText
-      );
+      scrollToAndHighlightText(printRef.current!, searchText);
     }, 100);
   }, []);
 
   const handleRerun = () => {
-    onRerun(uploadedFiles)
-  }
+    onRerun(uploadedFiles);
+  };
 
   return (
     <Box sx={{ display: "flex", height: "100%" }}>
@@ -239,6 +260,7 @@ export const MarketAnalysisReport = ({
           onPrint={onPrint}
           onSave={handleSave}
           onDelete={onDelete}
+          onSendEmail={onSendEmail}
         />
         <Box sx={{ px: 4, py: 2, height: "calc(100% - 200px)" }}>
           <Box
@@ -287,7 +309,7 @@ export const MarketAnalysisReport = ({
         {exportModal && (
           <ExportModal
             open={exportModal}
-            exportContent={printRef.current}
+            exportContent={printRef.current!}
             onClose={() => showExportModal(false)}
           />
         )}
@@ -295,7 +317,7 @@ export const MarketAnalysisReport = ({
           <ChatAssistWindow
             reportType={reportType}
             onClose={() => showChatAssist(false)}
-            onExportChat={() => { }}
+            onExportChat={() => {}}
           />
         )}
         {refFileModal && refFileRef.current && (
@@ -303,6 +325,14 @@ export const MarketAnalysisReport = ({
             open={refFileModal}
             onClose={() => showRefFileModal(false)}
             content={refFileRef.current}
+          />
+        )}
+        {emailModal && (
+          <SendEmailModal
+            open={emailModal}
+            onClose={() => showEmailModal(false)}
+            content={emailContentRef.current!.content}
+            initialSubject={emailContentRef.current!.subject}
           />
         )}
       </Box>
