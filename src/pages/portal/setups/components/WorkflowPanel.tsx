@@ -208,7 +208,6 @@ const WorkflowPanel = memo(
 			},
 			[reactFlowInstance, setupId, categoryDict, setNodes]
 		);
-		console.log("==========", nodes)
 		const onExport = useCallback(() => {
 			showDeployModal(true);
 		}, []);
@@ -286,10 +285,10 @@ const WorkflowPanel = memo(
 			updateSetupWithLoadedData(setup);
 		}, [updateSetupWithLoadedData, setup, isFetching]);
 
-		useEffect(() => {
-			if (isLoadingExecuteGraph || !executedData) return;
-			updateSetupWithLoadedData(executedData);
-		}, [updateSetupWithLoadedData, isLoadingExecuteGraph, executedData]);
+		// useEffect(() => {
+		// 	if (isLoadingExecuteGraph || !executedData) return;
+		// 	updateSetupWithLoadedData(executedData);
+		// }, [updateSetupWithLoadedData, isLoadingExecuteGraph, executedData]);
 
 		const isValid = useMemo(
 			() => isValidGraph(nodes as any, edges as any),

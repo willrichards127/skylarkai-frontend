@@ -114,11 +114,11 @@ export const setupApi = createApi({
       async queryFn({ setup, analysisType }, __, ___, apiBaseQuery) {
         try {
           // save current graph
-          const updateResponse: any = await apiBaseQuery({
-            url: `graphs/${setup.id}`,
-            method: "PUT",
-            body: setup,
-          });
+          // const updateResponse: any = await apiBaseQuery({
+          //   url: `graphs/${setup.id}`,
+          //   method: "PUT",
+          //   body: setup,
+          // });
 
           // execute the graph
           // await apiBaseQuery({
@@ -143,10 +143,10 @@ export const setupApi = createApi({
 
           return {
             data: {
-              id: updateResponse.data.id,
-              name: updateResponse.data.name,
-              edges: updateResponse.data.edges,
-              nodes: updateResponse.data.nodes,
+              // id: updateResponse.data.id,
+              // name: updateResponse.data.name,
+              // edges: updateResponse.data.edges,
+              // nodes: updateResponse.data.nodes,
             },
           };
         } catch (e) {
