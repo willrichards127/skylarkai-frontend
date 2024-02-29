@@ -82,7 +82,7 @@ const WorkflowPanel = memo(
 
 		const [
 			executeGraph,
-			{ isLoading: isLoadingExecuteGraph, data: executedData },
+			{ isLoading: isLoadingExecuteGraph },
 		] = useExecuteGraphMutation();
 
 		const reactFlowWrapper = useRef<HTMLDivElement>(null);
