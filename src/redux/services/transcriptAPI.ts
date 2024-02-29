@@ -270,13 +270,17 @@ export const transcriptApi = createApi({
             method: "GET",
           });
 
-          const finalResult = responseTransactions.data.map((transaction: any) => {
-            const matchedEdgar = responseEdgars.data.find((edgar: any) => edgar.file_name === transaction.file_name);
-            return {
-              ...transaction,
-              url: matchedEdgar ? matchedEdgar.url : ""
+          const finalResult = responseTransactions.data.map(
+            (transaction: any) => {
+              const matchedEdgar = responseEdgars.data.find(
+                (edgar: any) => edgar.file_name === transaction.file_name
+              );
+              return {
+                ...transaction,
+                url: matchedEdgar ? matchedEdgar.url : "",
+              };
             }
-          }) 
+          );
 
           return {
             data: finalResult
@@ -341,6 +345,11 @@ export const transcriptApi = createApi({
             },
           });
 
+          if (response.error) {
+            return {
+              error: response.erorr,
+            };
+          }
           return {
             data: {
               type: "answer",
@@ -420,7 +429,7 @@ export const transcriptApi = createApi({
           const merged = [].concat(
             ...responses
               .filter((response) => !!response.data)
-              .map((response) => (response.data as any))
+              .map((response) => response.data as any)
           );
           return {
             data: merged,
@@ -533,7 +542,7 @@ export const transcriptApi = createApi({
           };
         }
       },
-    }),    
+    }),
     getSiteContent: builder.mutation<any, { website_url: string }>({
       query: ({ website_url }) => ({
         url: "crawler",
@@ -704,16 +713,15 @@ export const transcriptApi = createApi({
       }
     >({
       async queryFn(
-        { base64str, emails, subject = 'Report' },
+        { base64str, emails, subject = "Report" },
         _,
         __,
         apiBaseQuery
       ) {
-        
         try {
           const formdata = new FormData();
-          formdata.append('file_content_base64', base64str);
-          formdata.append('subject', subject);
+          formdata.append("file_content_base64", base64str);
+          formdata.append("subject", subject);
           emails.forEach((email) => {
             formdata.append("email_addresses", email);
           });
@@ -723,7 +731,7 @@ export const transcriptApi = createApi({
             method: "POST",
             data: formdata,
           });
-          console.log(response, 'email: response')
+          console.log(response, "email: response");
 
           return {
             data: response.data,
@@ -738,7 +746,7 @@ export const transcriptApi = createApi({
           };
         }
       },
-    }),   
+    }),
   }),
 });
 
@@ -799,5 +807,5 @@ export const {
   useUpdateFetchFileLogMutation,
 
   // send email
-  useSendReportsViaEmailsMutation
+  useSendReportsViaEmailsMutation,
 } = transcriptApi;

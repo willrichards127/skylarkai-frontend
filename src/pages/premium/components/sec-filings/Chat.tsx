@@ -15,14 +15,9 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ChatPanel from "../../../../components/ChatPanel";
 import { ICustomInstance } from "./interface";
 import { loadStoreValue } from "../../../../shared/utils/storage";
-import {
-  myRandomInts,
-  scrollToAndHighlightInIFrame,
-} from "../../../../shared/utils/basic";
+import { scrollToAndHighlightInIFrame } from "../../../../shared/utils/basic";
 // import { useGetSuggestionsQuery } from "../../../../redux/services/transcriptAPI";
 import { addDownloadButtons } from "../../../../shared/utils/xlsx";
-import { ITopic } from "../../../../redux/interfaces";
-import { suggestionDict as suggestions } from "../../../../shared/models/constants";
 
 export const Chat = ({
   instance,
@@ -102,38 +97,6 @@ export const Chat = ({
     };
   }, [onloadIframe]);
 
-  const selectedSuggestions = useMemo(() => {
-    if (suggestions && instance.instance_metadata.docs.length) {
-      const formTypes = instance.instance_metadata.docs.map(
-        (doc) => doc.form_type
-      );
-      if (formTypes.length < 2) {
-        if (suggestions[formTypes[0]]) {
-          return myRandomInts(
-            suggestions[formTypes[0]].length < 3
-              ? suggestions[formTypes[0]].length
-              : 3,
-            suggestions[formTypes[0]].length
-          ).map((index) => suggestions[formTypes[0]][index]);
-        }
-      } else {
-        return formTypes
-          .reduce<ITopic[]>((prev: ITopic[], formType: string) => {
-            if (suggestions[formType]) {
-              const random = myRandomInts(1, suggestions[formType].length);
-              return [...prev, suggestions[formType][random[0]]];
-            } else {
-              return prev;
-            }
-          }, [])
-          .filter(
-            (value: ITopic, index: number, self: ITopic[]) =>
-              index === self.findIndex((v) => value.topic === v.topic)
-          );
-      }
-    }
-  }, [instance]);
-
   return (
     <Box sx={{ height: "100%" }}>
       <Backdrop
@@ -196,7 +159,7 @@ export const Chat = ({
                 )}
                 onJumpTo={onJumpTo}
                 analysis_type="edgar"
-                suggestions={selectedSuggestions}
+                suggestions={instance.instance_metadata.suggestions}
               />
             </Box>
           }

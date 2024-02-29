@@ -61,15 +61,17 @@ export const ChatPanel = memo(
           insider_transaction,
           llm,
         }).unwrap();
-        setChatHistory((prev) => [
-          ...prev.filter((chat) => chat.type.toString() !== "loading"),
-          { type: "answer", content: response.content },
-        ]);
-        addChat({
-          feature_instance_id,
-          question,
-          answer: response.content as string,
-        });
+        if (response) {
+          setChatHistory((prev) => [
+            ...prev.filter((chat) => chat.type.toString() !== "loading"),
+            { type: "answer", content: response.content },
+          ]);
+          addChat({
+            feature_instance_id,
+            question,
+            answer: response.content as string,
+          });
+        }
       },
       [
         llm,
