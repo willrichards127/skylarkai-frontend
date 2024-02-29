@@ -21,6 +21,7 @@ import PieChartIcon from "@mui/icons-material/PieChart";
 import DonutLargeIcon from "@mui/icons-material/DonutLarge";
 import { XIconButton } from "../../../../components/buttons/XIconButton";
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const VizItems = [
   {
     value: "table",

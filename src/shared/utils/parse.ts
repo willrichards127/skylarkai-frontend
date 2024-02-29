@@ -42,7 +42,7 @@ const getColumnType = (columnLabel: string, rows: Record<string, string>[]) => {
     } else if ((cv[columnLabel] || "").toLowerCase().includes("million")) {
       units.push("Million");
     }
-    if (["N/A", "NA"].includes(cv[columnLabel] || "")) {
+    if (["N/A", "NA", "NaN"].includes(cv[columnLabel] || "")) {
       pv.push("");
     } else {
       const cleanedString = (cv[columnLabel] || "").replace(/[$%,]/g, "");
@@ -50,6 +50,7 @@ const getColumnType = (columnLabel: string, rows: Record<string, string>[]) => {
     }
     return pv;
   }, []);
+  
   units = units.filter((unit) => !!unit);
   if (columnValues.some((value) => !isNaN(parseFloat(value)))) {
     return {
@@ -80,7 +81,7 @@ const convertObjTable = (data: any) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         row.props.children.map((cell: any) =>
           cell.props.children && cell.props.children.length
-            ? cell.props.children[0]
+            ? cell.props.children
             : ""
         )
     );
@@ -123,13 +124,13 @@ export const parseTable = (data: any) => {
           const column = columns.find((col: any) => col.label === key);
           if (
             row[key] &&
-            !["N/A", "NA"].includes(row[key]) &&
+            !["N/A", "NA", "NaN"].includes(row[key]) &&
             column!.type === "numeric"
           ) {
             newRow[key] = row[key].replace(/\$|%|billion|million/g, "");
           } else if (
             column!.type === "numeric" &&
-            ["N/A", "NA"].includes(row[key])
+            ["N/A", "NA", "NaN"].includes(row[key])
           ) {
             newRow[key] = "0";
           } else {
