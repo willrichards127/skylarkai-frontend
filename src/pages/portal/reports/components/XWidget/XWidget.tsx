@@ -48,6 +48,7 @@ export const XWidget = memo(
     ...rest
   }: any) => {
     const table = useMemo(() => parseTable(rest.children), [rest.children]);
+    console.log(table, "table===")
     const hasSameUnit = useMemo(() => {
       const units = (table?.columns || [])
         .filter((col: any) => col.type === "numeric")

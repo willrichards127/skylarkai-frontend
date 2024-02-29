@@ -163,15 +163,15 @@ export const SortableItemWrapper = memo(
                 }
                 return <li {...props} />;
               },
-              table: (props) => (
-                <XWidget
+              table: (props) => {
+                return <XWidget
                   {...props}
                   isVisualize={isVisualize}
                   visualType={visualType}
                   onCloseVisualize={onShowVisualization}
                   onChangeVisualType={onChangeVisualType}
                 />
-              ),
+              },
               th: ({ ...props }) => (
                 <th
                   {...props}
@@ -202,7 +202,7 @@ export const SortableItemWrapper = memo(
             <Box
               sx={{
                 position: "absolute",
-                top: -8,
+                top: -10,
                 left: -8,
                 right: -8,
                 bottom: -8,

@@ -70,7 +70,7 @@ const convertObjTable = (data: any) => {
 
     const columns = data[0].props.children.props.children.map((column: any) =>
       column.props.children && column.props.children.length
-        ? column.props.children[0]
+        ? column.props.children
         : ""
     );
 
@@ -101,7 +101,10 @@ const convertObjTable = (data: any) => {
       rows: objRows,
     };
   } catch (err) {
-
+    return {
+      headers: [],
+      rows: []
+    }
   }
 };
 
