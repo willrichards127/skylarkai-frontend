@@ -552,6 +552,65 @@ export const transcriptApi = createApi({
         },
       }),
     }),
+    generateInvestmentCategory: builder.mutation<
+      any,
+      {
+        template: string;
+        data: string;
+        is_file_with_content?: boolean;
+        is_template_with_content?: boolean;
+        llm?: string;
+        company_name: string;
+        execute_query?: boolean;
+      }
+    >({
+      async queryFn(
+        {
+          execute_query = true,
+          template,
+          data,
+          is_file_with_content = true,
+          is_template_with_content = true,
+          company_name,
+          llm = "OpenAI",
+        },
+        api,
+        __,
+        apiBaseQuery
+      ) {
+        const graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
+        try {
+          const response: any = await apiBaseQuery({
+            url: `reports/template`,
+            method: "POST",
+            data: {
+              graph_id: graph_id,
+              execute_query,
+              template,
+              data: JSON.stringify({
+                answer: data,
+              }),
+              company_name,
+              is_file_with_content,
+              is_template_with_content,
+              llm,
+            },
+          });
+
+          return {
+            data: response.data.new_id,
+          };
+        } catch (e) {
+          return {
+            error: {
+              status: 404,
+              statusText: e,
+              data: "Error in sentimentanalysis API",
+            },
+          };
+        }
+      },
+    }),
     generateInvestmentReport: builder.mutation<
       any,
       {
