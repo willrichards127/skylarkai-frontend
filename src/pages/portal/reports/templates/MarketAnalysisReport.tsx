@@ -100,10 +100,9 @@ export const MarketAnalysisReport = ({
     };
     showEmailModal(true);
   }, [reportType]);
-  console.log("=================", initialReportItems.filter(f => f.value.tag === "table"));
+
   const handleSave = useCallback(() => {
-    console.log("====================", reportItems)
-    // onSave(reportItems);
+    onSave(reportItems);
   }, [onSave, reportItems]);
 
   const onDelete = useCallback(() => {
