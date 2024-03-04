@@ -53268,6 +53268,11 @@ export const tickers: ICompany[] = [
     company_name: "Oak Woods Acquisition Corp",
   },
   {
+    cik_str: 320193999999,
+    ticker: "ORDR",
+    company_name: "Outrider",
+  },
+  {
     cik_str: 1945422,
     ticker: "OAKUU",
     company_name: "Oak Woods Acquisition Corp",
