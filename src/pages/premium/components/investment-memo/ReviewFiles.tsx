@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+// import CheckIcon from '@mui/icons-material/Check';
 import { ICustomInstance } from "./interfaces";
 import { XAccordion } from "../../../../components/XAccordion";
 import {
@@ -99,7 +100,7 @@ export const ReviewFiles = ({
       if (webContent) {
         data = { ...data, website_content: webContent.text_content };
       }
-      console.log(webContent, fileData, data, "###BBB");
+
       const responseReportId = await generateReport({
         template: generateMD(instance.instance_metadata.template_content),
         data: JSON.stringify({
@@ -192,7 +193,7 @@ export const ReviewFiles = ({
               defaultExpanded
               options={instance.instance_metadata.template_content.map(
                 (item) => ({
-                  summary: item.category,
+                  summary: <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>{item.category}<CircularProgress size={16} /></Box>,
                   detail: item.questions.map((question, index) => (
                     <p key={question}>
                       {index + 1}. {question}
