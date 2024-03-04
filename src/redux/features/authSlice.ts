@@ -155,13 +155,17 @@ export const userAuthSlice = createSlice({
           errorHandler(state, "This user registeration is under the review.");
           return;
         }
-        state.user = payload;
+        state.user = {
+          ...payload,
+          main_features: (payload.main_features || []).filter((item: any) => item.id < 7) // remove 7, 8 features now
+        };
+        
         state.token = payload.token;
         state.sys_graph_id = payload.sys_graph_id;
         saveStoreValue("user-info", payload);
         saveStoreValue("token", payload.token);
         saveStoreValue("sys_graph_id", payload.sys_graph_id);
-      }),      
+      }),
       builder.addCase(verifyEmailAPI.pending, (state) => {
         state.loading = true;
       }),
