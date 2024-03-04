@@ -1,43 +1,32 @@
-import { memo, useMemo } from "react";
+import { memo } from "react";
 import { Box } from "@mui/material";
-import { chartTypeConfig } from "./config";
-import { TChartType, TColumn } from "../../../../../shared/models/types"; 
-import ApexChart from "react-apexcharts";
-import { parse2Apex } from "../../../../../shared/utils/parse";
+// import { TChartType, TColumn } from "../../../../../shared/models/types";
+// import ApexChart from "react-apexcharts";
 
-const colors = [
-  "#008FFB",
-  "#00E396",
-  "#FEB019",
-  "#FF4560",
-  "#775DD0",
-  "#3F51B5",
-  "#03A9F4",
-  "#4CAF50",
-  "#F9CE1D",
-  "#FF9800",
-];
+// const colors = [
+//   "#008FFB",
+//   "#00E396",
+//   "#FEB019",
+//   "#FF4560",
+//   "#775DD0",
+//   "#3F51B5",
+//   "#03A9F4",
+//   "#4CAF50",
+//   "#F9CE1D",
+//   "#FF9800",
+// ];
 
-export const Chart = memo(
-  ({
-    chartType,
-    columns,
-    rows,
-    height = 320,
-    title,
-  }: {
-    columns: TColumn[];
-    rows: Record<string, string | boolean>[];
-    title?: string;
-    height?: number | string;
-    chartType: TChartType;
-  }) => {
-
-    
-    const series = useMemo(() => {
-
-    }, [])
-    
+export const Chart = memo(() =>
+  // {
+  //   ,
+  // }: {
+  //   columns: TColumn[];
+  //   rows: Record<string, string | boolean>[];
+  //   title?: string;
+  //   height?: number | string;
+  //   chartType: TChartType;
+  // }
+  {
     return (
       <Box>
         {/* <Box
@@ -70,7 +59,7 @@ export const Chart = memo(
             </Box>
           ))}
         </Box> */}
-        <ApexChart
+        {/* <ApexChart
           options={{
             colors,
             theme: {
@@ -123,7 +112,7 @@ export const Chart = memo(
           type={chartType}
           width="100%"
           height={height}
-        />
+        /> */}
       </Box>
     );
   }

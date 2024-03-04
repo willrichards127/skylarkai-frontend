@@ -1,9 +1,9 @@
 import { memo, useCallback, useMemo } from "react";
 import { Box, colors } from "@mui/material";
 
-import { Chart } from "../Chart";
+// import { Chart } from "../Chart";
 import { XWidgetDrawer } from "./XWidgetDrawer";
-import { TChartType, TColumn } from "../../../../../shared/models/types";
+import { TColumn } from "../../../../../shared/models/types";
 import { ExtraProps } from "react-markdown";
 import { IReportItemValue } from "../../../../../shared/models/interfaces";
 
@@ -131,11 +131,11 @@ export const XWidget = memo(
           </table>
         ) : (
           <Box>
-            <Chart
+            {/* <Chart
               chartType={data.visual as TChartType}
               columns={columns.filter((col) => !col.isUnChecked)}
               rows={rows.filter((row: any) => !row.isUnChecked)}
-            />
+            /> */}
           </Box>
         )}
         <XWidgetDrawer

@@ -549,10 +549,11 @@ export const ChatAssistWindow = memo(
                       table: (props) => (
                         <XWidget
                           {...props}
+                          data={{ tag: "table", content: "" }}
                           isVisualize={false}
-                          visualType={"bar"}
+                          // visualType={"bar"}
                           onCloseVisualize={() => {}}
-                          onChangeVisualType={() => {}}
+                          onChangeData={() => {}}
                         />
                       ),
                       th: ({ isHeader, ...props }: any) => (
