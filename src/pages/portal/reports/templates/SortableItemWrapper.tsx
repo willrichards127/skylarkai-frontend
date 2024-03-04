@@ -9,11 +9,16 @@ import { XWidget } from "../components/XWidget";
 import { ItemEditor } from "./ItemEditor";
 // import { ItemOverlay } from "./ItemOverlay";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import FileCopyIcon from "@mui/icons-material/FileCopy";
 import BarChartIcon from "@mui/icons-material/BarChart";
-import CancelIcon from "@mui/icons-material/Cancel";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import AddIcon from "@mui/icons-material/Add";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { parseCitationInReport2 } from "../../../../shared/utils/string";
+import {
+  IReportItem,
+  IReportItemValue,
+} from "../../../../shared/models/interfaces";
 
 const styles = {
   csvReader: {
@@ -24,28 +29,20 @@ const styles = {
 
 export const SortableItemWrapper = memo(
   ({
-    itemId,
     item,
     onAddNew,
     onRemove,
+    onClone,
     onItemChanged,
     onAddUploadedFile,
     onJumpTo,
   }: {
-    itemId: string;
-    item: {
-      content: string;
-      tag: string;
-      visual?: string;
-    };
+    item: IReportItem;
     onAddNew: () => void;
     onRemove: () => void;
+    onClone: (clonedItem: IReportItemValue) => void;
     onAddUploadedFile: (data: string[][]) => void;
-    onItemChanged: (
-      itemContent: string,
-      tagName: string,
-      visualType?: string
-    ) => void;
+    onItemChanged: (value: Partial<IReportItemValue>) => void;
     onJumpTo: ({
       filename,
       quote,
@@ -57,7 +54,7 @@ export const SortableItemWrapper = memo(
     const { CSVReader } = useCSVReader();
     const { attributes, listeners, setNodeRef, transform, transition } =
       useSortable({
-        id: itemId,
+        id: item.key,
       });
 
     const style = {
@@ -67,9 +64,6 @@ export const SortableItemWrapper = memo(
       transition,
     };
 
-    const [visualType, setVisualType] = useState<string>(
-      item.visual || "table"
-    );
     const [hover, setHover] = useState<boolean>(false);
     const [isEdit, setIsEdit] = useState<boolean>(false);
     const [isVisualize, setIsVisualize] = useState<boolean>(false);
@@ -90,20 +84,12 @@ export const SortableItemWrapper = memo(
       setIsVisualize((prev) => !prev);
     }, []);
 
-    const onChangeVisualType = useCallback(
-      (newVisualType: string) => {
-        setVisualType(newVisualType);
-        onItemChanged(item.content, item.tag, newVisualType);
-      },
-      [onItemChanged, item]
-    );
-
     const onClickAway = useCallback(
       (content: string) => {
         setIsEdit(false);
-        onItemChanged(content, item.tag);
+        onItemChanged({ content });
       },
-      [onItemChanged, item]
+      [onItemChanged]
     );
 
     const onUploadAccepted = useCallback(
@@ -118,7 +104,7 @@ export const SortableItemWrapper = memo(
     return (
       <div
         ref={setNodeRef}
-        id={itemId}
+        id={item.key}
         style={{
           ...style,
           position: "relative",
@@ -130,7 +116,7 @@ export const SortableItemWrapper = memo(
         onDoubleClick={onEdit}
       >
         {isEdit ? (
-          <ItemEditor onClickAway={onClickAway} initialItem={item} />
+          <ItemEditor onClickAway={onClickAway} initialItem={item.value} />
         ) : (
           <ReactMarkdown
             rehypePlugins={[rehypeRaw as any]}
@@ -164,37 +150,19 @@ export const SortableItemWrapper = memo(
                 return <li {...props} />;
               },
               table: (props) => {
-                return <XWidget
-                  {...props}
-                  isVisualize={isVisualize}
-                  visualType={visualType}
-                  onCloseVisualize={onShowVisualization}
-                  onChangeVisualType={onChangeVisualType}
-                />
+                return (
+                  <XWidget
+                    {...props}
+                    data={item.value}
+                    onChangeData={onItemChanged}
+                    isVisualize={isVisualize}
+                    onCloseVisualize={onShowVisualization}
+                  />
+                );
               },
-              th: ({ ...props }) => (
-                <th
-                  {...props}
-                  style={{
-                    textAlign: "center",
-                    padding: "4px 8px",
-                    border: `1px solid ${colors.grey[500]}`,
-                  }}
-                />
-              ),
-              td: ({ ...props }) => (
-                <td
-                  {...props}
-                  style={{
-                    textAlign: "center",
-                    padding: "4px 8px",
-                    border: `1px solid ${colors.grey[500]}`,
-                  }}
-                />
-              ),
             }}
           >
-            {item.content}
+            {item.value.content}
           </ReactMarkdown>
         )}
         {!isEdit && hover && (
@@ -225,10 +193,17 @@ export const SortableItemWrapper = memo(
                 top: -36,
               }}
             >
-              <IconButton size="small" onClick={onAddNew}>
+              <IconButton
+                size="small"
+                onClick={onAddNew}
+                title="Add New Item Below"
+              >
                 <AddIcon sx={{ fontSize: 16 }} />
               </IconButton>
-              <CSVReader onUploadAccepted={onUploadAccepted}>
+              <CSVReader
+                onUploadAccepted={onUploadAccepted}
+                title="Upload File"
+              >
                 {({ getRootProps }: any) => (
                   <div style={styles.csvReader}>
                     <IconButton size="small" {...getRootProps()}>
@@ -237,13 +212,24 @@ export const SortableItemWrapper = memo(
                   </div>
                 )}
               </CSVReader>
-              {item.tag === "table" && (
-                <IconButton size="small" onClick={onShowVisualization}>
+              <IconButton
+                size="small"
+                onClick={() => onClone(item.value)}
+                title="Clone"
+              >
+                <FileCopyIcon sx={{ fontSize: 16 }} />
+              </IconButton>
+              {item.value.tag === "table" && (
+                <IconButton
+                  size="small"
+                  onClick={onShowVisualization}
+                  title="Visualize"
+                >
                   <BarChartIcon sx={{ fontSize: 16 }} />
                 </IconButton>
               )}
-              <IconButton size="small" onClick={onRemove}>
-                <CancelIcon sx={{ fontSize: 16 }} />
+              <IconButton size="small" onClick={onRemove} title="Remove">
+                <DeleteForeverIcon sx={{ fontSize: 16 }} />
               </IconButton>
             </Box>
           </Box>

@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { v4 as uuidv4 } from "uuid";
 import * as htmlparser2 from "htmlparser2";
+import { IReportItem } from "../models/interfaces";
+import { TColumn, TRow } from "../models/types";
+import * as cheerios from "cheerio";
 
 export const parseSWOT = (content: string) => {
   const strengthsRegex = /Strengths:([\s\S]*?)(Weaknesses:|$)/;
@@ -29,38 +32,18 @@ export const parseSWOT = (content: string) => {
   return [strengths, weaknesses, opportunities, threats];
 };
 
-const getColumnType = (columnLabel: string, rows: Record<string, string>[]) => {
-  if (columnLabel === "Year") return { type: "category" };
-  let units: string[] = [];
-  const columnValues: string[] = rows.reduce((pv: string[], cv) => {
-    if ((cv[columnLabel] || "").includes("%")) {
-      units.push("%");
-    } else if ((cv[columnLabel] || "").includes("$")) {
-      units.push("$");
-    } else if ((cv[columnLabel] || "").toLowerCase().includes("billion")) {
-      units.push("Billion");
-    } else if ((cv[columnLabel] || "").toLowerCase().includes("million")) {
-      units.push("Million");
-    }
-    if (["N/A", "NA", "NaN"].includes(cv[columnLabel] || "")) {
-      pv.push("");
-    } else {
-      const cleanedString = (cv[columnLabel] || "").replace(/[$%,]/g, "");
-      pv.push(cleanedString);
-    }
-    return pv;
-  }, []);
-  
-  units = units.filter((unit) => !!unit);
-  if (columnValues.some((value) => !isNaN(parseFloat(value)))) {
-    return {
-      unit: units.length > 0 ? units[0] : "",
-      type: "numeric",
-    };
-  }
-  return { type: "category" };
-};
+const getUnitFromColumn = (columnLabel: string) => {
+  const regex = /\((.*?)\)/;
+  const match = regex.exec(columnLabel);
 
+  if (match) {
+    const unit = match[1];
+    return unit;
+  } else {
+    return "";
+  }
+};
+/*
 const convertObjTable = (data: any) => {
   try {
     if (!data[0].props.children.props.children)
@@ -71,7 +54,7 @@ const convertObjTable = (data: any) => {
 
     const columns = data[0].props.children.props.children.map((column: any) =>
       column.props.children && column.props.children.length
-        ? column.props.children
+        ? (column.props.children || "").trim()
         : ""
     );
 
@@ -81,7 +64,7 @@ const convertObjTable = (data: any) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         row.props.children.map((cell: any) =>
           cell.props.children && cell.props.children.length
-            ? cell.props.children
+            ? (cell.props.children || "").trim()
             : ""
         )
     );
@@ -92,7 +75,9 @@ const convertObjTable = (data: any) => {
       const row: Record<string, string> = {};
 
       for (let j = 0; j < columns.length; j++) {
-        row[columns[j]] = rows[i][j];
+        if (["N/A", "NA", "NaN", ""].includes(rows[i][j].trim()))
+          row[columns[j]] = "-";
+        else row[columns[j]] = rows[i][j].trim();
       }
       objRows.push(row);
     }
@@ -104,58 +89,100 @@ const convertObjTable = (data: any) => {
   } catch (err) {
     return {
       headers: [],
-      rows: []
-    }
-  }
-};
-
-export const parseTable = (data: any) => {
-  const json = convertObjTable(data);
-  if (json) {
-    const columns = json.headers.map((header: string) => ({
-      label: header,
-      ...getColumnType(header, json.rows),
-    }));
-    return {
-      columns,
-      rows: json.rows.map((row: any) => {
-        const newRow: Record<string, string> = {};
-        for (const key in row) {
-          const column = columns.find((col: any) => col.label === key);
-          if (
-            row[key] &&
-            !["N/A", "NA", "NaN"].includes(row[key]) &&
-            column!.type === "numeric"
-          ) {
-            newRow[key] = row[key].replace(/\$|%|billion|million/g, "");
-          } else if (
-            column!.type === "numeric" &&
-            ["N/A", "NA", "NaN"].includes(row[key])
-          ) {
-            newRow[key] = "0";
-          } else {
-            newRow[key] = row[key];
-          }
-        }
-        return newRow;
-      }),
+      rows: [],
     };
   }
+};
+*/
+export const parseTable = (data: string) => {
+  const $ = cheerios.load(data);
+
+  const rows: TRow[] = [];
+  const columns: TColumn[] = [];
+  const table = $("table").first();
+  $(table)
+    .find("th")
+    .each((_, col) => {
+      const headerLabel = $(col).text() || "";
+      const unit = getUnitFromColumn(headerLabel);
+      const column = {
+        label: headerLabel,
+        unit,
+        type: unit ? "numeric" : "category",
+      } as TColumn;
+      if ($(col).hasClass("table-cell-hide")) {
+        column["isUnChecked"] = true;
+      }
+      columns.push(column);
+    });
+
+  $(table)
+    .find("tr")
+    .each((_, row) => {
+      const rowData: TRow = {};
+      $(row)
+        .find("td")
+        .each((j, td) => {
+          if (columns[j].type === "numeric") {
+            rowData[columns[j].label] = $(td)
+              .text()
+              .replace(/\$|%|billion|million/g, "");
+          } else {
+            rowData[columns[j].label] = $(td).text();
+          }
+        });
+
+      if (Object.keys(rowData).length) {
+        if($(row).hasClass("table-row-hide")) {
+          rowData["isUnChecked"] = true;
+        }
+        rows.push(rowData);
+      }
+    });
+
+  return {
+    rows,
+    columns,
+  };
+  // const json = HTMLTableParser.parse(data);
+
+  // if (json.results) {
+  //   const headers = Object.keys(json.results[0][0]);
+  //   const columns = headers.map((header: string) => {
+  //     const unit = getUnitFromColumn(header);
+  //     return { label: header, unit, type: unit ? "numeric" : "category" } as TColumn;
+  //   });
+  //   return {
+  //     columns,
+  //     rows: json.results[0].map((row: any) => {
+  //       const newRow: Record<string, string> = {};
+  //       for (const key in row) {
+  //         const column = columns.find((col: any) => col.label === key);
+  //         if (column!.type === "numeric") {
+  //           newRow[key] = row[key].replace(/\$|%|billion|million/g, "");
+  //         } else {
+  //           newRow[key] = row[key];
+  //         }
+  //       }
+  //       return newRow;
+  //     }),
+  //   };
+  // }
 };
 
 export const parse2Apex = (
   table: {
     columns: (
       | {
-        type: string;
-        unit?: undefined;
-        label: string;
-      }
+          type: string;
+          unit?: undefined;
+          label: string;
+        }
       | {
-        unit: string;
-        type: string;
-        label: string;
-      }
+          unit: string;
+          type: string;
+          label: string;
+        }
     )[];
     rows: Record<string, string>[];
   },
@@ -203,129 +230,21 @@ export const getDate = (date: Date = new Date()) => {
   });
 };
 
-const extractTableColumnsAndRows = (tableHTML: string) => {
-  const columns: string[] = [];
-  const rows: string[][] = [];
-
-  // Use regular expressions to extract columns and rows
-  const trRegex = /<tr>(.*?)<\/tr>/gs;
-  const tdThRegex = /<(th|td)>(.*?)<\/\1>/gs;
-
-  let trMatch;
-  while ((trMatch = trRegex.exec(tableHTML)) !== null) {
-    const rowContent = trMatch[1];
-    const row = [];
-    let tdThMatch;
-
-    // Extract columns
-    while ((tdThMatch = tdThRegex.exec(rowContent)) !== null) {
-      const cellContent = tdThMatch[2];
-      row.push(cellContent);
-    }
-
-    if (row.length > 0) {
-      if (columns.length === 0) {
-        columns.push(...row);
-      } else {
-        rows.push(row);
-      }
-    }
-  }
-
-  // convert obj table
-  const objRows: Record<string, any>[] = [];
-
-  for (let i = 0; i < rows.length; i++) {
-    const row: Record<string, string> = {};
-
-    for (let j = 0; j < columns.length; j++) {
-      row[columns[j]] = rows[i][j];
-    }
-    objRows.push(row);
-  }
-
-  // add column type
-  const typedColumns = columns.map((column: string) => ({
-    label: column,
-    ...getColumnType(column, objRows),
-  }));
-
-  // correction for row values
-  const correctedObjRows = objRows.map((row: any) => {
-    const newRow: Record<string, string> = {};
-    for (const key in row) {
-      const column = typedColumns.find((col: any) => col.label === key);
-      if (
-        row[key] &&
-        !["N/A", "NA"].includes(row[key]) &&
-        column!.type === "numeric"
-      ) {
-        newRow[key] = row[key].replace(/\$|%|billion|million/g, "");
-      } else if (
-        column!.type === "numeric" &&
-        ["N/A", "NA"].includes(row[key])
-      ) {
-        newRow[key] = "0";
-      } else {
-        newRow[key] = row[key];
-      }
-    }
-    return newRow;
-  });
-
-  return {
-    columns: typedColumns,
-    rows: correctedObjRows,
-  };
-};
-
-export const extractTagsAndContent = (htmlString: string) => {
-  const results: Record<string, any> = {};
-  const tagRegex = /<(h[1-6]|p|div|table)>(.*?)<\/\1>|<table>(.*?)<\/table>/gs;
-
-  // remove html or body tags
-  const html = htmlString.replace(/<\/?body>|<\/?html>/gi, "");
-
-  let match;
-  while ((match = tagRegex.exec(html)) !== null) {
-    const tagname = match[1];
-    const content = match[2];
-    if (tagname) {
-      const id = `${tagname}_${uuidv4()}`;
-      if (tagname === "table") {
-        results[id] = {
-          id,
-          tagname,
-          content: extractTableColumnsAndRows(content),
-        };
-      } else {
-        results[id] = {
-          id,
-          tagname,
-          content,
-        };
-      }
-    }
-  }
-
-  return results;
-};
-
 export const getNewId = (prefix = "md") => `${prefix}_${uuidv4()}`;
 
 export const categoryParser = (htmlString: string) => {
-  const sections: { key: string; value: any }[] = [];
+  const sections: IReportItem[] = [];
   let currentSection = "";
   let isTable = false;
 
   const parser = new htmlparser2.Parser(
     {
-      onopentag(name) {
+      onopentag(name, attr) {
         if (name === "table" || name === "ul" || name === "ol") {
           isTable = true;
         }
         if (isTable) {
-          currentSection += `<${name}>`;
+          currentSection += `<${name}${attr.class ? ` class=${attr.class}` : ''}>`;
         } else {
           currentSection = `<${name}>`;
         }

@@ -1,9 +1,8 @@
-import { memo, useMemo } from "react";
+import { memo } from "react";
 import { Box } from "@mui/material";
 import { chartTypeConfig } from "./config";
-import { TChartType, TColumn } from "../../../../../shared/models/types"; 
+import { TChartType } from "../../../../../shared/models/types"; 
 import ApexChart from "react-apexcharts";
-import { parse2Apex } from "../../../../../shared/utils/parse";
 
 const colors = [
   "#008FFB",
@@ -21,26 +20,25 @@ const colors = [
 export const Chart = memo(
   ({
     chartType,
-    columns,
-    rows,
+    chartConfig,
     height = 320,
     title,
   }: {
-    columns: TColumn[];
-    rows: Record<string, string | boolean>[];
+    chartConfig: {
+      series: ApexAxisChartSeries | ApexNonAxisChartSeries;
+      categories: (string | number)[];
+      xAxisLabel: string;
+      yAxisLabel: string;
+    };
     title?: string;
     height?: number | string;
     chartType: TChartType;
   }) => {
-
-    
-    const series = useMemo(() => {
-
-    }, [])
-    
+    const config = chartTypeConfig[chartType];
+    if (!chartConfig) return <>Unable to show this chart.</>;
     return (
       <Box>
-        {/* <Box
+        <Box
           className="print-legend"
           style={{
             display: "flex",
@@ -69,12 +67,13 @@ export const Chart = memo(
               {category}
             </Box>
           ))}
-        </Box> */}
+        </Box>
         <ApexChart
           options={{
             colors,
             theme: {
               mode: "dark",
+              // palette: "palette0",
             },
             chart: {
               animations: {
@@ -84,6 +83,7 @@ export const Chart = memo(
               toolbar: {
                 show: false,
               },
+              ...config.chart,
             },
             dataLabels: {
               enabled: false,
@@ -100,9 +100,14 @@ export const Chart = memo(
               shared: true,
               intersect: false,
             },
-            
+            ...(!!config.stroke && { stroke: config.stroke }),
+            ...(!!config.plotOptions && {
+              plotOptions: config.plotOptions,
+            }),
             ...(!!title && { title: { text: title } }),
-            
+            ...(["pie", "donut"].includes(chartType) && {
+              labels: chartConfig.categories!.map((item) => item.toString()),
+            }),
             xaxis: {
               categories: chartConfig.categories!,
               // tickPlacement: "on",
@@ -115,12 +120,30 @@ export const Chart = memo(
                 text: chartConfig.yAxisLabel,
               },
             },
-            
+            ...(["pie", "donut"].includes(chartType)
+              ? {
+                  legend: {
+                    position: "top",
+                    show: true,
+                    offsetY: 10,
+                  },
+                }
+              : {
+                  legend: {
+                    position: "top",
+                    showForSingleSeries: true,
+                    offsetY: 20,
+                    show: true,
+                  },
+                }),
           }}
           series={
-            chartConfig.series
+            ["pie", "donut"].includes(chartType)
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              ? (chartConfig.series[0] as any).data.map((item: any) => +item)
+              : chartConfig.series
           }
-          type={chartType}
+          type={config.chart!.type}
           width="100%"
           height={height}
         />
