@@ -137,7 +137,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
               <MarketAnalysisReport
                 setup={setupData}
                 reportContent={isGeneratedReport ? generatedData : reportData.content}
-                customizedContent={isGeneratedReport ? undefined : reportData.custom_metadata}
+                // customizedContent={isGeneratedReport ? undefined : reportData.custom_metadata}
                 reportType={reportType!}
                 onRerun={OnRerun}
                 onSave={onSave}

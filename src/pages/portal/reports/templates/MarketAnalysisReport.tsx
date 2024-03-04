@@ -4,7 +4,6 @@ import { Box } from "@mui/material";
 // import { toast } from "react-toastify";
 import { DndContext } from "@dnd-kit/core";
 import {
-  arrayMove,
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
@@ -18,27 +17,30 @@ import {
   getNewId,
   categoryParser,
   convertCSVToTable,
+  parseTable,
 } from "../../../../shared/utils/parse";
 import { UtilPanel } from "../components/UtilPanel";
 import { BottomPanel } from "../components/BottomPanel";
 import { ChatAssistWindow } from "../components/ChatAssistWindow";
 import { useLazyGetFilesDataQuery } from "../../../../redux/services/transcriptAPI";
 import { scrollToAndHighlightText } from "../../../../shared/utils/string";
-import { ISetup } from "../../../../shared/models/interfaces";
+import {
+  IReportItem,
+  IReportItemValue,
+  ISetup,
+} from "../../../../shared/models/interfaces";
 import { REPORTS_DICT } from "../../../../shared/models/constants";
 import { getPdfInBase64 } from "../../../../shared/utils/pdf-generator";
 
 export const MarketAnalysisReport = ({
   setup,
   reportContent,
-  customizedContent,
   reportType,
   onSave,
   onRerun,
 }: {
   setup: ISetup;
   reportContent: any;
-  customizedContent?: { key: string; value: any }[];
   reportType: string;
   onSave: (content: { key: string; value: any }[]) => void;
   onRerun: (append?: Record<string, File[]>) => void;
@@ -46,8 +48,8 @@ export const MarketAnalysisReport = ({
   const printRef = useRef<HTMLDivElement>();
 
   const initialReportItems = useMemo(
-    () => customizedContent || categoryParser(reportContent),
-    [reportContent, customizedContent]
+    () => categoryParser(reportContent),
+    [reportContent]
   );
 
   const refFileRef = useRef<{
@@ -66,10 +68,17 @@ export const MarketAnalysisReport = ({
   const [chatAssist, showChatAssist] = useState<boolean>(false);
   const [emailModal, showEmailModal] = useState<boolean>(false);
 
-  const [reportItems, setReportItems] =
-    useState<{ key: string; value: any }[]>(initialReportItems);
-  const [itemIds, setItemIds] = useState<string[]>(
-    initialReportItems.map((item) => item.key)
+  const [reportItems, setReportItems] = useState<IReportItem[]>(
+    initialReportItems.map((item) => ({
+      ...item,
+      value: {
+        ...item.value,
+        ...(item.value.tag === "table" && {
+          metadata: parseTable(item.value.content),
+          visual: "table",
+        }),
+      },
+    }))
   );
 
   const onPrint = useCallback(() => {
@@ -104,12 +113,6 @@ export const MarketAnalysisReport = ({
     const { active, over } = event;
     if (!active || !over) return;
     if (active.id !== over.id) {
-      setItemIds((prevItemIds) => {
-        const oldIndex = prevItemIds.indexOf(active.id);
-        const newIndex = prevItemIds.indexOf(over.id);
-
-        return arrayMove(prevItemIds, oldIndex, newIndex);
-      });
       setReportItems((prevItems) => {
         const updated = [...prevItems];
         const oldIndex = prevItems.map((item) => item.key).indexOf(active.id);
@@ -133,10 +136,17 @@ export const MarketAnalysisReport = ({
       });
       return updated;
     });
-    setItemIds((prevItemIds) => {
-      const updated = [...prevItemIds];
-      const position = prevItemIds.indexOf(itemId);
-      updated.splice(position, 0, newId);
+  }, []);
+
+  const onClone = useCallback((itemId: string, item: any) => {
+    const newId = getNewId();
+    setReportItems((prevItems) => {
+      const updated = [...prevItems];
+      const position = prevItems.map((item) => item.key).indexOf(itemId);
+      updated.splice(position, 0, {
+        key: newId,
+        value: item,
+      });
       return updated;
     });
   }, []);
@@ -152,19 +162,10 @@ export const MarketAnalysisReport = ({
       });
       return updated;
     });
-    setItemIds((prevItemIds) => {
-      const updated = [...prevItemIds];
-      const position = prevItemIds.indexOf(itemId);
-      updated.splice(position, 0, newId);
-      return updated;
-    });
   }, []);
 
   const onRemove = useCallback((itemId: string) => {
     setReportItems((prev) => prev.filter((item) => item.key !== itemId));
-    setItemIds((prevItemIds) =>
-      prevItemIds.filter((prevId) => prevId !== itemId)
-    );
   }, []);
 
   const onChatAssist = useCallback(() => {
@@ -190,25 +191,27 @@ export const MarketAnalysisReport = ({
 
   // Item content
   const onItemChanged = useCallback(
-    (
-      itemId: string,
-      changedItemContent: string,
-      tagName: string,
-      visualType?: string
-    ) => {
+    (itemId: string, data: Partial<IReportItemValue>) => {
       setReportItems((prev) =>
-        prev.map((item) =>
-          item.key === itemId
-            ? {
-                ...item,
-                value: {
-                  tag: tagName,
-                  ...(visualType && { visual: visualType }),
-                  content: changedItemContent,
-                },
-              }
-            : item
-        )
+        prev.map((item) => {
+          if (item.key === itemId) {
+            if (item.value.tag === "table" && data.content && !data.metadata) {
+              // Item Changed for table edit(Just data, not configure row/column)
+              const newMetadata = parseTable(data.content);
+              data.metadata = newMetadata;
+            }
+
+            return {
+              ...item,
+              value: {
+                ...item.value,
+                ...data,
+              },
+            };
+          } else {
+            return item;
+          }
+        })
       );
     },
     []
@@ -276,24 +279,22 @@ export const MarketAnalysisReport = ({
             <IndexView items={reportItems} />
             <DndContext onDragEnd={onDragEnd}>
               <SortableContext
-                items={itemIds}
+                items={reportItems.map((item) => item.key)}
                 strategy={verticalListSortingStrategy}
               >
-                {itemIds.map((itemId) => (
+                {reportItems.map((item) => (
                   <SortableItemWrapper
-                    key={itemId}
-                    itemId={itemId}
-                    item={
-                      reportItems.find((item) => item.key === itemId)!.value
-                    }
-                    onAddNew={() => onAddNew(itemId)}
-                    onRemove={() => onRemove(itemId)}
+                    key={item.key}
+                    item={item}
+                    onAddNew={() => onAddNew(item.key)}
+                    onRemove={() => onRemove(item.key)}
+                    onClone={(clonedItem) => onClone(item.key, clonedItem)}
                     onAddUploadedFile={(data) =>
-                      onAddUploadedFile(itemId, data)
+                      onAddUploadedFile(item.key, data)
                     }
                     onJumpTo={onJumpTo}
-                    onItemChanged={(changedValue, tagName, visualType) =>
-                      onItemChanged(itemId, changedValue, tagName, visualType)
+                    onItemChanged={(data: Partial<IReportItemValue>) =>
+                      onItemChanged(item.key, data)
                     }
                   />
                 ))}

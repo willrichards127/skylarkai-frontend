@@ -42,20 +42,21 @@ export const SendEmailModal = memo(
         base64str: content,
         emails: emails.split(",").map((email) => email.trim()),
       });
-      onClose()
-    }, [subject, emails, content, sendEmails, onClose]);
+    }, [subject, emails, content, sendEmails]);
 
     useEffect(() => {
       if (initialSubject) setSubject(initialSubject);
     }, [initialSubject]);
 
-    if (isSuccess) {
-      toast.success("Sent the report.");
-    }
-
-    if (isError) {
-      toast.error("Failed to send the report.");
-    }
+    useEffect(() => {
+      if (isSuccess) {
+        toast.success("Sent the report.");
+        onClose();
+      }
+      if (isError) {
+        toast.error("Failed to send the report.");
+      }
+    }, [isSuccess, isError, onClose]);
 
     return (
       <XModal

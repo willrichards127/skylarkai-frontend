@@ -2,16 +2,14 @@ import { memo, useCallback, useRef } from "react";
 import { ClickAwayListener } from "@mui/base/ClickAwayListener";
 import { Editor } from "@tinymce/tinymce-react";
 import { correctTableFormat } from "../../../../shared/utils/parse";
+import { IReportItemValue } from "../../../../shared/models/interfaces";
 
 export const ItemEditor = memo(
   ({
     initialItem,
     onClickAway,
   }: {
-    initialItem: {
-      content: string;
-      tag: string;
-    };
+    initialItem: IReportItemValue;
     onClickAway: (content: string) => void;
   }) => {
     const editorRef = useRef<any>(null);
