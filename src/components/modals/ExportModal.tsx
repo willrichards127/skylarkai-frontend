@@ -31,8 +31,9 @@ export const ExportModal = memo(
         item.remove();
       }
       
-      generatePdf(container.innerHTML, reportName, "SkylarkAI");
-    }, [exportContent, reportName]);
+      generatePdf(container.innerHTML, reportName, "Skylark");
+      onClose();
+    }, [onClose, exportContent, reportName]);
 
     return (
       <XModal
