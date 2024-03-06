@@ -34,29 +34,33 @@ export const Chart = memo(
     const chartData = useMemo(() => {
       if (data.axis && data.axis.x.length && data.axis.y.length) {
         let categories: string[];
-        const [direct, index] = data.axis.x[0].split("-");
+
+        const [direct, xIndex] = data.axis.x.split("-");
         if (direct === "col") {
-          const colLabel = data.columns[+index].label;
+          const colLabel = data.columns[+xIndex].label;
           categories = data.rows.map((row) => row[colLabel]);
         } else {
-          categories = Object.keys(data.rows[+index])
+          categories = Object.keys(data.rows[+xIndex])
             .filter((key) => key !== "isUnChecked")
-            .map((key) => data.rows[+index][key]);
+            .map((key) => data.rows[+xIndex][key]);
         }
 
         const series = data.axis.y.map((eachY) => {
-          let s: number[];
+          let sTitle = "";
+          let sData: number[];
           const [direct, index] = eachY.split("-");
           if (direct === "col") {
             const colLabel = data.columns[+index].label;
-            s = data.rows.map((row) => +row[colLabel]);
+            sData = data.rows.map((row) => +row[colLabel]);
+            sTitle = colLabel;
           } else {
-            s = Object.keys(data.rows[+index])
+            sData = Object.keys(data.rows[+index])
               .filter((key) => key !== "isUnChecked")
               .map((key) => +data.rows[+index][key]);
+            sTitle = `Row-${index}`
           }
 
-          return { data: s };
+          return { data: sData, name: sTitle };
         });
 
         return {
