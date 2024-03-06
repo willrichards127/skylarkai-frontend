@@ -1,32 +1,73 @@
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import { Box } from "@mui/material";
-// import { TChartType, TColumn } from "../../../../../shared/models/types";
-// import ApexChart from "react-apexcharts";
+import { chartTypeConfig } from "./config";
+import { TChartType } from "../../../../../shared/models/types";
+import ApexChart from "react-apexcharts";
+import { IReportItemMetadata } from "../../../../../shared/models/interfaces";
 
-// const colors = [
-//   "#008FFB",
-//   "#00E396",
-//   "#FEB019",
-//   "#FF4560",
-//   "#775DD0",
-//   "#3F51B5",
-//   "#03A9F4",
-//   "#4CAF50",
-//   "#F9CE1D",
-//   "#FF9800",
-// ];
+const colors = [
+  "#008FFB",
+  "#00E396",
+  "#FEB019",
+  "#FF4560",
+  "#775DD0",
+  "#3F51B5",
+  "#03A9F4",
+  "#4CAF50",
+  "#F9CE1D",
+  "#FF9800",
+];
 
-export const Chart = memo(() =>
-  // {
-  //   ,
-  // }: {
-  //   columns: TColumn[];
-  //   rows: Record<string, string | boolean>[];
-  //   title?: string;
-  //   height?: number | string;
-  //   chartType: TChartType;
-  // }
-  {
+export const Chart = memo(
+  ({
+    data,
+    height = 320,
+    title,
+  }: {
+    data: IReportItemMetadata;
+    title?: string;
+    height?: number | string;
+  }) => {
+    const chartType = data.visual as TChartType;
+    const config = chartTypeConfig[chartType];
+
+    const chartData = useMemo(() => {
+      if (data.axis && data.axis.x.length && data.axis.y.length) {
+        let categories: string[];
+        const [direct, index] = data.axis.x[0].split("-");
+        if (direct === "col") {
+          const colLabel = data.columns[+index].label;
+          categories = data.rows.map((row) => row[colLabel]);
+        } else {
+          categories = Object.keys(data.rows[+index])
+            .filter((key) => key !== "isUnChecked")
+            .map((key) => data.rows[+index][key]);
+        }
+
+        const series = data.axis.y.map((eachY) => {
+          let s: number[];
+          const [direct, index] = eachY.split("-");
+          if (direct === "col") {
+            const colLabel = data.columns[+index].label;
+            s = data.rows.map((row) => +row[colLabel]);
+          } else {
+            s = Object.keys(data.rows[+index])
+              .filter((key) => key !== "isUnChecked")
+              .map((key) => +data.rows[+index][key]);
+          }
+
+          return { data: s };
+        });
+
+        return {
+          categories,
+          series,
+        };
+      }
+    }, [data]);
+
+    if (!chartData) return <>Unable to show this chart.</>;
+
     return (
       <Box>
         {/* <Box
@@ -40,8 +81,8 @@ export const Chart = memo(() =>
         >
           {(["pie", "donut"].includes(chartType)
             ? chartConfig.categories!
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            : chartConfig.series.map((item: any) => item.name)
+            : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              chartConfig.series.map((item: any) => item.name)
           ).map((category: string | number, index: number) => (
             <Box
               key={category}
@@ -59,11 +100,12 @@ export const Chart = memo(() =>
             </Box>
           ))}
         </Box> */}
-        {/* <ApexChart
+        <ApexChart
           options={{
             colors,
             theme: {
               mode: "dark",
+              // palette: "palette0",
             },
             chart: {
               animations: {
@@ -73,6 +115,7 @@ export const Chart = memo(() =>
               toolbar: {
                 show: false,
               },
+              ...config.chart,
             },
             dataLabels: {
               enabled: false,
@@ -89,30 +132,49 @@ export const Chart = memo(() =>
               shared: true,
               intersect: false,
             },
-            
+            ...(!!config.stroke && { stroke: config.stroke }),
+            ...(!!config.plotOptions && {
+              plotOptions: config.plotOptions,
+            }),
             ...(!!title && { title: { text: title } }),
-            
+            ...(["pie", "donut"].includes(chartType) && {
+              labels: chartData.categories,
+            }),
             xaxis: {
-              categories: chartConfig.categories!,
+              categories: chartData.categories,
               // tickPlacement: "on",
-              title: {
-                text: chartConfig.xAxisLabel,
-              },
             },
-            yaxis: {
-              title: {
-                text: chartConfig.yAxisLabel,
-              },
-            },
-            
+            // yaxis: {
+            //   title: {
+            //     text: chartConfig.yAxisLabel,
+            //   },
+            // },
+            ...(["pie", "donut"].includes(chartType)
+              ? {
+                  legend: {
+                    position: "top",
+                    show: true,
+                    offsetY: 10,
+                  },
+                }
+              : {
+                  legend: {
+                    position: "top",
+                    showForSingleSeries: true,
+                    offsetY: 20,
+                    show: true,
+                  },
+                }),
           }}
           series={
-            chartConfig.series
+            ["pie", "donut"].includes(chartType)
+              ? chartData.series[0].data
+              : chartData.series
           }
-          type={chartType}
+          type={config.chart!.type}
           width="100%"
           height={height}
-        /> */}
+        />
       </Box>
     );
   }
