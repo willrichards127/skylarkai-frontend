@@ -29,7 +29,7 @@ export const Report = ({
   const ref = useRef<HTMLDivElement>();
 
   const onExport = useCallback(() => {
-    generatePdf(ref.current!.innerHTML, "Sentiment Analysis");
+    generatePdf(ref.current!.innerHTML, "Sentiment Analysis", "Skylark");
   }, []);
 
   return (

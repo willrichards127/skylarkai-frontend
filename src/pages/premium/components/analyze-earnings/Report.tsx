@@ -41,7 +41,7 @@ export const Report = ({
     useUpdateFeatureInstanceMutation();
 
   const onExport = useCallback(() => {
-    generatePdf(ref.current!.innerHTML, "Compare Earning Calls");
+    generatePdf(ref.current!.innerHTML, "Compare Earning Calls", "Skylark");
   }, []);
 
   useEffect(() => {

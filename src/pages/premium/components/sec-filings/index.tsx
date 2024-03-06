@@ -149,7 +149,7 @@ const AskSecFilingsFeature = ({ featureId }: { featureId: number }) => {
                 </Typography>
                 <Stack
                   spacing={1}
-                  sx={{ maxHeight: 320, overflowY: "auto", pr: 4 }}
+                  sx={{ maxHeight: 240, overflowY: "auto", pr: 4 }}
                 >
                   {(instance.instance_metadata?.docs || []).map((doc) => (
                     <DocumentChip

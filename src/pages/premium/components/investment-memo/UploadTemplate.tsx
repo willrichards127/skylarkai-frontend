@@ -117,7 +117,7 @@ export const UploadTemplate = ({
           variant="contained"
           sx={{ minWidth: 140 }}
           onClick={() => onNext(companyUrl)}
-          disabled={!uploadedFiles.length && !companyUrl}
+          disabled={!uploadedFiles.length}
         >
           Next
         </Button>
@@ -143,7 +143,7 @@ export const UploadTemplate = ({
               ))}
             </TextField>
             <TextField
-              label="Website URL:"
+              label="Website URL(Optional)"
               size="small"
               value={companyUrl}
               onChange={(e) => setCompanyUrl(e.target.value)}

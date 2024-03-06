@@ -58,7 +58,7 @@ export const Report = ({
   const [emailModal, showEmailModal] = useState<boolean>(false);
 
   const onExport = useCallback(() => {
-    generatePdf(ref.current!.innerHTML, "Compare documents");
+    generatePdf(ref.current!.innerHTML, "Compare documents", "Skylark");
   }, []);
 
   const onSendEmail = useCallback(async () => {

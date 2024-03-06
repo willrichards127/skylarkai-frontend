@@ -162,13 +162,12 @@ export const transcriptApi = createApi({
         const graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
         try {
           const response: any = await apiBaseQuery({
-            url: `${
-              analysis_type === "edgar"
+            url: `${analysis_type === "edgar"
                 ? "edgar_files"
                 : analysis_type === "transcript"
-                ? "transcript_files"
-                : "insider_transaction"
-            }/${graph_id}?company_name=${company_name}&ticker=${ticker}`,
+                  ? "transcript_files"
+                  : "insider_transaction"
+              }/${graph_id}?company_name=${company_name}&ticker=${ticker}`,
             method: "GET",
           });
           if (!response.data || response.data[1] === 400) {
@@ -306,6 +305,7 @@ export const transcriptApi = createApi({
     customQuery: builder.mutation<
       IChat,
       {
+        graph_id?: number;
         question: string;
         filenames: string[];
         analysis_type?: string;
@@ -316,6 +316,7 @@ export const transcriptApi = createApi({
     >({
       async queryFn(
         {
+          graph_id,
           question,
           filenames,
           analysis_type = "transcript",
@@ -327,14 +328,14 @@ export const transcriptApi = createApi({
         __,
         apiBaseQuery
       ) {
-        const graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
+        const sys_graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
+        const current_graph_id = graph_id || sys_graph_id;
         try {
           const response: any = await apiBaseQuery({
-            url: `customquery/${graph_id}?${
-              insider_transaction
+            url: `customquery/${current_graph_id}?${insider_transaction
                 ? "&insider_transaction=" + insider_transaction
                 : ""
-            }`,
+              }`,
             method: "POST",
             data: {
               question,

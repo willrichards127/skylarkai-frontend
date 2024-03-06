@@ -33,7 +33,7 @@ export const ExportModal = memo(
       
       generatePdf(container.innerHTML, reportName, "Skylark");
       onClose();
-    }, [exportContent, reportName, onClose]);
+    }, [onClose, exportContent, reportName]);
 
     return (
       <XModal
