@@ -74,8 +74,7 @@ export const MarketAnalysisReport = ({
       value: {
         ...item.value,
         ...(item.value.tag === "table" && {
-          metadata: parseTable(item.value.content),
-          visual: "table",
+          metadata: { ...parseTable(item.value.content), visual: "table" },
         }),
       },
     }))
@@ -198,7 +197,7 @@ export const MarketAnalysisReport = ({
             if (item.value.tag === "table" && data.content && !data.metadata) {
               // Item Changed for table edit(Just data, not configure row/column)
               const newMetadata = parseTable(data.content);
-              data.metadata = newMetadata;
+              data.metadata = {...newMetadata, visual: "table"};
             }
 
             return {

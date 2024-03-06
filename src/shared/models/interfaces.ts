@@ -1,4 +1,4 @@
-import { TChat } from "./types";
+import { TChat, TColumn, TRow } from "./types";
 
 export interface IMenuItem {
   content?: React.ReactNode;
@@ -117,13 +117,24 @@ export interface IChat {
 }
 
 export interface IReportItemValue {
-	tag: string;
-	content: string;
-	metadata?: any;
-  visual?: string;
+  tag: string;
+  content: string;
+  metadata?: {
+    rows: TRow[];
+    columns: TColumn[];
+    visual?: string;
+    axis?: {
+      x: string[];
+      y: string[];
+    }
+  };
 }
 
+export type IReportItemMetadata = Required<IReportItemValue>["metadata"];
+export type IAxis = Required<IReportItemMetadata>["axis"];
+export type IAxisKey = keyof IAxis;
+
 export interface IReportItem {
-	key: string;
-	value: IReportItemValue;
+  key: string;
+  value: IReportItemValue;
 }

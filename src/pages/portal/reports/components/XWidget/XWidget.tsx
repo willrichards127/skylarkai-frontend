@@ -1,11 +1,14 @@
 import { memo, useCallback, useMemo } from "react";
 import { Box, colors } from "@mui/material";
 
-// import { Chart } from "../Chart";
+import { Chart } from "../Chart";
 import { XWidgetDrawer } from "./XWidgetDrawer";
 import { TColumn } from "../../../../../shared/models/types";
 import { ExtraProps } from "react-markdown";
-import { IReportItemValue } from "../../../../../shared/models/interfaces";
+import {
+  IAxisKey,
+  IReportItemValue,
+} from "../../../../../shared/models/interfaces";
 
 type XWidgetProps = React.TableHTMLAttributes<HTMLTableElement> &
   ExtraProps & {
@@ -17,11 +20,13 @@ type XWidgetProps = React.TableHTMLAttributes<HTMLTableElement> &
 
 export const XWidget = memo(
   ({ data, onChangeData, isVisualize, onCloseVisualize }: XWidgetProps) => {
+    const metadata = data.metadata!;
+
     const columns = useMemo(
-      () => (data.metadata.columns || []) as TColumn[],
-      [data.metadata.columns]
+      () => (metadata.columns || []) as TColumn[],
+      [metadata.columns]
     );
-    const rows = useMemo(() => data.metadata.rows || [], [data.metadata.rows]);
+    const rows = useMemo(() => metadata.rows || [], [metadata.rows]);
 
     const generateInnerHtml = useCallback((rows: any, columns: TColumn[]) => {
       return `<table><thead><tr>${columns
@@ -57,10 +62,10 @@ export const XWidget = memo(
         }));
         onChangeData({
           content: generateInnerHtml(rows, newColumns),
-          metadata: { ...data.metadata, columns: newColumns },
+          metadata: { ...metadata, columns: newColumns },
         });
       },
-      [rows, columns, onChangeData, generateInnerHtml, data.metadata]
+      [rows, columns, onChangeData, generateInnerHtml, metadata]
     );
 
     const onChangeRow = useCallback(
@@ -71,19 +76,29 @@ export const XWidget = memo(
         }));
         onChangeData({
           content: generateInnerHtml(newRows, columns),
-          metadata: { ...data.metadata, rows: newRows },
+          metadata: { ...metadata, rows: newRows },
         });
       },
-      [rows, columns, onChangeData, generateInnerHtml, data.metadata]
+      [rows, columns, onChangeData, generateInnerHtml, metadata]
     );
 
     const onChangeVisualType = (newType: string) => {
-      onChangeData({ visual: newType });
+      onChangeData({ metadata: { ...metadata, visual: newType } });
     };
 
-    return data ? (
+    const onChangeAxis = (axis: IAxisKey, index: string) => {
+      const axisData = { ...(metadata.axis || { x: [], y: [] }) };
+      if (axisData[axis].includes(index)) {
+        axisData[axis] = axisData[axis].filter((value) => value !== index);
+      } else {
+        axisData[axis].push(index);
+      }
+      onChangeData({ metadata: { ...metadata, axis: axisData } });
+    };
+
+    return metadata ? (
       <Box sx={{ display: "flex", flexDirection: "column", mt: 4, mb: 8 }}>
-        {data.visual === "table" ? (
+        {metadata.visual === "table" ? (
           <table style={{ borderCollapse: "collapse" }}>
             <thead>
               <tr>
@@ -131,22 +146,20 @@ export const XWidget = memo(
           </table>
         ) : (
           <Box>
-            {/* <Chart
-              chartType={data.visual as TChartType}
-              columns={columns.filter((col) => !col.isUnChecked)}
-              rows={rows.filter((row: any) => !row.isUnChecked)}
-            /> */}
+            <Chart data={metadata} />
           </Box>
         )}
         <XWidgetDrawer
           open={isVisualize}
-          visualType={data.visual}
+          visualType={metadata.visual}
           columns={columns}
           rows={rows}
+          axis={metadata.axis || { x: [], y: [] }}
           onClose={onCloseVisualize}
           onChangeVisualType={onChangeVisualType}
           onChangeColumn={onChangeColumn}
           onChangeRow={onChangeRow}
+          onChangeAxis={onChangeAxis}
         />
       </Box>
     ) : null;
