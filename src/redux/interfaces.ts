@@ -38,6 +38,7 @@ export interface ITranscript {
 export interface IChat {
   type: "question" | "answer" | "loading" | "topic" | "suggestions";
   content: string | string[];
+  tables?: string[];
   reference?: string[];
 }
 

@@ -11,6 +11,7 @@ import { ReviewFiles } from "./ReviewFiles";
 import { DocumentChip } from "../../../../components/DocumentChip";
 import { FileViewModal } from "../sub-components/FileViewModal";
 import { investmentTemplateDict } from "../../../../shared/models/constants";
+import { removeExtension } from "../../../../shared/utils/string";
 
 const InvestmentMemoFeature = ({ featureId }: { featureId: number }) => {
   const [instance, setInstance] = useState<ICustomInstance>({
@@ -133,7 +134,7 @@ const InvestmentMemoFeature = ({ featureId }: { featureId: number }) => {
       ...prev,
       instance_metadata: {
         ...prev.instance_metadata,
-        uploaded_file_names: files.map((file) => file.name),
+        uploaded_file_names: files.map((file) => removeExtension(file.name)),
         uploaded_files: files,
       },
     }));
@@ -172,7 +173,7 @@ const InvestmentMemoFeature = ({ featureId }: { featureId: number }) => {
                   </Typography>
                   <Stack
                     spacing={1}
-                    sx={{ maxHeight: 320, overflowY: "auto", pr: 4 }}
+                    sx={{ maxHeight: 240, overflowY: "auto", pr: 4 }}
                   >
                     <DocumentChip
                       label={instance.instance_metadata?.template_name}
@@ -191,7 +192,7 @@ const InvestmentMemoFeature = ({ featureId }: { featureId: number }) => {
                   </Typography>
                   <Stack
                     spacing={1}
-                    sx={{ maxHeight: 320, overflowY: "auto", pr: 4 }}
+                    sx={{ maxHeight: 140, overflowY: "auto", pr: 4 }}
                   >
                     {!instance.saved
                       ? instance.instance_metadata.uploaded_files.map(
