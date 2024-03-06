@@ -124,7 +124,7 @@ export interface IReportItemValue {
     columns: TColumn[];
     visual?: string;
     axis?: {
-      x: string[];
+      x: string;
       y: string[];
     }
   };

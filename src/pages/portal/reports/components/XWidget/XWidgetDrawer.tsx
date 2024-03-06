@@ -26,7 +26,6 @@ import DonutLargeIcon from "@mui/icons-material/DonutLarge";
 import { XIconButton } from "../../../../../components/buttons/XIconButton";
 import { TColumn } from "../../../../../shared/models/types";
 import { IAxis, IAxisKey } from "../../../../../shared/models/interfaces";
-// import { XAccordion } from "../../../../../components/XAccordion";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const VizItems = [
@@ -219,12 +218,7 @@ export const XWidgetDrawer = memo(
             <Typography p={2} variant="subtitle2">
               X-Axis
             </Typography>
-            <Accordion
-              disabled={
-                axis.y.join(" ").includes("col") ||
-                axis.x.join(" ").includes("row")
-              }
-            >
+            <Accordion disabled={axis.x.includes("row")}>
               <AccordionSummary>
                 <Box fontSize={12}>Columns</Box>
               </AccordionSummary>
@@ -236,7 +230,7 @@ export const XWidgetDrawer = memo(
                       control={
                         <Checkbox
                           size="small"
-                          checked={axis.x.includes(`col-${index}`)}
+                          checked={axis.x === `col-${index}`}
                           onChange={() => onChangeAxis("x", `col-${index}`)}
                         />
                       }
@@ -247,12 +241,7 @@ export const XWidgetDrawer = memo(
                 </Stack>
               </AccordionDetails>
             </Accordion>
-            <Accordion
-              disabled={
-                axis.x.join(" ").includes("col") ||
-                axis.y.join(" ").includes("row")
-              }
-            >
+            <Accordion disabled={axis.x.includes("col")}>
               <AccordionSummary>
                 <Box fontSize={12}>Rows</Box>
               </AccordionSummary>
@@ -264,7 +253,7 @@ export const XWidgetDrawer = memo(
                       control={
                         <Checkbox
                           size="small"
-                          checked={axis.x.includes(`row-${index}`)}
+                          checked={axis.x === `row-${index}`}
                           onChange={() => onChangeAxis("x", `row-${index}`)}
                         />
                       }
@@ -279,59 +268,53 @@ export const XWidgetDrawer = memo(
             <Typography p={2} variant="subtitle2">
               Y-Axis
             </Typography>
-            <Accordion
-              disabled={
-                axis.x.join(" ").includes("col") ||
-                axis.y.join(" ").includes("row")
-              }
-            >
+            <Accordion disabled={axis.x.includes("row")}>
               <AccordionSummary>
                 <Box fontSize={12}>Columns</Box>
               </AccordionSummary>
               <AccordionDetails>
                 <Stack>
-                  {columns.map((col, index) => (
-                    <FormControlLabel
-                      key={`col-${col.label}`}
-                      control={
-                        <Checkbox
-                          size="small"
-                          checked={axis.y.includes(`col-${index}`)}
-                          onChange={() => onChangeAxis("y", `col-${index}`)}
-                        />
-                      }
-                      label={<Box fontSize={12}>{col.label}</Box>}
-                      sx={{ "&.MuiFormControlLabel-root": { margin: 0 } }}
-                    />
-                  ))}
+                  {columns
+                    .map((col, index) => (
+                      <FormControlLabel
+                        key={`col-${col.label}`}
+                        control={
+                          <Checkbox
+                            size="small"
+                            disabled={axis.x === `col-${index}`}
+                            checked={axis.y.includes(`col-${index}`)}
+                            onChange={() => onChangeAxis("y", `col-${index}`)}
+                          />
+                        }
+                        label={<Box fontSize={12}>{col.label}</Box>}
+                        sx={{ "&.MuiFormControlLabel-root": { margin: 0 } }}
+                      />
+                    ))}
                 </Stack>
               </AccordionDetails>
             </Accordion>
-            <Accordion
-              disabled={
-                axis.y.join(" ").includes("col") ||
-                axis.x.join(" ").includes("row")
-              }
-            >
+            <Accordion disabled={axis.x.includes("col")}>
               <AccordionSummary>
                 <Box fontSize={12}>Rows</Box>
               </AccordionSummary>
               <AccordionDetails>
                 <Stack>
-                  {rows.map((_, index) => (
-                    <FormControlLabel
-                      key={`row-${index}`}
-                      control={
-                        <Checkbox
-                          size="small"
-                          checked={axis.y.includes(`row-${index}`)}
-                          onChange={() => onChangeAxis("y", `row-${index}`)}
-                        />
-                      }
-                      label={<Box fontSize={12}>Row - {index}</Box>}
-                      sx={{ "&.MuiFormControlLabel-root": { margin: 0 } }}
-                    />
-                  ))}
+                  {rows
+                    .map((_, index) => (
+                      <FormControlLabel
+                        key={`row-${index}`}
+                        control={
+                          <Checkbox
+                            size="small"
+                            disabled={axis.x === `row-${index}`}
+                            checked={axis.y.includes(`row-${index}`)}
+                            onChange={() => onChangeAxis("y", `row-${index}`)}
+                          />
+                        }
+                        label={<Box fontSize={12}>Row - {index}</Box>}
+                        sx={{ "&.MuiFormControlLabel-root": { margin: 0 } }}
+                      />
+                    ))}
                 </Stack>
               </AccordionDetails>
             </Accordion>

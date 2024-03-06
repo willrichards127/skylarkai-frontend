@@ -87,12 +87,17 @@ export const XWidget = memo(
     };
 
     const onChangeAxis = (axis: IAxisKey, index: string) => {
-      const axisData = { ...(metadata.axis || { x: [], y: [] }) };
-      if (axisData[axis].includes(index)) {
-        axisData[axis] = axisData[axis].filter((value) => value !== index);
+      const axisData = { ...(metadata.axis || { x: "", y: [] }) };
+      if (axis === "x") {
+        axisData["x"] = axisData["x"] !== index ? index : "";
       } else {
-        axisData[axis].push(index);
+        if (axisData["y"].includes(index)) {
+          axisData["y"] = axisData["y"].filter((value) => value !== index);
+        } else {
+          axisData["y"].push(index);
+        }
       }
+
       onChangeData({ metadata: { ...metadata, axis: axisData } });
     };
 
@@ -154,7 +159,7 @@ export const XWidget = memo(
           visualType={metadata.visual}
           columns={columns}
           rows={rows}
-          axis={metadata.axis || { x: [], y: [] }}
+          axis={metadata.axis || { x: "", y: [] }}
           onClose={onCloseVisualize}
           onChangeVisualType={onChangeVisualType}
           onChangeColumn={onChangeColumn}
