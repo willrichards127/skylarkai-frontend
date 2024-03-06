@@ -357,3 +357,8 @@ export const parseTransaction = (transaction: ITransaction) => {
 
   return updatedTransaction;
 };
+
+export const removeExtension = (filename: string) => {
+  return filename.split('.').slice(0, -1).join('.');
+
+}
