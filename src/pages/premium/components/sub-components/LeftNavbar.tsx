@@ -37,7 +37,7 @@ export const LeftNavbar = ({
       sx={{
         width: leftNavWidth,
         bgcolor: "#060606",
-        p: 3,
+        p: 2,
         height: "100%",
       }}
     >
@@ -51,6 +51,7 @@ export const LeftNavbar = ({
               <ListItemIcon>
                 <CircleIcon
                   sx={{
+                    fontSize: 16,
                     color:
                       featureId === item.id.toString()
                         ? "green"
@@ -58,7 +59,7 @@ export const LeftNavbar = ({
                   }}
                 />
               </ListItemIcon>
-              <ListItemText primary={item.feature} />
+              <ListItemText primary={<Box fontSize={14}>{item.feature}</Box>} />
             </ListItemButton>
           </ListItem>
         ))}

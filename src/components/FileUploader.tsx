@@ -6,7 +6,7 @@ import { Box, Typography, LinearProgress, Stack } from "@mui/material";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import { DataRoomIcon, DropBoxIcon, GoogleDriveIcon, OneDriveIcon } from "./Svgs";
 
-const LIMIT_DOCS = 4194304;
+const LIMIT_DOCS = 25165824;
 
 export const formatBytes = (bytes: number, decimals = 2): string => {
   if (!+bytes) return '0 Bytes';
@@ -228,7 +228,7 @@ export const FileUploader = ({
                 </Typography>
                 {limit && (
                   <Typography variant="subtitle2" color="text.secondary" mt={1}>
-                    upto {formatBytes(limit)}
+                    upto {formatBytes(limit, 2)}
                   </Typography>
                 )}
               </Box>

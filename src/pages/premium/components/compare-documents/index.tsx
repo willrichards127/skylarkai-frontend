@@ -92,7 +92,7 @@ const CompareDocumentsFeature = ({ featureId }: { featureId: number }) => {
             <Divider />
             {instance.step !== "create_instance" && (
               <Box sx={{ pl: 3, py: 2 }}>
-                <Typography variant="body1" gutterBottom>
+                <Typography variant="body1" fontSize={12} gutterBottom>
                   Uploaded Documents
                 </Typography>
                 <Stack

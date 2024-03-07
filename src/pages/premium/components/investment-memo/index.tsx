@@ -168,7 +168,7 @@ const InvestmentMemoFeature = ({ featureId }: { featureId: number }) => {
             {instance.step !== "create_instance" &&
               !!instance.instance_metadata?.template_name && (
                 <Box sx={{ pl: 3, py: 2 }}>
-                  <Typography variant="body1" gutterBottom>
+                  <Typography variant="body1" fontSize={12} gutterBottom>
                     Selected Template
                   </Typography>
                   <Stack
@@ -187,12 +187,12 @@ const InvestmentMemoFeature = ({ featureId }: { featureId: number }) => {
             {instance.instance_metadata.uploaded_file_names.length > 0 && (
               <>
                 <Box sx={{ pl: 3, py: 2 }}>
-                  <Typography variant="body1" gutterBottom>
+                  <Typography variant="body1" fontSize={12} gutterBottom>
                     Uploaded Files
                   </Typography>
                   <Stack
                     spacing={1}
-                    sx={{ maxHeight: 140, overflowY: "auto", pr: 4 }}
+                    sx={{ maxHeight: 170, overflowY: "auto", pr: 4 }}
                   >
                     {!instance.saved
                       ? instance.instance_metadata.uploaded_files.map(

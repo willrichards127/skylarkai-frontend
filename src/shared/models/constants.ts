@@ -7,7 +7,7 @@ export const HeaderConfig = {
 
 export const bottomNavHeight = 390;
 export const helpNavWidth = 400;
-export const leftNavWidth = 360;
+export const leftNavWidth = 300;
 export const chatboxWidth = 480;
 
 export const topicDict = {
