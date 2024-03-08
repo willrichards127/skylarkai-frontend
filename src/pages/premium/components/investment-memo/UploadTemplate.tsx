@@ -161,6 +161,7 @@ export const UploadTemplate = ({
               isOneFileOnly
               layoutDirection="column"
               cloud
+              showFileList
             />
           </Box>
         </Stack>
@@ -171,7 +172,6 @@ export const UploadTemplate = ({
         <FileUploader
           initialFiles={uploadedFiles}
           onUploadCompleted={(files) => onCompanyFilesUploaded(files)}
-          multiple
           cloud
         />
       </Stack>

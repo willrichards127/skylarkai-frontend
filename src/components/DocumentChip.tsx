@@ -1,4 +1,4 @@
-import { Box, colors } from "@mui/material";
+import { Box, Tooltip, colors } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 
@@ -21,31 +21,35 @@ export const DocumentChip = ({
         borderRadius: 1,
         display: "flex",
         alignItems: "center",
-        width: "100%",
         gap: 1,
         px: 1,
         py: 0.6,
         bgcolor: selected ? colors.grey[800] : colors.grey[900],
         cursor: onClick ? "pointer" : "normal",
       }}
-      onClick={onClick}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (onClick) onClick();
+      }}
     >
       <VisibilityIcon
         sx={{
           opacity: selected ? 1 : 0.05,
         }}
       />
-      <Box
-        sx={{
-          overflow: "hidden",
-          whiteSpace: "nowrap",
-          textOverflow: "ellipsis",
-          fontSize: 13,
-        }}
-      >
-        {label}
-      </Box>
-      <Box mr="auto" />
+      <Tooltip title={label}>
+        <Box
+          sx={{
+            flex: 1,
+            overflow: "hidden",
+            whiteSpace: "nowrap",
+            textOverflow: "ellipsis",
+            fontSize: 13,
+          }}
+        >
+          {label}
+        </Box>
+      </Tooltip>
       {deletable && (
         <HighlightOffIcon
           sx={{ cursor: "pointer" }}
