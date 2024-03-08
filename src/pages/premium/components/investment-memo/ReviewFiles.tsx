@@ -22,25 +22,20 @@ import { XAccordion } from "../../../../components/XAccordion";
 import {
   useCreateFeatureInstanceMutation,
   useIngestFilesMutation,
-  // useGenerateInvestmentReportMutation,
-  useLazyGetFilesDataQuery,
-  useGetSiteContentMutation,
-  useCustomQueryMutation,
+  // useGetSiteContentMutation,
+  useReportSectionTemplateMutation,
 } from "../../../../redux/services/transcriptAPI";
 // import { useLazyGetReportQuery } from "../../../../redux/services/reportApi";
 import { parseCitationInReport } from "../../../../shared/utils/string";
 
 const generateMD = (
   companyName: string,
-  reportData: Record<string, Record<string, string>>
+  reportData: Record<string, string>
 ): string => {
   let reportMD: string = `<h1>Investment Memo Report: ${companyName}</h1><br /><b>Created: ${new Date().toDateString()}</b><br />
   `;
-  Object.entries(reportData).forEach(([category, qa]) => {
-    reportMD += `<br /><h2>${category}</h2>`;
-    Object.entries(qa).forEach(([question, answer]) => {
-      reportMD += `<br /><h3>${question}</h3>${answer}<br />`;
-    });
+  Object.values(reportData).forEach((section) => {
+    reportMD += section;
   });
   return parseCitationInReport(reportMD);
 };
@@ -60,22 +55,18 @@ export const ReviewFiles = ({
     useCreateFeatureInstanceMutation();
 
   const [ingestFiles, { isLoading: loadingIngest }] = useIngestFilesMutation();
-  const [getWebsiteContent, { isLoading: loadingWebContent }] =
-    useGetSiteContentMutation();
-  const [customQuery, { isLoading: loadingCustomQuery }] =
-    useCustomQueryMutation();
-  const [getFilesData, { isLoading: loadingFilesdata }] =
-    useLazyGetFilesDataQuery();
+  // const [getWebsiteContent, { isLoading: loadingWebContent }] =
+  //   useGetSiteContentMutation();
+  const [generateReportSection, { isLoading: loadingSection }] =
+    useReportSectionTemplateMutation();
 
   // const [generateReport, { isLoading: generatingReport }] =
   //   useGenerateInvestmentReportMutation();
 
   // const [getReport, { isLoading: loadingReport }] = useLazyGetReportQuery();
   const [selectedTab, setSelectedTab] = useState<string>("All");
-  const [, setProcessStatus] = useState<string>("");
-  const processedDataDictRef = useRef<Record<string, Record<string, string>>>(
-    {}
-  );
+  const [processStep, setProcessStep] = useState<number>(0);
+  const processedDataDictRef = useRef<Record<string, string>>();
 
   const onNextStep = useCallback(async () => {
     try {
@@ -95,23 +86,19 @@ export const ReviewFiles = ({
         categoryIndex,
         { category, questions },
       ] of instance.instance_metadata.template_content.entries()) {
-        for (const [questionIndex, question] of questions.entries()) {
-          const data = await customQuery({
-            filenames: instance.instance_metadata.uploaded_file_names,
-            question,
-            analysis_type: "template",
-          }).unwrap();
-          processedDataDictRef.current = {
-            ...processedDataDictRef.current,
-            [category]: {
-              ...(processedDataDictRef.current?.[category] || {}),
-              [question]: data.content as string,
-            },
-          };
-          setProcessStatus(`${categoryIndex + 1}/${questionIndex + 1}`);
-        }
+        const data = await generateReportSection({
+          question: category,
+          sub_question: questions,
+          template: `# ${category}`,
+          analysis_type: "investmentmemo",
+          company_name: instance.company_name,
+        }).unwrap();
+        processedDataDictRef.current = {
+          ...processedDataDictRef.current,
+          [category]: data.filled_template,
+        };
+        setProcessStep(categoryIndex + 1);
       }
-      console.log("insider action:", processedDataDictRef.current);
       // if (webContent) {
       //   processedDataDictRef.current = {
       //     ...processedDataDictRef.current,
@@ -121,23 +108,13 @@ export const ReviewFiles = ({
       //   };
       // }
 
-      // const responseReportId = await generateReport({
-      //   template: generateMD(instance.instance_metadata.template_content),
-      //   data: JSON.stringify(processedDataDictRef.current),
-      //   company_name: instance.company_name,
-      // }).unwrap();
-      // console.log(responseReportId, "###responseReportId");
-      // const content = await getReport({
-      //   reportId: responseReportId,
-      // }).unwrap();
-      // console.log(content, "###responseFileData");
       const responseInstance = await createInstance({
         ...instance,
         instance_metadata: {
           ...instance.instance_metadata,
           report: generateMD(
             instance.company_name,
-            processedDataDictRef.current
+            processedDataDictRef.current!
           ),
         },
       }).unwrap();
@@ -148,10 +125,8 @@ export const ReviewFiles = ({
   }, [
     ingestFiles,
     instance,
-    getFilesData,
-    // generateReport,
-    getWebsiteContent,
-    // getReport,
+    // getWebsiteContent,
+    generateReportSection,
     createInstance,
     onNext,
   ]);
@@ -160,14 +135,7 @@ export const ReviewFiles = ({
     <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
       <Backdrop
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={
-          loadingCreateInstance ||
-          loadingIngest ||
-          // generatingReport ||
-          // loadingReport ||
-          loadingWebContent ||
-          loadingFilesdata
-        }
+        open={loadingCreateInstance || loadingIngest}
       >
         <Stack spacing={1} alignItems="center">
           <CircularProgress color="inherit" />
@@ -186,7 +154,7 @@ export const ReviewFiles = ({
             color="inherit"
             href="#"
             onClick={onGotoMain}
-            sx={{ pointerEvents: loadingCustomQuery ? "none" : "auto" }}
+            sx={{ pointerEvents: loadingSection ? "none" : "auto" }}
           >
             Create Investment Memo
           </Link>
@@ -197,7 +165,7 @@ export const ReviewFiles = ({
           variant="contained"
           sx={{ minWidth: 140 }}
           onClick={onNextStep}
-          disabled={loadingCustomQuery}
+          disabled={loadingSection}
         >
           Create Report
         </Button>
@@ -228,7 +196,7 @@ export const ReviewFiles = ({
             <XAccordion
               defaultExpanded
               options={instance.instance_metadata.template_content.map(
-                (item) => ({
+                (item, index) => ({
                   summary: (
                     <Box
                       sx={{
@@ -238,15 +206,18 @@ export const ReviewFiles = ({
                         justifyContent: "space-between",
                       }}
                     >
-                      {item.category}
-                      <span>
-                        {processedDataDictRef.current?.[item.category]
-                          ? Object.values(
-                              processedDataDictRef.current[item.category]
-                            ).length
-                          : 0}
-                        /{item.questions.length}
-                      </span>
+                      {item.category} ({item.questions.length} Questions)
+                      <Box>
+                        {processedDataDictRef.current?.[item.category] ? (
+                          <CheckCircleIcon
+                            sx={{ color: "success.main", fontSize: 18 }}
+                          />
+                        ) : (processStep === index && loadingSection) ? (
+                          <CircularProgress size={14} />
+                        ) : (
+                          <></>
+                        )}
+                      </Box>
                     </Box>
                   ),
                   detail: item.questions.map((question, index) => (
@@ -262,15 +233,6 @@ export const ReviewFiles = ({
                       <p>
                         {index + 1}. {question}
                       </p>
-                      {processedDataDictRef.current?.[item.category]?.[
-                        question
-                      ] ? (
-                        <CheckCircleIcon
-                          sx={{ color: "success.main", fontSize: 18 }}
-                        />
-                      ) : (
-                        loadingCustomQuery && <CircularProgress size={14} />
-                      )}
                     </Box>
                   )),
                 })
