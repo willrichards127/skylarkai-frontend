@@ -328,7 +328,7 @@ const WorkflowPanel = memo(
 				<Box sx={{ position: "absolute", top: 16, left: 16 }}>
 					{!isFetching && (
 						<Typography variant='h6' fontWeight='bold'>
-							{isNew ? "Untitled" : setup!.name}
+							{isNew ? "Untitled" : savedData?.name || setup!.name}
 						</Typography>
 					)}
 				</Box>

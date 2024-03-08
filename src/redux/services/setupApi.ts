@@ -74,9 +74,9 @@ export const setupApi = createApi({
         method: setupId ? "PUT" : "POST",
         body: setupId
           ? {
-            ...(setupId !== undefined && { graph_id: setupId }),
-            ...setup,
-          }
+              ...(setupId !== undefined && { graph_id: setupId }),
+              ...setup,
+            }
           : setup,
       }),
     }),
@@ -87,7 +87,15 @@ export const setupApi = createApi({
       }),
       invalidatesTags: ["Setup"],
     }),
-    ingestFiles: builder.mutation<void, { setupId: number; companyName: string; analysisType: string; files: File[] }>({
+    ingestFiles: builder.mutation<
+      void,
+      {
+        setupId: number;
+        companyName: string;
+        analysisType: string;
+        files: File[];
+      }
+    >({
       query: ({ setupId, companyName, analysisType, files }) => {
         const formData = new FormData();
         formData.append("analysis_type", analysisType);
@@ -110,15 +118,18 @@ export const setupApi = createApi({
         };
       },
     }),
-    executeGraph: builder.mutation<any, { setup: ISetup; analysisType: string }>({
+    executeGraph: builder.mutation<
+      any,
+      { setup: ISetup; analysisType: string }
+    >({
       async queryFn({ setup, analysisType }, __, ___, apiBaseQuery) {
         try {
           // save current graph
-          // const updateResponse: any = await apiBaseQuery({
-          //   url: `graphs/${setup.id}`,
-          //   method: "PUT",
-          //   body: setup,
-          // });
+          const updateResponse: any = await apiBaseQuery({
+            url: `graphs/${setup.id}`,
+            method: "PUT",
+            body: setup,
+          });
 
           // execute the graph
           // await apiBaseQuery({
@@ -126,7 +137,9 @@ export const setupApi = createApi({
           //   method: "POST",
           // });
 
-          const uploadNode = setup.nodes.find(node => node.template_node_id === 2);
+          const uploadNode = setup.nodes.find(
+            (node) => node.template_node_id === 2
+          );
           if (uploadNode) {
             const formData = new FormData();
             formData.append("analysis_type", analysisType);
@@ -140,15 +153,7 @@ export const setupApi = createApi({
             });
           }
 
-
-          return {
-            data: {
-              // id: updateResponse.data.id,
-              // name: updateResponse.data.name,
-              // edges: updateResponse.data.edges,
-              // nodes: updateResponse.data.nodes,
-            },
-          };
+          return { data: updateResponse.data };
         } catch (e) {
           return {
             error: {
@@ -206,13 +211,13 @@ export const setupApi = createApi({
               "CSV Output"
             )
               ? executionResponse.data.data.substring(
-                0,
-                executionResponse.data.data.indexOf("CSV Output:")
-              )
+                  0,
+                  executionResponse.data.data.indexOf("CSV Output:")
+                )
               : executionResponse.data.data;
             console.log(finalResult, "finalResult---");
-            let replaced = finalResult.replace('<investment_memo>', '');
-            replaced = replaced.replace('</investment_memo>', '');
+            let replaced = finalResult.replace("<investment_memo>", "");
+            replaced = replaced.replace("</investment_memo>", "");
             return {
               data: {
                 id: updateResponse.data.id,
