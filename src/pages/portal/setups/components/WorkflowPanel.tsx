@@ -192,6 +192,7 @@ const WorkflowPanel = memo(
 							(node) => node.data.name === dndItem.name // name is node type
 						).length + 1;
 					const graph_node_id = `${dndItem.name}_${order}`;
+
 					return prev.concat({
 						id: graph_node_id,
 						type: "custom",
