@@ -12,7 +12,9 @@ import { IndexView } from "./IndexView";
 import { ExportModal } from "../../../../components/modals/ExportModal";
 import { RefFileModal } from "../components/RefFileModal";
 import { SendEmailModal } from "../../../../components/modals/SendEmailModal";
+import { SplitContainer } from "../../../../components/SplitContainer";
 import { SortableItemWrapper } from "./SortableItemWrapper";
+import ChatPanel from "../components/ChatPanel";
 import {
   getNewId,
   categoryParser,
@@ -20,8 +22,6 @@ import {
   parseTable,
 } from "../../../../shared/utils/parse";
 import { UtilPanel } from "../components/UtilPanel";
-import { BottomPanel } from "../components/BottomPanel";
-import { ChatAssistWindow } from "../components/ChatAssistWindow";
 import { useLazyGetFilesDataQuery } from "../../../../redux/services/transcriptAPI";
 import { scrollToAndHighlightText } from "../../../../shared/utils/string";
 import {
@@ -36,14 +36,14 @@ export const MarketAnalysisReport = ({
   setup,
   reportContent,
   reportType,
-  onSave,
-  onRerun,
+  onSaveAction,
+  onRerunAction,
 }: {
   setup: ISetup;
   reportContent: any;
   reportType: string;
-  onSave: (content: { key: string; value: any }[]) => void;
-  onRerun: (append?: Record<string, File[]>) => void;
+  onSaveAction: (content: { key: string; value: any }[]) => void;
+  onRerunAction: (append?: Record<string, File[]>) => void;
 }) => {
   const printRef = useRef<HTMLDivElement>();
 
@@ -65,7 +65,6 @@ export const MarketAnalysisReport = ({
   const [uploadedFiles, setUploadedFiles] = useState<Record<string, File[]>>();
   const [exportModal, showExportModal] = useState<boolean>(false);
   const [refFileModal, showRefFileModal] = useState<boolean>(false);
-  const [chatAssist, showChatAssist] = useState<boolean>(false);
   const [emailModal, showEmailModal] = useState<boolean>(false);
 
   const [reportItems, setReportItems] = useState<IReportItem[]>(
@@ -100,9 +99,9 @@ export const MarketAnalysisReport = ({
     showEmailModal(true);
   }, [reportType]);
 
-  const handleSave = useCallback(() => {
-    onSave(reportItems);
-  }, [onSave, reportItems]);
+  const onSave = useCallback(() => {
+    onSaveAction(reportItems);
+  }, [onSaveAction, reportItems]);
 
   const onDelete = useCallback(() => {
     showExportModal(true);
@@ -167,11 +166,7 @@ export const MarketAnalysisReport = ({
     setReportItems((prev) => prev.filter((item) => item.key !== itemId));
   }, []);
 
-  const onChatAssist = useCallback(() => {
-    showChatAssist(true);
-  }, []);
-
-  const onUploadedFile = useCallback((type: string, files: File[]) => {
+  const onUploadedFiles = useCallback((type: string, files: File[]) => {
     setUploadedFiles((prev) => ({ ...prev, [type]: files }));
   }, []);
 
@@ -197,7 +192,7 @@ export const MarketAnalysisReport = ({
             if (item.value.tag === "table" && data.content && !data.metadata) {
               // Item Changed for table edit(Just data, not configure row/column)
               const newMetadata = parseTable(data.content);
-              data.metadata = {...newMetadata, visual: "table"};
+              data.metadata = { ...newMetadata, visual: "table" };
             }
 
             return {
@@ -215,6 +210,18 @@ export const MarketAnalysisReport = ({
     },
     []
   );
+
+  const onAddToReport = useCallback((content: string) => {
+    
+    const newId = getNewId();
+    setReportItems((prevItems) => [
+      ...prevItems,
+      {
+        key: newId,
+        value: { content, tag: "p" },
+      },
+    ]);
+  }, []);
 
   const onJumpTo = useCallback(
     async ({ filename, quote }: { filename: string; quote: string }) => {
@@ -242,82 +249,100 @@ export const MarketAnalysisReport = ({
     }, 100);
   }, []);
 
-  const handleRerun = () => {
-    onRerun(uploadedFiles);
+  const onRerunReport = () => {
+    onRerunAction(uploadedFiles);
   };
 
   return (
-    <Box sx={{ display: "flex", height: "100%" }}>
+    <Box sx={{ display: "flex", height: "100%", position: "relative" }}>
       <UtilPanel
         onRemoveFiles={onRemoveFiles}
-        onChatAssist={onChatAssist}
-        onUploadedFile={onUploadedFile}
         uploadedFiles={uploadedFiles}
         onSearchText={onSearchText}
       />
-      <Box sx={{ position: "relative", flex: 1 }}>
+      <Box
+        sx={{
+          position: "absolute",
+          left: 100,
+          height: "100%",
+          width: "calc(100% - 100px)",
+        }}
+      >
         <HeaderPanel
           companyName={setup.name!}
           reportType={reportType}
           onPrint={onPrint}
-          onSave={handleSave}
+          onSave={onSave}
           onDelete={onDelete}
           onSendEmail={onSendEmail}
+          onRerunReport={onRerunReport}
+          onUploadedFiles={onUploadedFiles}
         />
-        <Box sx={{ px: 4, py: 2, height: "calc(100% - 200px)" }}>
-          <Box
-            ref={printRef}
-            sx={{
-              px: 32,
-              bgcolor: "black",
-              py: 4,
-              height: "100%",
-              overflowY: "auto",
-            }}
-          >
-            <IndexView items={reportItems} />
-            <DndContext onDragEnd={onDragEnd}>
-              <SortableContext
-                items={reportItems.map((item) => item.key)}
-                strategy={verticalListSortingStrategy}
+        <Box sx={{ p: 2, height: "calc(100% - 66px)" }}>
+          <SplitContainer
+            sizes={[70, 30]}
+            leftPanel={
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  flexDirection: "column",
+                  bgcolor: "#121212",
+                  borderRadius: 2,
+                  overflowY: "auto",
+                  p: 4,
+                  position: "relative",
+                }}
               >
-                {reportItems.map((item) => (
-                  <SortableItemWrapper
-                    key={item.key}
-                    item={item}
-                    onAddNew={() => onAddNew(item.key)}
-                    onRemove={() => onRemove(item.key)}
-                    onClone={(clonedItem) => onClone(item.key, clonedItem)}
-                    onAddUploadedFile={(data) =>
-                      onAddUploadedFile(item.key, data)
-                    }
-                    onJumpTo={onJumpTo}
-                    onItemChanged={(data: Partial<IReportItemValue>) =>
-                      onItemChanged(item.key, data)
-                    }
-                  />
-                ))}
-              </SortableContext>
-            </DndContext>
-          </Box>
+                <Box
+                  ref={printRef}
+                  sx={{
+                    width: 892,
+                  }}
+                >
+                  <IndexView items={reportItems} />
+                  <DndContext onDragEnd={onDragEnd}>
+                    <SortableContext
+                      items={reportItems.map((item) => item.key)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {reportItems.map((item) => (
+                        <SortableItemWrapper
+                          key={item.key}
+                          item={item}
+                          onAddNew={() => onAddNew(item.key)}
+                          onRemove={() => onRemove(item.key)}
+                          onClone={(clonedItem) =>
+                            onClone(item.key, clonedItem)
+                          }
+                          onAddUploadedFile={(data) =>
+                            onAddUploadedFile(item.key, data)
+                          }
+                          onJumpTo={onJumpTo}
+                          onItemChanged={(data: Partial<IReportItemValue>) =>
+                            onItemChanged(item.key, data)
+                          }
+                        />
+                      ))}
+                    </SortableContext>
+                  </DndContext>
+                </Box>
+              </Box>
+            }
+            rightPanel={
+              <ChatPanel
+                graph_id={setup.id!}
+                analysis_type="financial_diligence"
+                onAddToReport={onAddToReport}
+              />
+            }
+          />
         </Box>
-        <BottomPanel
-          onChatAssist={onChatAssist}
-          onUploadedFile={onUploadedFile}
-          onRerun={handleRerun}
-        />
         {exportModal && (
           <ExportModal
             open={exportModal}
             exportContent={printRef.current!}
             onClose={() => showExportModal(false)}
-          />
-        )}
-        {chatAssist && (
-          <ChatAssistWindow
-            reportType={reportType}
-            onClose={() => showChatAssist(false)}
-            onExportChat={() => {}}
           />
         )}
         {refFileModal && refFileRef.current && (

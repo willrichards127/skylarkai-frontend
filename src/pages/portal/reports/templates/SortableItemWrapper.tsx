@@ -108,7 +108,7 @@ export const SortableItemWrapper = memo(
         style={{
           ...style,
           position: "relative",
-          marginBottom: "32px",
+          // marginBottom: "32px",
         }}
         {...attributes}
         onMouseOver={onMouseOver}

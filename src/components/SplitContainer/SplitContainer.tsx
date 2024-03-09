@@ -7,8 +7,8 @@ export const SplitContainer = ({
   rightPanel,
 }: {
   sizes?: [number, number];
-  leftPanel: React.ReactNode;
-  rightPanel: React.ReactNode;
+  leftPanel?: React.ReactNode;
+  rightPanel?: React.ReactNode;
 }) => {
   return (
     <Split
@@ -23,8 +23,8 @@ export const SplitContainer = ({
       direction="horizontal"
       cursor="col-resize"
     >
-      {leftPanel}
-      {rightPanel}
+      {!!leftPanel && leftPanel}
+      {!!rightPanel && rightPanel}
     </Split>
   );
 };

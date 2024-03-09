@@ -162,12 +162,13 @@ export const transcriptApi = createApi({
         const graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
         try {
           const response: any = await apiBaseQuery({
-            url: `${analysis_type === "edgar"
+            url: `${
+              analysis_type === "edgar"
                 ? "edgar_files"
                 : analysis_type === "transcript"
-                  ? "transcript_files"
-                  : "insider_transaction"
-              }/${graph_id}?company_name=${company_name}&ticker=${ticker}`,
+                ? "transcript_files"
+                : "insider_transaction"
+            }/${graph_id}?company_name=${company_name}&ticker=${ticker}`,
             method: "GET",
           });
           if (!response.data || response.data[1] === 400) {
@@ -332,10 +333,11 @@ export const transcriptApi = createApi({
         const current_graph_id = graph_id || sys_graph_id;
         try {
           const response: any = await apiBaseQuery({
-            url: `customquery/${current_graph_id}?${insider_transaction
+            url: `customquery/${current_graph_id}?${
+              insider_transaction
                 ? "&insider_transaction=" + insider_transaction
                 : ""
-              }`,
+            }`,
             method: "POST",
             data: {
               question,
@@ -373,10 +375,10 @@ export const transcriptApi = createApi({
       any,
       {
         graph_id?: number;
-        template: string;        
+        template: string;
         question: string;
-        analysis_type: string;        
-        company_name: string;        
+        analysis_type: string;
+        company_name: string;
         sub_question: string[];
         is_file_with_content?: boolean;
         is_template_with_content?: boolean;
@@ -395,7 +397,7 @@ export const transcriptApi = createApi({
           company_name,
           all_files = true,
           sub_question,
-          llm = "OpenAI"
+          llm = "OpenAI",
         },
         api,
         __,
@@ -417,7 +419,7 @@ export const transcriptApi = createApi({
               is_template_with_content,
               company_name,
               all_files,
-              llm
+              llm,
             },
           });
 
@@ -621,7 +623,7 @@ export const transcriptApi = createApi({
           url: website_url,
         },
       }),
-    }),    
+    }),
     generateInvestmentReport: builder.mutation<
       any,
       {
@@ -762,6 +764,16 @@ export const transcriptApi = createApi({
       keepUnusedDataFor: 0,
       providesTags: ["FetchFileLog"],
     }),
+    getIngestedFiles: builder.query<
+      any,
+      { graph_id: number; analysis_type: string }
+    >({
+      query: ({ graph_id, analysis_type }) => ({
+        method: "GET",
+        url: `files/${graph_id}?analysis_type=${analysis_type}`,
+      }),
+      keepUnusedDataFor: 0,
+    }),
     updateFetchFileLog: builder.mutation<
       void,
       {
@@ -839,6 +851,8 @@ export const {
 
   // chatbot
   useCustomQueryMutation,
+  // get ingested files for graph
+  useGetIngestedFilesQuery,
 
   // fetch SEC filings or transcript files
   useFetchFilesMutation,

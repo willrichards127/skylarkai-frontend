@@ -139,8 +139,8 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
                 reportContent={isGeneratedReport ? generatedData : reportData.content}
                 // customizedContent={isGeneratedReport ? undefined : reportData.custom_metadata}
                 reportType={reportType!}
-                onRerun={OnRerun}
-                onSave={onSave}
+                onRerunAction={OnRerun}
+                onSaveAction={onSave}
               />
             )}
           </Box>
