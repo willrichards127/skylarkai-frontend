@@ -153,9 +153,17 @@ export const UploadDocuments = ({
         Upload company specific documents
       </Typography>
       <Stack spacing={2} direction="row" alignItems="flex-start">
-        <FileUploader isOneFileOnly onUploadCompleted={onFileUploaded(0)} />
+        <FileUploader
+          isOneFileOnly
+          onUploadCompleted={onFileUploaded(0)}
+          showFileList
+        />
         <Typography variant="h6">VS</Typography>
-        <FileUploader isOneFileOnly onUploadCompleted={onFileUploaded(1)} />
+        <FileUploader
+          isOneFileOnly
+          onUploadCompleted={onFileUploaded(1)}
+          showFileList
+        />
       </Stack>
       <Divider sx={{ my: 2 }} />
       <Autocomplete
