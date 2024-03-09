@@ -1,6 +1,6 @@
 import { memo, useCallback, useState } from "react";
 import { Box, Button } from "@mui/material";
-import { FileUploader } from "../../../../components/FileUploaderOld";
+import { FileUploader } from "../../../../components/FileUploader";
 import { XModal } from "../../../../components/XModal";
 
 export const FileUploadModal = memo(
@@ -16,7 +16,7 @@ export const FileUploadModal = memo(
     onClose: () => void;
   }) => {
     const [uploadFiles, setUploadFiles] = useState<File[]>([]);
-    const onUpload = useCallback((_: any, pureFiles: File[]) => {
+    const onUpload = useCallback((pureFiles: File[]) => {
       setUploadFiles(pureFiles);
     }, []);
 
@@ -46,7 +46,11 @@ export const FileUploadModal = memo(
           </Box>
         }
       >
-        <FileUploader initialFiles={[]} onUploadCompleted={onUpload} />
+        <FileUploader
+          initialFiles={[]}
+          onUploadCompleted={onUpload}
+          showFileList
+        />
       </XModal>
     );
   }
