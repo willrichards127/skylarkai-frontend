@@ -21,7 +21,7 @@ export const ChatBlock = memo(
     chat,
     chats,
     onJumpTo,
-    onAddToReport
+    onAddToReport,
   }: {
     chat: IChat;
     chats: IChat[];
@@ -156,7 +156,15 @@ export const ChatBlock = memo(
             </ReactMarkdown>
           </Box>
           {blogHovered && isBot && (
-            <>
+            <Box
+              sx={{
+                display: "flex",
+                gap: 1,
+                position: "absolute",
+                right: 4,
+                top: 4,
+              }}
+            >
               <XIconButton
                 size="small"
                 variant="contained"
@@ -165,9 +173,6 @@ export const ChatBlock = memo(
                     minHeight: 31,
                     minWidth: 31,
                   },
-                  position: "absolute",
-                  right: 4,
-                  top: 4,
                 }}
                 onClick={() =>
                   onSendViaEmail(chats[chats.length - 2].content.toString())
@@ -178,18 +183,11 @@ export const ChatBlock = memo(
               <Button
                 size="small"
                 variant="contained"
-                sx={{
-                  position: "absolute",
-                  right: 4,
-                  bottom: 4,
-                }}
-                onClick={() =>
-                  onAddToReport(chat.content as string)
-                }
+                onClick={() => onAddToReport(chat.content as string)}
               >
                 Add to Report
               </Button>
-            </>
+            </Box>
           )}
         </Box>
 

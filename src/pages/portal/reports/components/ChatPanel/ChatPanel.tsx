@@ -41,7 +41,6 @@ export const ChatPanel = memo(
     const { isLoading: loadingFiles, data: dataFiles } =
       useGetIngestedFilesQuery({ graph_id, analysis_type });
     const [getAnswer, { isLoading: loadingAnswer }] = useCustomQueryMutation();
-    console.log(dataFiles, "dataFiles===")
     const onSend = useCallback(
       async (question: string) => {
         setChatHistory((prev) => [
