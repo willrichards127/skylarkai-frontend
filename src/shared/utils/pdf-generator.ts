@@ -17,7 +17,7 @@ export const generatePdf = (
   fileName: string,
   watermark?: string
 ) => {
-  const content = html2PdfMake(htmlContent);
+  const content = html2PdfMake(htmlContent, {tableAutoSize: true});
   const docDefinition = {
     ...(watermark && {
       watermark: {
@@ -34,7 +34,7 @@ export const generatePdf = (
 };
 
 export const getPdfInBase64 = async (htmlContent: string, watermark?: string): Promise<string> => {
-  const content = html2PdfMake(htmlContent);
+  const content = html2PdfMake(htmlContent, {tableAutoSize: true});
   const docDefinition = {
     ...(watermark && {
       watermark: {

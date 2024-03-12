@@ -10,21 +10,24 @@ export const ItemEditor = memo(
     onClickAway,
   }: {
     initialItem: IReportItemValue;
-    onClickAway: (content: string) => void;
+    onClickAway: (tag: string, content: string) => void;
   }) => {
     const editorRef = useRef<any>(null);
 
     const onClickAwayAction = useCallback(() => {
       if (!editorRef.current) return;
       let updatedContent = editorRef.current.getContent();
-
       if (
         updatedContent.includes("<table>") &&
         !updatedContent.includes("<thead>")
       ) {
         updatedContent = correctTableFormat(updatedContent);
       }
-      onClickAway(updatedContent);
+      const tagName =
+        (
+          editorRef.current.getElement().firstChild?.tagName || ""
+        ).toLowerCase() || "p";
+      onClickAway(tagName, updatedContent);
     }, [onClickAway]);
 
     return (

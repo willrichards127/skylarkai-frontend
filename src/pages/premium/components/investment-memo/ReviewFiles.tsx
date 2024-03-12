@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useCallback, useState, useRef } from "react";
+import { useCallback, useState, useRef, useMemo } from "react";
 import {
   Box,
   Button,
@@ -22,12 +22,9 @@ import { XAccordion } from "../../../../components/XAccordion";
 import {
   useCreateFeatureInstanceMutation,
   useIngestFilesMutation,
-  // useGenerateInvestmentReportMutation,
-  useLazyGetFilesDataQuery,
-  useGetSiteContentMutation,
+  // useGetSiteContentMutation,
   useCustomQueryMutation,
 } from "../../../../redux/services/transcriptAPI";
-// import { useLazyGetReportQuery } from "../../../../redux/services/reportApi";
 import { parseCitationInReport } from "../../../../shared/utils/string";
 
 const generateMD = (
@@ -60,19 +57,13 @@ export const ReviewFiles = ({
     useCreateFeatureInstanceMutation();
 
   const [ingestFiles, { isLoading: loadingIngest }] = useIngestFilesMutation();
-  const [getWebsiteContent, { isLoading: loadingWebContent }] =
-    useGetSiteContentMutation();
+  // const [getWebsiteContent, { isLoading: loadingWebContent }] =
+  //   useGetSiteContentMutation();
   const [customQuery, { isLoading: loadingCustomQuery }] =
     useCustomQueryMutation();
-  const [getFilesData, { isLoading: loadingFilesdata }] =
-    useLazyGetFilesDataQuery();
 
-  // const [generateReport, { isLoading: generatingReport }] =
-  //   useGenerateInvestmentReportMutation();
-
-  // const [getReport, { isLoading: loadingReport }] = useLazyGetReportQuery();
   const [selectedTab, setSelectedTab] = useState<string>("All");
-  const [, setProcessStatus] = useState<string>("");
+  const [processStatus, setProcessStatus] = useState<string>("");
   const processedDataDictRef = useRef<Record<string, Record<string, string>>>(
     {}
   );
@@ -90,6 +81,7 @@ export const ReviewFiles = ({
         analysis_type: "template",
         files: instance.instance_metadata.uploaded_files,
       });
+
 
       for (const [
         categoryIndex,
@@ -111,7 +103,6 @@ export const ReviewFiles = ({
           setProcessStatus(`${categoryIndex + 1}/${questionIndex + 1}`);
         }
       }
-      console.log("insider action:", processedDataDictRef.current);
       // if (webContent) {
       //   processedDataDictRef.current = {
       //     ...processedDataDictRef.current,
@@ -121,16 +112,6 @@ export const ReviewFiles = ({
       //   };
       // }
 
-      // const responseReportId = await generateReport({
-      //   template: generateMD(instance.instance_metadata.template_content),
-      //   data: JSON.stringify(processedDataDictRef.current),
-      //   company_name: instance.company_name,
-      // }).unwrap();
-      // console.log(responseReportId, "###responseReportId");
-      // const content = await getReport({
-      //   reportId: responseReportId,
-      // }).unwrap();
-      // console.log(content, "###responseFileData");
       const responseInstance = await createInstance({
         ...instance,
         instance_metadata: {
@@ -148,26 +129,31 @@ export const ReviewFiles = ({
   }, [
     ingestFiles,
     instance,
-    getFilesData,
-    // generateReport,
-    getWebsiteContent,
-    // getReport,
+    // getWebsiteContent,
+    customQuery,
     createInstance,
     onNext,
   ]);
+
+  const isQueryProcessing = useMemo(() => {
+    if(!processStatus && !loadingCustomQuery) return false;
+    if (loadingCreateInstance) return true;
+    const finalStatus = `${
+      instance.instance_metadata.template_content.length
+    }/${
+      instance.instance_metadata.template_content[
+        instance.instance_metadata.template_content.length - 1
+      ].questions.length
+    }`;
+    if (loadingCustomQuery || processStatus !== finalStatus) return true;
+    return false;
+  }, [loadingCreateInstance, processStatus, loadingCustomQuery, instance]);
 
   return (
     <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
       <Backdrop
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={
-          loadingCreateInstance ||
-          loadingIngest ||
-          // generatingReport ||
-          // loadingReport ||
-          loadingWebContent ||
-          loadingFilesdata
-        }
+        open={loadingIngest}
       >
         <Stack spacing={1} alignItems="center">
           <CircularProgress color="inherit" />
@@ -177,7 +163,7 @@ export const ReviewFiles = ({
         </Stack>
       </Backdrop>
       <Box sx={{ display: "flex", alignItems: "center" }}>
-        <IconButton size="small" onClick={onPrev} sx={{ mr: 1 }}>
+        <IconButton size="small" disabled={loadingIngest || isQueryProcessing} onClick={onPrev} sx={{ mr: 1 }}>
           <ArrowBackIcon sx={{ fontSize: 18 }} />
         </IconButton>
         <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
@@ -186,7 +172,7 @@ export const ReviewFiles = ({
             color="inherit"
             href="#"
             onClick={onGotoMain}
-            sx={{ pointerEvents: loadingCustomQuery ? "none" : "auto" }}
+            sx={{ pointerEvents: (loadingIngest || isQueryProcessing) ? "none" : "auto" }}
           >
             Create Investment Memo
           </Link>
@@ -197,7 +183,7 @@ export const ReviewFiles = ({
           variant="contained"
           sx={{ minWidth: 140 }}
           onClick={onNextStep}
-          disabled={loadingCustomQuery}
+          disabled={loadingIngest || isQueryProcessing}
         >
           Create Report
         </Button>

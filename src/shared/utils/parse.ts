@@ -133,7 +133,7 @@ export const parseTable = (data: string) => {
         });
 
       if (Object.keys(rowData).length) {
-        if($(row).hasClass("table-row-hide")) {
+        if ($(row).hasClass("table-row-hide")) {
           rowData["isUnChecked"] = true;
         }
         rows.push(rowData);
@@ -244,7 +244,9 @@ export const categoryParser = (htmlString: string) => {
           isTable = true;
         }
         if (isTable) {
-          currentSection += `<${name}${attr.class ? ` class=${attr.class}` : ''}>`;
+          currentSection += `<${name}${
+            attr.class ? ` class=${attr.class}` : ""
+          }>`;
         } else {
           currentSection = `<${name}>`;
         }
@@ -262,6 +264,7 @@ export const categoryParser = (htmlString: string) => {
             key: getNewId(),
             value: { content: currentSection, tag: name },
           });
+
           currentSection = "";
         }
       },

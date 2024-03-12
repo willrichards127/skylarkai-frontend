@@ -9,6 +9,8 @@ export const bottomNavHeight = 390;
 export const helpNavWidth = 400;
 export const leftNavWidth = 300;
 export const chatboxWidth = 480;
+export const reportHeaderHeight = 66;
+export const reportDrawerWidth = 300;
 
 export const topicDict = {
   Financials: [
@@ -126,26 +128,26 @@ export const investmentTemplateDict: Record<
       category: "Overview",
       questions: ["What product or service is being offered for whom and why?"],
     },
-    {
-      category: "Team",
-      questions: [
-        "Who are the founders and what are their backgrounds?",
-        "What is the composition of the core-team other than the founders?",
-        "Have the founders worked previously?",
-        "How did the founders met?",
-        "Why did the founders start the business?",
-      ],
-    },
-    {
-      category: "Problem",
-      questions: [
-        "What problem is the Company targeting/trying to solve?",
-        "How big is the customer's pain point?",
-        "What is the Company's long-term vision for addressing this problem?",
-        "How did the founders met?",
-        "Why did the founders start the business?",
-      ],
-    },
+    // {
+    //   category: "Team",
+    //   questions: [
+    //     "Who are the founders and what are their backgrounds?",
+    //     "What is the composition of the core-team other than the founders?",
+    //     "Have the founders worked previously?",
+    //     "How did the founders met?",
+    //     "Why did the founders start the business?",
+    //   ],
+    // },
+    // {
+    //   category: "Problem",
+    //   questions: [
+    //     "What problem is the Company targeting/trying to solve?",
+    //     "How big is the customer's pain point?",
+    //     "What is the Company's long-term vision for addressing this problem?",
+    //     "How did the founders met?",
+    //     "Why did the founders start the business?",
+    //   ],
+    // },
     {
       category: "Target segment",
       questions: [
@@ -153,23 +155,23 @@ export const investmentTemplateDict: Record<
         "Who are they selling to?",
       ],
     },
-    {
-      category: "Products and services",
-      questions: [
-        "What are the key features?",
-        "How customizable is the product?",
-        "What is the long-term product vision?",
-        "How does the product roadmap look like?",
-      ],
-    },
-    {
-      category: "Value proposition",
-      questions: [
-        "What is the Unique Value Proposition (UVP) or Unique Selling Proposition (USP) of the Company??",
-        "How does the Value Proposition Address Market Needs or Pain Points?",
-        "What Evidence Supports the Effectiveness of the Value Proposition?",
-      ],
-    },
+    // {
+    //   category: "Products and services",
+    //   questions: [
+    //     "What are the key features?",
+    //     "How customizable is the product?",
+    //     "What is the long-term product vision?",
+    //     "How does the product roadmap look like?",
+    //   ],
+    // },
+    // {
+    //   category: "Value proposition",
+    //   questions: [
+    //     "What is the Unique Value Proposition (UVP) or Unique Selling Proposition (USP) of the Company??",
+    //     "How does the Value Proposition Address Market Needs or Pain Points?",
+    //     "What Evidence Supports the Effectiveness of the Value Proposition?",
+    //   ],
+    // },
   ],
   "Default VC 2": [],
   "Good News Ventures": [],

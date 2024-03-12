@@ -14,7 +14,10 @@ import BarChartIcon from "@mui/icons-material/BarChart";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import AddIcon from "@mui/icons-material/Add";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
-import { parseCitationInReport2 } from "../../../../shared/utils/string";
+import {
+  // parseCitationInReport2,
+  parseCitation,
+} from "../../../../shared/utils/string";
 import {
   IReportItem,
   IReportItemValue,
@@ -85,9 +88,9 @@ export const SortableItemWrapper = memo(
     }, []);
 
     const onClickAway = useCallback(
-      (content: string) => {
+      (tag: string, content: string) => {
         setIsEdit(false);
-        onItemChanged({ content });
+        onItemChanged({ tag, content });
       },
       [onItemChanged]
     );
@@ -108,7 +111,7 @@ export const SortableItemWrapper = memo(
         style={{
           ...style,
           position: "relative",
-          marginBottom: "32px",
+          // marginBottom: "32px",
         }}
         {...attributes}
         onMouseOver={onMouseOver}
@@ -123,32 +126,41 @@ export const SortableItemWrapper = memo(
             components={{
               code: (props) => <p {...(props as any)} />,
               pre: (props) => <div {...(props as any)} />,
-              li: (props) => {
-                if (
-                  props.children &&
-                  typeof props.children === "string" &&
-                  props.children.includes("Document Title")
-                ) {
-                  const citations = parseCitationInReport2(props.children);
-                  if (citations.sections?.length) {
-                    return (
-                      <li
-                        {...props}
-                        style={{
-                          color: "#2196F3",
-                          textDecoration: "underline",
-                          cursor: "pointer",
-                          zIndex: 99999,
-                        }}
-                        onClick={() => onJumpTo(citations.sections[0])}
-                      >
-                        [{citations.sections[0].filename}]
-                      </li>
-                    );
-                  } else return <li {...props}>{citations.content}</li>;
-                }
-                return <li {...props} />;
-              },
+              a: (props: any) => (
+                <a
+                  {...props}
+                  style={{ color: "tomato" }}
+                  onClick={() => onJumpTo({ filename: "", quote: props.href })}
+                />
+              ),
+              // li: (props) => {
+              //   if (
+              //     props.children &&
+              //     typeof props.children === "string" &&
+              //     props.children.includes("Document Title")
+              //   ) {
+              //     const citations = parseCitationInReport2(props.children);
+              //     if (citations.sections?.length) {
+              //       return (
+              //         <li {...props}>
+              //           {citations.content}
+              //           <span
+              //             style={{
+              //               color: "#2196F3",
+              //               textDecoration: "underline",
+              //               cursor: "pointer",
+              //               zIndex: 99999,
+              //             }}
+              //             onClick={() => onJumpTo(citations.sections[0])}
+              //           >
+              //             [{citations.sections[0].filename}]
+              //           </span>
+              //         </li>
+              //       );
+              //     } else return <li {...props}>{citations.content}</li>;
+              //   }
+              //   return <li {...props} />;
+              // },
               table: (props) => {
                 return (
                   <XWidget
@@ -162,7 +174,7 @@ export const SortableItemWrapper = memo(
               },
             }}
           >
-            {item.value.content}
+            {parseCitation(item.value.content)}
           </ReactMarkdown>
         )}
         {!isEdit && hover && (
@@ -177,7 +189,8 @@ export const SortableItemWrapper = memo(
                 boxSizing: "content-box",
                 MozBoxSizing: "content-box",
                 WebkitBoxSizing: "content-box",
-                border: `1px solid ${colors.grey[800]}`,
+                border: `1px dotted ${colors.grey[800]}`,
+                borderRadius: 1,
               }}
             />
             <DragIndicatorIcon
@@ -198,7 +211,7 @@ export const SortableItemWrapper = memo(
                 onClick={onAddNew}
                 title="Add New Item Below"
               >
-                <AddIcon sx={{ fontSize: 16 }} />
+                <AddIcon sx={{ fontSize: 16, color: "black" }} />
               </IconButton>
               <CSVReader
                 onUploadAccepted={onUploadAccepted}
@@ -207,7 +220,7 @@ export const SortableItemWrapper = memo(
                 {({ getRootProps }: any) => (
                   <div style={styles.csvReader}>
                     <IconButton size="small" {...getRootProps()}>
-                      <UploadFileIcon sx={{ fontSize: 16 }} />
+                      <UploadFileIcon sx={{ fontSize: 16, color: "black" }} />
                     </IconButton>
                   </div>
                 )}
@@ -217,7 +230,7 @@ export const SortableItemWrapper = memo(
                 onClick={() => onClone(item.value)}
                 title="Clone"
               >
-                <FileCopyIcon sx={{ fontSize: 16 }} />
+                <FileCopyIcon sx={{ fontSize: 16, color: "black" }} />
               </IconButton>
               {item.value.tag === "table" && (
                 <IconButton
@@ -225,11 +238,11 @@ export const SortableItemWrapper = memo(
                   onClick={onShowVisualization}
                   title="Visualize"
                 >
-                  <BarChartIcon sx={{ fontSize: 16 }} />
+                  <BarChartIcon sx={{ fontSize: 16, color: "black" }} />
                 </IconButton>
               )}
               <IconButton size="small" onClick={onRemove} title="Remove">
-                <DeleteForeverIcon sx={{ fontSize: 16 }} />
+                <DeleteForeverIcon sx={{ fontSize: 16, color: "black" }} />
               </IconButton>
             </Box>
           </Box>

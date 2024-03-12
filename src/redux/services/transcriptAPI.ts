@@ -162,12 +162,13 @@ export const transcriptApi = createApi({
         const graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
         try {
           const response: any = await apiBaseQuery({
-            url: `${analysis_type === "edgar"
+            url: `${
+              analysis_type === "edgar"
                 ? "edgar_files"
                 : analysis_type === "transcript"
-                  ? "transcript_files"
-                  : "insider_transaction"
-              }/${graph_id}?company_name=${company_name}&ticker=${ticker}`,
+                ? "transcript_files"
+                : "insider_transaction"
+            }/${graph_id}?company_name=${company_name}&ticker=${ticker}`,
             method: "GET",
           });
           if (!response.data || response.data[1] === 400) {
@@ -332,10 +333,11 @@ export const transcriptApi = createApi({
         const current_graph_id = graph_id || sys_graph_id;
         try {
           const response: any = await apiBaseQuery({
-            url: `customquery/${current_graph_id}?${insider_transaction
+            url: `customquery/${current_graph_id}?${
+              insider_transaction
                 ? "&insider_transaction=" + insider_transaction
                 : ""
-              }`,
+            }`,
             method: "POST",
             data: {
               question,
@@ -364,6 +366,75 @@ export const transcriptApi = createApi({
               status: 404,
               statusText: e,
               data: "Error in customquery API",
+            },
+          };
+        }
+      },
+    }),
+    reportSectionTemplate: builder.mutation<
+      any,
+      {
+        graph_id?: number;
+        template: string;
+        question: string;
+        analysis_type: string;
+        company_name: string;
+        sub_question: string[];
+        is_file_with_content?: boolean;
+        is_template_with_content?: boolean;
+        all_files?: boolean;
+        llm?: string;
+      }
+    >({
+      async queryFn(
+        {
+          graph_id,
+          analysis_type,
+          template,
+          question,
+          is_file_with_content = false,
+          is_template_with_content = true,
+          company_name,
+          all_files = true,
+          sub_question,
+          llm = "OpenAI",
+        },
+        api,
+        __,
+        apiBaseQuery
+      ) {
+        const sys_graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
+        const current_graph_id = graph_id || sys_graph_id;
+        try {
+          const response: any = await apiBaseQuery({
+            url: "reports/section_template",
+            method: "POST",
+            data: {
+              graph_id: current_graph_id,
+              question,
+              analysis_type,
+              template,
+              sub_question,
+              is_file_with_content,
+              is_template_with_content,
+              company_name,
+              all_files,
+              llm,
+            },
+          });
+
+          if (response.error) {
+            return {
+              error: response.erorr,
+            };
+          }
+          return response;
+        } catch (e) {
+          return {
+            error: {
+              status: 404,
+              statusText: e,
+              data: "Error in reports/section_template API",
             },
           };
         }
@@ -553,65 +624,6 @@ export const transcriptApi = createApi({
         },
       }),
     }),
-    generateInvestmentCategory: builder.mutation<
-      any,
-      {
-        template: string;
-        data: string;
-        is_file_with_content?: boolean;
-        is_template_with_content?: boolean;
-        llm?: string;
-        company_name: string;
-        execute_query?: boolean;
-      }
-    >({
-      async queryFn(
-        {
-          execute_query = true,
-          template,
-          data,
-          is_file_with_content = true,
-          is_template_with_content = true,
-          company_name,
-          llm = "OpenAI",
-        },
-        api,
-        __,
-        apiBaseQuery
-      ) {
-        const graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
-        try {
-          const response: any = await apiBaseQuery({
-            url: `reports/template`,
-            method: "POST",
-            data: {
-              graph_id: graph_id,
-              execute_query,
-              template,
-              data: JSON.stringify({
-                answer: data,
-              }),
-              company_name,
-              is_file_with_content,
-              is_template_with_content,
-              llm,
-            },
-          });
-
-          return {
-            data: response.data.new_id,
-          };
-        } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              data: "Error in sentimentanalysis API",
-            },
-          };
-        }
-      },
-    }),
     generateInvestmentReport: builder.mutation<
       any,
       {
@@ -752,6 +764,16 @@ export const transcriptApi = createApi({
       keepUnusedDataFor: 0,
       providesTags: ["FetchFileLog"],
     }),
+    getIngestedFiles: builder.query<
+      any,
+      { graph_id: number; analysis_type: string }
+    >({
+      query: ({ graph_id, analysis_type }) => ({
+        method: "GET",
+        url: `files/${graph_id}?analysis_type=${analysis_type}`,
+      }),
+      keepUnusedDataFor: 0,
+    }),
     updateFetchFileLog: builder.mutation<
       void,
       {
@@ -829,6 +851,8 @@ export const {
 
   // chatbot
   useCustomQueryMutation,
+  // get ingested files for graph
+  useGetIngestedFilesQuery,
 
   // fetch SEC filings or transcript files
   useFetchFilesMutation,
@@ -848,6 +872,7 @@ export const {
   // create investment memo
   useGetSiteContentMutation,
   useGenerateInvestmentReportMutation,
+  useReportSectionTemplateMutation,
 
   // get suggestions
   useGetSuggestionsQuery,
