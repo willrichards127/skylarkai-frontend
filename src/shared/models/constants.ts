@@ -10,7 +10,7 @@ export const helpNavWidth = 400;
 export const leftNavWidth = 300;
 export const chatboxWidth = 480;
 export const reportHeaderHeight = 66;
-export const reportDrawerWidth = 360;
+export const reportDrawerWidth = 300;
 
 export const topicDict = {
   Financials: [

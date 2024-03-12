@@ -27,7 +27,7 @@ export const ChatPanel = memo(
   }: {
     graph_id: number;
     analysis_type: string;
-    onAddToReport: (content: string) => void;
+    onAddToReport: (question: string, content: string) => void;
     onJumpTo?: (tag: string) => void;
   }) => {
     const ref = useRef<HTMLDivElement>();

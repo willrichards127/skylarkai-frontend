@@ -14,7 +14,10 @@ import BarChartIcon from "@mui/icons-material/BarChart";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import AddIcon from "@mui/icons-material/Add";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
-import { parseCitationInReport2 } from "../../../../shared/utils/string";
+import {
+  // parseCitationInReport2,
+  parseCitation,
+} from "../../../../shared/utils/string";
 import {
   IReportItem,
   IReportItemValue,
@@ -85,9 +88,9 @@ export const SortableItemWrapper = memo(
     }, []);
 
     const onClickAway = useCallback(
-      (content: string) => {
+      (tag: string, content: string) => {
         setIsEdit(false);
-        onItemChanged({ content });
+        onItemChanged({ tag, content });
       },
       [onItemChanged]
     );
@@ -123,34 +126,41 @@ export const SortableItemWrapper = memo(
             components={{
               code: (props) => <p {...(props as any)} />,
               pre: (props) => <div {...(props as any)} />,
-              li: (props) => {
-                if (
-                  props.children &&
-                  typeof props.children === "string" &&
-                  props.children.includes("Document Title")
-                ) {
-                  const citations = parseCitationInReport2(props.children);
-                  if (citations.sections?.length) {
-                    return (
-                      <li {...props}>
-                        {citations.content}
-                        <span
-                          style={{
-                            color: "#2196F3",
-                            textDecoration: "underline",
-                            cursor: "pointer",
-                            zIndex: 99999,
-                          }}
-                          onClick={() => onJumpTo(citations.sections[0])}
-                        >
-                          [{citations.sections[0].filename}]
-                        </span>
-                      </li>
-                    );
-                  } else return <li {...props}>{citations.content}</li>;
-                }
-                return <li {...props} />;
-              },
+              a: (props: any) => (
+                <a
+                  {...props}
+                  style={{ color: "tomato" }}
+                  onClick={() => onJumpTo({ filename: "", quote: props.href })}
+                />
+              ),
+              // li: (props) => {
+              //   if (
+              //     props.children &&
+              //     typeof props.children === "string" &&
+              //     props.children.includes("Document Title")
+              //   ) {
+              //     const citations = parseCitationInReport2(props.children);
+              //     if (citations.sections?.length) {
+              //       return (
+              //         <li {...props}>
+              //           {citations.content}
+              //           <span
+              //             style={{
+              //               color: "#2196F3",
+              //               textDecoration: "underline",
+              //               cursor: "pointer",
+              //               zIndex: 99999,
+              //             }}
+              //             onClick={() => onJumpTo(citations.sections[0])}
+              //           >
+              //             [{citations.sections[0].filename}]
+              //           </span>
+              //         </li>
+              //       );
+              //     } else return <li {...props}>{citations.content}</li>;
+              //   }
+              //   return <li {...props} />;
+              // },
               table: (props) => {
                 return (
                   <XWidget
@@ -164,7 +174,7 @@ export const SortableItemWrapper = memo(
               },
             }}
           >
-            {item.value.content}
+            {parseCitation(item.value.content)}
           </ReactMarkdown>
         )}
         {!isEdit && hover && (

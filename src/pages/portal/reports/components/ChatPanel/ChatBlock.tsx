@@ -25,7 +25,7 @@ export const ChatBlock = memo(
   }: {
     chat: IChat;
     chats: IChat[];
-    onAddToReport: (content: string) => void;
+    onAddToReport: (question: string, content: string) => void;
     onJumpTo: (tag: string) => void;
   }) => {
     const isBot = chat.type === "answer";
@@ -183,7 +183,12 @@ export const ChatBlock = memo(
               <Button
                 size="small"
                 variant="contained"
-                onClick={() => onAddToReport(chat.content as string)}
+                onClick={() =>
+                  onAddToReport(
+                    chats[chats.length - 2].content.toString(),
+                    ref.current?.innerHTML || ""
+                  )
+                }
               >
                 Add to Report
               </Button>

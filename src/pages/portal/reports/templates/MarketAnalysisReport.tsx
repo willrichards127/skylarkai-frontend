@@ -210,13 +210,18 @@ export const MarketAnalysisReport = ({
     []
   );
 
-  const onAddToReport = useCallback((content: string) => {
-    const newId = getNewId();
+  const onAddToReport = useCallback((question: string, content: string) => {
+    // const newItems = categoryParser(content);
+    // console.log(newItems, content, '###')
     setReportItems((prevItems) => [
       ...prevItems,
       {
-        key: newId,
-        value: { content, tag: "p" },
+        key: getNewId(),
+        value: { content: `<h4>${question}</h4>`, tag: "h4" },
+      },
+      {
+        key: getNewId(),
+        value: { content: `<p>${content}</p>`, tag: "p" },
       },
     ]);
   }, []);
@@ -245,11 +250,12 @@ export const MarketAnalysisReport = ({
     onRerunAction(uploadedFiles);
   };
 
+  console.log(reportItems, "===");
+
   return (
-    <Box sx={{ display: "flex", height: "100%", position: "relative" }}>      
+    <Box sx={{ display: "flex", height: "100%", position: "relative" }}>
       <Box
         sx={{
-          // position: "absolute",
           width: "100%",
           height: "100%",
         }}

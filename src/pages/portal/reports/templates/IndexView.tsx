@@ -23,7 +23,7 @@ export const IndexView = memo(
             rehypePlugins={[rehypeRaw as any]}
             components={{
               h1: (props) => (
-                <h1 {...props} style={{ margin: "4px 0" }}>
+                <h1 {...props} style={{ margin: "4px 0", lineHeight: "22px" }}>
                   <a
                     href={`#${key}`}
                     className="index-heading"
@@ -41,6 +41,7 @@ export const IndexView = memo(
                   {...props}
                   style={{
                     margin: "4px 0 4px 4px",
+                    lineHeight: "22px",
                   }}
                 >
                   <a
@@ -56,7 +57,10 @@ export const IndexView = memo(
                 </h2>
               ),
               h3: (props) => (
-                <h3 {...props} style={{ margin: "4px 0 4px 8px" }}>
+                <h3
+                  {...props}
+                  style={{ margin: "4px 0 4px 8px", lineHeight: "20px" }}
+                >
                   <a
                     href={`#${key}`}
                     className="index-heading"
@@ -72,7 +76,11 @@ export const IndexView = memo(
               h4: (props) => (
                 <h4
                   {...props}
-                  style={{ margin: "4px 0 4px 12px", fontSize: 13 }}
+                  style={{
+                    margin: "4px 0 4px 12px",
+                    fontSize: 13,
+                    lineHeight: "16px",
+                  }}
                 >
                   <a
                     href={`#${key}`}
@@ -86,14 +94,17 @@ export const IndexView = memo(
               h5: (props) => (
                 <h5
                   {...props}
-                  style={{ margin: "4px 0 4px 16px", fontSize: 12 }}
+                  style={{
+                    margin: "4px 0 4px 16px",
+                    fontSize: 12,
+                    lineHeight: "14px",
+                  }}
                 >
                   <a
                     href={`#${key}`}
                     className="index-heading"
                     style={{
                       color: theme.palette.secondary.light,
-                      fontSize: 16,
                     }}
                   >
                     {props.children}
@@ -103,14 +114,17 @@ export const IndexView = memo(
               h6: (props) => (
                 <h6
                   {...props}
-                  style={{ margin: "4px 0 4px 20px", fontSize: 11 }}
+                  style={{
+                    margin: "4px 0 4px 20px",
+                    fontSize: 11,
+                    lineHeight: "14px",
+                  }}
                 >
                   <a
                     href={`#${key}`}
                     className="index-heading"
                     style={{
                       color: theme.palette.secondary.light,
-                      fontSize: 16,
                     }}
                   >
                     {props.children}
