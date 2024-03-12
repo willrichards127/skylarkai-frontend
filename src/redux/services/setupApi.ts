@@ -119,17 +119,30 @@ export const setupApi = createApi({
       },
     }),
     executeGraph: builder.mutation<
-      any,
+      ISetup,
       { setup: ISetup; analysisType: string }
     >({
       async queryFn({ setup, analysisType }, __, ___, apiBaseQuery) {
         try {
           // save current graph
-          const updateResponse: any = await apiBaseQuery({
+          let uploadFiles: File[] | undefined = undefined;
+          
+          const fileUploadNode = setup.nodes.find(
+            (node) => node.template_node_id === 2
+          );
+
+          if(fileUploadNode && fileUploadNode.template_node_id === 2 && fileUploadNode.properties && "files" in fileUploadNode.properties) {
+            uploadFiles = fileUploadNode.properties["files"];
+            delete fileUploadNode.properties["files"];
+          }
+
+          const updateResponse = await apiBaseQuery({
             url: `graphs/${setup.id}`,
             method: "PUT",
             body: setup,
           });
+
+          const updatedSetup = updateResponse.data as ISetup;
 
           // execute the graph
           // await apiBaseQuery({
@@ -137,23 +150,31 @@ export const setupApi = createApi({
           //   method: "POST",
           // });
 
-          const uploadNode = setup.nodes.find(
-            (node) => node.template_node_id === 2
-          );
-          if (uploadNode) {
+          
+          if (uploadFiles) {
             const formData = new FormData();
             formData.append("analysis_type", analysisType);
-            for (const file of uploadNode.properties?.files) {
+            for (const file of uploadFiles) {
               formData.append("files", file);
             }
-            await apiBaseQuery({
+            const updateIngestResponse = await apiBaseQuery({
               url: `ingestfiles?graph_id=${setup.id}&company_name=${setup.name}`,
               method: "POST",
               body: formData,
             });
+
+            const skyDBNodeIndex = updatedSetup.nodes.findIndex(
+              (node) => node.template_node_id === 46
+            );
+            if (skyDBNodeIndex > -1) {
+              updatedSetup.nodes[skyDBNodeIndex].properties!.files = [
+                ...(updatedSetup.nodes[skyDBNodeIndex].properties?.files || []),
+                ...(updateIngestResponse.data as any),
+              ];
+            }
           }
 
-          return { data: updateResponse.data };
+          return { data: updatedSetup };
         } catch (e) {
           return {
             error: {
