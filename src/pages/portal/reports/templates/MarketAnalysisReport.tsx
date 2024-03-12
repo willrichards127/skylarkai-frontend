@@ -1,14 +1,11 @@
-// import { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import { useCallback, useMemo, useState, useRef } from "react";
 import { Box } from "@mui/material";
-// import { toast } from "react-toastify";
 import { DndContext } from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { HeaderPanel } from "../components/HeaderPanel";
-import { IndexView } from "./IndexView";
 import { ExportModal } from "../../../../components/modals/ExportModal";
 import { RefFileModal } from "../components/RefFileModal";
 import { SendEmailModal } from "../../../../components/modals/SendEmailModal";
@@ -21,15 +18,17 @@ import {
   convertCSVToTable,
   parseTable,
 } from "../../../../shared/utils/parse";
-import { UtilPanel } from "../components/UtilPanel";
+import { ReportDrawer } from "../components/ReportDrawer";
 import { useLazyGetFilesDataQuery } from "../../../../redux/services/transcriptAPI";
-import { scrollToAndHighlightText } from "../../../../shared/utils/string";
 import {
   IReportItem,
   IReportItemValue,
   ISetup,
 } from "../../../../shared/models/interfaces";
-import { REPORTS_DICT } from "../../../../shared/models/constants";
+import {
+  REPORTS_DICT,
+  reportHeaderHeight,
+} from "../../../../shared/models/constants";
 import { getPdfInBase64 } from "../../../../shared/utils/pdf-generator";
 
 export const MarketAnalysisReport = ({
@@ -212,7 +211,6 @@ export const MarketAnalysisReport = ({
   );
 
   const onAddToReport = useCallback((content: string) => {
-    
     const newId = getNewId();
     setReportItems((prevItems) => [
       ...prevItems,
@@ -243,29 +241,17 @@ export const MarketAnalysisReport = ({
     [getFileData]
   );
 
-  const onSearchText = useCallback((searchText: string) => {
-    setTimeout(() => {
-      scrollToAndHighlightText(printRef.current!, searchText);
-    }, 100);
-  }, []);
-
   const onRerunReport = () => {
     onRerunAction(uploadedFiles);
   };
 
   return (
-    <Box sx={{ display: "flex", height: "100%", position: "relative" }}>
-      <UtilPanel
-        onRemoveFiles={onRemoveFiles}
-        uploadedFiles={uploadedFiles}
-        onSearchText={onSearchText}
-      />
+    <Box sx={{ display: "flex", height: "100%", position: "relative" }}>      
       <Box
         sx={{
-          position: "absolute",
-          left: 100,
+          // position: "absolute",
+          width: "100%",
           height: "100%",
-          width: "calc(100% - 100px)",
         }}
       >
         <HeaderPanel
@@ -278,54 +264,72 @@ export const MarketAnalysisReport = ({
           onRerunReport={onRerunReport}
           onUploadedFiles={onUploadedFiles}
         />
-        <Box sx={{ p: 2, height: "calc(100% - 66px)" }}>
+        <Box
+          sx={{
+            height: `calc(100% - ${reportHeaderHeight}px)`,
+            width: "100%",
+            p: 2,
+          }}
+        >
           <SplitContainer
             sizes={[70, 30]}
             leftPanel={
               <Box
                 sx={{
                   display: "flex",
-                  alignItems: "center",
-                  flexDirection: "column",
-                  bgcolor: "#121212",
                   borderRadius: 2,
-                  overflowY: "auto",
-                  p: 4,
-                  position: "relative",
+                  bgcolor: "#121212",
                 }}
               >
+                <ReportDrawer
+                  items={reportItems}
+                  onRemoveFiles={onRemoveFiles}
+                  uploadedFiles={uploadedFiles}
+                />
                 <Box
-                  ref={printRef}
                   sx={{
-                    width: 892,
+                    display: "flex",
+                    alignItems: "center",
+                    flexDirection: "column",
+                    overflowY: "auto",
+                    flex: 1,
                   }}
                 >
-                  <IndexView items={reportItems} />
-                  <DndContext onDragEnd={onDragEnd}>
-                    <SortableContext
-                      items={reportItems.map((item) => item.key)}
-                      strategy={verticalListSortingStrategy}
-                    >
-                      {reportItems.map((item) => (
-                        <SortableItemWrapper
-                          key={item.key}
-                          item={item}
-                          onAddNew={() => onAddNew(item.key)}
-                          onRemove={() => onRemove(item.key)}
-                          onClone={(clonedItem) =>
-                            onClone(item.key, clonedItem)
-                          }
-                          onAddUploadedFile={(data) =>
-                            onAddUploadedFile(item.key, data)
-                          }
-                          onJumpTo={onJumpTo}
-                          onItemChanged={(data: Partial<IReportItemValue>) =>
-                            onItemChanged(item.key, data)
-                          }
-                        />
-                      ))}
-                    </SortableContext>
-                  </DndContext>
+                  <Box
+                    ref={printRef}
+                    sx={{
+                      maxWidth: 892,
+                      bgcolor: "white",
+                      color: "black",
+                      p: 8,
+                    }}
+                  >
+                    <DndContext onDragEnd={onDragEnd}>
+                      <SortableContext
+                        items={reportItems.map((item) => item.key)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        {reportItems.map((item) => (
+                          <SortableItemWrapper
+                            key={item.key}
+                            item={item}
+                            onAddNew={() => onAddNew(item.key)}
+                            onRemove={() => onRemove(item.key)}
+                            onClone={(clonedItem) =>
+                              onClone(item.key, clonedItem)
+                            }
+                            onAddUploadedFile={(data) =>
+                              onAddUploadedFile(item.key, data)
+                            }
+                            onJumpTo={onJumpTo}
+                            onItemChanged={(data: Partial<IReportItemValue>) =>
+                              onItemChanged(item.key, data)
+                            }
+                          />
+                        ))}
+                      </SortableContext>
+                    </DndContext>
+                  </Box>
                 </Box>
               </Box>
             }

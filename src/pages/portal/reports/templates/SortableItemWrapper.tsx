@@ -132,17 +132,19 @@ export const SortableItemWrapper = memo(
                   const citations = parseCitationInReport2(props.children);
                   if (citations.sections?.length) {
                     return (
-                      <li
-                        {...props}
-                        style={{
-                          color: "#2196F3",
-                          textDecoration: "underline",
-                          cursor: "pointer",
-                          zIndex: 99999,
-                        }}
-                        onClick={() => onJumpTo(citations.sections[0])}
-                      >
-                        [{citations.sections[0].filename}]
+                      <li {...props}>
+                        {citations.content}
+                        <span
+                          style={{
+                            color: "#2196F3",
+                            textDecoration: "underline",
+                            cursor: "pointer",
+                            zIndex: 99999,
+                          }}
+                          onClick={() => onJumpTo(citations.sections[0])}
+                        >
+                          [{citations.sections[0].filename}]
+                        </span>
                       </li>
                     );
                   } else return <li {...props}>{citations.content}</li>;
@@ -177,7 +179,8 @@ export const SortableItemWrapper = memo(
                 boxSizing: "content-box",
                 MozBoxSizing: "content-box",
                 WebkitBoxSizing: "content-box",
-                border: `1px solid ${colors.grey[800]}`,
+                border: `1px dotted ${colors.grey[800]}`,
+                borderRadius: 1,
               }}
             />
             <DragIndicatorIcon
@@ -198,7 +201,7 @@ export const SortableItemWrapper = memo(
                 onClick={onAddNew}
                 title="Add New Item Below"
               >
-                <AddIcon sx={{ fontSize: 16 }} />
+                <AddIcon sx={{ fontSize: 16, color: "black" }} />
               </IconButton>
               <CSVReader
                 onUploadAccepted={onUploadAccepted}
@@ -207,7 +210,7 @@ export const SortableItemWrapper = memo(
                 {({ getRootProps }: any) => (
                   <div style={styles.csvReader}>
                     <IconButton size="small" {...getRootProps()}>
-                      <UploadFileIcon sx={{ fontSize: 16 }} />
+                      <UploadFileIcon sx={{ fontSize: 16, color: "black" }} />
                     </IconButton>
                   </div>
                 )}
@@ -217,7 +220,7 @@ export const SortableItemWrapper = memo(
                 onClick={() => onClone(item.value)}
                 title="Clone"
               >
-                <FileCopyIcon sx={{ fontSize: 16 }} />
+                <FileCopyIcon sx={{ fontSize: 16, color: "black" }} />
               </IconButton>
               {item.value.tag === "table" && (
                 <IconButton
@@ -225,11 +228,11 @@ export const SortableItemWrapper = memo(
                   onClick={onShowVisualization}
                   title="Visualize"
                 >
-                  <BarChartIcon sx={{ fontSize: 16 }} />
+                  <BarChartIcon sx={{ fontSize: 16, color: "black" }} />
                 </IconButton>
               )}
               <IconButton size="small" onClick={onRemove} title="Remove">
-                <DeleteForeverIcon sx={{ fontSize: 16 }} />
+                <DeleteForeverIcon sx={{ fontSize: 16, color: "black" }} />
               </IconButton>
             </Box>
           </Box>

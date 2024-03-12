@@ -1,4 +1,5 @@
 import { memo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   IconButton,
@@ -18,8 +19,7 @@ import UploadFileIcon from "@mui/icons-material/UploadFile";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import EmailIcon from "@mui/icons-material/Email";
 import { FileUploadModal } from "./FileUploadModal";
-import { REPORTS_DICT } from "../../../../shared/models/constants";
-import { useNavigate } from "react-router-dom";
+import { REPORTS_DICT, reportHeaderHeight } from "../../../../shared/models/constants";
 
 export const HeaderPanel = memo(
   ({
@@ -49,7 +49,7 @@ export const HeaderPanel = memo(
           py: 1,
           px: 2,
           bgcolor: "black",
-          height: 66,
+          height: reportHeaderHeight,
           zIndex: 1,
           display: "flex",
           gap: 1,
