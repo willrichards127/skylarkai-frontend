@@ -11,12 +11,14 @@ export const ChatContentBox = forwardRef(
       loading = false,
       chats,
       insider_transaction,
+      companyName,
       onChooseTopic,
       onChooseSuggestion,
       onJumpTo,
     }: {
       loading?: boolean;
       insider_transaction?: boolean;
+      companyName: string;
       chats: IChat[];
       onJumpTo: (tag: string) => void;
       onChooseTopic: (topicId: string) => void;
@@ -49,6 +51,7 @@ export const ChatContentBox = forwardRef(
             loading={loading}
             key={uuidv4()}
             chat={chat}
+            companyName={companyName}
             onChooseTopic={onChooseTopic}
             onChooseSuggestion={onChooseSuggestion}
             onJumpTo={onJumpTo}

@@ -22,11 +22,13 @@ export const ChatPanel = memo(
   ({
     graph_id,
     analysis_type,
+    companyName,
     onAddToReport,
     onJumpTo,
   }: {
     graph_id: number;
     analysis_type: string;
+    companyName: string;
     onAddToReport: (question: string, content: string) => void;
     onJumpTo?: (tag: string) => void;
   }) => {
@@ -113,16 +115,16 @@ export const ChatPanel = memo(
         }
       }
       const base64str = await getPdfInBase64(
-        `<h1>Chat History ${today}</h1><br />${container.innerHTML}`,
+        `<h1>Skylark ${companyName} Analysis</h1><br /><b>Created At: ${today}</b><br />${container.innerHTML}`,
         "Skylark"
       );
 
       emailContentRef.current = {
-        subject: `Chat History ${today}`,
+        subject: `Skylark ${companyName} Analysis`,
         content: base64str,
       };
       showEmailModal(true);
-    }, []);
+    }, [companyName]);
 
     useEffect(() => {
       if (loadingAnswer) {
@@ -198,6 +200,7 @@ export const ChatPanel = memo(
         <ChatContentBox
           ref={ref}
           chats={chatHistory}
+          companyName={companyName}
           onAddToReport={onAddToReport}
           onJumpTo={(tag: string) => (onJumpTo ? onJumpTo(tag) : null)}
         />

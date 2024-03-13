@@ -342,6 +342,7 @@ export const MarketAnalysisReport = ({
             rightPanel={
               <ChatPanel
                 graph_id={setup.id!}
+                companyName={setup.name!}
                 analysis_type="financial_diligence"
                 onAddToReport={onAddToReport}
               />

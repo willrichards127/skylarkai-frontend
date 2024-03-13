@@ -20,11 +20,13 @@ export const ChatBlock = memo(
   ({
     chat,
     chats,
+    companyName,
     onJumpTo,
     onAddToReport,
   }: {
     chat: IChat;
     chats: IChat[];
+    companyName: string;
     onAddToReport: (question: string, content: string) => void;
     onJumpTo: (tag: string) => void;
   }) => {
@@ -54,13 +56,16 @@ export const ChatBlock = memo(
 
     const onSendViaEmail = useCallback(async (question: string) => {
       if (!ref.current) return;
-      const base64str = await getPdfInBase64(ref.current.innerHTML, "Skylark");
+      const base64str = await getPdfInBase64(
+        `<b>Question: ${question}</b><br />Answer: ` + ref.current.innerHTML,
+        "Skylark"
+      );
       emailContentRef.current = {
-        subject: question,
+        subject: `Skylark ${companyName} Analysis`,
         content: base64str,
       };
       showEmailModal(true);
-    }, []);
+    }, [companyName]);
 
     return (
       <Box
@@ -104,6 +109,19 @@ export const ChatBlock = memo(
           <Box width="100%" fontSize={13} ref={ref}>
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
+              allowElement={(element, _, parent) => {
+                if (element.tagName === "p" && (parent as any).tagName === "li") {
+                  return false;
+                }
+                if (
+                  element.tagName === "strong" &&
+                  (parent as any).tagName === "li"
+                ) {
+                  return false;
+                }
+                return true;
+              }}
+              unwrapDisallowed={true}
               components={{
                 pre: (props) => <p {...(props as any)} />,
                 code: (props) => <p {...(props as any)} />,

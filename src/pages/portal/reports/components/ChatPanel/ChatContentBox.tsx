@@ -9,10 +9,12 @@ export const ChatContentBox = forwardRef(
   (
     {
       chats,
+      companyName,
       onAddToReport,
       onJumpTo,
     }: {
       chats: IChat[];
+      companyName: string;
       onAddToReport: (question: string, content: string) => void;
       onJumpTo: (tag: string) => void;
     },
@@ -42,6 +44,7 @@ export const ChatContentBox = forwardRef(
           <ChatBlock
             key={uuidv4()}
             chat={chat}
+            companyName={companyName}
             onJumpTo={onJumpTo}
             chats={chats}
             onAddToReport={onAddToReport}
