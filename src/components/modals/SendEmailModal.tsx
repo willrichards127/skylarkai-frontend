@@ -77,7 +77,7 @@ export const SendEmailModal = memo(
         size="sm"
       >
         {isLoading ? (
-          <LoadingSpinner size={114} loadingDescription="Exporting the file" />
+          <LoadingSpinner size={114} loadingDescription="Sending the pdf file..." />
         ) : (
           <Stack px={3} spacing={2}>
             <TextField
