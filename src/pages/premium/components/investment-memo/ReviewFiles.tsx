@@ -24,7 +24,6 @@ import {
   useIngestFilesMutation,
   // useGetSiteContentMutation,
   useCustomQueryMutation,
-  useCreateReportMutation,
 } from "../../../../redux/services/transcriptAPI";
 import { parseCitationInReport } from "../../../../shared/utils/string";
 
@@ -37,7 +36,7 @@ const generateMD = (
   Object.entries(reportData).forEach(([category, qa]) => {
     reportMD += `<br /><h2>${category}</h2>`;
     Object.entries(qa).forEach(([question, answer]) => {
-      reportMD += `<br /><h3>${question}</h3>${answer}<br />`;
+      reportMD += `<br /><h3>${question}</h3><p>${answer}<p><br />`;
     });
   });
   return parseCitationInReport(reportMD);
@@ -62,7 +61,6 @@ export const ReviewFiles = ({
   //   useGetSiteContentMutation();
   const [customQuery, { isLoading: loadingCustomQuery }] =
     useCustomQueryMutation();
-  const [createReport, {isLoading: loadingCreateReport}] = useCreateReportMutation();
 
   const [selectedTab, setSelectedTab] = useState<string>("All");
   const [processStatus, setProcessStatus] = useState<string>("");
@@ -113,15 +111,6 @@ export const ReviewFiles = ({
       //   };
       // }
 
-      const responseReport = await createReport({
-        report_name: 'Genpact Investment memo',
-        company_name: instance.company_name,
-        data: JSON.stringify(processedDataDictRef.current),
-        template: "",
-      }).unwrap();
-
-      
-
       const responseInstance = await createInstance({
         ...instance,
         instance_metadata: {
@@ -141,7 +130,6 @@ export const ReviewFiles = ({
     instance,
     // getWebsiteContent,
     customQuery,
-    createReport,
     createInstance,
     onNext,
   ]);
