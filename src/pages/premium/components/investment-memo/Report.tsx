@@ -13,12 +13,10 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import IosShareIcon from "@mui/icons-material/IosShare";
 import EmailIcon from "@mui/icons-material/Email";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { ExportModal } from "../../../../components/modals/ExportModal";
 import { ICustomInstance } from "./interfaces";
 import { ReportTemplate } from "../../../portal/reports/templates/ReportTemplate";
-import {
-  generatePdf,
-  getPdfInBase64,
-} from "../../../../shared/utils/pdf-generator";
+import { getPdfInBase64 } from "../../../../shared/utils/pdf-generator";
 import { SendEmailModal } from "../../../../components/modals/SendEmailModal";
 
 export const Report = ({
@@ -32,14 +30,11 @@ export const Report = ({
     { subject?: string; content: string } | undefined
   >();
   const reportPrintRef = useRef<HTMLDivElement>(null);
+  const [exportModal, showExportModal] = useState<boolean>(false);
   const [emailModal, showEmailModal] = useState<boolean>(false);
 
   const onExport = useCallback(() => {
-    generatePdf(
-      reportPrintRef.current!.innerHTML,
-      "Investment memo",
-      "Skylark"
-    );
+    showExportModal(true);
   }, []);
 
   const onSendEmail = useCallback(async () => {
@@ -54,8 +49,6 @@ export const Report = ({
     };
     showEmailModal(true);
   }, []);
-
-  console.log(instance, 'instance===')
 
   return (
     <Box sx={{ height: "100%" }}>
@@ -97,84 +90,21 @@ export const Report = ({
           {instance.instance_metadata?.template_name || "Default Template"}
         </Typography>
       </Box>
-      <Box sx={{ height: "calc(100% - 120px)"}}>
+      <Box sx={{ height: "calc(100% - 120px)" }}>
         <ReportTemplate
           ref={reportPrintRef}
           setup={{ name: instance.company_name }}
           reportContent={instance.instance_metadata.report!}
           analysisType="template"
         />
-        {/* <Box
-          sx={{
-            position: "absolute",
-            height: "100%",
-            width: "100%",
-            border: "1px solid black",
-            overflowY: "auto",
-            bgcolor: "white",
-            color: "black",
-            px: 16,
-            py: 8,
-          }}
-          ref={ref}
-        >
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeRaw as any]}
-            allowElement={(element, _, parent) => {
-              if (element.tagName === "p" && (parent as any).tagName === "li") {
-                return false;
-              }
-              if (
-                element.tagName === "strong" &&
-                (parent as any).tagName === "li"
-              ) {
-                return false;
-              }
-              return true;
-            }}
-            unwrapDisallowed={true}
-            components={{
-              pre: (props) => <div {...(props as any)} />,
-              li: (props) => <li {...props} style={{ marginBottom: "12px" }} />,
-              table: (props) => (
-                <table
-                  {...props}
-                  style={{
-                    borderCollapse: "collapse",
-                    margin: "4px 2px",
-                    overflowX: "auto",
-                  }}
-                />
-              ),
-              th: (props) => (
-                <th
-                  {...props}
-                  style={{
-                    textAlign: "center",
-                    padding: "2px 4px",
-                    color: "white",
-                    background: "black",
-                    border: `1px solid ${colors.grey[500]}`,
-                  }}
-                />
-              ),
-              td: (props) => (
-                <td
-                  {...props}
-                  style={{
-                    textAlign: "center",
-                    padding: "4px 8px",
-                    border: `1px solid ${colors.grey[500]}`,
-                  }}
-                />
-              ),
-            }}
-          >
-            {instance.instance_metadata.report}
-          </ReactMarkdown>
-        </Box> */}
       </Box>
+      {exportModal && (
+        <ExportModal
+          open={exportModal}
+          exportContent={reportPrintRef.current!}
+          onClose={() => showExportModal(false)}
+        />
+      )}
       {emailModal && (
         <SendEmailModal
           open={emailModal}
