@@ -24,6 +24,7 @@ import {
   useIngestFilesMutation,
   // useGetSiteContentMutation,
   useCustomQueryMutation,
+  useCreateReportMutation,
 } from "../../../../redux/services/transcriptAPI";
 import { parseCitationInReport } from "../../../../shared/utils/string";
 
@@ -61,6 +62,7 @@ export const ReviewFiles = ({
   //   useGetSiteContentMutation();
   const [customQuery, { isLoading: loadingCustomQuery }] =
     useCustomQueryMutation();
+  const [createReport, {isLoading: loadingCreateReport}] = useCreateReportMutation();
 
   const [selectedTab, setSelectedTab] = useState<string>("All");
   const [processStatus, setProcessStatus] = useState<string>("");
@@ -81,7 +83,6 @@ export const ReviewFiles = ({
         analysis_type: "template",
         files: instance.instance_metadata.uploaded_files,
       });
-
 
       for (const [
         categoryIndex,
@@ -112,6 +113,15 @@ export const ReviewFiles = ({
       //   };
       // }
 
+      const responseReport = await createReport({
+        report_name: 'Genpact Investment memo',
+        company_name: instance.company_name,
+        data: JSON.stringify(processedDataDictRef.current),
+        template: "",
+      }).unwrap();
+
+      
+
       const responseInstance = await createInstance({
         ...instance,
         instance_metadata: {
@@ -131,12 +141,13 @@ export const ReviewFiles = ({
     instance,
     // getWebsiteContent,
     customQuery,
+    createReport,
     createInstance,
     onNext,
   ]);
 
   const isQueryProcessing = useMemo(() => {
-    if(!processStatus && !loadingCustomQuery) return false;
+    if (!processStatus && !loadingCustomQuery) return false;
     if (loadingCreateInstance) return true;
     const finalStatus = `${
       instance.instance_metadata.template_content.length
@@ -163,7 +174,12 @@ export const ReviewFiles = ({
         </Stack>
       </Backdrop>
       <Box sx={{ display: "flex", alignItems: "center" }}>
-        <IconButton size="small" disabled={loadingIngest || isQueryProcessing} onClick={onPrev} sx={{ mr: 1 }}>
+        <IconButton
+          size="small"
+          disabled={loadingIngest || isQueryProcessing}
+          onClick={onPrev}
+          sx={{ mr: 1 }}
+        >
           <ArrowBackIcon sx={{ fontSize: 18 }} />
         </IconButton>
         <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
@@ -172,7 +188,10 @@ export const ReviewFiles = ({
             color="inherit"
             href="#"
             onClick={onGotoMain}
-            sx={{ pointerEvents: (loadingIngest || isQueryProcessing) ? "none" : "auto" }}
+            sx={{
+              pointerEvents:
+                loadingIngest || isQueryProcessing ? "none" : "auto",
+            }}
           >
             Create Investment Memo
           </Link>

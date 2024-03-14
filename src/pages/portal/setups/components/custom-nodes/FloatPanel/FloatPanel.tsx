@@ -1,5 +1,6 @@
-import React, { memo, useRef, useCallback, useEffect, useState } from "react";
+import React, { memo, useRef, useCallback, useState } from "react";
 import { Box, IconButton, CircularProgress, colors } from "@mui/material";
+import { toast } from "react-toastify";
 import { useReactFlow } from "reactflow";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { XPanel } from "../../../../../../components/XPanel";
@@ -22,19 +23,12 @@ import { SkyNode } from "../nodes/dataloaders/SkyNode";
 import { CustomAPINode } from "../nodes/dataloaders/CustomAPINode";
 import { NotionNode } from "../nodes/dataloaders/NotionNode";
 import { MongoDBNode } from "../nodes/dataloaders/MongoDBNode";
-import { ITemplateNode,INode, IEdge } from "../../../../../../shared/models/interfaces";
+import { ITemplateNode } from "../../../../../../shared/models/interfaces";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import DownloadIcon from "@mui/icons-material/Download";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
-import {
-  convert2DBNode,
-  convert2DBEdge,
-  convert2Node,
-  convert2Edge,
-} from "../../../utils";
-
-import { useExecuteNodeMutation } from "../../../../../../redux/services/setupApi";
+import { useCustomQueryMutation } from "../../../../../../redux/services/transcriptAPI";
 import { EdgarNode } from "../nodes/dataloaders/EdgarNode";
 import { SalesforceNode } from "../nodes/dataloaders/SalesforceNode";
 import { SlackNode } from "../nodes/dataloaders/SlackNode";
@@ -45,6 +39,11 @@ import { YoutubuNode } from "../nodes/dataloaders/YoutubuNode";
 import { GoogleDriveNode } from "../nodes/dataloaders/GoogleDriveNode";
 import { DataSearchNode } from "../nodes/dataloaders/DataSearchNode";
 import { SkylarkDBNode } from "../nodes/vectors/SkylarkDBNode";
+import {
+  parseCitation,
+  removeExtension,
+} from "../../../../../../shared/utils/string";
+import { ExportModal } from "../../../../../../components/modals/ExportModal";
 // key is corresponding to items.name
 const ComponentDict: Record<
   string,
@@ -83,7 +82,7 @@ const ComponentDict: Record<
   ElasticSearch: ElasticSearchNode,
   Youtube: YoutubuNode,
   GoogleDrive: GoogleDriveNode,
-  DataSearch: DataSearchNode
+  DataSearch: DataSearchNode,
 };
 
 const FloatPanel = memo(
@@ -99,98 +98,66 @@ const FloatPanel = memo(
     onClose: () => void;
   }) => {
     const printRef = useRef();
-    const { getNodes, getEdges, setNodes, setEdges } = useReactFlow();
-    const [executeNode, { isLoading, data }] = useExecuteNodeMutation();
+    const { getNodes, setNodes } = useReactFlow();
+    const [customQuery, { isLoading }] = useCustomQueryMutation();
+    const [exportModal, showExportModal] = useState<boolean>(false);
 
-    const startTimeRef = useRef<number>(0);
     const [fetchTime, setFetchTime] = useState("0.0");
     const XForm = ComponentDict[nodeContent.name];
 
-    const onExecuteNode = useCallback(() => {
-      startTimeRef.current = performance.now();
-
+    const onExecuteNode = useCallback(async () => {
+      const startTime = performance.now();
       const nodes = getNodes();
-      const edges = getEdges();
 
-      const dbNodes = nodes.map((node) => convert2DBNode(node as INode));
-      const dbEdges = edges.map((edge) => convert2DBEdge(edge as IEdge));
-
-      executeNode({
-        id: nodeContent.setupId!,
-        name: nodeContent.setupName,
-        edges: dbEdges,
-        nodes: dbNodes,
-      });
-    }, [executeNode, getNodes, getEdges, nodeContent]);
-
-    const onDownload = useCallback(() => {
-      const contentToPrint = printRef.current;
-      if (contentToPrint) {
-        const htmlContent = `<html><head><title>Print</title>
-					<style>
-						.visualize-button {
-							display: none;
-						}
-						tpan, text {
-							fill: black;
-						}
-					</style>
-					</head>
-					<body>${(contentToPrint as HTMLDivElement).innerHTML}</body></html>`;
-        fetch(`${process.env.apiUrl}generate_pdf`, {
-          method: "POST",
-          body: new URLSearchParams({ html_content: htmlContent }),
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        })
-          .then((response) => {
-            return response.blob();
-          })
-          .then((blob) => {
-            // Create a download link for the PDF
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "output.pdf";
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-          })
-          .catch((error) => {
-            console.error("Error:", error);
-          });
+      const inputNode = nodes.find((node) => node.data.name === "Input");
+      const skyDBNode = nodes.find((node) => node.data.name === "SkyDatabase");
+      const llmNode = nodes.find(
+        (node) => node.data.name === "Anthropic" || node.data.name === "GPT-3.5"
+      );
+      if (!inputNode || !skyDBNode || !llmNode) {
+        toast.error("Invalid graph format!");
+        return;
       }
-    }, []);
-
-    useEffect(() => {
-      if (isLoading || !data) return;
+      if (!inputNode.data.properties.text) {
+        toast.warn("Type any questions in the input node.");
+        return;
+      }
+      if (!skyDBNode.data.properties.files?.length) {
+        toast.warn("There is no ingested file. Please run the graph first.");
+        return;
+      }
+      const answerResponse = await customQuery({
+        graph_id: nodeContent.setupId!,
+        filenames: skyDBNode.data.properties.files.map(
+          ({ file_name }: { file_name: string }) => removeExtension(file_name)
+        ),
+        question: inputNode.data.properties.text,
+        analysis_type: "financial_diligence",
+        llm: llmNode.data.name === "Anthropic" ? "Anthropic" : "OpenAI",
+      }).unwrap();
 
       const endTime = performance.now();
-      const fetchDurationInSeconds = (
-        (endTime - startTimeRef.current) /
-        1000
-      ).toFixed(1);
-
+      const fetchDurationInSeconds = ((endTime - startTime) / 1000).toFixed(1);
+      setNodes((prev) =>
+        prev.map((node) =>
+          node.data.graph_node_id === nodeContent.graph_node_id
+            ? {
+                ...node,
+                data: {
+                  ...node.data,
+                  properties: { text: answerResponse.content },
+                },
+              }
+            : node
+        )
+      );
       setFetchTime(fetchDurationInSeconds);
-    }, [isLoading, data]);
+    }, [customQuery, getNodes, setNodes, nodeContent]);
 
-    useEffect(() => {
-      if (isLoading || !data) return;
+    const onExport = useCallback(() => {
+      showExportModal(true);
+    }, []);
 
-      const loadedNodes = (data as any).nodes.map((node: any) =>
-        convert2Node(node, nodeContent.categoryDict!, data.id, data.name)
-      );
-      const loadedEdges = (data as any).edges.map((edge: any) =>
-        convert2Edge(edge, (data as any).nodes)
-      );
-
-      setNodes(loadedNodes);
-      setEdges(loadedEdges as any);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isLoading, data]);
-
-    
     return (
       <XPanel
         header={
@@ -223,8 +190,8 @@ const FloatPanel = memo(
                 <Box mr="auto" />
                 <IconButton
                   size="small"
-                  onClick={onDownload}
-                  disabled={isLoading || !data}
+                  onClick={onExport}
+                  disabled={isLoading || !nodeContent.properties.text}
                 >
                   <DownloadIcon sx={{ fontSize: 14 }} />
                 </IconButton>
@@ -249,38 +216,71 @@ const FloatPanel = memo(
         sxProps={{ minWidth: 320 }}
       >
         {!!XForm && <XForm nodeId={nodeId} nodeContent={nodeContent} />}
-        {["Output"].includes(nodeContent.name) && !!data?.result && (
-          <>
-            <Box fontSize={12} mb={0.5}>
-              Result:
-            </Box>
-            <Box
-              ref={printRef}
-              className="nowheel"
-              sx={{
-                p: 1,
-                border: `1px solid ${colors.grey[500]}`,
-                borderRadius: 1,
-                maxHeight: 240,
-                minHeight: 100,
-                maxWidth: 400,
-                overflowY: "auto",
-              }}
-            >
-              <ReactMarkdown
-                rehypePlugins={[rehypeRaw as any]}
-                components={{
-                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                  li: ({ node, ...props }) => (
-                    <li style={{ marginLeft: 16 }} {...props} />
-                  ),
+        {["Output"].includes(nodeContent.name) &&
+          nodeContent.properties.text && (
+            <>
+              <Box fontSize={12} mb={0.5}>
+                Result:
+              </Box>
+              <Box
+                ref={printRef}
+                className="nowheel"
+                sx={{
+                  p: 1,
+                  border: `1px solid ${colors.grey[500]}`,
+                  borderRadius: 1,
+                  maxHeight: 240,
+                  minHeight: 100,
+                  maxWidth: 400,
+                  overflowY: "auto",
                 }}
               >
-                {data.result || ""}
-              </ReactMarkdown>
-            </Box>
-          </>
-        )}
+                <ReactMarkdown
+                  rehypePlugins={[rehypeRaw as any]}
+                  allowElement={(element, _, parent) => {
+                    if (
+                      element.tagName === "p" &&
+                      (parent as any).tagName === "li"
+                    ) {
+                      return false;
+                    }
+                    if (
+                      element.tagName === "strong" &&
+                      (parent as any).tagName === "li"
+                    ) {
+                      return false;
+                    }
+                    return true;
+                  }}
+                  unwrapDisallowed={true}
+                  components={{
+                    code: (props) => <p {...(props as any)} />,
+                    pre: (props) => <div {...(props as any)} />,
+                    a: (props: any) => (
+                      <a
+                        {...props}
+                        style={{ color: "tomato" }}
+                        // onClick={() =>
+                        //   onJumpTo({ filename: "", quote: props.href })
+                        // }
+                      />
+                    ),
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    li: ({ node, ...props }) => (
+                      <li style={{ marginLeft: 16 }} {...props} />
+                    ),
+                  }}
+                >
+                  {parseCitation(nodeContent.properties.text) || ""}
+                </ReactMarkdown>
+              </Box>
+            </>
+          )}
+        <ExportModal
+          open={exportModal}
+          exportContent={printRef.current!}
+          onClose={() => showExportModal(false)}
+        />
       </XPanel>
     );
   }

@@ -440,6 +440,42 @@ export const transcriptApi = createApi({
         }
       },
     }),
+    createReport: builder.mutation<
+      any,
+      { company_name: string; report_name: string; data: string; template: string }
+    >({
+      async queryFn(args, api, ___, apiBaseQuery) {
+        const { company_name, report_name, data, template } = args;
+        const graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
+        try {
+          const reportResponse: any = await apiBaseQuery({
+            url: `reports`,
+            method: "POST",
+            data: {
+              data,
+              graph_id,
+              report_name,
+              execute_query: true,
+              template,
+              company_name
+            },
+          });
+          const generatedId: number = reportResponse.data.new_id;
+
+          return {
+            data: generatedId,
+          };
+        } catch (e) {
+          return {
+            error: {
+              status: 404,
+              statusText: e,
+              data: "Error in creteReport API",
+            },
+          };
+        }
+      },
+    }),
     generateSentimentAnalysis: builder.mutation<
       IChat,
       {
@@ -873,6 +909,7 @@ export const {
   useGetSiteContentMutation,
   useGenerateInvestmentReportMutation,
   useReportSectionTemplateMutation,
+  useCreateReportMutation,
 
   // get suggestions
   useGetSuggestionsQuery,
