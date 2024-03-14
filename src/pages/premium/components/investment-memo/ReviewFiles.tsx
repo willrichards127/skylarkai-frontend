@@ -36,7 +36,7 @@ const generateMD = (
   Object.entries(reportData).forEach(([category, qa]) => {
     reportMD += `<br /><h2>${category}</h2>`;
     Object.entries(qa).forEach(([question, answer]) => {
-      reportMD += `<br /><h3>${question}</h3>${answer}<br />`;
+      reportMD += `<br /><h3>${question}</h3><p>${answer}<p><br />`;
     });
   });
   return parseCitationInReport(reportMD);
@@ -81,7 +81,6 @@ export const ReviewFiles = ({
         analysis_type: "template",
         files: instance.instance_metadata.uploaded_files,
       });
-
 
       for (const [
         categoryIndex,
@@ -136,7 +135,7 @@ export const ReviewFiles = ({
   ]);
 
   const isQueryProcessing = useMemo(() => {
-    if(!processStatus && !loadingCustomQuery) return false;
+    if (!processStatus && !loadingCustomQuery) return false;
     if (loadingCreateInstance) return true;
     const finalStatus = `${
       instance.instance_metadata.template_content.length
@@ -163,7 +162,12 @@ export const ReviewFiles = ({
         </Stack>
       </Backdrop>
       <Box sx={{ display: "flex", alignItems: "center" }}>
-        <IconButton size="small" disabled={loadingIngest || isQueryProcessing} onClick={onPrev} sx={{ mr: 1 }}>
+        <IconButton
+          size="small"
+          disabled={loadingIngest || isQueryProcessing}
+          onClick={onPrev}
+          sx={{ mr: 1 }}
+        >
           <ArrowBackIcon sx={{ fontSize: 18 }} />
         </IconButton>
         <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
@@ -172,7 +176,10 @@ export const ReviewFiles = ({
             color="inherit"
             href="#"
             onClick={onGotoMain}
-            sx={{ pointerEvents: (loadingIngest || isQueryProcessing) ? "none" : "auto" }}
+            sx={{
+              pointerEvents:
+                loadingIngest || isQueryProcessing ? "none" : "auto",
+            }}
           >
             Create Investment Memo
           </Link>

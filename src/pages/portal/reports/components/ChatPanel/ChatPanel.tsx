@@ -26,7 +26,7 @@ export const ChatPanel = memo(
     onAddToReport,
     onJumpTo,
   }: {
-    graph_id: number;
+    graph_id?: number;
     analysis_type: string;
     companyName: string;
     onAddToReport: (question: string, content: string) => void;
@@ -41,7 +41,10 @@ export const ChatPanel = memo(
     const [chatHistory, setChatHistory] = useState<IChat[]>([]);
 
     const { isLoading: loadingFiles, data: dataFiles } =
-      useGetIngestedFilesQuery({ graph_id, analysis_type });
+      useGetIngestedFilesQuery({
+        ...(!!graph_id && { graph_id }),
+        analysis_type,
+      });
     const [getAnswer, { isLoading: loadingAnswer }] = useCustomQueryMutation();
     const onSend = useCallback(
       async (question: string) => {
@@ -50,7 +53,7 @@ export const ChatPanel = memo(
           { type: "question", content: question },
         ]);
         const response = await getAnswer({
-          graph_id,
+          ...(!!graph_id && { graph_id }),
           question,
           filenames: dataFiles,
           analysis_type,

@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCallback, useRef, useState } from "react";
 import {
-  colors,
   Box,
   Button,
   Breadcrumbs,
@@ -15,15 +14,12 @@ import IosShareIcon from "@mui/icons-material/IosShare";
 import EmailIcon from "@mui/icons-material/Email";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { ICustomInstance } from "./interfaces";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
+import { ReportTemplate } from "../../../portal/reports/templates/ReportTemplate";
 import {
   generatePdf,
   getPdfInBase64,
 } from "../../../../shared/utils/pdf-generator";
 import { SendEmailModal } from "../../../../components/modals/SendEmailModal";
-// import { removeCitations } from "../../../../shared/utils/string";
 
 export const Report = ({
   instance,
@@ -35,16 +31,20 @@ export const Report = ({
   const emailContentRef = useRef<
     { subject?: string; content: string } | undefined
   >();
-  const ref = useRef<HTMLDivElement>(null);
+  const reportPrintRef = useRef<HTMLDivElement>(null);
   const [emailModal, showEmailModal] = useState<boolean>(false);
 
   const onExport = useCallback(() => {
-    generatePdf(ref.current!.innerHTML, "Investment memo", "Skylark");
+    generatePdf(
+      reportPrintRef.current!.innerHTML,
+      "Investment memo",
+      "Skylark"
+    );
   }, []);
 
   const onSendEmail = useCallback(async () => {
     const base64str = await getPdfInBase64(
-      `<h1>Investment memo</h1><br />${ref.current!.innerHTML}`,
+      `<h1>Investment memo</h1><br />${reportPrintRef.current!.innerHTML}`,
       "Skylark"
     );
 
@@ -54,6 +54,8 @@ export const Report = ({
     };
     showEmailModal(true);
   }, []);
+
+  console.log(instance, 'instance===')
 
   return (
     <Box sx={{ height: "100%" }}>
@@ -95,8 +97,14 @@ export const Report = ({
           {instance.instance_metadata?.template_name || "Default Template"}
         </Typography>
       </Box>
-      <Box sx={{ height: "calc(100% - 120px)", position: "relative" }}>
-        <Box
+      <Box sx={{ height: "calc(100% - 120px)"}}>
+        <ReportTemplate
+          ref={reportPrintRef}
+          setup={{ name: instance.company_name }}
+          reportContent={instance.instance_metadata.report!}
+          analysisType="template"
+        />
+        {/* <Box
           sx={{
             position: "absolute",
             height: "100%",
@@ -165,7 +173,7 @@ export const Report = ({
           >
             {instance.instance_metadata.report}
           </ReactMarkdown>
-        </Box>
+        </Box> */}
       </Box>
       {emailModal && (
         <SendEmailModal

@@ -3,6 +3,7 @@ import { useCSVReader } from "react-papaparse";
 import { Box, IconButton, colors } from "@mui/material";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
+import remarkGfm from "remark-gfm";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { XWidget } from "../components/XWidget";
@@ -111,6 +112,8 @@ export const SortableItemWrapper = memo(
         style={{
           ...style,
           position: "relative",
+          backgroundColor: "white",
+          color: "black",
           // marginBottom: "32px",
         }}
         {...attributes}
@@ -123,6 +126,7 @@ export const SortableItemWrapper = memo(
         ) : (
           <ReactMarkdown
             rehypePlugins={[rehypeRaw as any]}
+            remarkPlugins={[remarkGfm]}
             allowElement={(element, _, parent) => {
               if (element.tagName === "p" && (parent as any).tagName === "li") {
                 return false;
@@ -137,8 +141,8 @@ export const SortableItemWrapper = memo(
             }}
             unwrapDisallowed={true}
             components={{
-              code: (props) => <p {...(props as any)} />,
               pre: (props) => <div {...(props as any)} />,
+              li: (props) => <li {...props} style={{ marginBottom: "12px" }} />,
               a: (props: any) => (
                 <a
                   {...props}
@@ -146,34 +150,6 @@ export const SortableItemWrapper = memo(
                   onClick={() => onJumpTo({ filename: "", quote: props.href })}
                 />
               ),
-              // li: (props) => {
-              //   if (
-              //     props.children &&
-              //     typeof props.children === "string" &&
-              //     props.children.includes("Document Title")
-              //   ) {
-              //     const citations = parseCitationInReport2(props.children);
-              //     if (citations.sections?.length) {
-              //       return (
-              //         <li {...props}>
-              //           {citations.content}
-              //           <span
-              //             style={{
-              //               color: "#2196F3",
-              //               textDecoration: "underline",
-              //               cursor: "pointer",
-              //               zIndex: 99999,
-              //             }}
-              //             onClick={() => onJumpTo(citations.sections[0])}
-              //           >
-              //             [{citations.sections[0].filename}]
-              //           </span>
-              //         </li>
-              //       );
-              //     } else return <li {...props}>{citations.content}</li>;
-              //   }
-              //   return <li {...props} />;
-              // },
               table: (props) => {
                 return (
                   <XWidget
