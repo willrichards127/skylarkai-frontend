@@ -95,7 +95,8 @@ export const Report = ({
           ref={reportPrintRef}
           setup={{ name: instance.company_name }}
           reportContent={instance.instance_metadata.report!}
-          analysisType="template"
+          analysisType="transcript"
+          filenames={instance.instance_metadata.uploaded_file_names}
         />
       </Box>
       {exportModal && (

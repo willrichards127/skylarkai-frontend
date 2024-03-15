@@ -14,6 +14,7 @@ import {
   useIngestFilesMutation,
   useLazyGetSetupQuery,
 } from "../../../../redux/services/setupApi";
+import { useGetIngestedFilesQuery } from "../../../../redux/services/transcriptAPI";
 import { toast } from "react-toastify";
 
 const ReportPanel = ({ reportId }: { reportId: string }) => {
@@ -36,7 +37,14 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
 
   const [getReport, { isLoading: loadingReport, data: reportData }] =
     useLazyGetReportQuery();
-
+  const { isLoading: loadingFiles, data: dataFiles } = useGetIngestedFilesQuery(
+    {
+      graph_id: +setupId!,
+      analysis_type: "financial_diligence",
+    },
+    { skip: !setupId }
+  );
+  
   const [getSetup, { isLoading: loadingSetup, data: setupData }] =
     useLazyGetSetupQuery();
   const [saveReport, { isSuccess: isSaved }] = useSaveReportMutation({});
@@ -107,7 +115,11 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
 
   return (
     <Box sx={{ width: "100%", height: "100%" }}>
-      {loadingReport || isGeneratingReport || loadingSetup || ingestingFiles ? (
+      {loadingReport ||
+      isGeneratingReport ||
+      loadingSetup ||
+      ingestingFiles ||
+      loadingFiles ? (
         <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
           <CircleSpinner
             size={120}
@@ -133,7 +145,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
           onScroll={onScroll}
         >
           <Box width="100%" height="100%">
-            {!!reportData && !!setupData && (
+            {!!reportData && !!setupData && dataFiles?.length && (
               <MarketAnalysisReport
                 setup={setupData}
                 reportContent={
@@ -141,6 +153,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
                 }
                 // customizedContent={isGeneratedReport ? undefined : reportData.custom_metadata}
                 reportType={reportType!}
+                filenames={dataFiles}
                 onRerunAction={OnRerun}
                 onSaveAction={onSave}
               />

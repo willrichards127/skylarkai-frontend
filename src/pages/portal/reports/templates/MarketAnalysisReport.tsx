@@ -16,16 +16,18 @@ export const MarketAnalysisReport = ({
   setup,
   reportContent,
   reportType,
+  filenames,
   onSaveAction,
   onRerunAction,
 }: {
   setup: ISetup;
   reportContent: any;
   reportType: string;
+  filenames: string[];
   onSaveAction: (content: string) => void;
   onRerunAction: (append?: Record<string, File[]>) => void;
 }) => {
-  const reportPrintRef = useRef<HTMLDivElement>(null);
+  const reportPrintRef = useRef<HTMLDivElement>(null);  
 
   // const refFileRef = useRef<{
   //   filename: string;
@@ -114,6 +116,7 @@ export const MarketAnalysisReport = ({
             setup={setup as { id: number; name: string }}
             reportContent={reportContent}
             analysisType="financial_diligence"
+            filenames={filenames}
           />
         </Box>
         {exportModal && (

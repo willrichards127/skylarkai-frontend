@@ -274,8 +274,8 @@ export const categoryParser = (htmlString: string) => {
 
   parser.write(htmlString);
   parser.end();
-
-  return sections;
+  console.log(sections, '###sections===')
+  return sections.filter(section => section.value.tag !== 'br');
 };
 
 const extractRows = (inputString: string) => {

@@ -90,7 +90,7 @@ export const ReviewFiles = ({
           const data = await customQuery({
             filenames: instance.instance_metadata.uploaded_file_names,
             question,
-            analysis_type: "template",
+            analysis_type: "transcript",
           }).unwrap();
           processedDataDictRef.current = {
             ...processedDataDictRef.current,

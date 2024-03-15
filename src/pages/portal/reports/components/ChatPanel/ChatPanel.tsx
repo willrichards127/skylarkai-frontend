@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { memo, useRef, useCallback, useEffect, useState } from "react";
+import * as marked from "marked";
 import { Box, TextField, Typography } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
 import EmailIcon from "@mui/icons-material/Email";
@@ -8,10 +9,7 @@ import { XPanel } from "../../../../../components/XPanel";
 import { ChatContentBox } from "./ChatContentBox";
 import { InputBox } from "./InputBox";
 import { IChat } from "../../../../../redux/interfaces";
-import {
-  useGetIngestedFilesQuery,
-  useCustomQueryMutation,
-} from "../../../../../redux/services/transcriptAPI";
+import { useCustomQueryMutation } from "../../../../../redux/services/transcriptAPI";
 import {
   generatePdf,
   getPdfInBase64,
@@ -23,12 +21,14 @@ export const ChatPanel = memo(
     graph_id,
     analysis_type,
     companyName,
+    filenames,
     onAddToReport,
     onJumpTo,
   }: {
     graph_id?: number;
     analysis_type: string;
     companyName: string;
+    filenames: string[];
     onAddToReport: (question: string, content: string) => void;
     onJumpTo?: (tag: string) => void;
   }) => {
@@ -40,11 +40,6 @@ export const ChatPanel = memo(
     const [emailModal, showEmailModal] = useState<boolean>(false);
     const [chatHistory, setChatHistory] = useState<IChat[]>([]);
 
-    const { isLoading: loadingFiles, data: dataFiles } =
-      useGetIngestedFilesQuery({
-        ...(!!graph_id && { graph_id }),
-        analysis_type,
-      });
     const [getAnswer, { isLoading: loadingAnswer }] = useCustomQueryMutation();
     const onSend = useCallback(
       async (question: string) => {
@@ -55,17 +50,20 @@ export const ChatPanel = memo(
         const response = await getAnswer({
           ...(!!graph_id && { graph_id }),
           question,
-          filenames: dataFiles,
+          filenames,
           analysis_type,
         }).unwrap();
         if (response) {
           setChatHistory((prev) => [
             ...prev.filter((chat) => chat.type.toString() !== "loading"),
-            { type: "answer", content: response.content },
+            {
+              type: "answer",
+              content: marked.parse(response.content as any) as any,
+            },
           ]);
         }
       },
-      [getAnswer, dataFiles, graph_id, analysis_type]
+      [getAnswer, filenames, graph_id, analysis_type]
     );
 
     const onPrint = useCallback(() => {
@@ -207,10 +205,7 @@ export const ChatPanel = memo(
           onAddToReport={onAddToReport}
           onJumpTo={(tag: string) => (onJumpTo ? onJumpTo(tag) : null)}
         />
-        <InputBox
-          disabled={loadingAnswer || loadingFiles || !dataFiles?.length}
-          onSubmitAction={onSend}
-        />
+        <InputBox disabled={loadingAnswer} onSubmitAction={onSend} />
         {emailModal && (
           <SendEmailModal
             open={emailModal}

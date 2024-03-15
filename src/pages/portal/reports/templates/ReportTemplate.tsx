@@ -25,6 +25,7 @@ import {
   IReportItem,
   IReportItemValue,
 } from "../../../../shared/models/interfaces";
+import * as marked from 'marked';
 
 export const ReportTemplate = forwardRef(
   (
@@ -32,18 +33,19 @@ export const ReportTemplate = forwardRef(
       setup,
       reportContent,
       analysisType,
+      filenames,
     }: {
       setup: { id?: number; name: string };
       reportContent: string;
       analysisType: string;
+      filenames: string[]
     },
     ref: ForwardedRef<HTMLDivElement>
   ) => {
     const initialReportItems = useMemo(
-      () => categoryParser(reportContent),
+      () => categoryParser(marked.parse(reportContent) as string),
       [reportContent]
     );
-
     const [uploadedFiles, setUploadedFiles] =
       useState<Record<string, File[]>>();
 
@@ -270,6 +272,7 @@ export const ReportTemplate = forwardRef(
             companyName={setup.name!}
             analysis_type={analysisType}
             onAddToReport={onAddToReport}
+            filenames={filenames}
           />
         }
       />

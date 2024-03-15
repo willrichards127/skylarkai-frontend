@@ -4,6 +4,7 @@ import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { colors, Box, Button } from "@mui/material";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 import EmailIcon from "@mui/icons-material/Email";
 import { DotSpinner } from "../../../../../components/DotSpinner";
 import { XIconButton } from "../../../../../components/buttons/XIconButton";
@@ -109,6 +110,7 @@ export const ChatBlock = memo(
           <Box width="100%" fontSize={13} ref={ref}>
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeRaw as any]}
               allowElement={(element, _, parent) => {
                 if (element.tagName === "p" && (parent as any).tagName === "li") {
                   return false;

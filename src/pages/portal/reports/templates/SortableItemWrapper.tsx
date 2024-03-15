@@ -150,6 +150,11 @@ export const SortableItemWrapper = memo(
                   onClick={() => onJumpTo({ filename: "", quote: props.href })}
                 />
               ),
+              
+              h1: (props) => <h1 {...props} style={{...props.style, fontSize: '28px', color: 'red'}} />,
+              h2: (props) => <h2 {...props} style={{...props.style, fontSize: '24px', color: 'blue'}} />,
+              h3: (props) => <h3 {...props} style={{...props.style, fontSize: '16.75px', color: 'darkcyan'}} />,
+              p: (props) => <p {...props} style={{...props.style, fontSize: '16px'}} />,
               table: (props) => {
                 return (
                   <XWidget
