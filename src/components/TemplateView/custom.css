@@ -1,0 +1,31 @@
+:root {
+    --rct-color-focustree-item-selected-bg: transparent;
+    --rct-color-focustree-item-hover-bg: transparent;
+    --rct-color-focustree-item-active-bg: transparent;
+    --rct-color-arrow: white;
+}
+
+.rct-tree-root > div {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.rct-tree-item-li-custom .rct-tree-item-button {
+    height: auto !important;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    justify-content: space-between;
+}
+
+.rct-tree-item-li-custom .rct-tree-item-title-container-isFolder {
+    background-color: #060606 !important;
+}
+
+.rct-tree-item-li-custom .rct-tree-item-title-container-isFolder .rct-tree-item-button {
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+.rct-tree-item-li-custom .rct-tree-item-title-container-selected .rct-tree-item-button::before {
+    height: calc(100% - 2 * var(--rct-bar-offset));
+    top: var(--rct-bar-offset);
+}

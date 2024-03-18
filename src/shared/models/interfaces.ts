@@ -126,7 +126,7 @@ export interface IReportItemValue {
     axis?: {
       x: string;
       y: string[];
-    }
+    };
   };
 }
 
@@ -137,4 +137,16 @@ export type IAxisKey = keyof IAxis;
 export interface IReportItem {
   key: string;
   value: IReportItemValue;
+}
+
+export type TTreeData = {
+  name: string;
+  template?: string;
+  isLoading?: boolean;
+  isSuccess?: boolean;
+  isFailed?: boolean;
+};
+
+export interface ITemplateItem extends TTreeData {
+  children?: ITemplateItem[];
 }
