@@ -18,7 +18,6 @@ export const ItemOverlay = memo(
     const [hover, setHover] = useState<boolean>(false);
 
     const onMouseOver = useCallback(() => {
-      console.log('hovering---')
       setHover(true);
     }, []);
 

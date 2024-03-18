@@ -42,7 +42,7 @@ export const parseAnswer = (inputString: string) => {
   return stringWithReplacedSections;
 };
 
-const cleanUp = (inputString: string, limitWordCount = 5) => {
+const cleanUp = (inputString: string, limitWordCount?: number) => {
   // replace all `("` and `")` with `"`
   let result = inputString.replace(/\("\s?/g, '"');
   result = result.replace(/"\)/g, '"');
@@ -68,17 +68,17 @@ const cleanUp = (inputString: string, limitWordCount = 5) => {
     // reduce the count of words of quote
     const splited = quote.split("___");
     quote =
-      splited.length > limitWordCount
+    limitWordCount ? splited.length > limitWordCount
         ? splited.slice(0, limitWordCount).join("___")
-        : quote;
-    return `[link](#${filename}______${quote})`;
+        : quote : quote;
+    return `[Link](#${filename}______${quote})`;
   } catch (e) {
     return "";
   }
 };
 
 // parse citation phase only
-export const parseCitation = (documentContent: string, limitWordCount = 5) => {
+export const parseCitation = (documentContent: string, limitWordCount?: number) => {
   // step 1. remove all ```
   let content: string = documentContent.replace(/```/g, "");
 

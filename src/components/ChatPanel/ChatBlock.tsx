@@ -4,6 +4,7 @@ import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { colors, Box, Typography } from "@mui/material";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 import EmailIcon from "@mui/icons-material/Email";
 import { DotSpinner } from "../DotSpinner";
 import { XIconButton } from "../buttons/XIconButton";
@@ -185,6 +186,7 @@ export const ChatBlock = memo(
             <Box width="100%" fontSize={13} ref={ref}>
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeRaw as any]}
                 allowElement={(element, _, parent) => {
                   if (element.tagName === "p" && (parent as any).tagName === "li") {
                     return false;
@@ -207,13 +209,21 @@ export const ChatBlock = memo(
                   p: ({ ...props }: any) => (
                     <p {...props} style={{ margin: "6px 0" }} />
                   ),
-                  a: (props: any) => (
-                    <a
-                      {...props}
-                      style={{ color: "tomato" }}
-                      onClick={() => onJumpTo(props.href)}
-                    />
-                  ),
+                  a: (props: any) => {
+                    if (props.href) {
+                      const splited = props.href.split("______");
+                      const filename = splited[0].replaceAll("___", " ").slice(1);
+                      const quote = splited[1].replaceAll("___", " ");
+                      return (
+                        <a
+                          {...props}
+                          style={{ color: "tomato" }}
+                          onClick={() => onJumpTo(props.href)}
+                          title={`${filename}.pdf:${quote}`}
+                        />
+                      );
+                    } else return <p {...props} />;
+                  },                  
                   table: (props) => (
                     <table
                       {...props}

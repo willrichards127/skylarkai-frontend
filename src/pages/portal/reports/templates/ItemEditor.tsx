@@ -27,7 +27,7 @@ export const ItemEditor = memo(
         (
           editorRef.current.getElement().firstChild?.tagName || ""
         ).toLowerCase() || "p";
-      onClickAway(tagName, updatedContent);
+      onClickAway(tagName, updatedContent.replaceAll("<p>&nbsp;</p>", ''));
     }, [onClickAway]);
 
     return (
