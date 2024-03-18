@@ -53,7 +53,8 @@ export const reportApi: any = createApi({
       }
     >({
       query: ({ report, companyCode, companyName, question }) =>
-        `${report}?companycode=${companyCode}&companyname=${companyName}${question ? "&question=" + question : ""
+        `${report}?companycode=${companyCode}&companyname=${companyName}${
+          question ? "&question=" + question : ""
         }`,
     }),
 
@@ -455,7 +456,7 @@ export const reportApi: any = createApi({
           };
         }
       },
-    }),
+    }),    
     markReport: builder.mutation<any, { reportId: number }>({
       query: ({ reportId }) => ({
         url: `reports/${reportId}/marked`,
@@ -463,13 +464,15 @@ export const reportApi: any = createApi({
       }),
       invalidatesTags: ["Report"],
     }),
-    deleteReport: builder.mutation<any, { reportId: number; viewMode: string }>({
-      query: ({ reportId }) => ({
-        url: `reports/${reportId}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["Report"],
-    }),
+    deleteReport: builder.mutation<any, { reportId: number; viewMode: string }>(
+      {
+        query: ({ reportId }) => ({
+          url: `reports/${reportId}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["Report"],
+      }
+    ),
     saveReport: builder.mutation<
       any,
       {
@@ -499,20 +502,22 @@ export const reportApi: any = createApi({
             url: `reports?view_mode=${viewMode}`,
           });
 
-          const updatedReports = reportsReponse.data.map((response: any) => {
-            const graph = setupsReponse.data.find(
-              (setup: ISetup) => setup.id === +response.graph_id
-            );
-            if (graph) {
-              return {
-                ...response,
-                ...(viewMode === "active" && {
-                  report_name: response.report_name,
-                }),
-                graph_name: graph.name,
+          const updatedReports = reportsReponse.data
+            .map((response: any) => {
+              const graph = setupsReponse.data.find(
+                (setup: ISetup) => setup.id === +response.graph_id
+              );
+              if (graph) {
+                return {
+                  ...response,
+                  ...(viewMode === "active" && {
+                    report_name: response.report_name,
+                  }),
+                  graph_name: graph.name,
+                };
               }
-            }
-          }).filter((report: any) => report);
+            })
+            .filter((report: any) => report);
 
           const groups = groupBy("graph_name")(updatedReports);
 

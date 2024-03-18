@@ -189,6 +189,7 @@ export const Chat = ({
                 filenames={instance.instance_metadata!.docs.map(
                   (doc) => doc.file_name
                 )}
+                companyName={instance.company_name}
                 onJumpTo={onJumpTo}
                 analysis_type="edgar"
                 suggestions={selectedSuggestions}

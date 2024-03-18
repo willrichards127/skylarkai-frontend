@@ -19,11 +19,13 @@ export const ChatBlock = memo(
     chat,
     insider_transaction,
     chats,
+    companyName,
     onChooseTopic,
     onChooseSuggestion,
     onJumpTo,
   }: {
     loading?: boolean;
+    companyName: string;
     chat: IChat;
     chats: IChat[];
     insider_transaction?: boolean;
@@ -60,15 +62,21 @@ export const ChatBlock = memo(
       setBlogHovered(false);
     }, []);
 
-    const onSendViaEmail = useCallback(async (question: string) => {
-      if (!ref.current) return;
-      const base64str = await getPdfInBase64(ref.current.innerHTML, "Skylark");
-      emailContentRef.current = {
-        subject: question,
-        content: base64str,
-      };
-      showEmailModal(true);
-    }, []);
+    const onSendViaEmail = useCallback(
+      async (question: string) => {
+        if (!ref.current) return;
+        const base64str = await getPdfInBase64(
+          `<b>Question: ${question}</b><br />Answer: ` + ref.current.innerHTML,
+          "Skylark"
+        );
+        emailContentRef.current = {
+          subject: `Skylark ${companyName} Analysis`,
+          content: base64str,
+        };
+        showEmailModal(true);
+      },
+      [companyName]
+    );
 
     return (
       <Box
@@ -177,6 +185,19 @@ export const ChatBlock = memo(
             <Box width="100%" fontSize={13} ref={ref}>
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
+                allowElement={(element, _, parent) => {
+                  if (element.tagName === "p" && (parent as any).tagName === "li") {
+                    return false;
+                  }
+                  if (
+                    element.tagName === "strong" &&
+                    (parent as any).tagName === "li"
+                  ) {
+                    return false;
+                  }
+                  return true;
+                }}
+                unwrapDisallowed={true}
                 components={{
                   pre: (props) => <p {...(props as any)} />,
                   code: (props) => <p {...(props as any)} />,

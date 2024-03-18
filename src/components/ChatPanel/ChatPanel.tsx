@@ -23,11 +23,13 @@ export const ChatPanel = memo(
     filenames,
     analysis_type,
     insider_transaction = false,
+    companyName,
     onJumpTo,
   }: {
     feature_instance_id: number;
     filenames: string[];
     analysis_type: string;
+    companyName: string;
     suggestions?: ITopic[];
     insider_transaction?: boolean;
     onJumpTo: (tag: string) => void;
@@ -134,16 +136,16 @@ export const ChatPanel = memo(
         }
       }
       const base64str = await getPdfInBase64(
-        `<h1>Chat History ${today}</h1><br />${container.innerHTML}`,
+        `<h1>Skylark ${companyName} Analysis</h1><br /><b>Created At: ${today}</b><br />${container.innerHTML}`,
         "Skylark"
       );
 
       emailContentRef.current = {
-        subject: `Chat History ${today}`,
+        subject: `Skylark ${companyName} Analysis`,
         content: base64str,
       };
       showEmailModal(true);
-    }, []);
+    }, [companyName]);
 
     const onChooseSuggestion = useCallback((suggest: string) => {
       setSuggestion(suggest);
@@ -280,6 +282,7 @@ export const ChatPanel = memo(
           onChooseSuggestion={onChooseSuggestion}
           onJumpTo={onJumpTo}
           insider_transaction={insider_transaction}
+          companyName={companyName}
         />
         <InputBox
           disabled={isLoading || loadingChatHistory}

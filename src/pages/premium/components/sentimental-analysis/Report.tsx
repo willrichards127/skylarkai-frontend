@@ -71,6 +71,19 @@ export const Report = ({
         >
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
+            allowElement={(element, _, parent) => {
+              if (element.tagName === "p" && (parent as any).tagName === "li") {
+                return false;
+              }
+              if (
+                element.tagName === "strong" &&
+                (parent as any).tagName === "li"
+              ) {
+                return false;
+              }
+              return true;
+            }}
+            unwrapDisallowed={true}
             components={{
               pre: (props) => <div {...(props as any)} />,
               table: (props) => (

@@ -2,11 +2,18 @@ import { useEffect, useRef, useCallback, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Box, IconButton } from "@mui/material";
 import { CircleSpinner } from "../../../../components/loading-spinners/CircleSpinner";
-import { useLazyGetReportQuery, useReGenerateReportMutation, useSaveReportMutation } from "../../../../redux/services/reportApi";
+import {
+  useLazyGetReportQuery,
+  useReGenerateReportMutation,
+  useSaveReportMutation,
+} from "../../../../redux/services/reportApi";
 import { MarketAnalysisReport } from "../templates/MarketAnalysisReport";
 import { REPORTS_DICT } from "../../../../shared/models/constants";
 import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
-import { useIngestFilesMutation, useLazyGetSetupQuery } from "../../../../redux/services/setupApi";
+import {
+  useIngestFilesMutation,
+  useLazyGetSetupQuery,
+} from "../../../../redux/services/setupApi";
 import { toast } from "react-toastify";
 
 const ReportPanel = ({ reportId }: { reportId: string }) => {
@@ -20,13 +27,18 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
 
   const [
     regenerateReport,
-    { isLoading: isGeneratingReport, isSuccess: isGeneratedReport, data: generatedData },
+    {
+      isLoading: isGeneratingReport,
+      isSuccess: isGeneratedReport,
+      data: generatedData,
+    },
   ] = useReGenerateReportMutation();
 
   const [getReport, { isLoading: loadingReport, data: reportData }] =
     useLazyGetReportQuery();
 
-  const [getSetup, { isLoading: loadingSetup, data: setupData }] = useLazyGetSetupQuery();
+  const [getSetup, { isLoading: loadingSetup, data: setupData }] =
+    useLazyGetSetupQuery();
   const [saveReport, { isSuccess: isSaved }] = useSaveReportMutation({});
 
   const [ingestFiles, { isLoading: ingestingFiles }] = useIngestFilesMutation();
@@ -37,22 +49,15 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
       queryType: reportType!,
       template: REPORTS_DICT[reportType!].template,
     });
-  }, [
-    getReport,
-    reportType,
-    reportId,
-  ]);
+  }, [getReport, reportType, reportId]);
 
   useEffect(() => {
     if (setupId) {
       getSetup({
-        setupId: +setupId
+        setupId: +setupId,
       });
     }
-  }, [
-    getSetup,
-    setupId,
-  ]);
+  }, [getSetup, setupId]);
 
   const onScroll = useCallback(() => {
     if (parentRef.current.scrollTop > 600) {
@@ -67,12 +72,12 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
   }, []);
 
   const OnRerun = async (append?: Record<string, File[]>) => {
-    if (append && append['file'] && setupData) {
+    if (append && append["file"] && setupData) {
       await ingestFiles({
         setupId: +setupId!,
         companyName: setupData.name!,
         analysisType: "financial_diligence",
-        files: append['file']
+        files: append["file"],
       });
     }
 
@@ -82,24 +87,17 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
       queryType: reportType!,
       template: REPORTS_DICT[reportType!].template,
     });
-  }
+  };
 
-  const onSave = (reportItems: { key: string; value: any }[]) => {
-    const mdTemplate = reportItems.reduce(
-      (pv: string, cv: { key: string; value: any }) => {
-        pv += cv.value.content;
-        return pv;
-      },
-      ""
-    );
+  const onSave = (content: string) => {
     saveReport({
       ...(reportId && { reportId }),
       setupId: +setupId!,
       reportName: reportType,
-      content: mdTemplate,
-      custom: reportItems,
+      content,
+      custom: [],
     });
-  }
+  };
 
   useEffect(() => {
     if (isSaved) {
@@ -113,7 +111,9 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
         <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
           <CircleSpinner
             size={120}
-            description={isGeneratingReport ? "Generating report..." : "Reading report..."}
+            description={
+              isGeneratingReport ? "Generating report..." : "Reading report..."
+            }
           />
         </Box>
       ) : (
@@ -136,7 +136,9 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
             {!!reportData && !!setupData && (
               <MarketAnalysisReport
                 setup={setupData}
-                reportContent={isGeneratedReport ? generatedData : reportData.content}
+                reportContent={
+                  isGeneratedReport ? generatedData : reportData.content
+                }
                 // customizedContent={isGeneratedReport ? undefined : reportData.custom_metadata}
                 reportType={reportType!}
                 onRerunAction={OnRerun}

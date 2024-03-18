@@ -22,7 +22,7 @@ import {
   HelpIcon as Help2Icon,
   SupportIcon,
   WelcomeIcon,
-  AdvancedFeaturesIcon,
+  // AdvancedFeaturesIcon,
   AnalysisIcon,
   ToolsIcon,
 } from "../../components/Svgs";
@@ -153,7 +153,7 @@ export const MainAppBar = memo(() => {
                 height: "100%",
               }}
             >
-              <Box
+              {/* <Box
                 component={Link}
                 to="/portal/dashboard"
                 sx={{
@@ -173,7 +173,7 @@ export const MainAppBar = memo(() => {
                   <WelcomeIcon />
                   Dashboard
                 </Box>
-              </Box>
+              </Box> */}
               <Box
                 sx={{
                   ml: 4,
@@ -413,7 +413,7 @@ export const MainAppBar = memo(() => {
                     </Menu>
                   </Box>
                 </Box>
-                {isEnterprise && (
+                {/* {isEnterprise && (
                   <Box
                     component={Link}
                     to="/advanced-features"
@@ -437,7 +437,7 @@ export const MainAppBar = memo(() => {
                       Advanced Features
                     </Box>
                   </Box>
-                )}
+                )} */}
                 <Box
                   component={Link}
                   to="/help"
