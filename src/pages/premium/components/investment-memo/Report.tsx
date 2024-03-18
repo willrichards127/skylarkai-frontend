@@ -38,8 +38,16 @@ export const Report = ({
   }, []);
 
   const onSendEmail = useCallback(async () => {
+    const container = document.createElement("div");
+    container.appendChild(reportPrintRef.current!.cloneNode(true));
+    const removeItems = container.querySelectorAll(
+      ".no-print"
+    );
+    for (const item of removeItems) {
+      item.remove();
+    }
     const base64str = await getPdfInBase64(
-      `<h1>Investment memo</h1><br />${reportPrintRef.current!.innerHTML}`,
+      `<h1>Investment memo</h1><br />${container.innerHTML}`,
       "Skylark"
     );
 

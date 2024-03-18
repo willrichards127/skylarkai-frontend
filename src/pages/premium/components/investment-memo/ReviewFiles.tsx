@@ -25,21 +25,20 @@ import {
   // useGetSiteContentMutation,
   useCustomQueryMutation,
 } from "../../../../redux/services/transcriptAPI";
-import { parseCitationInReport } from "../../../../shared/utils/string";
+import { parseCitation } from "../../../../shared/utils/string";
 
 const generateMD = (
   companyName: string,
   reportData: Record<string, Record<string, string>>
 ): string => {
-  let reportMD: string = `<h1>Investment Memo Report: ${companyName}</h1><br /><b>Created: ${new Date().toDateString()}</b><br />
-  `;
+  let reportMD: string = `# Investment memo: ${companyName} \n ** Created At: ** ${new Date().toLocaleDateString()} \n`;
   Object.entries(reportData).forEach(([category, qa]) => {
-    reportMD += `<br /><h2>${category}</h2>`;
+    reportMD += `## ${category} \n`;
     Object.entries(qa).forEach(([question, answer]) => {
-      reportMD += `<br /><h3>${question}</h3><p>${answer}<p><br />`;
+      reportMD += `### ${question} \n ${answer} \n`;
     });
   });
-  return parseCitationInReport(reportMD);
+  return reportMD;
 };
 
 export const ReviewFiles = ({
@@ -96,7 +95,7 @@ export const ReviewFiles = ({
             ...processedDataDictRef.current,
             [category]: {
               ...(processedDataDictRef.current?.[category] || {}),
-              [question]: data.content as string,
+              [question]: parseCitation(data.content as string),
             },
           };
           setProcessStatus(`${categoryIndex + 1}/${questionIndex + 1}`);

@@ -29,7 +29,13 @@ export const ChatBlock = memo(
     chats: IChat[];
     companyName: string;
     onAddToReport: (question: string, content: string) => void;
-    onJumpTo: (tag: string) => void;
+    onJumpTo: ({
+      filename,
+      quote,
+    }: {
+      filename: string;
+      quote: string;
+    }) => void;
   }) => {
     const isBot = chat.type === "answer";
     const isLoading = chat.type === "loading";
@@ -44,7 +50,7 @@ export const ChatBlock = memo(
 
     const answer = useMemo(() => {
       if (isBot) {
-        return parseCitation(chat.content as string, 4); // limited words of each quote to 5
+        return parseCitation(chat.content as string); // limited words of each quote to 5
       }
     }, [isBot, chat.content]);
 
@@ -55,18 +61,21 @@ export const ChatBlock = memo(
       setBlogHovered(false);
     }, []);
 
-    const onSendViaEmail = useCallback(async (question: string) => {
-      if (!ref.current) return;
-      const base64str = await getPdfInBase64(
-        `<b>Question: ${question}</b><br />Answer: ` + ref.current.innerHTML,
-        "Skylark"
-      );
-      emailContentRef.current = {
-        subject: `Skylark ${companyName} Analysis`,
-        content: base64str,
-      };
-      showEmailModal(true);
-    }, [companyName]);
+    const onSendViaEmail = useCallback(
+      async (question: string) => {
+        if (!ref.current) return;
+        const base64str = await getPdfInBase64(
+          `<b>Question: ${question}</b><br />Answer: ` + ref.current.innerHTML,
+          "Skylark"
+        );
+        emailContentRef.current = {
+          subject: `Skylark ${companyName} Analysis`,
+          content: base64str,
+        };
+        showEmailModal(true);
+      },
+      [companyName]
+    );
 
     return (
       <Box
@@ -112,7 +121,10 @@ export const ChatBlock = memo(
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeRaw as any]}
               allowElement={(element, _, parent) => {
-                if (element.tagName === "p" && (parent as any).tagName === "li") {
+                if (
+                  element.tagName === "p" &&
+                  (parent as any).tagName === "li"
+                ) {
                   return false;
                 }
                 if (
@@ -133,13 +145,21 @@ export const ChatBlock = memo(
                 p: ({ ...props }: any) => (
                   <p {...props} style={{ margin: "6px 0" }} />
                 ),
-                a: (props: any) => (
-                  <a
-                    {...props}
-                    style={{ color: "tomato" }}
-                    onClick={() => onJumpTo(props.href)}
-                  />
-                ),
+                a: (props: any) => {
+                  if (props.href) {
+                    const splited = props.href.split("______");
+                    const filename = splited[0].replaceAll("___", " ").slice(1);
+                    const quote = splited[1].replaceAll("___", " ");
+                    return (
+                      <a
+                        {...props}
+                        style={{ color: "tomato" }}
+                        onClick={() => onJumpTo({ filename, quote })}
+                        title={`${filename}.pdf:${quote}`}
+                      />
+                    );
+                  } else return <p {...props} />;
+                },
                 table: (props) => (
                   <table
                     {...props}

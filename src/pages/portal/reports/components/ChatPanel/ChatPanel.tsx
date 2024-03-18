@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { memo, useRef, useCallback, useEffect, useState } from "react";
-import * as marked from "marked";
 import { Box, TextField, Typography } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
 import EmailIcon from "@mui/icons-material/Email";
@@ -30,7 +29,13 @@ export const ChatPanel = memo(
     companyName: string;
     filenames: string[];
     onAddToReport: (question: string, content: string) => void;
-    onJumpTo?: (tag: string) => void;
+    onJumpTo: ({
+      filename,
+      quote,
+    }: {
+      filename: string;
+      quote: string;
+    }) => void;
   }) => {
     const ref = useRef<HTMLDivElement>();
     const emailContentRef = useRef<
@@ -58,7 +63,7 @@ export const ChatPanel = memo(
             ...prev.filter((chat) => chat.type.toString() !== "loading"),
             {
               type: "answer",
-              content: marked.parse(response.content as any) as any,
+              content: response.content,
             },
           ]);
         }
@@ -203,7 +208,7 @@ export const ChatPanel = memo(
           chats={chatHistory}
           companyName={companyName}
           onAddToReport={onAddToReport}
-          onJumpTo={(tag: string) => (onJumpTo ? onJumpTo(tag) : null)}
+          onJumpTo={onJumpTo}
         />
         <InputBox disabled={loadingAnswer} onSubmitAction={onSend} />
         {emailModal && (
