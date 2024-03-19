@@ -15,6 +15,8 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { FileUploader } from "../../../../components/FileUploader";
 import { ICustomInstance } from "./interfaces";
 import { investmentTemplateDict } from "../../../../shared/models/constants";
+import { ITemplateItem } from "../../../../shared/models/interfaces";
+import { addIdtoTemplateJson } from "../../../../components/TemplateView/utils";
 
 export const UploadTemplate = ({
   instance,
@@ -27,11 +29,11 @@ export const UploadTemplate = ({
   instance: ICustomInstance;
   onUploadedTemplate: (
     file: File,
-    content: { category: string; questions: string[] }[]
+    content: ITemplateItem[]
   ) => void;
   onSelectDefaultTemplate: (
     templateName: string,
-    content: { category: string; questions: string[] }[]
+    content: ITemplateItem[]
   ) => void;
   onUploadedCompanyFiles: (files: File[]) => void;
   onNext: (website?: string) => void;
@@ -50,7 +52,7 @@ export const UploadTemplate = ({
       setDefaultTemplate(e.target.value);
       onSelectDefaultTemplate(
         e.target.value,
-        investmentTemplateDict[e.target.value]
+        addIdtoTemplateJson(investmentTemplateDict[e.target.value])
       );
     },
     [onSelectDefaultTemplate]
@@ -98,8 +100,6 @@ export const UploadTemplate = ({
     );
     setUploadedFiles(instance.instance_metadata.uploaded_files);
   }, [instance]);
-
-  console.log(instance, 'instance===')
 
   return (
     <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>

@@ -1,7 +1,11 @@
 import { TreeItem, TreeItemIndex } from "react-complex-tree";
 import { v4 as uuidv4 } from "uuid";
 
-import { ITemplateItem, TTreeData } from "../../shared/models/interfaces";
+import {
+  ITemplateItem,
+  ITemplateItemPure,
+  TTreeData,
+} from "../../shared/models/interfaces";
 
 export const createNewItem = (
   data: TTreeData,
@@ -14,13 +18,29 @@ export const createNewItem = (
   isFolder,
 });
 
+export const addIdtoTemplateJson = (
+  elements: ITemplateItemPure[]
+): ITemplateItem[] => {
+  return elements.map((element) => {
+    const { children, ...elementData } = element;
+    const destinationElement: ITemplateItem = {
+      index: uuidv4(),
+      ...elementData,
+    };
+    if (children) {
+      destinationElement.children = addIdtoTemplateJson(children);
+    }
+    return destinationElement;
+  });
+};
+
 export const convertItems = (
   templateList: ITemplateItem[],
-  newGeneratedId?: TreeItemIndex[]
+  isRoot: boolean = true,
 ): Record<TreeItemIndex, TreeItem<TTreeData>> => {
   let result: Record<TreeItemIndex, TreeItem<TTreeData>> = {};
 
-  if (!newGeneratedId) {
+  if (isRoot) {
     result["root"] = {
       index: "root",
       data: { name: "root" },
@@ -30,27 +50,25 @@ export const convertItems = (
   }
 
   for (let i = 0; i < templateList.length; i++) {
-    const templateItem = templateList[i];
-
+    const { children, ...itemData } = templateList[i];
     const newTreeItem: TreeItem<TTreeData> = {
-      index: newGeneratedId ? newGeneratedId[i] : uuidv4(),
-      data: { name: templateItem.name },
+      index: itemData.index,
+      data: { ...itemData },
       canMove: true,
       canRename: true,
     };
-
-    if (templateItem.children) {
+    if (children) {
       newTreeItem.isFolder = true;
-      newTreeItem.children = templateItem.children.map((_) => uuidv4());
+      newTreeItem.children = children.map((child) => child.index);
       result = {
         ...result,
-        ...convertItems(templateItem.children, newTreeItem.children),
+        ...convertItems(children, false),
       };
     }
 
     result[newTreeItem.index] = newTreeItem;
 
-    if (!newGeneratedId) {
+    if (isRoot) {
       result["root"]["children"] = [
         ...result["root"]["children"]!,
         newTreeItem.index,
@@ -68,13 +86,11 @@ export const revertItems = (
 
   for (const key in treeData) {
     if (Object.prototype.hasOwnProperty.call(treeData, key)) {
-      const { data, children } = treeData[key];
-      const newItem: ITemplateItem = { ...data };
+      const { data, children, index } = treeData[key];
+      const newItem: ITemplateItem = { index: index as string, ...data };
 
       if (children && children.length > 0) {
-        newItem.children = children.map((childId) => ({
-          ...treeData[childId].data,
-        }));
+        newItem.children = children.map((childId) => ({index: childId as string, ...treeData[childId].data}));
       }
 
       result.push(newItem);

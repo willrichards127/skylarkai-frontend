@@ -12,6 +12,8 @@ import { DocumentChip } from "../../../../components/DocumentChip";
 import { FileViewModal } from "../sub-components/FileViewModal";
 import { investmentTemplateDict } from "../../../../shared/models/constants";
 import { removeExtension } from "../../../../shared/utils/string";
+import { ITemplateItemPure } from "../../../../shared/models/interfaces";
+import { addIdtoTemplateJson } from "../../../../components/TemplateView/utils";
 
 const InvestmentMemoFeature = ({ featureId }: { featureId: number }) => {
   const [instance, setInstance] = useState<ICustomInstance>({
@@ -23,7 +25,7 @@ const InvestmentMemoFeature = ({ featureId }: { featureId: number }) => {
     company_url: "",
     instance_metadata: {
       template_name: Object.keys(investmentTemplateDict)[0],
-      template_content: investmentTemplateDict["Default VC 1"],
+      template_content: addIdtoTemplateJson(investmentTemplateDict["Default VC 1"]),
       uploaded_file_names: [],
       uploaded_files: [],
     },
@@ -54,7 +56,7 @@ const InvestmentMemoFeature = ({ featureId }: { featureId: number }) => {
         company_url: "",
         instance_metadata: {
           template_name: Object.keys(investmentTemplateDict)[0],
-          template_content: investmentTemplateDict["Default VC 1"],
+          template_content: addIdtoTemplateJson(investmentTemplateDict["Default VC 1"]),
           uploaded_template_file: undefined,
           uploaded_files: [],
           uploaded_file_names: [],
@@ -92,14 +94,14 @@ const InvestmentMemoFeature = ({ featureId }: { featureId: number }) => {
   const onSelectDefaultTemplate = useCallback(
     (
       name: string,
-      templateContent: { category: string; questions: string[] }[]
+      templateContent: ITemplateItemPure[]
     ) => {
       setInstance((prev) => ({
         ...prev,
         instance_metadata: {
           ...prev.instance_metadata,
           template_name: name,
-          template_content: templateContent
+          template_content: addIdtoTemplateJson(templateContent)
         },
       }));
     },
@@ -114,7 +116,7 @@ const InvestmentMemoFeature = ({ featureId }: { featureId: number }) => {
   const onUploadedTemplate = useCallback(
     (
       file: File,
-      templateContent: { category: string; questions: string[] }[]
+      templateContent: ITemplateItemPure[]
     ) => {
       setInstance((prev) => ({
         ...prev,
@@ -122,7 +124,7 @@ const InvestmentMemoFeature = ({ featureId }: { featureId: number }) => {
           ...prev.instance_metadata,
           template_name: file.name,
           uploaded_template_file: file,
-          template_content: templateContent,
+          template_content: addIdtoTemplateJson(templateContent),
         },
       }));
     },
@@ -150,7 +152,7 @@ const InvestmentMemoFeature = ({ featureId }: { featureId: number }) => {
       company_url: "",
       instance_metadata: {
         template_name: Object.keys(investmentTemplateDict)[0],
-        template_content: investmentTemplateDict["Default VC 1"],
+        template_content: addIdtoTemplateJson(investmentTemplateDict["Default VC 1"]),
         uploaded_template_file: undefined,
         uploaded_files: [],
         uploaded_file_names: [],
