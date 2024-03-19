@@ -55,8 +55,9 @@ export const ReviewFiles = ({
       if (item.children) {
         const subResult = await handleCustomQuery(item.children, [...depth, i]);
         result +=
-          `${Array(depth.length+2).fill('#')} ${item.name} \n` +
-          subResult;
+          `${Array(depth.length + 2)
+            .fill("#")
+            .join("")} ${item.name} \n` + subResult;
       } else {
         const loadingObj = depth.reduceRight<any>(
           (acc, curr) => ({ [curr]: { children: acc } }),
@@ -69,7 +70,11 @@ export const ReviewFiles = ({
           question: item.name,
           analysis_type: "transcript",
         }).unwrap();
-        result += `${Array(depth.length+3).fill('#')} ${item.name} \n ${parseCitation(data.content as string)} \n`;
+        result += `${Array(depth.length + 3)
+          .fill("#")
+          .join("")} ${item.name} \n ${parseCitation(
+          data.content as string
+        )} \n`;
         const successObj = depth.reduceRight<any>(
           (acc, curr) => ({ [curr]: { children: acc } }),
           { [i]: { isLoading: { $set: false }, isSuccess: { $set: true } } }
@@ -91,7 +96,9 @@ export const ReviewFiles = ({
       const ret = await handleCustomQuery(items);
       setBackDisabled(false);
       const report =
-      `# Investment memo: ${instance.company_name} \n ** Created At: ** ${new Date().toLocaleDateString()} \n` + ret;
+        `# Investment memo: ${
+          instance.company_name
+        } \n ** Created At: ** ${new Date().toLocaleDateString()} \n` + ret;
       const responseInstance = await createInstance({
         ...instance,
         instance_metadata: {
