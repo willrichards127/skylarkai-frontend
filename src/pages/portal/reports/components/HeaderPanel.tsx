@@ -69,7 +69,7 @@ export const HeaderPanel = memo(
           <Box>
             <Typography variant="body2">{companyName}</Typography>
             <Typography variant="body2" fontWeight="bold">
-              {REPORTS_DICT[reportType].label} Report
+              {REPORTS_DICT[reportType]?.label || reportType} Report
             </Typography>
           </Box>
         </Box>

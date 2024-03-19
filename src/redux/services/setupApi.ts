@@ -88,7 +88,7 @@ export const setupApi = createApi({
       invalidatesTags: ["Setup"],
     }),
     ingestFiles: builder.mutation<
-      void,
+      any,
       {
         setupId: number;
         companyName: string;
