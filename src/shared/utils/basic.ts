@@ -122,10 +122,19 @@ export const currencyFormat = (q: number) => {
 };
 
 export const myRandomInts = (quantity: number, max: number) => {
-  const arr = []
+  const arr = [];
   while (arr.length < quantity) {
     const candidateInt = Math.floor(Math.random() * max);
-    if (arr.indexOf(candidateInt) === -1) arr.push(candidateInt)
+    if (arr.indexOf(candidateInt) === -1) arr.push(candidateInt);
   }
-  return arr
-}
+  return arr;
+};
+
+export const longDateFormat = (date: Date) => {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+  return formatter.format(date);
+};

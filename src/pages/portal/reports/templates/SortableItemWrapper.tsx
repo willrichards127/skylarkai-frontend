@@ -231,6 +231,15 @@ export const SortableItemWrapper = memo(
                   }}
                 />
               ),
+              h4: (props) => (
+                <h4
+                  {...props}
+                  style={{
+                    ...props.style,
+                    fontSize: "16px",
+                  }}
+                />
+              ),
               p: (props) => (
                 <p {...props} style={{ ...props.style, fontSize: "16px" }} />
               ),

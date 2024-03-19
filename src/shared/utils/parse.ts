@@ -372,10 +372,12 @@ export const categoryParser2 = (htmlString: string) => {
   root.childNodes
     .filter((el: HTMLElement) => el.nodeType !== 3) // get rid of line-breaks
     .forEach((el: any) => {
-      sections.push({
-        key: getNewId(),
-        value: { content: parseCitation(el.outerHTML), tag: el.rawTagName },
-      });
+      if (el.rawTagName !== "br") {
+        sections.push({
+          key: getNewId(),
+          value: { content: parseCitation(el.outerHTML), tag: el.rawTagName },
+        });
+      }
     });
 
   return sections;

@@ -24,6 +24,7 @@ import {
 } from "../../../../redux/services/transcriptAPI";
 import Templateview from "../../../../components/TemplateView";
 import { ITemplateItem } from "../../../../shared/models/interfaces";
+import { longDateFormat } from "../../../../shared/utils/basic";
 
 export const ReviewFiles = ({
   instance,
@@ -98,10 +99,12 @@ export const ReviewFiles = ({
       const ret = await handleCustomQuery(items);
       setBackDisabled(false);
       const report =
-        `<h1>Investment memo: ${
+        `<h1 style="text-align: center;">Investment memo: ${
           instance.company_name
-        }</h1> <strong>Created At:</strong> ${new Date().toLocaleDateString()} <br />` +
-        ret;
+        }</h1>
+        <p style="text-align: center;"><strong>${longDateFormat(
+          new Date()
+        )}</strong></p>` + ret;
       const responseInstance = await createInstance({
         ...instance,
         instance_metadata: {

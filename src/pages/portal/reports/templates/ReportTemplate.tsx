@@ -172,7 +172,7 @@ export const ReportTemplate = forwardRef(
         ...prevItems,
         {
           key: getNewId(),
-          value: { content: `<h3>${question}</h3>`, tag: "h4" },
+          value: { content: `<h3 class="heading-question">${question}</h3>`, tag: "h3" },
         },
         ...categoryParser2(content),
       ]);
