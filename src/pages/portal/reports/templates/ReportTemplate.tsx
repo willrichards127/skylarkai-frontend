@@ -16,7 +16,7 @@ import { SortableItemWrapper } from "./SortableItemWrapper";
 import ChatPanel from "../components/ChatPanel";
 import {
   getNewId,
-  categoryParser,
+  categoryParser2,
   convertCSVToTable,
   parseTable,
 } from "../../../../shared/utils/parse";
@@ -25,6 +25,7 @@ import {
   IReportItem,
   IReportItemValue,
 } from "../../../../shared/models/interfaces";
+import * as marked from "marked";
 
 export const ReportTemplate = forwardRef(
   (
@@ -32,18 +33,21 @@ export const ReportTemplate = forwardRef(
       setup,
       reportContent,
       analysisType,
+      filenames,
     }: {
       setup: { id?: number; name: string };
       reportContent: string;
       analysisType: string;
+      filenames: string[];
     },
     ref: ForwardedRef<HTMLDivElement>
   ) => {
     const initialReportItems = useMemo(
-      () => categoryParser(reportContent),
+      () => { 
+        const parsed = marked.parse(reportContent) as string;
+        return categoryParser2(parsed)},
       [reportContent]
     );
-
     const [uploadedFiles, setUploadedFiles] =
       useState<Record<string, File[]>>();
 
@@ -167,40 +171,22 @@ export const ReportTemplate = forwardRef(
     );
 
     const onAddToReport = useCallback((question: string, content: string) => {
-      // const newItems = categoryParser(content);
-      // console.log(newItems, content, '###')
       setReportItems((prevItems) => [
         ...prevItems,
         {
           key: getNewId(),
-          value: { content: `<h4>${question}</h4>`, tag: "h4" },
+          value: { content: `<h3>${question}</h3>`, tag: "h4" },
         },
-        {
-          key: getNewId(),
-          value: { content: `<p>${content}</p>`, tag: "p" },
-        },
+        ...categoryParser2(content),
       ]);
     }, []);
 
-    // const onJumpTo = useCallback(
-    //   async ({ filename, quote }: { filename: string; quote: string }) => {
-    //     // const response = await getFileData({
-    //     //   docs: [
-    //     //     {
-    //     //       analysis_type: "financial_diligence",
-    //     //       name: filename,
-    //     //     },
-    //     //   ],
-    //     // }).unwrap();
-    //     // refFileRef.current = {
-    //     //   filename,
-    //     //   text_content: response?.length ? response[0] : "",
-    //     //   quote_content: quote,
-    //     // };
-    //     // showRefFileModal(true);
-    //   },
-    //   []
-    // );
+    const onJumpTo = useCallback(
+      ({ filename, quote }: { filename: string; quote: string }) => {
+        console.log(filename, quote);
+      },
+      []
+    );
 
     return (
       <SplitContainer
@@ -270,6 +256,8 @@ export const ReportTemplate = forwardRef(
             companyName={setup.name!}
             analysis_type={analysisType}
             onAddToReport={onAddToReport}
+            filenames={filenames}
+            onJumpTo={onJumpTo}
           />
         }
       />

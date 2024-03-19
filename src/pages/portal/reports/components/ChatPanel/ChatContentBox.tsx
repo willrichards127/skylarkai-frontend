@@ -16,7 +16,13 @@ export const ChatContentBox = forwardRef(
       chats: IChat[];
       companyName: string;
       onAddToReport: (question: string, content: string) => void;
-      onJumpTo: (tag: string) => void;
+      onJumpTo: ({
+        filename,
+        quote,
+      }: {
+        filename: string;
+        quote: string;
+      }) => void;
     },
     ref: any
   ) => {

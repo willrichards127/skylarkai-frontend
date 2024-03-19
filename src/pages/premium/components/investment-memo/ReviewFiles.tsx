@@ -21,9 +21,8 @@ import {
   useIngestFilesMutation,
   useCustomQueryMutation,
 } from "../../../../redux/services/transcriptAPI";
-import { parseCitationInReport } from "../../../../shared/utils/string";
+import { parseCitation } from "../../../../shared/utils/string";
 import Templateview from "../../../../components/TemplateView";
-
 import { ITemplateItem } from "../../../../shared/models/interfaces";
 
 export const ReviewFiles = ({
@@ -56,7 +55,7 @@ export const ReviewFiles = ({
       if (item.children) {
         const subResult = await handleCustomQuery(item.children, [...depth, i]);
         result +=
-          `<br /><h${depth.length + 2}>${item.name}</h${depth.length + 2}>` +
+          `${Array(depth.length+2).fill('#')} ${item.name} \n` +
           subResult;
       } else {
         const loadingObj = depth.reduceRight<any>(
@@ -70,9 +69,7 @@ export const ReviewFiles = ({
           question: item.name,
           analysis_type: "transcript",
         }).unwrap();
-        result += `<br /><h${depth.length + 3}>${item.name}</h${
-          depth.length + 3
-        }>${data.content as string}<br />`;
+        result += `${Array(depth.length+3).fill('#')} ${item.name} \n ${parseCitation(data.content as string)} \n`;
         const successObj = depth.reduceRight<any>(
           (acc, curr) => ({ [curr]: { children: acc } }),
           { [i]: { isLoading: { $set: false }, isSuccess: { $set: true } } }
@@ -94,14 +91,12 @@ export const ReviewFiles = ({
       const ret = await handleCustomQuery(items);
       setBackDisabled(false);
       const report =
-        `<h1>Investment Memo Report: ${
-          instance.company_name
-        }</h1><br /><b>Created: ${new Date().toDateString()}</b><br />` + ret;
+      `# Investment memo: ${instance.company_name} \n ** Created At: ** ${new Date().toLocaleDateString()} \n` + ret;
       const responseInstance = await createInstance({
         ...instance,
         instance_metadata: {
           ...instance.instance_metadata,
-          report: parseCitationInReport(report),
+          report,
         },
       }).unwrap();
       onNext({ ...responseInstance, saved: true } as ICustomInstance);

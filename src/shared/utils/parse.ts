@@ -4,6 +4,7 @@ import * as htmlparser2 from "htmlparser2";
 import { IReportItem } from "../models/interfaces";
 import { TColumn, TRow } from "../models/types";
 import * as cheerios from "cheerio";
+import { parse } from "node-html-parser";
 
 export const parseSWOT = (content: string) => {
   const strengthsRegex = /Strengths:([\s\S]*?)(Weaknesses:|$)/;
@@ -248,7 +249,13 @@ export const categoryParser = (htmlString: string) => {
             attr.class ? ` class=${attr.class}` : ""
           }>`;
         } else {
-          currentSection = `<${name}>`;
+          if (name === "a") {
+            currentSection = attr.href
+              ? `<${name} href="${attr.href}">`
+              : `<${name}>`;
+          } else {
+            currentSection = `<${name}>`;
+          }
         }
       },
       ontext(text) {
@@ -274,10 +281,25 @@ export const categoryParser = (htmlString: string) => {
 
   parser.write(htmlString);
   parser.end();
-
-  return sections;
+  console.log(sections, "###sections===");
+  return sections.filter((section) => section.value.tag !== "br");
 };
 
+export const categoryParser2 = (htmlString: string) => {
+  const sections: IReportItem[] = [];
+  const root: any = parse(htmlString);
+  root.childNodes
+    .filter((el: HTMLElement) => el.nodeType !== 3) // get rid of line-breaks
+    .forEach((el: any) => {
+      sections.push({
+        key: getNewId(),
+        value: { content: el.outerHTML, tag: el.rawTagName },
+      });
+    });
+
+  console.log(sections, "###sections222===");
+  return sections;
+};
 const extractRows = (inputString: string) => {
   const trRegex = /<tr[^>]*>((?:.|\n)*?)<\/tr>/gi;
   const matches = inputString.match(trRegex);

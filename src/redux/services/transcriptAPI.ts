@@ -138,7 +138,7 @@ export const transcriptApi = createApi({
             error: {
               status: 404,
               statusText: e,
-              data: "Error in fetch_edgar/fetch_transcript API",
+              msg: "Error in fetch_edgar/fetch_transcript API",
             },
           };
         }
@@ -184,7 +184,7 @@ export const transcriptApi = createApi({
             error: {
               status: 404,
               statusText: e,
-              data: "Error in edgar_files/transcript_files/insider_transaction API",
+              msg: "Error in edgar_files/transcript_files/insider_transaction API",
             },
           };
         }
@@ -218,7 +218,7 @@ export const transcriptApi = createApi({
             error: {
               status: 404,
               statusText: e,
-              data: "Error in edgar_files API",
+              msg: "Error in edgar_files API",
             },
           };
         }
@@ -245,7 +245,7 @@ export const transcriptApi = createApi({
             error: {
               status: 404,
               statusText: e,
-              data: "Error in transcript_files API",
+              msg: "Error in transcript_files API",
             },
           };
         }
@@ -296,7 +296,7 @@ export const transcriptApi = createApi({
             error: {
               status: 404,
               statusText: e,
-              data: "Error in insider_transaction API",
+              msg: "Error in insider_transaction API",
             },
           };
         }
@@ -333,7 +333,7 @@ export const transcriptApi = createApi({
         const current_graph_id = graph_id || sys_graph_id;
         try {
           const response: any = await apiBaseQuery({
-            url: `customquery/${current_graph_id}?${
+            url: `customquery/${current_graph_id}?analysis_type=${analysis_type}${
               insider_transaction
                 ? "&insider_transaction=" + insider_transaction
                 : ""
@@ -342,7 +342,6 @@ export const transcriptApi = createApi({
             data: {
               question,
               filenames,
-              analysis_type,
               chatmode,
               llm,
             },
@@ -365,7 +364,7 @@ export const transcriptApi = createApi({
             error: {
               status: 404,
               statusText: e,
-              data: "Error in customquery API",
+              msg: "Error in customquery API",
             },
           };
         }
@@ -434,7 +433,7 @@ export const transcriptApi = createApi({
             error: {
               status: 404,
               statusText: e,
-              data: "Error in reports/section_template API",
+              msg: "Error in reports/section_template API",
             },
           };
         }
@@ -475,7 +474,7 @@ export const transcriptApi = createApi({
             error: {
               status: 404,
               statusText: e,
-              data: "Error in creteReport API",
+              msg: "Error in creteReport API",
             },
           };
         }
@@ -512,7 +511,7 @@ export const transcriptApi = createApi({
             error: {
               status: 404,
               statusText: e,
-              data: "Error in sentimentanalysis API",
+              msg: "Error in sentimentanalysis API",
             },
           };
         }
@@ -552,7 +551,7 @@ export const transcriptApi = createApi({
             error: {
               status: 404,
               statusText: e,
-              data: "Error in file_data API",
+              msg: "Error in file_data API",
             },
           };
         }
@@ -608,7 +607,7 @@ export const transcriptApi = createApi({
             error: {
               status: 404,
               statusText: e,
-              data: "Error in compare_document API",
+              msg: "Error in compare_document API",
             },
           };
         }
@@ -650,7 +649,7 @@ export const transcriptApi = createApi({
             error: {
               status: 404,
               statusText: e,
-              data: "Error in ingestfiles API",
+              msg: "Error in ingestfiles API",
             },
           };
         }
@@ -721,7 +720,7 @@ export const transcriptApi = createApi({
             error: {
               status: 404,
               statusText: e,
-              data: "Error in sentimentanalysis API",
+              msg: "Error in sentimentanalysis API",
             },
           };
         }
@@ -749,7 +748,7 @@ export const transcriptApi = createApi({
             error: {
               status: 404,
               statusText: e,
-              data: "Error in analysis_type_queries API",
+              msg: "Error in analysis_type_queries API",
             },
           };
         }
@@ -827,7 +826,7 @@ export const transcriptApi = createApi({
             error: {
               status: 404,
               statusText: e,
-              data: "Error in analysis_type_queries API",
+              msg: "Error in analysis_type_queries API",
             },
           };
         }
@@ -883,7 +882,7 @@ export const transcriptApi = createApi({
             error: {
               status: 404,
               statusText: e,
-              data: "Error in send email API",
+              msg: "Error in send email API",
             },
           };
         }

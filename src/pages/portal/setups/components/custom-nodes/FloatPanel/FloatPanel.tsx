@@ -271,7 +271,7 @@ const FloatPanel = memo(
                     ),
                   }}
                 >
-                  {parseCitation(nodeContent.properties.text) || ""}
+                  {parseCitation(nodeContent.properties.text || "", 4)}
                 </ReactMarkdown>
               </Box>
             </>
