@@ -6,6 +6,7 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/DeleteForever";
 import PostAddIcon from "@mui/icons-material/PostAdd";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 import {
   Tree,
@@ -35,7 +36,6 @@ const Templateview = ({
   >(convertItems(data));
   const [focusedItem, setFocusedItem] = useState<TreeItemIndex>();
   const [expandedItems, setExpandedItems] = useState<TreeItemIndex[]>([]);
-
   const getParentItem = (itemId: TreeItemIndex) => {
     const entry = Object.entries(items).find(([_, value]) =>
       value.children?.includes(itemId)
@@ -46,9 +46,14 @@ const Templateview = ({
   };
 
   useEffect(() => {
+    setItems(convertItems(data));
+  }, [data]);
+
+  useEffect(() => {
     if (onChangeData) {
       onChangeData(revertItems(items));
     }
+    // console.log("=======================", revertItems(items));
   }, [items]);
 
   const addItem = (item: TreeItem<TTreeData>) => {
@@ -97,6 +102,37 @@ const Templateview = ({
     );
   };
 
+  const getTotalCount = (item: TreeItem<TTreeData>) => {
+    if (item.children) {
+      let totalCount = 0;
+      let successCount = 0 ;
+      let isIncludeCategory = false;
+      for (let i = 0; i < item.children.length; i++) {
+        if (items[item.children[i]].children) {
+          isIncludeCategory = true;
+          const temp = getTotalCount(items[item.children[i]]);
+          totalCount += temp.totalCount;
+          successCount += items[item.children[i]].children!.reduce<number>(
+            (prev, cur) => (items[cur].data.isSuccess ? prev + 1 : prev),
+            0
+          );
+        }
+      }
+      if (!isIncludeCategory) {
+        totalCount = item.children.length;
+        successCount = item.children?.reduce<number>(
+          (prev, cur) => (items[cur].data.isSuccess ? prev + 1 : prev),
+          0
+        );
+      }
+      return {totalCount, successCount};
+    }
+    return {
+      totalCount: 0,
+      successCount: 0,
+    };
+  };
+
   return (
     <ControlledTreeEnvironment<TTreeData>
       items={items}
@@ -114,6 +150,7 @@ const Templateview = ({
       }}
       renderItem={({ item, title, arrow, context, children, depth }) => {
         const type = context.isRenaming ? undefined : "button";
+        const counts = getTotalCount(item);
         return (
           <li
             {...(context.itemContainerWithChildrenProps as any)}
@@ -205,10 +242,16 @@ const Templateview = ({
                     </IconButton>
                   </Box>
                 ) : item.isFolder ? (
-                  <Typography>0/{item.children?.length}</Typography>
-                ) : (
+                  <Typography>
+                    {counts.successCount}/{counts.totalCount}
+                  </Typography>
+                ) : item.data.isLoading ? (
                   <CircularProgress size={14} />
-                )}
+                ) : item.data.isSuccess ? (
+                  <CheckCircleIcon
+                    sx={{ color: "success.main", fontSize: 18 }}
+                  />
+                ) : null}
               </div>
             </div>
             {children}
@@ -226,7 +269,6 @@ const Templateview = ({
       }
       onRenameItem={renameItem}
       viewState={{ "tree-1": { focusedItem, expandedItems } }}
-      //   ref={treeRef}
     >
       <Tree treeId="tree-1" rootItem="root" treeLabel="Tree Example" />
     </ControlledTreeEnvironment>

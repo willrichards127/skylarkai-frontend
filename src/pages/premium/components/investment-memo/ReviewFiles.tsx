@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useCallback, useState, useRef, useMemo } from "react";
+import { useCallback, useState } from "react";
 import {
   Box,
   Button,
@@ -11,35 +11,19 @@ import {
   Backdrop,
   CircularProgress,
   Stack,
-  Tabs,
-  Tab,
 } from "@mui/material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import update from "immutability-helper";
 import { ICustomInstance } from "./interfaces";
-import { XAccordion } from "../../../../components/XAccordion";
 import {
   useCreateFeatureInstanceMutation,
   useIngestFilesMutation,
-  // useGetSiteContentMutation,
   useCustomQueryMutation,
 } from "../../../../redux/services/transcriptAPI";
 import { parseCitation } from "../../../../shared/utils/string";
-
-const generateMD = (
-  companyName: string,
-  reportData: Record<string, Record<string, string>>
-): string => {
-  let reportMD: string = `# Investment memo: ${companyName} \n Created At: ${new Date().toLocaleDateString()} \n`;
-  Object.entries(reportData).forEach(([category, qa]) => {
-    reportMD += `## ${category} \n`;
-    Object.entries(qa).forEach(([question, answer]) => {
-      reportMD += `### ${question} \n ${answer} \n`;
-    });
-  });
-  return reportMD;
-};
+import Templateview from "../../../../components/TemplateView";
+import { ITemplateItem } from "../../../../shared/models/interfaces";
 
 export const ReviewFiles = ({
   instance,
@@ -52,72 +36,74 @@ export const ReviewFiles = ({
   onNext: (args: ICustomInstance) => void;
   onGotoMain: () => void;
 }) => {
-  const [createInstance, { isLoading: loadingCreateInstance }] =
-    useCreateFeatureInstanceMutation();
-
-  const [ingestFiles, { isLoading: loadingIngest }] = useIngestFilesMutation();
-  // const [getWebsiteContent, { isLoading: loadingWebContent }] =
-  //   useGetSiteContentMutation();
-  const [customQuery, { isLoading: loadingCustomQuery }] =
-    useCustomQueryMutation();
-
-  const [selectedTab, setSelectedTab] = useState<string>("All");
-  const [processStatus, setProcessStatus] = useState<string>("");
-  const processedDataDictRef = useRef<Record<string, Record<string, string>>>(
-    {}
+  const [items, setItems] = useState<ITemplateItem[]>(
+    instance.instance_metadata.template_content
   );
+  const [backDisabled, setBackDisabled] = useState<boolean>(false);
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
+  const [createInstance] = useCreateFeatureInstanceMutation();
+  const [ingestFiles, { isLoading: loadingIngest }] = useIngestFilesMutation();
+  const [customQuery] = useCustomQueryMutation();
+
+  const handleCustomQuery = useCallback(async (
+    templateItems: ITemplateItem[],
+    depth: number[] = []
+  ) => {
+    let result: string = "";
+    for (let i = 0; i < templateItems.length; i++) {
+      const item = templateItems[i];
+      if (item.children) {
+        const subResult = await handleCustomQuery(item.children, [...depth, i]);
+        result +=
+          `${Array(depth.length + 2)
+            .fill("#")
+            .join("")} ${item.name} \n` + subResult;
+      } else {
+        const loadingObj = depth.reduceRight<any>(
+          (acc, curr) => ({ [curr]: { children: acc } }),
+          { [i]: { isLoading: { $set: true } } }
+        );
+        setItems((prev) => update(prev, loadingObj));
+        // await new Promise((resolve) => setTimeout(resolve, 1000));
+        const data = await customQuery({
+          filenames: instance.instance_metadata.uploaded_file_names,
+          question: item.name,
+          analysis_type: "transcript",
+        }).unwrap();
+        result += `${Array(depth.length + 3)
+          .fill("#")
+          .join("")} ${item.name} \n ${parseCitation(
+          data.content as string
+        )} \n`;
+        const successObj = depth.reduceRight<any>(
+          (acc, curr) => ({ [curr]: { children: acc } }),
+          { [i]: { isLoading: { $set: false }, isSuccess: { $set: true } } }
+        );
+        setItems((prev) => update(prev, successObj));
+      }
+    }
+    return result;
+  }, [customQuery, instance]);
 
   const onNextStep = useCallback(async () => {
     try {
-      // let webContent;
-      // if (instance.company_url) {
-      //   webContent = await getWebsiteContent({
-      //     website_url: instance.company_url,
-      //   }).unwrap();
-      // }
-
+      setIsEditMode(false);
+      setBackDisabled(true);
       await ingestFiles({
         analysis_type: "template",
         files: instance.instance_metadata.uploaded_files,
       });
-
-      for (const [
-        categoryIndex,
-        { category, questions },
-      ] of instance.instance_metadata.template_content.entries()) {
-        for (const [questionIndex, question] of questions.entries()) {
-          const data = await customQuery({
-            filenames: instance.instance_metadata.uploaded_file_names,
-            question,
-            analysis_type: "transcript",
-          }).unwrap();
-          processedDataDictRef.current = {
-            ...processedDataDictRef.current,
-            [category]: {
-              ...(processedDataDictRef.current?.[category] || {}),
-              [question]: parseCitation(data.content as string),
-            },
-          };
-          setProcessStatus(`${categoryIndex + 1}/${questionIndex + 1}`);
-        }
-      }
-      // if (webContent) {
-      //   processedDataDictRef.current = {
-      //     ...processedDataDictRef.current,
-      //     website: {
-      //       text_content: webContent.text_content,
-      //     },
-      //   };
-      // }
-
+      const ret = await handleCustomQuery(items);
+      setBackDisabled(false);
+      const report =
+        `# Investment memo: ${
+          instance.company_name
+        } \n ** Created At: ** ${new Date().toLocaleDateString()} \n` + ret;
       const responseInstance = await createInstance({
         ...instance,
         instance_metadata: {
           ...instance.instance_metadata,
-          report: generateMD(
-            instance.company_name,
-            processedDataDictRef.current
-          ),
+          report,
         },
       }).unwrap();
       onNext({ ...responseInstance, saved: true } as ICustomInstance);
@@ -127,25 +113,11 @@ export const ReviewFiles = ({
   }, [
     ingestFiles,
     instance,
-    // getWebsiteContent,
-    customQuery,
+    handleCustomQuery,
     createInstance,
+    items,
     onNext,
   ]);
-
-  const isQueryProcessing = useMemo(() => {
-    if (!processStatus && !loadingCustomQuery) return false;
-    if (loadingCreateInstance) return true;
-    const finalStatus = `${
-      instance.instance_metadata.template_content.length
-    }/${
-      instance.instance_metadata.template_content[
-        instance.instance_metadata.template_content.length - 1
-      ].questions.length
-    }`;
-    if (loadingCustomQuery || processStatus !== finalStatus) return true;
-    return false;
-  }, [loadingCreateInstance, processStatus, loadingCustomQuery, instance]);
 
   return (
     <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
@@ -163,7 +135,7 @@ export const ReviewFiles = ({
       <Box sx={{ display: "flex", alignItems: "center" }}>
         <IconButton
           size="small"
-          disabled={loadingIngest || isQueryProcessing}
+          disabled={loadingIngest || backDisabled}
           onClick={onPrev}
           sx={{ mr: 1 }}
         >
@@ -176,8 +148,7 @@ export const ReviewFiles = ({
             href="#"
             onClick={onGotoMain}
             sx={{
-              pointerEvents:
-                loadingIngest || isQueryProcessing ? "none" : "auto",
+              pointerEvents: loadingIngest || backDisabled ? "none" : "auto",
             }}
           >
             Create Investment Memo
@@ -189,95 +160,18 @@ export const ReviewFiles = ({
           variant="contained"
           sx={{ minWidth: 140 }}
           onClick={onNextStep}
-          disabled={loadingIngest || isQueryProcessing}
+          disabled={loadingIngest || backDisabled}
         >
           Create Report
         </Button>
       </Box>
       <Divider sx={{ my: 2 }} />
       <Stack spacing={2}>
-        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <Tabs
-            value={selectedTab}
-            onChange={(_, newValue) => setSelectedTab(newValue)}
-            variant="scrollable"
-            scrollButtons="auto"
-          >
-            {[
-              { category: "All" },
-              ...instance.instance_metadata.template_content,
-            ].map((item) => (
-              <Tab
-                key={item.category}
-                value={item.category}
-                label={item.category}
-              />
-            ))}
-          </Tabs>
-        </Box>
-        <Box pb={2}>
-          {selectedTab === "All" ? (
-            <XAccordion
-              defaultExpanded
-              options={instance.instance_metadata.template_content.map(
-                (item) => ({
-                  summary: (
-                    <Box
-                      sx={{
-                        width: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      {item.category}
-                      <span>
-                        {processedDataDictRef.current?.[item.category]
-                          ? Object.values(
-                              processedDataDictRef.current[item.category]
-                            ).length
-                          : 0}
-                        /{item.questions.length}
-                      </span>
-                    </Box>
-                  ),
-                  detail: item.questions.map((question, index) => (
-                    <Box
-                      key={question}
-                      sx={{
-                        width: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <p>
-                        {index + 1}. {question}
-                      </p>
-                      {processedDataDictRef.current?.[item.category]?.[
-                        question
-                      ] ? (
-                        <CheckCircleIcon
-                          sx={{ color: "success.main", fontSize: 18 }}
-                        />
-                      ) : (
-                        loadingCustomQuery && <CircularProgress size={14} />
-                      )}
-                    </Box>
-                  )),
-                })
-              )}
-            />
-          ) : (
-            instance.instance_metadata.template_content
-              .find((item) => item.category === selectedTab)!
-              .questions.map((question, index) => (
-                <p key={question}>
-                  {index + 1}. {question}
-                </p>
-              ))
-          )}
-        </Box>
+        <Templateview
+          data={items}
+          // onChangeData={setItems}
+          isEditMode={isEditMode}
+        />
       </Stack>
     </Box>
   );

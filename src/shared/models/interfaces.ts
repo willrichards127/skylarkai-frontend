@@ -148,5 +148,10 @@ export type TTreeData = {
 };
 
 export interface ITemplateItem extends TTreeData {
+  index: string;
   children?: ITemplateItem[];
+}
+
+export interface ITemplateItemPure extends Pick<TTreeData, "name" | "template"> {
+  children?: ITemplateItemPure[];
 }

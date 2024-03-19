@@ -1,4 +1,5 @@
 import { ICompany, ITopic } from "../../redux/interfaces";
+import { ITemplateItemPure } from "./interfaces";
 
 export const HeaderConfig = {
   mainToolbarHeight: 64,
@@ -119,14 +120,15 @@ export const investmentTemplate = `
 # Investment Memo Template\n\n ## Executive Summary\n- **Investment Thesis:** Brief overview of the investment opportunity.\n- **Key Metrics:** Summary of financial and operational metrics.\n- **Recommendation:** Proposed action (buy, hold, sell).\n\n## Company Overview\n- **Company Description:** Brief description of the company.\n- **Industry Analysis:** Overview of the industry and market trends.\n- **Competitive Positioning:** Analysis of the company's position in the market.\n\n## Financial Analysis\n- **Revenue Analysis:** Breakdown of revenue streams and growth.\n- **Profitability Analysis:** Examination of margins and profit trends.\n- **Balance Sheet Analysis:** Assessment of financial health (assets, liabilities, equity).\n- **Cash Flow Analysis:** Evaluation of operational, investing, and financing cash flows.\n\n## Strategic Analysis\n- **Business Model:** Analysis of the company's business model and its sustainability.\n- **Growth Strategy:** Review of the company's growth plans and potential.\n- **Risks and Mitigation:** Identification of potential risks and mitigation strategies.\n\n## Management and Governance\n- **Management Team:** Overview of the management team's background and experience.\n- **Corporate Governance:** Assessment of governance structures and policies.\n\n## Investment Rationale\n- **Value Proposition:** Justification of the investment value.\n- **Investment Risk:** Analysis of potential investment risks.\n- **Exit Strategies:** Potential exit options and scenarios.\n\n## Financial Projections and Valuation\n- **Projection Summary:** Future financial projections.\n- **Valuation Analysis:** Valuation methods and outcomes (e.g., DCF, comparables).\n\n## Appendices\n- **Additional Data:** Any additional relevant data or information.\n- **Sources:** References and sources of information."
 `;
 
-export const investmentTemplateDict: Record<
-  string,
-  { category: string; questions: string[] }[]
-> = {
+export const investmentTemplateDict: Record<string, ITemplateItemPure[]> = {
   "Default VC 1": [
     {
-      category: "Overview",
-      questions: ["What product or service is being offered for whom and why?"],
+      name: "Overview",
+      children: [
+        {
+          name: "What product or service is being offered for whom and why?",
+        },
+      ],
     },
     // {
     //   category: "Team",
@@ -149,10 +151,12 @@ export const investmentTemplateDict: Record<
     //   ],
     // },
     {
-      category: "Target segment",
-      questions: [
-        "What are the key segments of customers the company is targeting?",
-        "Who are they selling to?",
+      name: "Target segment",
+      children: [
+        {
+          name: "What are the key segments of customers the company is targeting?",
+        },
+        { name: "Who are they selling to?" },
       ],
     },
     // {
@@ -54320,7 +54324,13 @@ export const ACCEPT_TEMPLATE_NODE_DICT: Record<string, string[]> = {
   ],
   File: ["PitchBook", "Sky", "Edgar"],
   Chroma: ["File", "CustomAPI", "GoogleSearch", "YahooFinance", "Webcrawler"],
-  SkyDatabase: ["File", "CustomAPI", "GoogleSearch", "YahooFinance", "Webcrawler"],
+  SkyDatabase: [
+    "File",
+    "CustomAPI",
+    "GoogleSearch",
+    "YahooFinance",
+    "Webcrawler",
+  ],
   Pinecone: [
     "File",
     "CustomAPI",
