@@ -25,6 +25,7 @@ import {
   IReportItem,
   IReportItemValue,
 } from "../../../../shared/models/interfaces";
+import * as marked from "marked";
 
 export const ReportTemplate = forwardRef(
   (
@@ -42,7 +43,8 @@ export const ReportTemplate = forwardRef(
     ref: ForwardedRef<HTMLDivElement>
   ) => {
     const initialReportItems = useMemo(() => {
-      return categoryParser2(reportContent);
+      const content = marked.parse(reportContent) as string;
+      return categoryParser2(content);
     }, [reportContent]);
     const [isShowQuestion, setIsShowQuestion] = useState<boolean>(true);
     const [uploadedFiles, setUploadedFiles] =

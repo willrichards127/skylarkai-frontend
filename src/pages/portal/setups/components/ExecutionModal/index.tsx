@@ -10,9 +10,10 @@ import {
 } from "../../../../../redux/services/setupApi";
 import { addIdtoTemplateJson } from "../../../../../components/TemplateView/utils";
 import { useCustomQueryMutation } from "../../../../../redux/services/transcriptAPI";
-import { parseCitation } from "../../../../../shared/utils/string";
 import { useGenerateReportMutation } from "../../../../../redux/services/reportApi";
 import { useNavigate } from "react-router-dom";
+import { longDateFormat } from "../../../../../shared/utils/basic";
+import * as marked from "marked";
 
 export const ExecutionModal = memo(
   ({
@@ -102,9 +103,12 @@ export const ExecutionModal = memo(
         setCustomQueyring(true);
         const ret = await handleCustomQuery(items, filenames);
         const report =
-          `# Investment memo: ${
-            updatedSetup.name
-          } \n ** Created At: ** ${new Date().toLocaleDateString()} \n` + ret;
+        `<h1 style="text-align: center;">Investment memo: ${
+          updatedSetup.name
+        }</h1>
+        <p style="text-align: center;"><strong>${longDateFormat(
+          new Date()
+        )}</strong></p>` + ret;        
         setCustomQueyring(false);
         const reportName = `Template-${new Date().getTime()}`;
         const generatedId = await generateReport({
@@ -112,7 +116,6 @@ export const ExecutionModal = memo(
           data: report,
           queryType: reportName
         }).unwrap();
-        console.log("==============", generatedId);
         navigate(
           `/portal/reports/${generatedId}?reportType=${reportName}&setupId=${setup.id}&viewMode=active`
         );
@@ -135,9 +138,8 @@ export const ExecutionModal = memo(
             i,
           ]);
           result +=
-            `${Array(depth.length + 2)
-              .fill("#")
-              .join("")} ${item.name} \n` + subResult;
+            `<h${depth.length + 2}>${item.name}</h${depth.length + 2}>` +
+            subResult;
         } else {
           const loadingObj = depth.reduceRight<any>(
             (acc, curr) => ({ [curr]: { children: acc } }),
@@ -151,11 +153,11 @@ export const ExecutionModal = memo(
             analysis_type: "transcript",
           });
           if("data" in resp) {
-            result += `${Array(depth.length + 3)
-              .fill("#")
-              .join("")} ${item.name} \n ${parseCitation(
-              resp.data.content as string
-            )} \n`;
+            result += `<h${depth.length + 3} class='heading-question'>${
+              item.name
+            }</h${depth.length + 3}>${
+              marked.parse(resp.data.content as string) as string
+            }`;
           }
           const successObj = depth.reduceRight<any>(
             (acc, curr) => ({ [curr]: { children: acc } }),
