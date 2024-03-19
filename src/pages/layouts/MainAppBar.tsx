@@ -477,10 +477,16 @@ export const MainAppBar = memo(() => {
                   </Box>
                 </Box>
               </Box>
-              {isEnterprise && (
+              {isEnterprise ? (
                 <Link to="/portal/reports">
                   <Button variant="contained" sx={{ minWidth: 160 }}>
                     Access Enterprise Portal
+                  </Button>
+                </Link>
+              ) : (
+                <Link to="/features/1">
+                  <Button variant="contained" sx={{ minWidth: 160 }}>
+                    Access Premium Portal
                   </Button>
                 </Link>
               )}
