@@ -201,6 +201,7 @@ export const SortableItemWrapper = memo(
                   return (
                     <a
                       {...props}
+                      className="no-print"
                       style={{ color: "tomato" }}
                       onClick={() => onJumpTo({ filename, quote })}
                       title={`${filename}.pdf:${quote}`}
@@ -227,6 +228,15 @@ export const SortableItemWrapper = memo(
                     ...props.style,
                     fontSize: "16.75px",
                     color: "darkcyan",
+                  }}
+                />
+              ),
+              h4: (props) => (
+                <h4
+                  {...props}
+                  style={{
+                    ...props.style,
+                    fontSize: "16px",
                   }}
                 />
               ),

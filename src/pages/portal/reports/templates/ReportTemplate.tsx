@@ -25,7 +25,6 @@ import {
   IReportItem,
   IReportItemValue,
 } from "../../../../shared/models/interfaces";
-import * as marked from "marked";
 
 export const ReportTemplate = forwardRef(
   (
@@ -42,12 +41,10 @@ export const ReportTemplate = forwardRef(
     },
     ref: ForwardedRef<HTMLDivElement>
   ) => {
-    const initialReportItems = useMemo(
-      () => { 
-        const parsed = marked.parse(reportContent) as string;
-        return categoryParser2(parsed)},
-      [reportContent]
-    );
+    const initialReportItems = useMemo(() => {
+      return categoryParser2(reportContent);
+    }, [reportContent]);
+    const [isShowQuestion, setIsShowQuestion] = useState<boolean>(true);
     const [uploadedFiles, setUploadedFiles] =
       useState<Record<string, File[]>>();
 
@@ -175,7 +172,7 @@ export const ReportTemplate = forwardRef(
         ...prevItems,
         {
           key: getNewId(),
-          value: { content: `<h3>${question}</h3>`, tag: "h4" },
+          value: { content: `<h3 class="heading-question">${question}</h3>`, tag: "h3" },
         },
         ...categoryParser2(content),
       ]);
@@ -200,7 +197,9 @@ export const ReportTemplate = forwardRef(
             }}
           >
             <ReportDrawer
+              isShowQuestion={isShowQuestion}
               items={reportItems}
+              onSwitchMode={(mode) => setIsShowQuestion(mode)}
               onRemoveFiles={onRemoveFiles}
               uploadedFiles={uploadedFiles}
             />
@@ -224,26 +223,44 @@ export const ReportTemplate = forwardRef(
               >
                 <DndContext onDragEnd={onDragEnd}>
                   <SortableContext
-                    items={reportItems.map((item) => item.key)}
+                    items={reportItems
+                      .filter((item) =>
+                        isShowQuestion
+                          ? true
+                          : !item.value.content.includes(
+                              'heading-question'
+                            )
+                      )
+                      .map((item) => item.key)}
                     strategy={verticalListSortingStrategy}
                   >
-                    {reportItems.map((item) => (
-                      <SortableItemWrapper
-                        key={item.key}
-                        item={item}
-                        onAddNew={() => onAddNew(item.key)}
-                        onRemove={() => onRemove(item.key)}
-                        onClone={(clonedItem) => onClone(item.key, clonedItem)}
-                        onAddUploadedFile={(data) =>
-                          onAddUploadedFile(item.key, data)
-                        }
-                        // onJumpTo={onJumpTo}
-                        onJumpTo={() => {}}
-                        onItemChanged={(data: Partial<IReportItemValue>) =>
-                          onItemChanged(item.key, data)
-                        }
-                      />
-                    ))}
+                    {reportItems
+                      .filter((item) =>
+                        isShowQuestion
+                          ? true
+                          : !item.value.content.includes(
+                              'heading-question'
+                            )
+                      )
+                      .map((item) => (
+                        <SortableItemWrapper
+                          key={item.key}
+                          item={item}
+                          onAddNew={() => onAddNew(item.key)}
+                          onRemove={() => onRemove(item.key)}
+                          onClone={(clonedItem) =>
+                            onClone(item.key, clonedItem)
+                          }
+                          onAddUploadedFile={(data) =>
+                            onAddUploadedFile(item.key, data)
+                          }
+                          // onJumpTo={onJumpTo}
+                          onJumpTo={() => {}}
+                          onItemChanged={(data: Partial<IReportItemValue>) =>
+                            onItemChanged(item.key, data)
+                          }
+                        />
+                      ))}
                   </SortableContext>
                 </DndContext>
               </Box>

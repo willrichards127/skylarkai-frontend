@@ -54298,10 +54298,10 @@ export const EdgarFilings = [
 export const ACCEPT_TEMPLATE_NODE_DICT: Record<string, string[]> = {
   // Template: ["File", "Webcrawler"],
   Comparison: ["File", "Webcrawler", "Template"],
-  "GPT-3.5": [
+  "GPT-4": [
     "Webcrawler",
     "Input",
-    "GPT-3.5",
+    "GPT-4",
     "Anthropic",
     "Chroma",
     "SkyDatabase",
@@ -54313,7 +54313,7 @@ export const ACCEPT_TEMPLATE_NODE_DICT: Record<string, string[]> = {
   Anthropic: [
     "Webcrawler",
     "Input",
-    "GPT-3.5",
+    "GPT-4",
     "Anthropic",
     "Chroma",
     "SkyDatabase",
@@ -54339,7 +54339,7 @@ export const ACCEPT_TEMPLATE_NODE_DICT: Record<string, string[]> = {
     "Webcrawler",
     "PitchBook",
   ],
-  Output: ["GPT-3.5", "Anthropic", "GoogleSearch", "CustomAPI", "YahooFinance"],
+  Output: ["GPT-4", "Anthropic", "GoogleSearch", "CustomAPI", "YahooFinance"],
   GoogleSearch: ["Input"],
 };
 

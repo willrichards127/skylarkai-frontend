@@ -59,7 +59,7 @@ const ComponentDict: Record<
   Input: InputNode,
   Output: OutputNode,
   Webcrawler: WebcrawlerNode,
-  "GPT-3.5": OpenAINode,
+  "GPT-4": OpenAINode,
   Anthropic: AnthropicNode,
   File: DocUploadNode,
   GoogleSearch: GoogleSearchNode,
@@ -112,7 +112,7 @@ const FloatPanel = memo(
       const inputNode = nodes.find((node) => node.data.name === "Input");
       const skyDBNode = nodes.find((node) => node.data.name === "SkyDatabase");
       const llmNode = nodes.find(
-        (node) => node.data.name === "Anthropic" || node.data.name === "GPT-3.5"
+        (node) => node.data.name === "Anthropic" || node.data.name === "GPT-4"
       );
       if (!inputNode || !skyDBNode || !llmNode) {
         toast.error("Invalid graph format!");

@@ -106,7 +106,7 @@ export const ChatPanel = memo(
       const container = document.createElement("div");
       container.appendChild(ref.current.cloneNode(true));
       const removeItems = container.querySelectorAll(
-        ".suggestions, .topic, .loading"
+        ".suggestions, .topic, .loading, no-print"
       );
       for (const item of removeItems) {
         item.remove();

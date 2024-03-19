@@ -30,6 +30,7 @@ export const IndexView = memo(
                     style={{
                       color: theme.palette.secondary.light,
                       fontSize: 16,
+                      textDecoration: "none",
                     }}
                   >
                     {props.children}
@@ -50,6 +51,7 @@ export const IndexView = memo(
                     style={{
                       color: theme.palette.secondary.light,
                       fontSize: 15,
+                      textDecoration: "none",
                     }}
                   >
                     {props.children}
@@ -67,6 +69,7 @@ export const IndexView = memo(
                     style={{
                       color: theme.palette.secondary.light,
                       fontSize: 14,
+                      textDecoration: "none",
                     }}
                   >
                     {props.children}
@@ -85,7 +88,10 @@ export const IndexView = memo(
                   <a
                     href={`#${key}`}
                     className="index-heading"
-                    style={{ color: theme.palette.secondary.light }}
+                    style={{
+                      color: theme.palette.secondary.light,
+                      textDecoration: "none",
+                    }}
                   >
                     {props.children}
                   </a>
@@ -105,6 +111,7 @@ export const IndexView = memo(
                     className="index-heading"
                     style={{
                       color: theme.palette.secondary.light,
+                      textDecoration: "none",
                     }}
                   >
                     {props.children}
@@ -125,6 +132,7 @@ export const IndexView = memo(
                     className="index-heading"
                     style={{
                       color: theme.palette.secondary.light,
+                      textDecoration: "none",
                     }}
                   >
                     {props.children}
