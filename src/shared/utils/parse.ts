@@ -281,8 +281,89 @@ export const categoryParser = (htmlString: string) => {
 
   parser.write(htmlString);
   parser.end();
-  console.log(sections, "###sections===");
   return sections.filter((section) => section.value.tag !== "br");
+};
+
+const parseExpression = (json: any, limitWordCount?: number) => {
+  let filename: string = "",
+    quote: string = "";
+  if (json.citation) {
+    filename = json.citation["Document Title"];
+    quote = json.citation["Direct Quote"];
+  } else if (json["Document Title"]) {
+    filename = json["Document Title"];
+    quote = json["Direct Quote"];
+  } else {
+    if (Object.keys(json).length === 2) {
+      filename = Object.values<string>(json)[0];
+      quote = Object.values<string>(json)[1];
+    } else {
+      filename = Object.keys(json)[0];
+      quote = Object.values<string>(json)[0];
+    }
+  }
+  // replace whitespaces with "___"
+  filename = filename.replace(/\s/g, "___");
+  quote = quote.replace(/\s/g, "___");
+  // reduce the count of words of quote
+  const splited = quote.split("___");
+  quote = limitWordCount
+    ? splited.length > limitWordCount
+      ? splited.slice(0, limitWordCount).join("___")
+      : quote
+    : quote;
+  return { filename, quote };
+};
+
+const cleanUp = (inputString: string, limitWordCount?: number) => {
+  let parsed;
+  // remove all &quot;
+  const nextInputString = inputString.replace(/&quot;/g, '"');
+  try {
+    parsed = JSON.parse(nextInputString);
+    const { filename, quote } = parseExpression(parsed, limitWordCount);
+    return `<a href="#${filename}______${quote}">Link</a>`;
+  } catch (e) {
+    let result = nextInputString.replace(/\("\s?/g, '"');
+    result = result.replace(/"\)/g, '"');
+    // replace all `(` and `)` with `"`;
+    result = result.replace(/[()]/g, '"');
+    try {
+      parsed = JSON.parse(result);
+      const { filename, quote } = parseExpression(parsed, limitWordCount);
+      return `<a href="#${filename}______${quote}">Link</a>`;
+    } catch (e) {
+      return "";
+    }
+  }
+};
+
+// parse citation phase only
+const parseCitation = (content: string, limitWordCount?: number) => {
+  let startIndex = -1;
+  let braceCount = 0;
+
+  for (let i = 0; i < content.length; i++) {
+    if (content[i] === "{") {
+      if (braceCount === 0) {
+        startIndex = i;
+      }
+      braceCount++;
+    } else if (content[i] === "}") {
+      braceCount--;
+      if (braceCount === 0 && startIndex !== -1) {
+        const section = cleanUp(
+          content.substring(startIndex, i + 1),
+          limitWordCount
+        );
+        content = content.slice(0, startIndex) + section + content.slice(i + 1);
+        i = startIndex; // Reset index to re-scan the string
+        startIndex = -1;
+      }
+    }
+  }
+
+  return content;
 };
 
 export const categoryParser2 = (htmlString: string) => {
@@ -293,11 +374,10 @@ export const categoryParser2 = (htmlString: string) => {
     .forEach((el: any) => {
       sections.push({
         key: getNewId(),
-        value: { content: el.outerHTML, tag: el.rawTagName },
+        value: { content: parseCitation(el.outerHTML), tag: el.rawTagName },
       });
     });
 
-  console.log(sections, "###sections222===");
   return sections;
 };
 const extractRows = (inputString: string) => {

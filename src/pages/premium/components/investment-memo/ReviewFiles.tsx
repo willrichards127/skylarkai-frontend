@@ -15,13 +15,13 @@ import {
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import update from "immutability-helper";
+import * as marked from "marked";
 import { ICustomInstance } from "./interfaces";
 import {
   useCreateFeatureInstanceMutation,
   useIngestFilesMutation,
   useCustomQueryMutation,
 } from "../../../../redux/services/transcriptAPI";
-import { parseCitation } from "../../../../shared/utils/string";
 import Templateview from "../../../../components/TemplateView";
 import { ITemplateItem } from "../../../../shared/models/interfaces";
 
@@ -45,45 +45,47 @@ export const ReviewFiles = ({
   const [ingestFiles, { isLoading: loadingIngest }] = useIngestFilesMutation();
   const [customQuery] = useCustomQueryMutation();
 
-  const handleCustomQuery = useCallback(async (
-    templateItems: ITemplateItem[],
-    depth: number[] = []
-  ) => {
-    let result: string = "";
-    for (let i = 0; i < templateItems.length; i++) {
-      const item = templateItems[i];
-      if (item.children) {
-        const subResult = await handleCustomQuery(item.children, [...depth, i]);
-        result +=
-          `${Array(depth.length + 2)
-            .fill("#")
-            .join("")} ${item.name} \n` + subResult;
-      } else {
-        const loadingObj = depth.reduceRight<any>(
-          (acc, curr) => ({ [curr]: { children: acc } }),
-          { [i]: { isLoading: { $set: true } } }
-        );
-        setItems((prev) => update(prev, loadingObj));
-        // await new Promise((resolve) => setTimeout(resolve, 1000));
-        const data = await customQuery({
-          filenames: instance.instance_metadata.uploaded_file_names,
-          question: item.name,
-          analysis_type: "transcript",
-        }).unwrap();
-        result += `${Array(depth.length + 3)
-          .fill("#")
-          .join("")} ${item.name} \n ${parseCitation(
-          data.content as string
-        )} \n`;
-        const successObj = depth.reduceRight<any>(
-          (acc, curr) => ({ [curr]: { children: acc } }),
-          { [i]: { isLoading: { $set: false }, isSuccess: { $set: true } } }
-        );
-        setItems((prev) => update(prev, successObj));
+  const handleCustomQuery = useCallback(
+    async (templateItems: ITemplateItem[], depth: number[] = []) => {
+      let result: string = "";
+      for (let i = 0; i < templateItems.length; i++) {
+        const item = templateItems[i];
+        if (item.children) {
+          const subResult = await handleCustomQuery(item.children, [
+            ...depth,
+            i,
+          ]);
+          result +=
+            `<h${depth.length + 2}>${item.name}</h${depth.length + 2}>` +
+            subResult;
+        } else {
+          const loadingObj = depth.reduceRight<any>(
+            (acc, curr) => ({ [curr]: { children: acc } }),
+            { [i]: { isLoading: { $set: true } } }
+          );
+          setItems((prev) => update(prev, loadingObj));
+          // await new Promise((resolve) => setTimeout(resolve, 1000));
+          const data = await customQuery({
+            filenames: instance.instance_metadata.uploaded_file_names,
+            question: item.name,
+            analysis_type: "transcript",
+          }).unwrap();
+          result += `<h${depth.length + 3} class='heading-question'>${
+            item.name
+          }</h${depth.length + 3}>${
+            marked.parse(data.content as string) as string
+          }`;
+          const successObj = depth.reduceRight<any>(
+            (acc, curr) => ({ [curr]: { children: acc } }),
+            { [i]: { isLoading: { $set: false }, isSuccess: { $set: true } } }
+          );
+          setItems((prev) => update(prev, successObj));
+        }
       }
-    }
-    return result;
-  }, [customQuery, instance]);
+      return result;
+    },
+    [customQuery, instance]
+  );
 
   const onNextStep = useCallback(async () => {
     try {
@@ -96,9 +98,10 @@ export const ReviewFiles = ({
       const ret = await handleCustomQuery(items);
       setBackDisabled(false);
       const report =
-        `# Investment memo: ${
+        `<h1>Investment memo: ${
           instance.company_name
-        } \n ** Created At: ** ${new Date().toLocaleDateString()} \n` + ret;
+        }</h1> <strong>Created At:</strong> ${new Date().toLocaleDateString()} <br />` +
+        ret;
       const responseInstance = await createInstance({
         ...instance,
         instance_metadata: {
@@ -110,14 +113,7 @@ export const ReviewFiles = ({
     } catch (e) {
       console.log("Error in next step", e);
     }
-  }, [
-    ingestFiles,
-    instance,
-    handleCustomQuery,
-    createInstance,
-    items,
-    onNext,
-  ]);
+  }, [ingestFiles, instance, handleCustomQuery, createInstance, items, onNext]);
 
   return (
     <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
