@@ -314,6 +314,12 @@ export const MainAppBar = memo(() => {
                   Support
                 </Box>
               </Box>
+
+              <Box component={Link} to="/features/1" ml="auto">
+                <Button variant="contained" sx={{ minWidth: 160 }}>
+                  Access Premium Portal
+                </Button>
+              </Box>
             </Box>
           ) : (
             <Box

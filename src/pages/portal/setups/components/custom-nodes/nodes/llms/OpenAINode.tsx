@@ -6,7 +6,7 @@ import { SimpleDropdown } from "../../../../../../../components/SimpleDropdown";
 import { Handlers } from "../../Handlers";
 import { ITemplateNode } from "../../../../../../../shared/models/interfaces";
 
-export const modelItems = ["gpt-3.5", "gpt-4"];
+export const modelItems = ["gpt-4"];
 
 export const OpenAINode = memo(
 	({ nodeId, nodeContent }: { nodeId: string; nodeContent: ITemplateNode }) => {

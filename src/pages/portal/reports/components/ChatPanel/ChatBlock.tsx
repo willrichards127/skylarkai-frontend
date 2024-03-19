@@ -64,8 +64,25 @@ export const ChatBlock = memo(
     const onSendViaEmail = useCallback(
       async (question: string) => {
         if (!ref.current) return;
+        const container = document.createElement("div");
+        container.appendChild(ref.current.cloneNode(true));
+        const removeItems = container.querySelectorAll(
+          ".suggestions, .topic, .loading, .no-print"
+        );
+        for (const item of removeItems) {
+          item.remove();
+        }
+        const listings = container.querySelectorAll("li");
+        for (const item of listings) {
+          const paragraphs = item.querySelectorAll("p");
+          for (const paragraph of paragraphs) {
+            paragraph.before(...paragraph.childNodes);
+            const br = document.createElement("br");
+            paragraph.replaceWith(br);
+          }
+        }
         const base64str = await getPdfInBase64(
-          `<b>Question: ${question}</b><br />Answer: ` + ref.current.innerHTML,
+          `<b>Question: ${question}</b><br />Answer: ` + container.innerHTML,
           "Skylark"
         );
         emailContentRef.current = {
@@ -153,6 +170,7 @@ export const ChatBlock = memo(
                     return (
                       <a
                         {...props}
+                        className="no-print"
                         style={{ color: "tomato" }}
                         onClick={() => onJumpTo({ filename, quote })}
                         title={`${filename}.pdf:${quote}`}

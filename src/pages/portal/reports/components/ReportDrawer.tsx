@@ -1,5 +1,12 @@
 import { useCallback, useState } from "react";
-import { Box, Divider, IconButton, Stack } from "@mui/material";
+import {
+  Box,
+  Divider,
+  FormControlLabel,
+  Switch,
+  IconButton,
+  Stack,
+} from "@mui/material";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
 import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
 import { IndexView } from "../templates/IndexView";
@@ -7,11 +14,15 @@ import { DocumentChip } from "../../../../components/DocumentChip";
 import { reportDrawerWidth } from "../../../../shared/models/constants";
 
 export const ReportDrawer = ({
+  isShowQuestion,
   uploadedFiles,
   onRemoveFiles,
+  onSwitchMode,
   items,
 }: {
+  isShowQuestion?: boolean;
   items: { key: string; value: any }[];
+  onSwitchMode: (showQuestion: boolean) => void;
   onRemoveFiles: (type: string, filename: string) => void;
   uploadedFiles?: Record<string, File[]>;
 }) => {
@@ -59,8 +70,28 @@ export const ReportDrawer = ({
             borderBottomLeftRadius: 8,
           }}
         >
-          <Box textAlign="right">
-            <IconButton color="primary" onClick={onToggleDrawer}>
+          <Box sx={{ display: "flex", alignItems: "center", pl: 4 }}>
+            <FormControlLabel
+              control={
+                <Switch
+                  size="small"
+                  color="primary"
+                  checked={isShowQuestion}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    onSwitchMode(e.target.checked)
+                  }
+                />
+              }
+              label={
+                <small>{isShowQuestion ? "Show" : "Hide"} Questions</small>
+              }
+              labelPlacement="end"
+            />
+            <IconButton
+              color="primary"
+              onClick={onToggleDrawer}
+              sx={{ ml: "auto" }}
+            >
               <KeyboardDoubleArrowLeftIcon />
             </IconButton>
           </Box>

@@ -27,8 +27,7 @@ export const MarketAnalysisReport = ({
   onSaveAction: (content: string) => void;
   onRerunAction: (append?: Record<string, File[]>) => void;
 }) => {
-  const reportPrintRef = useRef<HTMLDivElement>(null);  
-
+  const reportPrintRef = useRef<HTMLDivElement>(null);
   // const refFileRef = useRef<{
   //   filename: string;
   //   text_content: string;
