@@ -31,7 +31,7 @@ const generateMD = (
   companyName: string,
   reportData: Record<string, Record<string, string>>
 ): string => {
-  let reportMD: string = `# Investment memo: ${companyName} \n ** Created At: ** ${new Date().toLocaleDateString()} \n`;
+  let reportMD: string = `# Investment memo: ${companyName} \n Created At: ${new Date().toLocaleDateString()} \n`;
   Object.entries(reportData).forEach(([category, qa]) => {
     reportMD += `## ${category} \n`;
     Object.entries(qa).forEach(([question, answer]) => {

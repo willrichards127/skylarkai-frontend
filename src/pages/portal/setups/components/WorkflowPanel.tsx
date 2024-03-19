@@ -32,7 +32,7 @@ import {
   // DeployIcon,
   // ImportIcon,
   PlayIcon,
-  UploadIcon,
+  // UploadIcon,
 } from "../../../../components/Svgs";
 import { ExportModal } from "./ExportModal/ExportModal";
 import { SaveSetupModal } from "./SaveSetupModal";
@@ -209,9 +209,9 @@ const WorkflowPanel = memo(
       },
       [reactFlowInstance, setupId, categoryDict, setNodes]
     );
-    const onExport = useCallback(() => {
-      showDeployModal(true);
-    }, []);
+    // const onExport = useCallback(() => {
+    //   showDeployModal(true);
+    // }, []);
 
     const onExecute = useCallback(() => {
       const dbNodes = nodes.map((node) => convert2DBNode(node as INode));
@@ -358,14 +358,14 @@ const WorkflowPanel = memo(
 						isNeutral
 						disabled
 					/> */}
-          <XIconButton
+          {/* <XIconButton
             variant="contained"
             startIcon={<UploadIcon />}
             size="small"
             isNeutral
             disabled={!setup || !setup?.id || !isValid}
             onClick={onExport}
-          />
+          /> */}
           {/* <XIconButton
 						variant='contained'
 						startIcon={<ImportIcon />}
