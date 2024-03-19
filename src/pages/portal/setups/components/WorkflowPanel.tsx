@@ -54,8 +54,8 @@ import "reactflow/dist/style.css";
 import {
   useGetSetupQuery,
   useSaveSetupMutation,
-  useExecuteGraphMutation,
 } from "../../../../redux/services/setupApi";
+import { ExecutionModal } from "./ExecutionModal";
 
 const nodeTypes = {
   custom: CustomNode,
@@ -80,11 +80,6 @@ const WorkflowPanel = memo(
     const [saveSetup, { isLoading: isLoadingSaveSetup, data: savedData }] =
       useSaveSetupMutation();
 
-    const [
-      executeGraph,
-      { isLoading: isLoadingExecuteGraph, data: executedData },
-    ] = useExecuteGraphMutation();
-
     const reactFlowWrapper = useRef<HTMLDivElement>(null);
     const edgeUpdateSuccessful = useRef(true);
     const setupRef = useRef<{
@@ -98,6 +93,7 @@ const WorkflowPanel = memo(
       useState<ReactFlowInstance<any, any>>();
     const [deployModal, showDeployModal] = useState<boolean>(false);
     const [saveSetupModal, showSaveSetupModal] = useState<boolean>(false);
+    const [progressModal, showProgressModal] = useState<boolean>(false);
 
     const onConnect = useCallback(
       (params: Connection) => {
@@ -213,19 +209,9 @@ const WorkflowPanel = memo(
     //   showDeployModal(true);
     // }, []);
 
-    const onExecute = useCallback(() => {
-      const dbNodes = nodes.map((node) => convert2DBNode(node as INode));
-      const dbEdges = edges.map((edge) => convert2DBEdge(edge as IEdge));
-      executeGraph({
-        setup: {
-          id: +setupRef.current.id!,
-          name: setupRef.current.name!,
-          nodes: dbNodes,
-          edges: dbEdges,
-        },
-        analysisType: "financial_diligence",
-      });
-    }, [executeGraph, nodes, edges]);
+    const onExecute = useCallback(async () => {
+      showProgressModal(true);
+    }, []);
 
     const onSaveSetup = useCallback(() => {
       showSaveSetupModal(true);
@@ -286,11 +272,6 @@ const WorkflowPanel = memo(
       updateSetupWithLoadedData(setup);
     }, [updateSetupWithLoadedData, setup, isFetching]);
 
-    useEffect(() => {
-      if (isLoadingExecuteGraph || !executedData) return;
-      updateSetupWithLoadedData(executedData);
-    }, [updateSetupWithLoadedData, isLoadingExecuteGraph, executedData]);
-
     const isValid = useMemo(
       () => isValidGraph(nodes as any, edges as any),
       [nodes, edges]
@@ -305,7 +286,7 @@ const WorkflowPanel = memo(
             color: "#fff",
             zIndex: (theme) => theme.zIndex.drawer + 1,
           }}
-          open={isFetching || isLoadingSaveSetup || isLoadingExecuteGraph}
+          open={isFetching || isLoadingSaveSetup}
         >
           <CircularProgress color="inherit" />
         </Backdrop>
@@ -397,6 +378,23 @@ const WorkflowPanel = memo(
             onSaveName={onSaveName}
           />
         )}
+        {progressModal ? (
+          <ExecutionModal
+            open={progressModal}
+            setup={{
+              id: setup?.id,
+              name: savedData?.name || setup?.name,
+              nodes: nodes.map((node) => convert2DBNode(node as INode)),
+              edges: edges.map((edge) => convert2DBEdge(edge as IEdge)),
+            }}
+            onClose={(setup?: ISetup) => {
+              showProgressModal(false);
+              if (setup) {
+                updateSetupWithLoadedData(setup);
+              }
+            }}
+          />
+        ) : null}
       </Box>
     );
   }

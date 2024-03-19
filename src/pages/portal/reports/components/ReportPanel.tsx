@@ -44,7 +44,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
     },
     { skip: !setupId }
   );
-  
+
   const [getSetup, { isLoading: loadingSetup, data: setupData }] =
     useLazyGetSetupQuery();
   const [saveReport, { isSuccess: isSaved }] = useSaveReportMutation({});
@@ -54,8 +54,6 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
   useEffect(() => {
     getReport({
       reportId: +reportId,
-      queryType: reportType!,
-      template: REPORTS_DICT[reportType!].template,
     });
   }, [getReport, reportType, reportId]);
 

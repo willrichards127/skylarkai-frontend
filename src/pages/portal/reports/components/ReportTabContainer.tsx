@@ -87,7 +87,7 @@ export const ReportTabContainer = memo(
               <XCard
                 key={card.id}
                 id={card.id}
-                label={REPORTS_DICT[card.report_metadata.reportname].label}
+                label={REPORTS_DICT[card.report_metadata.reportname]?.label || card.report_metadata.reportname}
                 updatedAt={getDate(
                   new Date(card.created_at || card.executed_at)
                 )}

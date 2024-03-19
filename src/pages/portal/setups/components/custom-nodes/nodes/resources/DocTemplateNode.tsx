@@ -162,15 +162,18 @@ export const DocTemplateNode = memo(
             </TextField>
           </Box>
         </Box>
-        <TemplateViewModal
-          open={showModal}
-          onClose={() => setShowModal(false)}
-          data={
-            nodeContent.properties.text
-              ? JSON.parse(nodeContent.properties.text)
-              : []
-          }
-        />
+        {showModal ? (
+          <TemplateViewModal
+            open={showModal}
+            onClose={() => setShowModal(false)}
+            data={
+              nodeContent.properties.text
+                ? JSON.parse(nodeContent.properties.text)
+                : []
+            }
+            onSave={() => {}}
+          />
+        ) : null}
       </Box>
     );
   }

@@ -87,166 +87,53 @@ export const reportApi: any = createApi({
     }),
     generateReport: builder.mutation<
       any,
-      { setupId: number; queryType: string; template: string }
+      { setupId: number; queryType?: string; template?: string; data?: string; }
     >({
       async queryFn(args, __, ___, apiBaseQuery) {
-        const { setupId, queryType, template } = args;
-        // const DDDict: Record<string, string[]> = {
-        //   commercialduediligence: [
-        //     "marketanalysis",
-        //     "competitoranalysis",
-        //     "customeranalysis",
-        //     "productserviceanalysis",
-        //     "regulatoryfinancialduediligence",
-        //   ],
-        //   financialduediligence: [
-        //     "financials",
-        //     "cashflow",
-        //     "historicalfinancialperformance",
-        //     "financials_ratio",
-        //     "growth",
-        //     "profitability",
-        //     "projectionsandassumptions",
-        //     "offbalancesheetitems",
-        //     "taxation",
-        //   ],
-        //   qualityofearnsanalysis: [
-        //     "nonrecurringrevenuestreams",
-        //     "revenuerecognitionpolicies",
-        //     "unusualexpenseitems",
-        //     "earningmanipulationindicators",
-        //     "adjustmentstoreportedearnings",
-        //   ],
-        //   workingcapitalanalysis: [
-        //     "inventoryturnover",
-        //     "dayssalesofinventory",
-        //     // "customquery:Accounts Receivable & Collection Period",
-        //     // "customquery:Accounts Payable & Payment Period",
-        //     "cashconversioncycle",
-        //     "seasonalvariationsinworkingcapital",
-        //   ],
-        //   esgduediligence: [
-        //     "environmentalimpactassessment",
-        //     "socialresponsibilitypractices",
-        //     "corporategovernance",
-        //     "ethicalsupplychainanalysis",
-        //     "energyandcarbonfootprint",
-        //   ],
-        // };
+        const { setupId, queryType, template, data } = args;
         try {
-          /*
-                    if (DDDict[queryType]) {
-                      const reportsReponse: any = await apiBaseQuery({
-                        url: "reports",
-                      });
-                      
-                      const reportsForSetupId = reportsReponse.data.filter(
-                        (report: any) =>
-                          report.graph_id === setupId &&
-                          DDDict[queryType].includes(report.report_name)
-                      );
+          let templateResponse: any;
           
-                      const promises: Promise<unknown>[] = [];
-                      for (const { id } of reportsForSetupId) {
-                        const promise = new Promise((resolve) =>
-                          resolve(
-                            apiBaseQuery({
-                              url: `reports/${id}`,
-                            })
-                          )
-                        );
-                        promises.push(promise);
-                      }
-          
-                      const responses = await Promise.all(promises);
-                      const pairs: Record<string, any> = {};
-                      for (const query of DDDict[queryType]) {
-                        const matched: any = responses.find(
-                          (response: any) => response.data.report_name === query
-                        );
-                        if (matched) {
-                          pairs[query] = matched.data.report_data;
-                        }
-                      }
-          
-                      const finalPromises: Promise<unknown>[] = [];
-                      for (const [query, { data, answer }] of Object.entries(pairs)) {
-                        const promise = new Promise((resolve) =>
-                          resolve(
-                            apiBaseQuery({
-                              url: `generate_report/${setupId}`,
-                              method: "POST",
-                              body: {
-                                data: JSON.stringify({
-                                  answer,
-                                  data,
-                                }),
-                                report_name: query,
-                                template: template,
-                              },
-                            })
-                          )
-                        );
-                        finalPromises.push(promise);
-                      }
-                      const finalResponses = await Promise.all(finalPromises);
-                      
-                      // const summaryReponse: any = await apiBaseQuery({
-                      //   url: `chatwithdata/${setupId}`,
-                      //   method: "POST",
-                      //   body: {
-                      //     data: finalResult,
-                      //     question: `Executive summary for ${REPORTS_DICT[queryType].label}.`,
-                      //   },
-                      // });
-          
-                      // console.log("summaryReponse: ", summaryReponse);
-                      let reportFinal: string = "";
-                      reportFinal += `
-                        <h1>${REPORTS_DICT[queryType].label}</h1>
-                        <p>Created: ${new Date().toDateString()}</p>
-          
-                        <h2>Company Overview</h2>
-                        <p>STAF 7 is a technology company headquartered in San Francisco. It was founded in 2010 and currently employs around 5000 people.
-                        The company generated $2.5 billion in revenue in 2020. In 2021, STAF 7's revenue grew to $3 billion.</p>
-                        <h2>Executive Summary</h2>
-                        ${finalResult}
-                      `;
-                      for (const removeRegex of removeRegexes) {
-                        reportFinal = reportFinal.replace(removeRegex, "");
-                      }
-                      return {
-                        data: reportFinal,
-                      };
-                    } else {
-          */
-          const jsonResponse: any = await apiBaseQuery({
-            url: `${queryType}/${setupId}?llm=${"OpenAI"}`,
-            method: "POST",
-          });
+          if(queryType && template) {
+            const jsonResponse: any = await apiBaseQuery({
+              url: `${queryType}/${setupId}?llm=${"OpenAI"}`,
+              method: "POST",
+            });
+  
+            templateResponse = await apiBaseQuery({
+              url: `reports`,
+              method: "POST",
+              body: {
+                data: JSON.stringify({
+                  answer: jsonResponse.data.answer,
+                  data: jsonResponse.data.data,
+                }),
+                graph_id: setupId,
+                report_name: queryType,
+                template: `
+                    <h1>${REPORTS_DICT[queryType].label} Report</h1>
+                    ${template}`,
+              },
+            });
+          } else {
+            templateResponse = await apiBaseQuery({
+              url: `reports`,
+              method: "POST",
+              body: {
+                data,
+                graph_id: setupId,
+                report_name: queryType,
+                is_template_with_content: false,
+                is_file_with_content: true,
+              },
+            });
+          }
 
-          const templateResponse: any = await apiBaseQuery({
-            url: `reports`,
-            method: "POST",
-            body: {
-              data: JSON.stringify({
-                answer: jsonResponse.data.answer,
-                data: jsonResponse.data.data,
-              }),
-              graph_id: setupId,
-              report_name: queryType,
-              execute_query: true,
-              template: `
-                  <h1>${REPORTS_DICT[queryType].label} Report</h1>
-                  ${template}`,
-            },
-          });
           const generatedId: number = templateResponse.data.new_id;
 
           return {
             data: generatedId,
           };
-          // }
         } catch (e) {
           return {
             error: {
