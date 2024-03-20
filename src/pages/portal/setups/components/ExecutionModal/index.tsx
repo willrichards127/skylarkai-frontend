@@ -77,7 +77,7 @@ export const ExecutionModal = memo(
         const updateIngestResponse = await ingestFiles({
           setupId: updatedSetup.id!,
           companyName: updatedSetup.name!,
-          analysisType: "transcript",
+          analysisType: "financial_diligence",
           files: uploadFiles,
         }).unwrap();
 
@@ -152,9 +152,10 @@ export const ExecutionModal = memo(
           setItems((prev) => update(prev, loadingObj));
           // await new Promise((resolve) => setTimeout(resolve, 1000));
           const resp = await customQuery({
+            graph_id: setup.id,
             filenames: filenames,
             question: item.name,
-            analysis_type: "transcript",
+            analysis_type: "financial_diligence",
           });
           if ("data" in resp) {
             result += `<h${depth.length + 3} class='heading-question'>${
