@@ -29,7 +29,7 @@ export const DocUploadNode = memo(
       <Box position="relative">
         <Handlers nodeId={nodeId} handlerType="both" />
         <FileUploader
-          // initialFiles={nodeContent.properties?.files as any}
+          initialFiles={nodeContent.properties?.files as any}
           onUploadCompleted={onUpload}
           showFileList
         />

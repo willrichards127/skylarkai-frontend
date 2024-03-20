@@ -15,7 +15,7 @@ export const SkylarkDBNode = memo(
               sx={{ width: "320px", overflowY: "auto", maxHeight: 120 }}
             >
               {nodeContent.properties.files.map((file: any, index: number) => (
-                <Tooltip enterNextDelay={1000} title={file.file_name}>
+                <Tooltip key={`db-file-${index}`} enterNextDelay={1000} title={file.file_name}>
                   <Typography
                     noWrap
                     key={`file-${nodeContent.db_node_id}-${index}`}
