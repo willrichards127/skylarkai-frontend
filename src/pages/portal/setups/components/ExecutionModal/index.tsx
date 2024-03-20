@@ -59,7 +59,7 @@ export const ExecutionModal = memo(
         delete fileUploadNode.properties["files"];
       }
 
-      const updatedSetup = await saveSetup({
+      const updatedSetupResponse = await saveSetup({
         setupId: setup.id,
         setup: {
           name: setup.name,
@@ -68,6 +68,7 @@ export const ExecutionModal = memo(
         },
       }).unwrap();
 
+      const updatedSetup: ISetup = JSON.parse(JSON.stringify(updatedSetupResponse));
       const skyDBNodeIndex = updatedSetup.nodes.findIndex(
         (node) => node.template_node_id === 46
       );
@@ -80,11 +81,14 @@ export const ExecutionModal = memo(
           files: uploadFiles,
         }).unwrap();
 
-        if (skyDBNodeIndex > -1) {
-          updatedSetup.nodes[skyDBNodeIndex].properties!.files = [
-            ...(updatedSetup.nodes[skyDBNodeIndex].properties?.files || []),
-            ...updateIngestResponse,
-          ];
+        if (skyDBNodeIndex > -1 && updateIngestResponse.length) {
+          updatedSetup.nodes[skyDBNodeIndex].properties = {
+            ...(updatedSetup.nodes[skyDBNodeIndex].properties || {}),
+            files: [
+              ...(updatedSetup.nodes[skyDBNodeIndex].properties?.files || []),
+              ...updateIngestResponse,
+            ],
+          };
         }
       }
 
@@ -92,7 +96,7 @@ export const ExecutionModal = memo(
         (node) => node.template_node_id === 17
       );
 
-      if (templateNodeIndex > -1 && skyDBNodeIndex > -1) {
+      if (templateNodeIndex > -1 && skyDBNodeIndex > -1 && updatedSetup.nodes[templateNodeIndex].properties?.text) {
         const items = addIdtoTemplateJson(
           JSON.parse(updatedSetup.nodes[templateNodeIndex].properties!.text)
         );
@@ -103,18 +107,18 @@ export const ExecutionModal = memo(
         setCustomQueyring(true);
         const ret = await handleCustomQuery(items, filenames);
         const report =
-        `<h1 style="text-align: center;">Investment memo: ${
-          updatedSetup.name
-        }</h1>
+          `<h1 style="text-align: center;">Investment memo: ${
+            updatedSetup.name
+          }</h1>
         <p style="text-align: center;"><strong>${longDateFormat(
           new Date()
-        )}</strong></p>` + ret;        
+        )}</strong></p>` + ret;
         setCustomQueyring(false);
         const reportName = `Template-${new Date().getTime()}`;
         const generatedId = await generateReport({
           setupId: updatedSetup.id,
           data: report,
-          queryType: reportName
+          queryType: reportName,
         }).unwrap();
         navigate(
           `/portal/reports/${generatedId}?reportType=${reportName}&setupId=${setup.id}&viewMode=active`
@@ -152,7 +156,7 @@ export const ExecutionModal = memo(
             question: item.name,
             analysis_type: "transcript",
           });
-          if("data" in resp) {
+          if ("data" in resp) {
             result += `<h${depth.length + 3} class='heading-question'>${
               item.name
             }</h${depth.length + 3}>${
@@ -183,9 +187,12 @@ export const ExecutionModal = memo(
               flexDirection={"column"}
               justifyContent={"center"}
               alignItems={"center"}
+              height={"100%"}
             >
-              <Typography variant="body1">Upadating graph...</Typography>
-              <CircularProgress color="inherit" />
+              <Typography variant="body1" sx={{ marginBottom: 3 }}>
+                Upadating graph...
+              </Typography>
+              <CircularProgress />
             </Box>
           )}
           {isIngestingFiles && (
@@ -194,9 +201,12 @@ export const ExecutionModal = memo(
               flexDirection={"column"}
               justifyContent={"center"}
               alignItems={"center"}
+              height={"100%"}
             >
-              <Typography variant="body1">Ingesting files...</Typography>
-              <CircularProgress color="inherit" />
+              <Typography variant="body1" sx={{ marginBottom: 3 }}>
+                Ingesting files...
+              </Typography>
+              <CircularProgress />
             </Box>
           )}
           {isGeneratingReport && (
@@ -205,9 +215,12 @@ export const ExecutionModal = memo(
               flexDirection={"column"}
               justifyContent={"center"}
               alignItems={"center"}
+              height={"100%"}
             >
-              <Typography variant="body1">Generating Report...</Typography>
-              <CircularProgress color="inherit" />
+              <Typography variant="body1" sx={{ marginBottom: 3 }}>
+                Generating Report...
+              </Typography>
+              <CircularProgress />
             </Box>
           )}
           {customQuerying && <Templateview data={items} isEditMode={false} />}
