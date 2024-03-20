@@ -64,13 +64,26 @@ export const MarketAnalysisReport = ({
 
   const onSave = useCallback(() => {
     if (!reportPrintRef.current) return;
-    const items = reportPrintRef.current.querySelectorAll('div[id^="md_"]');
+    const container = document.createElement("div");
+    container.appendChild(reportPrintRef.current.cloneNode(true));
+    const removeItems = container.querySelectorAll(
+      ".no-print"
+    );
+    for (const item of removeItems) {
+      item.remove();
+    }
+    const items = container.querySelectorAll('div[id^="md_"]');
     let reportHtml = "";
     for (const item of items) {
-      reportHtml += item.innerHTML;
+      const wrapperDiv = item.querySelector('div');
+      if(wrapperDiv) {
+        reportHtml += wrapperDiv.innerHTML;
+      } else {
+        reportHtml += item.innerHTML;
+      }
     }
-    // remove all empty div elements
-    onSaveAction(reportHtml.replaceAll("<div>/div>", ""));
+    console.log("reportHtml###", reportHtml);
+    onSaveAction(reportHtml);
   }, [onSaveAction]);
 
   const onDelete = useCallback(() => {
