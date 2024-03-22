@@ -32,7 +32,7 @@ export const XWidget = memo(
       return `<table style="border-collapse: collapse; width: 100%;"><thead><tr>${columns
         .map(
           (col) =>
-            `<th${col.isUnChecked ? ` class='table-cell-hide'` : ""} style="font-size: 13px; word-break: break-word;">${
+            `<th${col.isUnChecked ? ` class='table-cell-hide'` : ""} style="font-size: 13px; word-break: break-word; background-color: #A9B6FF;">${
               col.label
             }</th>`
         )
@@ -124,6 +124,8 @@ export const XWidget = memo(
                       fontSize: '13px',
                       wordBreak: 'break-word',
                       border: `1px solid ${colors.grey[500]}`,
+                      backgroundColor: '#A9B6FF',
+                      verticalAlign: 'middle'
                     }}
                     className={col.isUnChecked ? "table-cell-hide" : undefined}
                   >

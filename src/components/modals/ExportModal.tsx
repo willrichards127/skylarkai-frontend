@@ -24,7 +24,7 @@ export const ExportModal = memo(
 
     const onExport = useCallback(() => {
       // get all apex-charts
-      const apex = ApexCharts.getChartByID("chart-1");
+      // const apex = ApexCharts.getChartByID("chart-1");
       // const svg: any = apex!.exports.getSvgString();
       // console.log(svg, "svg");
       // const container = document.createElement("div");
@@ -42,21 +42,31 @@ export const ExportModal = memo(
 
       // generatePdf(container.innerHTML, reportName, "Skylark");
       // onClose();
-      apex!.dataURI({ scale: 1 }).then((value: any) => {        
-        const container = document.createElement("div");
-        container.appendChild(exportContent.cloneNode(true));
-        const removeItems = container.querySelectorAll(".no-print");
-        for (const item of removeItems) {
+      // apex!.dataURI({ scale: 1 }).then((value: any) => {
+      const container = document.createElement("div");
+      container.appendChild(exportContent.cloneNode(true));
+      const removeItems = container.querySelectorAll(".no-print");
+      for (const item of removeItems) {        
+        item.remove();        
+      }
+      const mdElements = document.querySelectorAll('[id^="md_"]');
+      for(const item of mdElements) {
+        if(!item.childElementCount) {
           item.remove();
         }
-        const chartEls = container.querySelectorAll(".chart-wrapper");
-        for (const chartEl of chartEls) {
-          chartEl.innerHTML = `<img src="${value.imgURI.replace('image/png', 'image/jpeg')}" width="672" alt="chart" />`;
+        // after remove link tag, if there's only "." existing
+        if(item.childElementCount === 1 && (item.firstChild?.textContent || "").trim() === ".") {
+          item.remove();
         }
+      }
+      // const chartEls = container.querySelectorAll(".chart-wrapper");
+      // for (const chartEl of chartEls) {
+      //   chartEl.innerHTML = `<img src="${value.imgURI.replace('image/png', 'image/jpeg')}" width="672" alt="chart" />`;
+      // }
 
-        generatePdf(container.innerHTML, reportName, "Skylark");
-        onClose();
-      });
+      generatePdf(container.innerHTML, reportName, "Skylark");
+      onClose();
+      // });
     }, [onClose, exportContent, reportName]);
 
     return (

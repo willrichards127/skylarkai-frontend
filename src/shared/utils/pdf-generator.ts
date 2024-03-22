@@ -35,6 +35,11 @@ export const generatePdf = (
     //   height: 'auto'
     // } as PageSize,
     content,
+    // styles:{
+    //   tableHeader:{
+    //     background: "middle"
+    //   }
+    // }
   };
   pdfMake.createPdf(docDefinition).download(fileName);
 };
