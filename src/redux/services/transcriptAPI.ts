@@ -333,7 +333,7 @@ export const transcriptApi = createApi({
         const current_graph_id = graph_id || sys_graph_id;
         try {
           const response: any = await apiBaseQuery({
-            url: `customquery/${current_graph_id}?analysis_type=${analysis_type}${
+            url: `customquery/${current_graph_id}?llm=${llm}&analysis_type=${analysis_type}${
               insider_transaction
                 ? "&insider_transaction=" + insider_transaction
                 : ""
