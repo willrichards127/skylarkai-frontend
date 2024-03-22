@@ -73,7 +73,7 @@ export const Chart = memo(
     if (!chartData) return <>Unable to show this chart.</>;
 
     return (
-      <Box>
+      <Box className="chart-wrapper">
         {/* <Box
           className="print-legend"
           style={{
@@ -107,11 +107,8 @@ export const Chart = memo(
         <ApexChart
           options={{
             colors,
-            theme: {
-              mode: "dark",
-              // palette: "palette0",
-            },
             chart: {
+              id: 'chart-1',
               animations: {
                 enabled: false,
               },
@@ -129,8 +126,7 @@ export const Chart = memo(
               },
             },
             stroke: {
-              show: true,
-              width: 1,
+              show: false,
             },
             tooltip: {
               shared: true,

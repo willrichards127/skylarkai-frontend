@@ -29,10 +29,10 @@ export const XWidget = memo(
     const rows = useMemo(() => metadata.rows || [], [metadata.rows]);
 
     const generateInnerHtml = useCallback((rows: any, columns: TColumn[]) => {
-      return `<table><thead><tr>${columns
+      return `<table style="border-collapse: collapse; width: 100%;"><thead><tr>${columns
         .map(
           (col) =>
-            `<th${col.isUnChecked ? ` class='table-cell-hide'` : ""}>${
+            `<th${col.isUnChecked ? ` class='table-cell-hide'` : ""} style="font-size: 13px; word-break: break-word;">${
               col.label
             }</th>`
         )
@@ -46,7 +46,7 @@ export const XWidget = memo(
                     col.isUnChecked || row.isUnChecked
                       ? ` class='table-cell-hide'`
                       : ""
-                  }>${row[col.label]}</td>`
+                  } style="font-size: 12px; word-break: break-word;">${row[col.label]}</td>`
               )
               .join("")}</tr>`
         )
@@ -102,9 +102,17 @@ export const XWidget = memo(
     };
 
     return metadata ? (
-      <Box sx={{ display: "flex", flexDirection: "column", mt: 4, mb: 8 }}>
+      <Box
+        style={{
+          width: '100%',
+          display: "flex",
+          flexDirection: "column",
+          marginTop: "4px",
+          marginBottom: "8px",
+        }}
+      >
         {metadata.visual === "table" ? (
-          <table style={{ borderCollapse: "collapse" }}>
+          <table style={{ borderCollapse: "collapse", width: "100%" }}>
             <thead>
               <tr>
                 {columns.map((col, index) => (
@@ -112,7 +120,9 @@ export const XWidget = memo(
                     key={`col-${index}`}
                     style={{
                       textAlign: "center",
-                      padding: "4px 8px",
+                      padding: "4px",
+                      fontSize: '13px',
+                      wordBreak: 'break-word',
                       border: `1px solid ${colors.grey[500]}`,
                     }}
                     className={col.isUnChecked ? "table-cell-hide" : undefined}
@@ -133,8 +143,10 @@ export const XWidget = memo(
                       key={`row-${rowIndex}-col-${colIndex}`}
                       style={{
                         textAlign: "center",
-                        padding: "4px 8px",
+                        padding: "4px",
+                        fontSize: '12px',
                         border: `1px solid ${colors.grey[500]}`,
+                        wordBreak: 'break-word',
                       }}
                       className={
                         row.isUnChecked || col.isUnChecked

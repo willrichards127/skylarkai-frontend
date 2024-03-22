@@ -217,7 +217,7 @@ export const ReportTemplate = forwardRef(
               <Box
                 ref={ref}
                 sx={{
-                  maxWidth: 892,
+                  maxWidth: '8.3in',
                   bgcolor: "white",
                   color: "black",
                   p: 8,
