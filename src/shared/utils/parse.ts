@@ -5,6 +5,7 @@ import { IReportItem } from "../models/interfaces";
 import { TColumn, TRow } from "../models/types";
 import * as cheerios from "cheerio";
 import { parse } from "node-html-parser";
+import * as marked from "marked";
 
 export const parseSWOT = (content: string) => {
   const strengthsRegex = /Strengths:([\s\S]*?)(Weaknesses:|$)/;
@@ -373,10 +374,28 @@ export const categoryParser2 = (htmlString: string) => {
     .filter((el: HTMLElement) => el.nodeType !== 3) // get rid of line-breaks
     .forEach((el: any) => {
       if (el.rawTagName !== "br") {
-        sections.push({
-          key: getNewId(),
-          value: { content: parseCitation(el.outerHTML), tag: el.rawTagName },
-        });
+        if (el.rawTagName === "p") {
+          const innerParsed = marked.parse(el.innerHTML) as string;
+          if (innerParsed.includes("<table>")) {
+            sections.push({
+              key: getNewId(),
+              value: { content: innerParsed, tag: "table" },
+            });
+          } else {
+            sections.push({
+              key: getNewId(),
+              value: {
+                content: parseCitation(el.outerHTML),
+                tag: el.rawTagName,
+              },
+            });
+          }
+        } else {
+          sections.push({
+            key: getNewId(),
+            value: { content: parseCitation(el.outerHTML), tag: el.rawTagName },
+          });
+        }
       }
     });
 

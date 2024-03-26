@@ -46,6 +46,7 @@ export const ReportTemplate = forwardRef(
       const content = marked.parse(reportContent) as string;
       return categoryParser2(content);
     }, [reportContent]);
+    
     const [isShowQuestion, setIsShowQuestion] = useState<boolean>(false);
     const [uploadedFiles, setUploadedFiles] =
       useState<Record<string, File[]>>();
