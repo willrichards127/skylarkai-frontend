@@ -10,7 +10,7 @@ import {
 } from "../../../../../redux/services/setupApi";
 import { addIdtoTemplateJson } from "../../../../../components/TemplateView/utils";
 import { useCustomQueryMutation } from "../../../../../redux/services/transcriptAPI";
-import { useGenerateReportMutation } from "../../../../../redux/services/reportApi";
+import { useGenerateReportMutation, useGenerateCustomReportMutation } from "../../../../../redux/services/reportApi";
 import { useNavigate } from "react-router-dom";
 import { longDateFormat } from "../../../../../shared/utils/basic";
 import * as marked from "marked";
@@ -34,6 +34,7 @@ export const ExecutionModal = memo(
       useIngestFilesMutation();
     const [generateReport, { isLoading: isGeneratingReport }] =
       useGenerateReportMutation();
+    const [generateCustomReport] = useGenerateCustomReportMutation();
     const [customQuery] = useCustomQueryMutation();
 
     const [items, setItems] = useState<ITemplateItem[]>([]);
@@ -141,9 +142,22 @@ export const ExecutionModal = memo(
             ...depth,
             i,
           ]);
-          result +=
-            `<h${depth.length + 2}>${item.name}</h${depth.length + 2}>` +
-            subResult;
+          if (item.template) {
+            console.log(">>>>>>>>>", item.name, item.template);
+            const customResult: any = await generateCustomReport({
+              setupId: setup.id!,
+              template: item.template,
+              data: subResult,
+            }).unwrap();
+            console.log("<<<<<<<<<", customResult.filled_template);
+            result +=
+              `<h${depth.length + 2}>${item.name}</h${depth.length + 2}>` +
+              customResult.filled_template;
+          } else {
+            result +=
+              `<h${depth.length + 2}>${item.name}</h${depth.length + 2}>` +
+              subResult;
+          }
         } else {
           const loadingObj = depth.reduceRight<any>(
             (acc, curr) => ({ [curr]: { children: acc } }),

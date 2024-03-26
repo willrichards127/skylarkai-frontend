@@ -315,6 +315,20 @@ export const reportApi: any = createApi({
         }
       },
     }),
+    generateCustomReport: builder.mutation<
+      string,
+      { setupId: number; template: string; data: string }
+    >({
+      query: ({ setupId, template, data }) => ({
+        url: `reports/custom`,
+        method: "POST",
+        body: {
+          graph_id: setupId,
+          data,
+          template
+        }
+      }),
+    }),
     getReport: builder.query<
       any,
       {
@@ -577,6 +591,7 @@ export const {
   useGetCustomQueryMutation,
   useCreateReportTemplateMutation,
   useGenerateReportMutation,
+  useGenerateCustomReportMutation,
   useReGenerateReportMutation,
   useGetReportsQuery,
   useLazyGetReportsQuery,
