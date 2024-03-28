@@ -60,7 +60,6 @@ export const ExecutionModal = memo(
         "files" in fileUploadNode.properties
       ) {
         uploadFiles = fileUploadNode.properties["files"];
-        delete fileUploadNode.properties["files"];
       }
 
       const updatedSetupResponse = await saveSetup({
