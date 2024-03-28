@@ -1,6 +1,5 @@
 import { memo, useCallback, useState } from "react";
-// import { useCSVReader } from "react-papaparse";
-import { Box, IconButton, colors, styled } from "@mui/material";
+import { Box, colors, styled } from "@mui/material";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
@@ -8,47 +7,24 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { XWidget } from "../components/XWidget";
 import { ItemEditor } from "./ItemEditor";
-import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
-import FileCopyIcon from "@mui/icons-material/FileCopy";
-import BarChartIcon from "@mui/icons-material/BarChart";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import AddIcon from "@mui/icons-material/Add";
-// import UploadFileIcon from "@mui/icons-material/UploadFile";
+import { ItemActionPane } from "./ItemActionPane";
 import {
   IReportItem,
   IReportItemValue,
 } from "../../../../shared/models/interfaces";
-
-// const styles = {
-//   csvReader: {
-//     display: "flex",
-//     flexDirection: "row",
-//   } as CSSProperties,
-// };
 
 const ItemWrapper = styled(Box)({
   position: "relative",
   backgroundColor: "white",
   color: "black",
   border: "1px solid transparent",
-});
-
-const ActionPane = styled(Box)({
-  position: "absolute",
-  gap: 0.5,
-  right: 8,
-  top: 8,
-  backgroundColor: "rgba(255,255,255,0.8)",
-  border: '1px solid grey',
-  borderRadius: 4,
-  alignItems: "center",
-  display: "none",
+  padding: "4px",
 });
 
 const ItemWrapperWithHover = styled(ItemWrapper)({
   "&:hover": {
     border: `1px dotted ${colors.grey[800]}`,
-    "& > div:first-child": {
+    "& > div:first-of-type": {
       display: "flex",
     },
   },
@@ -60,14 +36,15 @@ export const SortableItemWrapper = memo(
     onAddNew,
     onRemove,
     onClone,
+    onSplit,
     onItemChanged,
-    // onAddUploadedFile,
     onJumpTo,
   }: {
     item: IReportItem;
     onAddNew: () => void;
     onRemove: () => void;
     onClone: (clonedItem: IReportItemValue) => void;
+    onSplit: (rows: number) => void;
     onAddUploadedFile?: (data: string[][]) => void;
     onItemChanged: (value: Partial<IReportItemValue>) => void;
     onJumpTo: ({
@@ -78,7 +55,6 @@ export const SortableItemWrapper = memo(
       quote: string;
     }) => void;
   }) => {
-    // const { CSVReader } = useCSVReader();
     const { attributes, listeners, setNodeRef, transform, transition } =
       useSortable({
         id: item.key,
@@ -110,15 +86,6 @@ export const SortableItemWrapper = memo(
       [onItemChanged]
     );
 
-    // const onUploadAccepted = useCallback(
-    //   (results: any) => {
-    //     if (results.data?.length > 0) {
-    //       onAddUploadedFile(results.data);
-    //     }
-    //   },
-    //   [onAddUploadedFile]
-    // );
-
     return (
       <ItemWrapperWithHover
         ref={setNodeRef}
@@ -130,47 +97,15 @@ export const SortableItemWrapper = memo(
         onDoubleClick={onEdit}
       >
         {!isEdit && (
-          <ActionPane className="no-print">
-            <IconButton
-              size="small"
-              onClick={onAddNew}
-              title="Add New Item Below"
-            >
-              <AddIcon sx={{ fontSize: 16, color: "black" }} />
-            </IconButton>
-            {/* <CSVReader onUploadAccepted={onUploadAccepted} title="Upload File">
-              {({ getRootProps }: any) => (
-                <div style={styles.csvReader}>
-                  <IconButton size="small" {...getRootProps()}>
-                    <UploadFileIcon sx={{ fontSize: 16, color: "black" }} />
-                  </IconButton>
-                </div>
-              )}
-            </CSVReader> */}
-            <IconButton
-              size="small"
-              onClick={() => onClone(item.value)}
-              title="Clone"
-            >
-              <FileCopyIcon sx={{ fontSize: 16, color: "black" }} />
-            </IconButton>
-            {item.value.tag === "table" && (
-              <IconButton
-                size="small"
-                onClick={onShowVisualization}
-                title="Visualize"
-              >
-                <BarChartIcon sx={{ fontSize: 16, color: "black" }} />
-              </IconButton>
-            )}
-            <IconButton size="small" onClick={onRemove} title="Remove">
-              <DeleteForeverIcon sx={{ fontSize: 16, color: "black" }} />
-            </IconButton>
-            <DragIndicatorIcon
-              {...listeners}
-              sx={{ color: "black", fontSize: 16, cursor: "grab" }}
-            />
-          </ActionPane>
+          <ItemActionPane
+            item={item}
+            onAddNew={onAddNew}
+            onRemove={onRemove}
+            onShowVisualization={onShowVisualization}
+            onClone={() => onClone(item.value)}
+            onSplit={onSplit}
+            listeners={listeners}
+          />
         )}
         {isEdit ? (
           <ItemEditor onClickAway={onClickAway} initialItem={item.value} />
@@ -259,7 +194,10 @@ export const SortableItemWrapper = memo(
                 />
               ),
               p: (props) => (
-                <p {...props} style={{ ...props.style, fontSize: "14px", margin: '8px 0' }} />
+                <p
+                  {...props}
+                  style={{ ...props.style, fontSize: "14px", margin: "8px 0" }}
+                />
               ),
               table: (props) => {
                 return (

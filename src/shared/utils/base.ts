@@ -33,3 +33,25 @@ export const gen5digits = () => {
 export const genWorkOrderName = (companyName: string, count = 3) => {
   return companyName.substring(0, count).toUpperCase() + gen5digits();
 };
+
+export const changeOrder = (
+  arr: any[],
+  specificId: string,
+  movingId: string
+) => {
+  const specificElementIndex = arr.findIndex((item) => item.id === specificId);
+  const elementToSwitchIndex = arr.findIndex((item) => item.id === movingId);
+
+  const updated = [...arr];
+
+  if (
+    specificElementIndex !== -1 &&
+    elementToSwitchIndex !== -1 &&
+    specificElementIndex !== elementToSwitchIndex
+  ) {
+    const elementToSwitch = updated[elementToSwitchIndex];
+    updated.splice(elementToSwitchIndex, 1); // Remove the element to switch
+    updated.splice(specificElementIndex, 0, elementToSwitch); // Insert the element to switch before the specific element
+  }
+  return updated;
+};

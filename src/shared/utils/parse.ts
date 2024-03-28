@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { v4 as uuidv4 } from "uuid";
 import * as htmlparser2 from "htmlparser2";
-import { IReportItem } from "../models/interfaces";
 import { TColumn, TRow } from "../models/types";
 import * as cheerios from "cheerio";
 import { parse } from "node-html-parser";
 import * as marked from "marked";
+import { IDNDContainer } from "../models/interfaces";
 
 export const parseSWOT = (content: string) => {
   const strengthsRegex = /Strengths:([\s\S]*?)(Weaknesses:|$)/;
@@ -368,7 +368,7 @@ const parseCitation = (content: string, limitWordCount?: number) => {
 };
 
 export const categoryParser2 = (htmlString: string) => {
-  const sections: IReportItem[] = [];
+  const sections: IDNDContainer[] = [];
   const root: any = parse(htmlString);
   root.childNodes
     .filter((el: HTMLElement) => el.nodeType !== 3) // get rid of line-breaks
@@ -377,23 +377,53 @@ export const categoryParser2 = (htmlString: string) => {
         if (el.rawTagName === "p") {
           const innerParsed = marked.parse(el.innerHTML) as string;
           if (innerParsed.includes("<table>")) {
+            const id = getNewId();
             sections.push({
-              key: getNewId(),
-              value: { content: innerParsed, tag: "table" },
+              id,
+              type: "CONTAINER",
+              children: [
+                {
+                  id: getNewId(),
+                  parentId: id,
+                  type: "ITEM",
+                  value: { content: innerParsed, tag: "table" },
+                },
+              ],
             });
           } else {
+            const id = getNewId();
             sections.push({
-              key: getNewId(),
-              value: {
-                content: parseCitation(el.outerHTML),
-                tag: el.rawTagName,
-              },
+              id,
+              type: "CONTAINER",
+              children: [
+                {
+                  id: getNewId(),
+                  parentId: id,
+                  type: "ITEM",
+                  value: {
+                    content: parseCitation(el.outerHTML),
+                    tag: el.rawTagName,
+                  },
+                },
+              ],
             });
           }
         } else {
+          const id = getNewId();
           sections.push({
-            key: getNewId(),
-            value: { content: parseCitation(el.outerHTML), tag: el.rawTagName },
+            id,
+            type: "CONTAINER",
+            children: [
+              {
+                id: getNewId(),
+                parentId: id,
+                type: "ITEM",
+                value: {
+                  content: parseCitation(el.outerHTML),
+                  tag: el.rawTagName,
+                },
+              },
+            ],
           });
         }
       }

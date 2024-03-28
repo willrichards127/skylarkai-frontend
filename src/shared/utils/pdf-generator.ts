@@ -18,7 +18,7 @@ export const generatePdf = (
   fileName: string,
   watermark?: string
 ) => {
-  const content = html2PdfMake(htmlContent, {tableAutoSize: true});
+  const content = html2PdfMake(htmlContent, { tableAutoSize: true });
   const docDefinition = {
     ...(watermark && {
       watermark: {
@@ -35,17 +35,20 @@ export const generatePdf = (
     //   height: 'auto'
     // } as PageSize,
     content,
-    // styles:{
-    //   tableHeader:{
-    //     background: "middle"
-    //   }
-    // }
+    // styles: {
+    //   wrapper: {
+    //     display: "flex",
+    //   },
+    // },
   };
   pdfMake.createPdf(docDefinition).download(fileName);
 };
 
-export const getPdfInBase64 = async (htmlContent: string, watermark?: string): Promise<string> => {
-  const content = html2PdfMake(htmlContent, {tableAutoSize: true});
+export const getPdfInBase64 = async (
+  htmlContent: string,
+  watermark?: string
+): Promise<string> => {
+  const content = html2PdfMake(htmlContent, { tableAutoSize: true });
   const docDefinition = {
     ...(watermark && {
       watermark: {
@@ -61,7 +64,7 @@ export const getPdfInBase64 = async (htmlContent: string, watermark?: string): P
   const maker = pdfMake.createPdf(docDefinition);
   return new Promise((resolve) => {
     maker.getBase64((data) => {
-        resolve(data);
+      resolve(data);
     });
-});
+  });
 };
