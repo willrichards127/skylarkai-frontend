@@ -357,6 +357,7 @@ export const transcriptApi = createApi({
               type: "answer",
               content: response.data.answer,
               reference: response.data.reference,
+              rating: response.data.rating,
             },
           };
         } catch (e) {

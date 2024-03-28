@@ -70,7 +70,7 @@ export const NewReportModal = memo(
       } else {
         const matched = EdgarFilings.find((item) => item.value === filing);
         generateWarrantReport({
-          setupId: form.company,
+          setupId: form.company!,
           question: matched!.question,
           reportName: matched!.value,
         });

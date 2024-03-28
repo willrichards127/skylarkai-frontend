@@ -19,16 +19,37 @@ export const createNewItem = (
 });
 
 export const addIdtoTemplateJson = (
-  elements: ITemplateItemPure[]
+  elements: ITemplateItemPure[],
+  option?: { excludeUnChecked?: boolean }
 ): ITemplateItem[] => {
   return elements.map((element) => {
     const { children, ...elementData } = element;
+    if ( option && option.excludeUnChecked && elementData.isUnChecked) {
+      return;
+    }
     const destinationElement: ITemplateItem = {
       index: uuidv4(),
       ...elementData,
     };
     if (children) {
-      destinationElement.children = addIdtoTemplateJson(children);
+      destinationElement.children = addIdtoTemplateJson(children, option);
+    }
+    return destinationElement;
+  }).filter((element): element is ITemplateItem => !!element);
+};
+
+export const removeIdTemplateJson = (
+  elements: ITemplateItem[]
+): ITemplateItemPure[] => {
+  return elements.map((element) => {
+    const { children, name, isUnChecked, template } = element;
+    const destinationElement: ITemplateItemPure = {
+      name,
+      isUnChecked,
+      template,
+    };
+    if (children) {
+      destinationElement.children = removeIdTemplateJson(children);
     }
     return destinationElement;
   });
@@ -36,7 +57,7 @@ export const addIdtoTemplateJson = (
 
 export const convertItems = (
   templateList: ITemplateItem[],
-  isRoot: boolean = true,
+  isRoot: boolean = true
 ): Record<TreeItemIndex, TreeItem<TTreeData>> => {
   let result: Record<TreeItemIndex, TreeItem<TTreeData>> = {};
 
@@ -83,21 +104,32 @@ export const revertItems = (
   treeData: Record<TreeItemIndex, TreeItem<TTreeData>>
 ): ITemplateItem[] => {
   const result = [];
+  const visited: { [key in TreeItemIndex]: boolean } = {};
+
+  function buildNode(index: TreeItemIndex) {
+    if (visited[index]) return null;
+    visited[index] = true;
+    const obj = treeData[index];
+    const newNode: ITemplateItem = { index: obj.index as string, ...obj.data };
+
+    if (obj.children && obj.children.length > 0) {
+      const children = obj.children
+        .map((childIndex) => buildNode(childIndex))
+        .filter((child): child is ITemplateItem => child !== null);
+      newNode.children = children;
+    }
+
+    return newNode;
+  }
 
   for (const key in treeData) {
-    if (Object.prototype.hasOwnProperty.call(treeData, key)) {
-      const { data, children, index } = treeData[key];
-      const newItem: ITemplateItem = { index: index as string, ...data };
-
-      if (children && children.length > 0) {
-        newItem.children = children.map((childId) => ({index: childId as string, ...treeData[childId].data}));
-      }
-
-      result.push(newItem);
+    if (!visited[key]) {
+      const node = buildNode(key);
+      if (node) result.push(node);
     }
   }
 
-  return result.find((ret) => ret.name === "root")!.children!;
+  return result[0].children!;
 };
 
 export const cx = (...classNames: Array<string | undefined | false>) =>

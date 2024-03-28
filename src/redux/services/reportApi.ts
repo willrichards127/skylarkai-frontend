@@ -37,7 +37,7 @@ import { groupBy } from "../../shared/utils/base";
 //   "*This report was prepared for STAF 7 on *",
 // ];
 
-export const reportApi: any = createApi({
+export const reportApi = createApi({
   reducerPath: "reportApi",
   refetchOnFocus: true,
   baseQuery,
@@ -87,19 +87,19 @@ export const reportApi: any = createApi({
     }),
     generateReport: builder.mutation<
       any,
-      { setupId: number; queryType?: string; template?: string; data?: string; }
+      { setupId: number; queryType?: string; template?: string; data?: string }
     >({
       async queryFn(args, __, ___, apiBaseQuery) {
         const { setupId, queryType, template, data } = args;
         try {
           let templateResponse: any;
-          
-          if(queryType && template) {
+
+          if (queryType && template) {
             const jsonResponse: any = await apiBaseQuery({
               url: `${queryType}/${setupId}?llm=${"OpenAI"}`,
               method: "POST",
             });
-  
+
             templateResponse = await apiBaseQuery({
               url: `reports`,
               method: "POST",
@@ -145,141 +145,14 @@ export const reportApi: any = createApi({
         }
       },
     }),
+
     reGenerateReport: builder.mutation<
       any,
       { reportId: number; setupId: number; queryType: string; template: string }
     >({
       async queryFn(args, __, ___, apiBaseQuery) {
         const { reportId, setupId, queryType, template } = args;
-        // const DDDict: Record<string, string[]> = {
-        //   commercialduediligence: [
-        //     "marketanalysis",
-        //     "competitoranalysis",
-        //     "customeranalysis",
-        //     "productserviceanalysis",
-        //     "regulatoryfinancialduediligence",
-        //   ],
-        //   financialduediligence: [
-        //     "financials",
-        //     "cashflow",
-        //     "historicalfinancialperformance",
-        //     "financials_ratio",
-        //     "growth",
-        //     "profitability",
-        //     "projectionsandassumptions",
-        //     "offbalancesheetitems",
-        //     "taxation",
-        //   ],
-        //   qualityofearnsanalysis: [
-        //     "nonrecurringrevenuestreams",
-        //     "revenuerecognitionpolicies",
-        //     "unusualexpenseitems",
-        //     "earningmanipulationindicators",
-        //     "adjustmentstoreportedearnings",
-        //   ],
-        //   workingcapitalanalysis: [
-        //     "inventoryturnover",
-        //     "dayssalesofinventory",
-        //     // "customquery:Accounts Receivable & Collection Period",
-        //     // "customquery:Accounts Payable & Payment Period",
-        //     "cashconversioncycle",
-        //     "seasonalvariationsinworkingcapital",
-        //   ],
-        //   esgduediligence: [
-        //     "environmentalimpactassessment",
-        //     "socialresponsibilitypractices",
-        //     "corporategovernance",
-        //     "ethicalsupplychainanalysis",
-        //     "energyandcarbonfootprint",
-        //   ],
-        // };
         try {
-          /*
-                    if (DDDict[queryType]) {
-                      const reportsReponse: any = await apiBaseQuery({
-                        url: "reports",
-                      });
-                      
-                      const reportsForSetupId = reportsReponse.data.filter(
-                        (report: any) =>
-                          report.graph_id === setupId &&
-                          DDDict[queryType].includes(report.report_name)
-                      );
-          
-                      const promises: Promise<unknown>[] = [];
-                      for (const { id } of reportsForSetupId) {
-                        const promise = new Promise((resolve) =>
-                          resolve(
-                            apiBaseQuery({
-                              url: `reports/${id}`,
-                            })
-                          )
-                        );
-                        promises.push(promise);
-                      }
-          
-                      const responses = await Promise.all(promises);
-                      const pairs: Record<string, any> = {};
-                      for (const query of DDDict[queryType]) {
-                        const matched: any = responses.find(
-                          (response: any) => response.data.report_name === query
-                        );
-                        if (matched) {
-                          pairs[query] = matched.data.report_data;
-                        }
-                      }
-          
-                      const finalPromises: Promise<unknown>[] = [];
-                      for (const [query, { data, answer }] of Object.entries(pairs)) {
-                        const promise = new Promise((resolve) =>
-                          resolve(
-                            apiBaseQuery({
-                              url: `generate_report/${setupId}`,
-                              method: "POST",
-                              body: {
-                                data: JSON.stringify({
-                                  answer,
-                                  data,
-                                }),
-                                report_name: query,
-                                template: template,
-                              },
-                            })
-                          )
-                        );
-                        finalPromises.push(promise);
-                      }
-                      const finalResponses = await Promise.all(finalPromises);
-                      
-                      // const summaryReponse: any = await apiBaseQuery({
-                      //   url: `chatwithdata/${setupId}`,
-                      //   method: "POST",
-                      //   body: {
-                      //     data: finalResult,
-                      //     question: `Executive summary for ${REPORTS_DICT[queryType].label}.`,
-                      //   },
-                      // });
-          
-                      // console.log("summaryReponse: ", summaryReponse);
-                      let reportFinal: string = "";
-                      reportFinal += `
-                        <h1>${REPORTS_DICT[queryType].label}</h1>
-                        <p>Created: ${new Date().toDateString()}</p>
-          
-                        <h2>Company Overview</h2>
-                        <p>STAF 7 is a technology company headquartered in San Francisco. It was founded in 2010 and currently employs around 5000 people.
-                        The company generated $2.5 billion in revenue in 2020. In 2021, STAF 7's revenue grew to $3 billion.</p>
-                        <h2>Executive Summary</h2>
-                        ${finalResult}
-                      `;
-                      for (const removeRegex of removeRegexes) {
-                        reportFinal = reportFinal.replace(removeRegex, "");
-                      }
-                      return {
-                        data: reportFinal,
-                      };
-                    } else {
-          */
           const jsonResponse: any = await apiBaseQuery({
             url: `${queryType}/${setupId}?llm=${"OpenAI"}`,
             method: "POST",
@@ -357,7 +230,7 @@ export const reportApi: any = createApi({
           };
         }
       },
-    }),    
+    }),
     markReport: builder.mutation<any, { reportId: number }>({
       query: ({ reportId }) => ({
         url: `reports/${reportId}/marked`,
@@ -442,32 +315,40 @@ export const reportApi: any = createApi({
     // 	query: () => "reports",
     // }),
     getCustomQuery: builder.mutation<
-      any,
+      string,
       { setupId: number; question: string; chatMode?: boolean }
     >({
       async queryFn(args, __, ___, apiBaseQuery) {
         const { setupId, question, chatMode = false } = args;
         try {
-          const response: any = await apiBaseQuery({
+          const response = await apiBaseQuery({
             url: `customquery/${setupId}?chatmode=${chatMode}&llm=Anthropic`,
             method: "POST",
             body: {
               question,
             },
           });
-          console.log(response, "customquery response---");
-          const regex = /```[^`]+```/g;
-          const finalResult: string = response.data.answer.replace(regex, "");
+          if (response.data) {
+            const regex = /```[^`]+```/g;
+            const finalResult: string = (response.data as any).answer.replace(
+              regex,
+              ""
+            );
 
-          return {
-            data: finalResult,
-          };
-        } catch (e) {
+            return {
+              data: finalResult,
+            };
+          } else if (response.error) {
+            return { error: response.error };
+          }
+
+          throw new Error("Fetch error");
+        } catch (err) {
           return {
             error: {
-              status: 404,
-              statusText: e,
-              data: "Error in getAllCreatedReports API",
+              status: "CUSTOM_ERROR",
+              error: "Error in getCustomQuery API",
+              data: err,
             },
           };
         }
@@ -591,8 +472,8 @@ export const {
   useGetCustomQueryMutation,
   useCreateReportTemplateMutation,
   useGenerateReportMutation,
-  useGenerateCustomReportMutation,
   useReGenerateReportMutation,
+  useGenerateCustomReportMutation,
   useGetReportsQuery,
   useLazyGetReportsQuery,
   useGetReportQuery,
@@ -602,5 +483,5 @@ export const {
   useGenerateWarrantReportMutation,
   useGetChatHistoryQuery,
   useSaveReportMutation,
-  useMarkReportMutation
+  useMarkReportMutation,
 } = reportApi;

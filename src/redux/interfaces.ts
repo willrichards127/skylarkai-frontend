@@ -40,6 +40,7 @@ export interface IChat {
   content: string | string[];
   tables?: string[];
   reference?: string[];
+  rating?: number;
 }
 
 export interface ICompany {
