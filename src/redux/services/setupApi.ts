@@ -69,16 +69,26 @@ export const setupApi = createApi({
       keepUnusedDataFor: 0,
     }),
     saveSetup: builder.mutation<ISetup, { setupId?: number; setup: ISetup }>({
-      query: ({ setupId = undefined, setup }) => ({
-        url: setupId ? `graphs/${setupId}` : "graphs",
-        method: setupId ? "PUT" : "POST",
-        body: setupId
-          ? {
-              ...(setupId !== undefined && { graph_id: setupId }),
-              ...setup,
-            }
-          : setup,
-      }),
+      query: ({ setupId = undefined, setup }) => {
+        // Fix some data
+        const fileUploadNodeIndex = setup.nodes.findIndex(
+          (node) => node.template_node_id == 2
+        );
+        if (fileUploadNodeIndex > -1 && setup.nodes[fileUploadNodeIndex].properties?.files) {
+          setup.nodes[fileUploadNodeIndex].properties!.files = [];
+        }
+        
+        return {
+          url: setupId ? `graphs/${setupId}` : "graphs",
+          method: setupId ? "PUT" : "POST",
+          body: setupId
+            ? {
+                ...(setupId !== undefined && { graph_id: setupId }),
+                ...setup,
+              }
+            : setup,
+        };
+      },
     }),
     deleteSetup: builder.mutation<void, { setupId: string }>({
       query: ({ setupId }) => ({
@@ -122,35 +132,29 @@ export const setupApi = createApi({
       ISetup,
       { setup: ISetup; analysisType: string }
     >({
-      async queryFn({ setup, analysisType }, __, ___, apiBaseQuery) {
+      async queryFn({ setup, analysisType }, queryApi, ___, apiBaseQuery) {
         try {
           // save current graph
-          let uploadFiles: File[] | undefined = undefined;
-          
+          let uploadFiles: File[] | undefined;
+
           const fileUploadNode = setup.nodes.find(
             (node) => node.template_node_id === 2
           );
 
-          if(fileUploadNode && fileUploadNode.template_node_id === 2 && fileUploadNode.properties && "files" in fileUploadNode.properties) {
+          if (
+            fileUploadNode &&
+            fileUploadNode.template_node_id === 2 &&
+            fileUploadNode.properties &&
+            "files" in fileUploadNode.properties
+          ) {
             uploadFiles = fileUploadNode.properties["files"];
-            delete fileUploadNode.properties["files"];
           }
-
-          const updateResponse = await apiBaseQuery({
-            url: `graphs/${setup.id}`,
-            method: "PUT",
-            body: setup,
-          });
+          const updateResponse: any = await queryApi.dispatch(
+            setupApi.endpoints.saveSetup.initiate({ setupId: setup.id, setup })
+          );
 
           const updatedSetup = updateResponse.data as ISetup;
 
-          // execute the graph
-          // await apiBaseQuery({
-          //   url: `graphs/${setup.id}/execute`,
-          //   method: "POST",
-          // });
-
-          
           if (uploadFiles) {
             const formData = new FormData();
             formData.append("analysis_type", analysisType);

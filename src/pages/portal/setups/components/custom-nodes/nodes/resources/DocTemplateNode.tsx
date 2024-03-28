@@ -3,8 +3,9 @@ import { Box, Button, TextField } from "@mui/material";
 import { Handlers } from "../../Handlers";
 import { useReactFlow } from "reactflow";
 import { useDropzone } from "react-dropzone";
-import { ITemplateNode } from "../../../../../../../shared/models/interfaces";
+import { ITemplateItem, ITemplateNode } from "../../../../../../../shared/models/interfaces";
 import { TemplateViewModal } from "../../../../../../../components/modals/TemplateViewModal";
+import { removeIdTemplateJson } from "../../../../../../../components/TemplateView/utils";
 
 const templates = [
   {
@@ -43,6 +44,24 @@ export const DocTemplateNode = memo(
       },
       [nodeId, setNodes]
     );
+
+    const onViewChange = (items: ITemplateItem[]) => {
+      setNodes((prev) =>
+          prev.map((node) => {
+            if (node.id === nodeId) {
+              node.data = {
+                ...node.data,
+                properties: {
+                  ...node.data.properties,
+                  text: JSON.stringify(removeIdTemplateJson(items)),
+                },
+              };
+            }
+
+            return node;
+          })
+        );
+    }
 
     const onDrop = useCallback(
       (acceptedFiles: any) => {
@@ -171,7 +190,7 @@ export const DocTemplateNode = memo(
                 ? JSON.parse(nodeContent.properties.text)
                 : []
             }
-            onSave={() => {}}
+            onSave={onViewChange}
           />
         ) : null}
       </Box>

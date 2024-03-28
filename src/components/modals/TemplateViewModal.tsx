@@ -20,9 +20,10 @@ export const TemplateViewModal = memo(
     data: ITemplateItemPure[];
     onSave: (items: ITemplateItem[]) => void;
   }) => {
-    const [items] = useState<ITemplateItem[]>(
+    const [items, setItems] = useState<ITemplateItem[]>(
       addIdtoTemplateJson(data)
     );
+    console.log("=================", data, items);
     return (
       <XModal
         open={open}
@@ -44,7 +45,7 @@ export const TemplateViewModal = memo(
         size="md"
       >
         <Box maxHeight={400} overflow={"auto"}>
-          <Templateview data={addIdtoTemplateJson(data)} isEditMode={false} />
+          <Templateview data={items} onChangeData={setItems} isEditMode={true} />
         </Box>
       </XModal>
     );
