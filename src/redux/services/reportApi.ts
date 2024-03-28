@@ -188,7 +188,6 @@ export const reportApi = createApi({
         }
       },
     }),
-
     generateCustomReport: builder.mutation<
       string,
       { setupId: number; template: string; data: string }
@@ -203,7 +202,6 @@ export const reportApi = createApi({
         }
       }),
     }),
-
     getReport: builder.query<
       any,
       {

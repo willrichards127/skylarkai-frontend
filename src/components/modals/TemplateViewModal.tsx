@@ -28,7 +28,7 @@ export const TemplateViewModal = memo(
       <XModal
         open={open}
         onClose={onClose}
-        header={<Box textAlign="center">Temmplate View</Box>}
+        header={<Box textAlign="center">Template View</Box>}
         footer={
           <Box display="flex" justifyContent="end" width="100%" px={1}>
             <Button

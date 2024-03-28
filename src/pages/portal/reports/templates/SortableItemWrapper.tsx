@@ -38,7 +38,8 @@ const ActionPane = styled(Box)({
   gap: 0.5,
   right: 8,
   top: 8,
-  backgroundColor: "#A9B6FF",
+  backgroundColor: "rgba(255,255,255,0.8)",
+  border: '1px solid grey',
   borderRadius: 4,
   alignItems: "center",
   display: "none",
@@ -192,7 +193,12 @@ export const SortableItemWrapper = memo(
             unwrapDisallowed={true}
             components={{
               pre: (props) => <div {...(props as any)} />,
-              li: (props) => <li {...props} style={{ marginBottom: "12px" }} />,
+              li: (props) => (
+                <li
+                  {...props}
+                  style={{ marginBottom: "12px", fontSize: "14px" }}
+                />
+              ),
               a: (props: any) => {
                 if (props.href) {
                   const splited = props.href.split("______");
@@ -202,7 +208,7 @@ export const SortableItemWrapper = memo(
                     <a
                       {...props}
                       className="no-print"
-                      style={{ color: "tomato" }}
+                      style={{ color: "tomato", fontSize: "14px" }}
                       onClick={() => onJumpTo({ filename, quote })}
                       title={`${filename}.pdf:${quote}`}
                     />
@@ -212,13 +218,23 @@ export const SortableItemWrapper = memo(
               h1: (props) => (
                 <h1
                   {...props}
-                  style={{ ...props.style, fontSize: "28px", color: "red" }}
+                  style={{
+                    ...props.style,
+                    fontSize: "28px",
+                    color: "red",
+                    margin: "18.76px 0",
+                  }}
                 />
               ),
               h2: (props) => (
                 <h2
                   {...props}
-                  style={{ ...props.style, fontSize: "24px", color: "blue" }}
+                  style={{
+                    ...props.style,
+                    fontSize: "22px",
+                    color: "#327bf0",
+                    margin: "18.76px 0",
+                  }}
                 />
               ),
               h3: (props) => (
@@ -226,8 +242,9 @@ export const SortableItemWrapper = memo(
                   {...props}
                   style={{
                     ...props.style,
-                    fontSize: "16.75px",
+                    fontSize: "18px",
                     color: "darkcyan",
+                    margin: "16.76px 0",
                   }}
                 />
               ),
@@ -237,11 +254,12 @@ export const SortableItemWrapper = memo(
                   style={{
                     ...props.style,
                     fontSize: "16px",
+                    margin: "16px 0",
                   }}
                 />
               ),
               p: (props) => (
-                <p {...props} style={{ ...props.style, fontSize: "16px" }} />
+                <p {...props} style={{ ...props.style, fontSize: "14px", margin: '8px 0' }} />
               ),
               table: (props) => {
                 return (

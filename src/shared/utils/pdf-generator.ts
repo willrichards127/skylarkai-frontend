@@ -1,4 +1,5 @@
 import pdfMake from "pdfmake/build/pdfmake";
+// import {PageSize} from 'pdfmake/interfaces'
 import html2PdfMake from "html-to-pdfmake";
 
 pdfMake.vfs = {
@@ -28,7 +29,17 @@ export const generatePdf = (
         angle: -45,
       },
     }),
+    // pageSize: 'A4' as PageSize,
+    // pageSize: {
+    //   width: 792,
+    //   height: 'auto'
+    // } as PageSize,
     content,
+    // styles:{
+    //   tableHeader:{
+    //     background: "middle"
+    //   }
+    // }
   };
   pdfMake.createPdf(docDefinition).download(fileName);
 };
