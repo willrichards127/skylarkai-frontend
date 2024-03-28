@@ -10,7 +10,10 @@ import {
 } from "../../../../../redux/services/setupApi";
 import { addIdtoTemplateJson } from "../../../../../components/TemplateView/utils";
 import { useCustomQueryMutation } from "../../../../../redux/services/transcriptAPI";
-import { useGenerateReportMutation } from "../../../../../redux/services/reportApi";
+import {
+  useGenerateCustomReportMutation,
+  useGenerateReportMutation,
+} from "../../../../../redux/services/reportApi";
 import { useNavigate } from "react-router-dom";
 import { longDateFormat } from "../../../../../shared/utils/basic";
 import * as marked from "marked";
@@ -34,6 +37,7 @@ export const ExecutionModal = memo(
       useIngestFilesMutation();
     const [generateReport, { isLoading: isGeneratingReport }] =
       useGenerateReportMutation();
+    const [generateCustomReport] = useGenerateCustomReportMutation();
     const [customQuery] = useCustomQueryMutation();
 
     const [items, setItems] = useState<ITemplateItem[]>([]);
@@ -68,7 +72,9 @@ export const ExecutionModal = memo(
         },
       }).unwrap();
 
-      const updatedSetup: ISetup = JSON.parse(JSON.stringify(updatedSetupResponse));
+      const updatedSetup: ISetup = JSON.parse(
+        JSON.stringify(updatedSetupResponse)
+      );
       const skyDBNodeIndex = updatedSetup.nodes.findIndex(
         (node) => node.template_node_id === 46
       );
@@ -96,9 +102,14 @@ export const ExecutionModal = memo(
         (node) => node.template_node_id === 17
       );
 
-      if (templateNodeIndex > -1 && skyDBNodeIndex > -1 && updatedSetup.nodes[templateNodeIndex].properties?.text) {
+      if (
+        templateNodeIndex > -1 &&
+        skyDBNodeIndex > -1 &&
+        updatedSetup.nodes[templateNodeIndex].properties?.text
+      ) {
         const items = addIdtoTemplateJson(
-          JSON.parse(updatedSetup.nodes[templateNodeIndex].properties!.text)
+          JSON.parse(updatedSetup.nodes[templateNodeIndex].properties!.text),
+          { excludeUnChecked: true }
         );
         setItems(items);
         const filenames = updatedSetup.nodes[
@@ -116,7 +127,7 @@ export const ExecutionModal = memo(
         setCustomQueyring(false);
         const reportName = `Template-${new Date().getTime()}`;
         const generatedId = await generateReport({
-          setupId: updatedSetup.id,
+          setupId: setup.id!,
           data: report,
           queryType: reportName,
         }).unwrap();
@@ -141,9 +152,20 @@ export const ExecutionModal = memo(
             ...depth,
             i,
           ]);
-          result +=
-            `<h${depth.length + 2}>${item.name}</h${depth.length + 2}>` +
-            subResult;
+          if (item.template) {
+            const customResult: any = await generateCustomReport({
+              setupId: setup.id!,
+              template: item.template,
+              data: subResult,
+            }).unwrap();
+            result +=
+              `<h${depth.length + 2}>${item.name}</h${depth.length + 2}>` +
+              customResult.filled_template;
+          } else {
+            result +=
+              `<h${depth.length + 2}>${item.name}</h${depth.length + 2}>` +
+              subResult;
+          }
         } else {
           const loadingObj = depth.reduceRight<any>(
             (acc, curr) => ({ [curr]: { children: acc } }),
@@ -157,7 +179,7 @@ export const ExecutionModal = memo(
             question: item.name,
             analysis_type: "financial_diligence",
           });
-          if ("data" in resp) {
+          if ("data" in resp && resp.data.rating && resp.data.rating >= 3) {
             result += `<h${depth.length + 3} class='heading-question'>${
               item.name
             }</h${depth.length + 3}>${

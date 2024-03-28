@@ -142,6 +142,7 @@ export interface IReportItem {
 export type TTreeData = {
   name: string;
   template?: string;
+  isUnChecked?: boolean;
   isLoading?: boolean;
   isSuccess?: boolean;
   isFailed?: boolean;
@@ -152,6 +153,6 @@ export interface ITemplateItem extends TTreeData {
   children?: ITemplateItem[];
 }
 
-export interface ITemplateItemPure extends Pick<TTreeData, "name" | "template"> {
+export interface ITemplateItemPure extends Pick<TTreeData, "name" | "template" | "isUnChecked"> {
   children?: ITemplateItemPure[];
 }

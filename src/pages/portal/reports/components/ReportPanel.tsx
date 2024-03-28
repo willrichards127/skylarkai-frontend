@@ -88,8 +88,8 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
     }
 
     regenerateReport({
-      reportId: reportId,
-      setupId: setupId!,
+      reportId: +reportId,
+      setupId: +setupId!,
       queryType: reportType!,
       template: REPORTS_DICT[reportType!].template,
     });
@@ -97,9 +97,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
 
   const onSave = (content: string) => {
     saveReport({
-      ...(reportId && { reportId }),
-      setupId: +setupId!,
-      reportName: reportType,
+      ...(reportId && { reportId: +reportId }),
       content,
       custom: [],
     });
