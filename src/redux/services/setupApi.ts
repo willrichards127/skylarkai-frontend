@@ -1,6 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQuery } from "./base";
 import { ISetup } from "../../shared/models/interfaces";
+import update from "immutability-helper";
 
 export const setupApi = createApi({
   reducerPath: "setupApi",
@@ -70,23 +71,33 @@ export const setupApi = createApi({
     }),
     saveSetup: builder.mutation<ISetup, { setupId?: number; setup: ISetup }>({
       query: ({ setupId = undefined, setup }) => {
+        let setupData = { ...setup };
         // Fix some data
         const fileUploadNodeIndex = setup.nodes.findIndex(
           (node) => node.template_node_id == 2
         );
-        if (fileUploadNodeIndex > -1 && setup.nodes[fileUploadNodeIndex].properties?.files) {
-          setup.nodes[fileUploadNodeIndex].properties!.files = [];
+
+        if (
+          fileUploadNodeIndex > -1 &&
+          setup.nodes[fileUploadNodeIndex].properties?.files
+        ) {
+          setupData = update(setupData, {
+            nodes: {
+              [fileUploadNodeIndex]: { properties: { files: { $set: [] } } },
+            },
+          });
+          // (setup.nodes[fileUploadNodeIndex].properties as any).files = [];
         }
-        
+
         return {
           url: setupId ? `graphs/${setupId}` : "graphs",
           method: setupId ? "PUT" : "POST",
           body: setupId
             ? {
                 ...(setupId !== undefined && { graph_id: setupId }),
-                ...setup,
+                ...setupData,
               }
-            : setup,
+            : setupData,
         };
       },
     }),
