@@ -46,6 +46,7 @@ export const ReportTemplate = forwardRef(
       const content = marked.parse(reportContent) as string;
       return categoryParser2(content);
     }, [reportContent]);
+    
     const [isShowQuestion, setIsShowQuestion] = useState<boolean>(false);
     const [uploadedFiles, setUploadedFiles] =
       useState<Record<string, File[]>>();
@@ -217,7 +218,7 @@ export const ReportTemplate = forwardRef(
               <Box
                 ref={ref}
                 sx={{
-                  maxWidth: 892,
+                  maxWidth: '8.3in',
                   bgcolor: "white",
                   color: "black",
                   p: 8,
