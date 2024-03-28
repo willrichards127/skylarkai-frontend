@@ -349,7 +349,7 @@ const Templateview = ({
                       display: "flex",
                     }}
                   >
-                    <IconButton
+                    {/* <IconButton
                       size="small"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -385,7 +385,7 @@ const Templateview = ({
                       title="Remove"
                     >
                       <DeleteIcon sx={{ fontSize: 16 }} />
-                    </IconButton>
+                    </IconButton> */}
                   </Box>
                 ) : item.isFolder ? (
                   <Typography>

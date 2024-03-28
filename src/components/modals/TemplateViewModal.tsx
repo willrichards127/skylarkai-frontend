@@ -23,7 +23,7 @@ export const TemplateViewModal = memo(
     const [items, setItems] = useState<ITemplateItem[]>(
       addIdtoTemplateJson(data)
     );
-    console.log("=================", data, items);
+    
     return (
       <XModal
         open={open}
