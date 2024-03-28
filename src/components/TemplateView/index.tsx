@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { convertItems, revertItems, createNewItem, cx } from "./utils";
+import { convertItems, revertItems, /* createNewItem,*/ cx } from "./utils";
 
-import { Box, CircularProgress, IconButton, Typography } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/DeleteForever";
-import PostAddIcon from "@mui/icons-material/PostAdd";
+import { Box, CircularProgress, /* IconButton,*/ Typography } from "@mui/material";
+// import AddIcon from "@mui/icons-material/Add";
+// import EditIcon from "@mui/icons-material/Edit";
+// import DeleteIcon from "@mui/icons-material/DeleteForever";
+// import PostAddIcon from "@mui/icons-material/PostAdd";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 import {
@@ -86,45 +86,45 @@ const Templateview = ({
     return parents;
   };
 
-  const addItem = (item: TreeItem<TTreeData>) => {
-    const parentItem = getParentItem(item.index);
-    if (items[item.index] && parentItem) {
-      const newItem = createNewItem({ name: "Untitled" }, item.isFolder);
+  // const addItem = (item: TreeItem<TTreeData>) => {
+  //   const parentItem = getParentItem(item.index);
+  //   if (items[item.index] && parentItem) {
+  //     const newItem = createNewItem({ name: "Untitled" }, item.isFolder);
 
-      const currentItemOrder = items[parentItem.index].children!.findIndex(
-        (child) => child === item.index
-      );
+  //     const currentItemOrder = items[parentItem.index].children!.findIndex(
+  //       (child) => child === item.index
+  //     );
 
-      setItems(
-        update(items, {
-          [newItem.index]: { $set: newItem },
-          [parentItem.index as string]: {
-            children: {
-              $splice: [[currentItemOrder + 1, 0, newItem.index]],
-            },
-          },
-        })
-      );
-    }
-  };
+  //     setItems(
+  //       update(items, {
+  //         [newItem.index]: { $set: newItem },
+  //         [parentItem.index as string]: {
+  //           children: {
+  //             $splice: [[currentItemOrder + 1, 0, newItem.index]],
+  //           },
+  //         },
+  //       })
+  //     );
+  //   }
+  // };
 
-  const removeItem = (item: TreeItem<TTreeData>) => {
-    const parentItem = getParentItem(item.index);
-    if (items[item.index] && parentItem) {
-      const currentItemOrder = items[parentItem.index].children!.findIndex(
-        (child) => child === item.index
-      );
+  // const removeItem = (item: TreeItem<TTreeData>) => {
+  //   const parentItem = getParentItem(item.index);
+  //   if (items[item.index] && parentItem) {
+  //     const currentItemOrder = items[parentItem.index].children!.findIndex(
+  //       (child) => child === item.index
+  //     );
 
-      setItems(
-        update(items, {
-          $unset: [item.index as string],
-          [parentItem.index as string]: {
-            children: { $splice: [[currentItemOrder, 1]] },
-          },
-        })
-      );
-    }
-  };
+  //     setItems(
+  //       update(items, {
+  //         $unset: [item.index as string],
+  //         [parentItem.index as string]: {
+  //           children: { $splice: [[currentItemOrder, 1]] },
+  //         },
+  //       })
+  //     );
+  //   }
+  // };
 
   const renameItem = (item: TreeItem<TTreeData>, newName: string) => {
     setItems(
