@@ -1,7 +1,6 @@
 import React, { memo, useCallback, useState } from "react";
 import { Box, Button, MenuItem, TextField, Typography } from "@mui/material";
 import { XModal } from "../XModal";
-import ApexCharts from "apexcharts";
 import { generatePdf } from "../../shared/utils/pdf-generator";
 
 export const ExportModal = memo(
