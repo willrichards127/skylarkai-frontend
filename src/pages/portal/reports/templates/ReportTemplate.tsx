@@ -15,6 +15,7 @@ import ChatPanel from "../components/ChatPanel";
 import {
   getNewId,
   categoryParser2,
+  categoryParser3,
   convertCSVToTable,
   parseTable,
 } from "../../../../shared/utils/parse";
@@ -36,18 +37,23 @@ export const ReportTemplate = forwardRef(
       reportContent,
       analysisType,
       filenames,
+      isSavedReport,
     }: {
       setup: { id?: number; name: string };
       reportContent: string;
       analysisType: string;
       filenames: string[];
+      isSavedReport?: boolean;
     },
     ref: ForwardedRef<HTMLDivElement>
   ) => {
     const initialReportItems = useMemo(() => {
+      if (isSavedReport) {
+        return categoryParser3(reportContent);
+      }
       const content = marked.parse(reportContent) as string;
       return categoryParser2(content);
-    }, [reportContent]);
+    }, [reportContent, isSavedReport]);
 
     const [isShowQuestion, setIsShowQuestion] = useState<boolean>(false);
     // const [activeId, setActiveId] = useState<string | null>(null);
@@ -209,7 +215,6 @@ export const ReportTemplate = forwardRef(
         childId: string,
         childValue: IReportItemValue
       ) => {
-        console.log(childValue);
         setReportItems((prevContainerItems) =>
           prevContainerItems.map((containerItem) => {
             if (containerItem.id === sourceId) {

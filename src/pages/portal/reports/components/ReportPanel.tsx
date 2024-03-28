@@ -21,6 +21,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
   const [searchParams] = useSearchParams();
   const reportType = searchParams.get("reportType"); // report api name
   const setupId = searchParams.get("setupId");
+  const isNewReport = searchParams.get("newReport");
 
   const parentRef = useRef<any>();
 
@@ -149,7 +150,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
                 reportContent={
                   isGeneratedReport ? generatedData : reportData.content
                 }
-                // customizedContent={isGeneratedReport ? undefined : reportData.custom_metadata}
+                isSavedReport={!isGeneratedReport && isNewReport !== "true"}
                 reportType={reportType!}
                 filenames={dataFiles}
                 onRerunAction={OnRerun}

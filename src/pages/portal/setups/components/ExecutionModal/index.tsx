@@ -122,7 +122,7 @@ export const ExecutionModal = memo(
           queryType: reportName,
         }).unwrap();
         navigate(
-          `/portal/reports/${generatedId}?reportType=${reportName}&setupId=${setup.id}&viewMode=active`
+          `/portal/reports/${generatedId}?reportType=${reportName}&setupId=${setup.id}&viewMode=active&newReport=true`
         );
       }
 

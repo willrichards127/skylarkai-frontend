@@ -95,7 +95,7 @@ export const NewReportModal = memo(
     useEffect(() => {
       if (isGeneratedReport && generatedReportId) {
         navigate(
-          `/portal/reports/${generatedReportId}?reportType=${form.report}&setupId=${form.company}`
+          `/portal/reports/${generatedReportId}?reportType=${form.report}&setupId=${form.company}&newReport=true`
         );
       }
     }, [navigate, isGeneratedReport, generatedReportId]);

@@ -1,7 +1,8 @@
 import { useCallback, useRef } from "react";
-import { Box } from "@mui/material";
 import { useDrop, useDrag } from "react-dnd";
 import { Item } from "./Item";
+import { ItemWrapper } from "./ItemWrapper";
+import { ContainerActionPane } from "./ContainerActionPane";
 import {
   IDNDItem,
   IReportItemValue,
@@ -78,19 +79,23 @@ export const Container = ({
   drag(drop(ref));
 
   return (
-    <div
-      className={children.length > 0 ? "wrapper" : "no-print"}
+    <ItemWrapper
+      className={children.length > 0 ? "dnd-container" : "no-print"}
       style={{
         display: "flex",
         width: "100%",
         padding: "4px",
-        border: "1px solid grey",
         height: children.length > 0 ? "auto" : "36px",
         opacity: isDragging ? 0.4 : 1,
       }}
       data-handler-id={handlerId}
       ref={ref}
     >
+      <ContainerActionPane
+        onAddNew={() => {}}
+        onRemove={() => {}}
+        onClone={() => {}}
+      />
       {children.length > 0 ? (
         children.map((child) => (
           <Item
@@ -105,6 +110,6 @@ export const Container = ({
       ) : (
         <small style={{ color: "grey" }}>Empty Container</small>
       )}
-    </div>
+    </ItemWrapper>
   );
 };

@@ -1,6 +1,8 @@
 import { useRef } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { Markdown } from "../Markdown";
+import { ItemWrapper } from "./ItemWrapper";
+import { ItemActionPane } from "./ItemActionPane";
 import {
   IReportItemValue,
   TDNDItemType,
@@ -57,17 +59,23 @@ export const Item = ({
   drag(drop(ref));
 
   return (
-    <div
+    <ItemWrapper
       ref={ref}
+      className="dnd-item"
       style={{
         width: "100%",
-        border: "1px dashed gray",
         cursor: "move",
         opacity: isDragging ? 0.4 : 1,
       }}
       data-handler-id={handlerId}
     >
+      <ItemActionPane
+        item={{ id, value, type, parentId }}
+        onAddNew={() => {}}
+        onRemove={() => {}}
+        onShowVisualization={() => {}}
+      />
       <Markdown html={value.content} />
-    </div>
+    </ItemWrapper>
   );
 };
