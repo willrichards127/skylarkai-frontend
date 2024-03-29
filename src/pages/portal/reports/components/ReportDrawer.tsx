@@ -12,6 +12,7 @@ import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArro
 import { IndexView } from "../templates/IndexView";
 import { DocumentChip } from "../../../../components/DocumentChip";
 import { reportDrawerWidth } from "../../../../shared/models/constants";
+import { IDNDContainer } from "../../../../shared/models/interfaces";
 
 export const ReportDrawer = ({
   isShowQuestion,
@@ -21,7 +22,7 @@ export const ReportDrawer = ({
   items,
 }: {
   isShowQuestion?: boolean;
-  items: { key: string; value: any }[];
+  items: IDNDContainer[];
   onSwitchMode: (showQuestion: boolean) => void;
   onRemoveFiles: (type: string, filename: string) => void;
   uploadedFiles?: Record<string, File[]>;

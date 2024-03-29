@@ -17,7 +17,6 @@ export const MarketAnalysisReport = ({
   reportContent,
   reportType,
   filenames,
-  isSavedReport,
   onSaveAction,
   onRerunAction,
 }: {
@@ -25,7 +24,6 @@ export const MarketAnalysisReport = ({
   reportContent: any;
   reportType: string;
   filenames: string[];
-  isSavedReport?: boolean;
   onSaveAction: (content: string) => void;
   onRerunAction: (append?: Record<string, File[]>) => void;
 }) => {
@@ -118,7 +116,6 @@ export const MarketAnalysisReport = ({
             reportContent={reportContent}
             analysisType="financial_diligence"
             filenames={filenames}
-            isSavedReport={isSavedReport}
           />
         </Box>
         {exportModal && (

@@ -55,3 +55,16 @@ export const changeOrder = (
   }
   return updated;
 };
+
+export const addElementsRightAfter = (
+  arr: any[],
+  specificId: string,
+  newElements: any[]
+) => {
+  const updated = [...arr];
+  const specificElementIndex = arr.findIndex((item) => item.id === specificId);
+  const insertIndex = specificElementIndex + 1;
+  // Insert the new element at the calculated index
+  updated.splice(insertIndex, 0, ...newElements);
+  return updated;
+};

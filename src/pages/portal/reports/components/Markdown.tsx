@@ -2,7 +2,19 @@ import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 
-export const Markdown = ({ html }: { html: string }) => {
+export const Markdown = ({
+  html,
+  onCitationLink,
+}: {
+  html: string;
+  onCitationLink: ({
+    filename,
+    quote,
+  }: {
+    filename: string;
+    quote: string;
+  }) => void;
+}) => {
   return (
     <ReactMarkdown
       rehypePlugins={[rehypeRaw as any]}
@@ -17,11 +29,28 @@ export const Markdown = ({ html }: { html: string }) => {
         return true;
       }}
       unwrapDisallowed={true}
+      urlTransform={(value: string) => value} // for image render
       components={{
-        pre: (props) => <div {...(props as any)} />,
+        pre: (props) => <p {...(props as any)} />,
         li: (props) => (
           <li {...props} style={{ marginBottom: "12px", fontSize: "14px" }} />
         ),
+        a: (props: any) => {
+          if (props.href) {
+            const splited = props.href.split("______");
+            const filename = splited[0].replaceAll("___", " ").slice(1);
+            const quote = splited[1].replaceAll("___", " ");
+            return (
+              <a
+                {...props}
+                className="no-print"
+                style={{ color: "tomato", fontSize: "14px" }}
+                onClick={() => onCitationLink({ filename, quote })}
+                title={`${filename}.pdf:${quote}`}
+              />
+            );
+          } else return <p {...props} />;
+        },
         h1: (props) => (
           <h1
             {...props}

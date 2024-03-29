@@ -8,16 +8,14 @@ import {
 import { Box } from "@mui/material";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import FormatAlignJustifyIcon from "@mui/icons-material/FormatAlignJustify";
 import { SplitContainer } from "../../../../components/SplitContainer";
-import { SortableItemWrapper } from "./SortableItemWrapper";
 import ChatPanel from "../components/ChatPanel";
 import {
   getNewId,
-  categoryParser2,
   categoryParser3,
-  convertCSVToTable,
-  parseTable,
+  initializeHtmlResponse,
+  // convertCSVToTable,
+  // parseTable,
 } from "../../../../shared/utils/parse";
 import { ReportDrawer } from "../components/ReportDrawer";
 import { DragLayer } from "../components/DND/DragLayer";
@@ -26,9 +24,11 @@ import {
   IDNDItem,
   IReportItemValue,
 } from "../../../../shared/models/interfaces";
-import * as marked from "marked";
 import { Container } from "../components/DND/Container";
-import { changeOrder } from "../../../../shared/utils/base";
+import {
+  addElementsRightAfter,
+  changeOrder,
+} from "../../../../shared/utils/base";
 
 export const ReportTemplate = forwardRef(
   (
@@ -37,26 +37,20 @@ export const ReportTemplate = forwardRef(
       reportContent,
       analysisType,
       filenames,
-      isSavedReport,
     }: {
       setup: { id?: number; name: string };
       reportContent: string;
       analysisType: string;
       filenames: string[];
-      isSavedReport?: boolean;
     },
     ref: ForwardedRef<HTMLDivElement>
   ) => {
-    const initialReportItems = useMemo(() => {
-      if (isSavedReport) {
-        return categoryParser3(reportContent);
-      }
-      const content = marked.parse(reportContent) as string;
-      return categoryParser2(content);
-    }, [reportContent, isSavedReport]);
+    const initialReportItems = useMemo(
+      () => categoryParser3(reportContent),
+      [reportContent]
+    );
 
     const [isShowQuestion, setIsShowQuestion] = useState<boolean>(false);
-    // const [activeId, setActiveId] = useState<string | null>(null);
     const [uploadedFiles, setUploadedFiles] =
       useState<Record<string, File[]>>();
 
@@ -73,141 +67,37 @@ export const ReportTemplate = forwardRef(
       // }))
     );
     console.log(reportItems);
-    // const onDragStart = useCallback((event: any) => {
-    //   setActiveId(event.active.id);
-    // }, []);
 
-    // const onDragEnd = useCallback((event: any) => {
-    //   const { active, over } = event;
-    //   setActiveId(null);
-    //   if (!active || !over) return;
-    //   if (active.id !== over.id) {
-    //     setReportItems((prevItems) => {
-    //       const updated = [...prevItems];
-    //       const oldIndex = prevItems.map((item) => item.key).indexOf(active.id);
-    //       const newIndex = prevItems.map((item) => item.key).indexOf(over.id);
-    //       const temp = updated[oldIndex];
-    //       updated[oldIndex] = updated[newIndex];
-    //       updated[newIndex] = temp;
-    //       return updated;
-    //     });
-    //   }
-    // }, []);
-
-    // const onAddNew = useCallback((itemId: string) => {
-    //   const newId = getNewId();
-    //   setReportItems((prevItems) => {
-    //     const updated = [...prevItems];
-    //     const position = prevItems.map((item) => item.key).indexOf(itemId);
-    //     updated.splice(position, 0, {
-    //       key: newId,
-    //       value: { content: "New Content", tag: "p" },
-    //     });
-    //     return updated;
-    //   });
-    // }, []);
-
-    // const onClone = useCallback((itemId: string, item: any) => {
-    //   const newId = getNewId();
-    //   setReportItems((prevItems) => {
-    //     const updated = [...prevItems];
-    //     const position = prevItems.map((item) => item.key).indexOf(itemId);
-    //     updated.splice(position, 0, {
-    //       key: newId,
-    //       value: item,
-    //     });
-    //     return updated;
-    //   });
-    // }, []);
-
-    // const onSplit = useCallback((itemId: string, rows: number) => {}, []);
-
-    // const onAddUploadedFile = useCallback(
-    //   (itemId: string, data: string[][]) => {
-    //     const newId = getNewId();
-    //     setReportItems((prevItems) => {
-    //       const updated = [...prevItems];
-    //       const position = prevItems.map((item) => item.key).indexOf(itemId);
-    //       updated.splice(position, 0, {
-    //         key: newId,
-    //         value: { content: convertCSVToTable(data), tag: "table" },
-    //       });
-    //       return updated;
-    //     });
-    //   },
-    //   []
-    // );
-
-    // const onRemove = useCallback((itemId: string) => {
-    //   setReportItems((prev) => prev.filter((item) => item.key !== itemId));
-    // }, []);
-
-    // const onRemoveFiles = useCallback((type: string, filename: string) => {
-    //   setUploadedFiles((prev) => {
-    //     const update = { ...prev };
-    //     const removeFiles = update[type].filter((f) => f.name !== filename);
-    //     if (removeFiles.length) {
-    //       update[type] = removeFiles;
-    //     } else {
-    //       delete update[type];
-    //     }
-    //     return update;
-    //   });
-    // }, []);
-
-    // // Item content
-    // const onItemChanged = useCallback(
-    //   (itemId: string, data: Partial<IReportItemValue>) => {
-    //     setReportItems((prev) =>
-    //       prev.map((item) => {
-    //         if (item.key === itemId) {
-    //           if (
-    //             item.value.tag === "table" &&
-    //             data.content &&
-    //             !data.metadata
-    //           ) {
-    //             // Item Changed for table edit(Just data, not configure row/column)
-    //             const newMetadata = parseTable(data.content);
-    //             data.metadata = { ...newMetadata, visual: "table" };
-    //           }
-
-    //           return {
-    //             ...item,
-    //             value: {
-    //               ...item.value,
-    //               ...data,
-    //             },
-    //           };
-    //         } else {
-    //           return item;
-    //         }
-    //       })
-    //     );
-    //   },
-    //   []
-    // );
-
-    const onAddToReport = useCallback((question: string, content: string) => {
-      // setReportItems((prevItems) => [
-      //   ...prevItems,
-      //   {
-      //     key: getNewId(),
-      //     value: {
-      //       content: `<h3 class="heading-question">${question}</h3>`,
-      //       tag: "h3",
-      //     },
-      //   },
-      //   ...categoryParser2(content),
-      // ]);
+    const onRemoveFiles = useCallback((type: string, filename: string) => {
+      setUploadedFiles((prev) => {
+        const update = { ...prev };
+        const removeFiles = update[type].filter((f) => f.name !== filename);
+        if (removeFiles.length) {
+          update[type] = removeFiles;
+        } else {
+          delete update[type];
+        }
+        return update;
+      });
     }, []);
 
-    const onJumpTo = useCallback(
+    const onAddToReport = useCallback((question: string, content: string) => {
+      setReportItems((prevContainers) => [
+        ...prevContainers,
+        ...categoryParser3(
+          initializeHtmlResponse(`<h3>${question}</h3>\n` + content)
+        ),
+      ]);
+    }, []);
+
+    const onCitationLink = useCallback(
       ({ filename, quote }: { filename: string; quote: string }) => {
         console.log(filename, quote);
       },
       []
     );
 
+    // Actions for Container
     const onExchangeItem = useCallback(
       (
         sourceId: string,
@@ -246,6 +136,42 @@ export const ReportTemplate = forwardRef(
       []
     );
 
+    const onMoveContainer = useCallback((dragId: string, hoverId: string) => {
+      setReportItems((prevContainers) =>
+        changeOrder(prevContainers, hoverId, dragId)
+      );
+    }, []);
+
+    const onAddNewContainer = useCallback((container: IDNDContainer) => {
+      const newContainerId = getNewId();
+      setReportItems((prevContainers) =>
+        addElementsRightAfter(prevContainers, container.id, [
+          {
+            id: newContainerId,
+            type: "CONTAINER",
+            children: [
+              {
+                id: getNewId(),
+                parentId: newContainerId,
+                type: "ITEM",
+                value: {
+                  tag: "p",
+                  content: "<p>New Item</p>",
+                },
+              },
+            ],
+          },
+        ])
+      );
+    }, []);
+
+    const onRemoveContainer = useCallback((container: IDNDContainer) => {
+      setReportItems((prevContainers) =>
+        prevContainers.filter((c) => c.id !== container.id)
+      );
+    }, []);
+
+    // Actions for Item
     const onChangeChildOrder = useCallback(
       (containerId: string, updatedChildren: IDNDItem[]) => {
         setReportItems((prevContainerItems) =>
@@ -259,9 +185,61 @@ export const ReportTemplate = forwardRef(
       []
     );
 
-    const onMoveContainer = useCallback((dragId: string, hoverId: string) => {
+    const onItemValueChanged = useCallback(
+      (replaceItem: IDNDItem, containers: IDNDContainer[]) => {
+        setReportItems((prevContainers) =>
+          addElementsRightAfter(
+            prevContainers.map((c) =>
+              replaceItem.parentId === c.id
+                ? {
+                    ...c,
+                    children: c.children.map((child) =>
+                      child.id === replaceItem.id ? replaceItem : child
+                    ),
+                  }
+                : c
+            ),
+            replaceItem.parentId,
+            containers
+          )
+        );
+      },
+      []
+    );
+
+    const onAddNewItem = useCallback((item: IDNDItem) => {
       setReportItems((prevContainers) =>
-        changeOrder(prevContainers, hoverId, dragId)
+        prevContainers.map((c) =>
+          item.parentId === c.id
+            ? {
+                ...c,
+                children: addElementsRightAfter(c.children, item.id, [
+                  {
+                    id: getNewId(),
+                    parentId: c.id,
+                    type: "ITEM",
+                    value: {
+                      tag: "p",
+                      content: "<p></p>",
+                    },
+                  },
+                ]),
+              }
+            : c
+        )
+      );
+    }, []);
+
+    const onRemoveItem = useCallback((item: IDNDItem) => {
+      setReportItems((prevContainers) =>
+        prevContainers.map((c) =>
+          item.parentId === c.id
+            ? {
+                ...c,
+                children: c.children.filter((it) => it.id !== item.id),
+              }
+            : c
+        )
       );
     }, []);
 
@@ -276,13 +254,13 @@ export const ReportTemplate = forwardRef(
               bgcolor: "#121212",
             }}
           >
-            {/* <ReportDrawer
+            <ReportDrawer
               isShowQuestion={isShowQuestion}
               items={reportItems}
               onSwitchMode={(mode) => setIsShowQuestion(mode)}
               onRemoveFiles={onRemoveFiles}
               uploadedFiles={uploadedFiles}
-            /> */}
+            />
             <Box
               sx={{
                 display: "flex",
@@ -295,10 +273,10 @@ export const ReportTemplate = forwardRef(
               <Box
                 ref={ref}
                 sx={{
-                  maxWidth: "8.3in",
+                  maxWidth: "8.8in",
                   bgcolor: "white",
                   color: "black",
-                  p: 8,
+                  p: 6,
                 }}
               >
                 <DndProvider backend={HTML5Backend}>
@@ -312,52 +290,16 @@ export const ReportTemplate = forwardRef(
                       onExchangeItem={onExchangeItem}
                       onMoveContainer={onMoveContainer}
                       onChangeChildOrder={onChangeChildOrder}
+                      isShowQuestion={isShowQuestion}
+                      onAddNew={() => onAddNewContainer(item)}
+                      onRemove={() => onRemoveContainer(item)}
+                      onAddNewItem={onAddNewItem}
+                      onRemoveItem={onRemoveItem}
+                      onItemValueChanged={onItemValueChanged}
+                      onCitationLink={onCitationLink}
                     />
                   ))}
                 </DndProvider>
-                {/* <DndContext onDragEnd={onDragEnd} onDragStart={onDragStart}>
-                  <SortableContext
-                    items={reportItems
-                      .filter((item) =>
-                        isShowQuestion
-                          ? true
-                          : !item.value.content.includes("heading-question")
-                      )
-                      .map((item) => item.key)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    {reportItems
-                      .filter((item) =>
-                        isShowQuestion
-                          ? true
-                          : !item.value.content.includes("heading-question")
-                      )
-                      .map((item) => (
-                        <SortableItemWrapper
-                          key={item.key}
-                          item={item}
-                          onAddNew={() => onAddNew(item.key)}
-                          onRemove={() => onRemove(item.key)}
-                          onClone={(clonedItem) =>
-                            onClone(item.key, clonedItem)
-                          }
-                          onSplit={(rows: number) => onSplit(item.key, rows)}
-                          onAddUploadedFile={(data) =>
-                            onAddUploadedFile(item.key, data)
-                          }
-                          onJumpTo={() => {}}
-                          onItemChanged={(data: Partial<IReportItemValue>) =>
-                            onItemChanged(item.key, data)
-                          }
-                        />
-                      ))}
-                  </SortableContext>
-                  <DragOverlay>
-                    {activeId ? (
-                      <FormatAlignJustifyIcon sx={{ color: "grey" }} />
-                    ) : null}
-                  </DragOverlay>
-                </DndContext> */}
               </Box>
             </Box>
           </Box>
@@ -369,7 +311,7 @@ export const ReportTemplate = forwardRef(
             analysis_type={analysisType}
             onAddToReport={onAddToReport}
             filenames={filenames}
-            onJumpTo={onJumpTo}
+            onJumpTo={onCitationLink}
           />
         }
       />

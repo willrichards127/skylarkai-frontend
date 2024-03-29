@@ -16,12 +16,12 @@ import {
 } from "../../../../redux/services/setupApi";
 import { useGetIngestedFilesQuery } from "../../../../redux/services/transcriptAPI";
 import { toast } from "react-toastify";
+import { initializeHtmlResponse } from "../../../../shared/utils/parse";
 
 const ReportPanel = ({ reportId }: { reportId: string }) => {
   const [searchParams] = useSearchParams();
   const reportType = searchParams.get("reportType"); // report api name
   const setupId = searchParams.get("setupId");
-  const isNewReport = searchParams.get("newReport");
 
   const parentRef = useRef<any>();
 
@@ -146,9 +146,10 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
               <MarketAnalysisReport
                 setup={setupData}
                 reportContent={
-                  isGeneratedReport ? generatedData : reportData.content
+                  isGeneratedReport
+                    ? initializeHtmlResponse(generatedData)
+                    : reportData.content
                 }
-                isSavedReport={!isGeneratedReport && isNewReport !== "true"}
                 reportType={reportType!}
                 filenames={dataFiles}
                 onRerunAction={OnRerun}

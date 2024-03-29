@@ -327,15 +327,27 @@ export const categoryParser3 = (htmlString: string) => {
       // get child nodes
       const children: IDNDItem[] = [];
       el.childNodes.forEach((child: any) => {
-        children.push({
-          id: getNewId(),
-          parentId: containerId,
-          type: "ITEM",
-          value: {
-            tag: child.firstChild.rawTagName,
-            content: child.innerHTML,
-          },
-        });
+        if (child.firstChild) {
+          children.push({
+            id: getNewId(),
+            parentId: containerId,
+            type: "ITEM",
+            value:
+              child.firstChild.rawTagName === "p" &&
+              marked
+                .parse(child.firstChild.innerHTML)
+                .toString()
+                .includes("<table>")
+                ? {
+                    content: marked.parse(child.firstChild.innerHTML) as string,
+                    tag: "table",
+                  }
+                : {
+                    tag: child.firstChild.rawTagName,
+                    content: parseCitation(child.innerHTML),
+                  },
+          });
+        }
       });
       sections.push({
         id: containerId,
@@ -368,6 +380,12 @@ export const categoryParser2 = (htmlString: string) => {
                   content: marked.parse(el.innerHTML) as string,
                   tag: "table",
                 }
+              : el.rawTagName === "p" &&
+                marked.parse(el.innerHTML).toString().includes("<img")
+              ? {
+                  tag: "img",
+                  content: marked.parse(el.innerHTML) as string,
+                }
               : {
                   content: parseCitation(el.outerHTML),
                   tag: el.rawTagName as string,
@@ -384,6 +402,21 @@ export const categoryParser2 = (htmlString: string) => {
 
   return sections;
 };
+
+export const initializeHtmlResponse = (htmlString: string) => {
+  // in this htmlString, there is only one container for each item
+  let categorizedHtml = "";
+  const root: any = parse(htmlString);
+  root.childNodes
+    .filter((el: any) => el.nodeType !== Node.TEXT_NODE) // Filter out text nodes
+    .forEach((el: any) => {
+      categorizedHtml += '<div class="dnd-container"">';
+      categorizedHtml += `<div class="dnd-item">${el.outerHTML}</div>`;
+      categorizedHtml += "</div>";
+    });
+  return categorizedHtml;
+};
+
 const extractRows = (inputString: string) => {
   const trRegex = /<tr[^>]*>((?:.|\n)*?)<\/tr>/gi;
   const matches = inputString.match(trRegex);

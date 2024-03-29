@@ -17,6 +17,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { longDateFormat } from "../../../../../shared/utils/basic";
 import * as marked from "marked";
+import { initializeHtmlResponse } from "../../../../../shared/utils/parse";
 
 export const ExecutionModal = memo(
   ({
@@ -127,11 +128,11 @@ export const ExecutionModal = memo(
         const reportName = `Template-${new Date().getTime()}`;
         const generatedId = await generateReport({
           setupId: setup.id!,
-          data: report,
+          data: initializeHtmlResponse(report),
           queryType: reportName,
         }).unwrap();
         navigate(
-          `/portal/reports/${generatedId}?reportType=${reportName}&setupId=${setup.id}&viewMode=active&newReport=true`
+          `/portal/reports/${generatedId}?reportType=${reportName}&setupId=${setup.id}&viewMode=active`
         );
       }
 

@@ -4,6 +4,7 @@ import { Item } from "./Item";
 import { ItemWrapper } from "./ItemWrapper";
 import { ContainerActionPane } from "./ContainerActionPane";
 import {
+  IDNDContainer,
   IDNDItem,
   IReportItemValue,
   TDNDItemType,
@@ -14,13 +15,21 @@ export const Container = ({
   id,
   type,
   children,
+  isShowQuestion,
   onExchangeItem,
   onMoveContainer,
   onChangeChildOrder,
+  onAddNew,
+  onRemove,
+  onAddNewItem,
+  onRemoveItem,
+  onItemValueChanged,
+  onCitationLink,
 }: {
   id: string;
   type: TDNDItemType;
   children: IDNDItem[];
+  isShowQuestion?: boolean;
   onExchangeItem: (
     sourceId: string,
     targetId: string,
@@ -29,6 +38,21 @@ export const Container = ({
   ) => void;
   onMoveContainer: (dragId: string, hoverId: string) => void;
   onChangeChildOrder: (id: string, updatedChildren: IDNDItem[]) => void;
+  onAddNew: () => void;
+  onRemove: () => void;
+  onAddNewItem: (item: IDNDItem) => void;
+  onRemoveItem: (item: IDNDItem) => void;
+  onItemValueChanged: (
+    replaceItem: IDNDItem,
+    containers: IDNDContainer[]
+  ) => void;
+  onCitationLink: ({
+    filename,
+    quote,
+  }: {
+    filename: string;
+    quote: string;
+  }) => void;
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [{ handlerId }, drop] = useDrop({
@@ -86,27 +110,34 @@ export const Container = ({
         width: "100%",
         padding: "4px",
         height: children.length > 0 ? "auto" : "36px",
+        minHeight: "36px",
         opacity: isDragging ? 0.4 : 1,
       }}
       data-handler-id={handlerId}
       ref={ref}
     >
-      <ContainerActionPane
-        onAddNew={() => {}}
-        onRemove={() => {}}
-        onClone={() => {}}
-      />
+      <ContainerActionPane onAddNew={onAddNew} onRemove={onRemove} />
       {children.length > 0 ? (
-        children.map((child) => (
-          <Item
-            key={child.id}
-            id={child.id}
-            type={child.type}
-            value={child.value!}
-            parentId={child.parentId}
-            onMoveItem={onMoveItem}
-          />
-        ))
+        children
+          .filter((item) =>
+            isShowQuestion
+              ? true
+              : !item.value.content.includes("heading-question")
+          )
+          .map((child) => (
+            <Item
+              key={child.id}
+              id={child.id}
+              type={child.type}
+              value={child.value!}
+              parentId={child.parentId}
+              onMoveItem={onMoveItem}
+              onAddNew={() => onAddNewItem(child)}
+              onRemove={() => onRemoveItem(child)}
+              onItemValueChanged={onItemValueChanged}
+              onCitationLink={onCitationLink}
+            />
+          ))
       ) : (
         <small style={{ color: "grey" }}>Empty Container</small>
       )}

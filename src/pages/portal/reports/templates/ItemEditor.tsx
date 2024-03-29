@@ -1,34 +1,63 @@
 import { memo, useCallback, useRef } from "react";
 import { ClickAwayListener } from "@mui/base/ClickAwayListener";
 import { Editor } from "@tinymce/tinymce-react";
-import { correctTableFormat } from "../../../../shared/utils/parse";
-import { IReportItemValue } from "../../../../shared/models/interfaces";
+import { parse } from "node-html-parser";
+import {
+  // correctTableFormat,
+  categoryParser2,
+} from "../../../../shared/utils/parse";
+import { IDNDContainer, IDNDItem } from "../../../../shared/models/interfaces";
 
 export const ItemEditor = memo(
   ({
-    initialItem,
+    item,
     onClickAway,
   }: {
-    initialItem: IReportItemValue;
-    onClickAway: (tag: string, content: string) => void;
+    item: IDNDItem;
+    onClickAway: (updatedItem: IDNDItem, containers: IDNDContainer[]) => void;
   }) => {
     const editorRef = useRef<any>(null);
 
     const onClickAwayAction = useCallback(() => {
       if (!editorRef.current) return;
-      let updatedContent = editorRef.current.getContent();
-      if (
-        updatedContent.includes("<table>") &&
-        !updatedContent.includes("<thead>")
-      ) {
-        updatedContent = correctTableFormat(updatedContent);
-      }
-      const tagName =
-        (
-          editorRef.current.getElement().firstChild?.tagName || ""
-        ).toLowerCase() || "p";
-      onClickAway(tagName, updatedContent.replaceAll("<p>&nbsp;</p>", ''));
-    }, [onClickAway]);
+      const content: string = editorRef.current.getContent();
+      // 1. Replace 1st element with first element of content
+      // 2. Add new items with new containers
+      const root = parse(content);
+      const validElements: any[] = root.childNodes.filter(
+        (el: any) => el.nodeType !== Node.TEXT_NODE
+      ); // Filter out text nodes
+      if (!validElements.length) return;
+
+      // Correct img tag
+      const replaceItem = {
+        id: item.id,
+        parentId: item.parentId,
+        type: "ITEM",
+        value:
+          validElements[0].rawTagName === "p" &&
+          validElements[0].innerHTML.includes("<img")
+            ? {
+                tag: "img",
+                content: validElements[0].innerHTML,
+              }
+            : {
+                tag: validElements[0].rawTagName,
+                content: validElements[0].outerHTML,
+              },
+      };
+
+      // remove first container: this container is an owner of replaced item.
+      const containers = categoryParser2(content).slice(1);
+      onClickAway(replaceItem as IDNDItem, containers);
+      // Missing creating table in editor: need to be fixed.
+      // if (
+      //   updatedContent.includes("<table>") &&
+      //   !updatedContent.includes("<thead>")
+      // ) {
+      //   updatedContent = correctTableFormat(updatedContent);
+      // }
+    }, [onClickAway, item]);
 
     return (
       <ClickAwayListener onClickAway={onClickAwayAction}>
@@ -36,17 +65,44 @@ export const ItemEditor = memo(
           <Editor
             apiKey={import.meta.env.VITE_TINYMCE_API_KEY}
             onInit={(_, editor) => (editorRef.current = editor)}
-            inline
-            initialValue={initialItem.content}
+            // inline
+            initialValue={item.value.content}
             init={{
-              content_css: "dark",
               menubar: false,
-              plugins: ["lists", "anchor", "table"],
+              plugins: "lists anchor link image code media table",
               toolbar:
                 "blocks | bold italic" +
                 "alignleft aligncenter " +
                 "alignright alignjustify | bullist numlist outdent indent | " +
-                "table",
+                "table | image",
+              width: "100%",
+              height: 240,
+              automatic_uploads: true,
+              file_picker_types: "image",
+              file_picker_callback: (cb) => {
+                const input = document.createElement("input");
+                input.setAttribute("type", "file");
+                input.setAttribute("accept", "image/*");
+
+                input.addEventListener("change", (e: any) => {
+                  const file = e.target.files[0];
+
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    // Create a Blob object from the file data
+                    const blob = new Blob([reader.result!], {
+                      type: file.type,
+                    });
+                    const uri = URL.createObjectURL(blob);
+                    cb(uri, { title: file.name });
+                  };
+
+                  // Read the file as an ArrayBuffer
+                  reader.readAsArrayBuffer(file);
+                });
+
+                input.click();
+              },
             }}
           />
         </div>
@@ -54,5 +110,3 @@ export const ItemEditor = memo(
     );
   }
 );
-
-ItemEditor.displayName = "ItemEditor";

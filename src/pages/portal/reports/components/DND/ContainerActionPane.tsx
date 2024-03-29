@@ -1,7 +1,6 @@
 import { memo } from "react";
 import { Box, Divider, IconButton, styled } from "@mui/material";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
-import FileCopyIcon from "@mui/icons-material/FileCopy";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import AddIcon from "@mui/icons-material/Add";
 
@@ -20,15 +19,7 @@ const ActionPane = styled(Box)({
 });
 
 export const ContainerActionPane = memo(
-  ({
-    onAddNew,
-    onRemove,
-    onClone,
-  }: {
-    onAddNew: () => void;
-    onRemove: () => void;
-    onClone: () => void;
-  }) => {
+  ({ onAddNew, onRemove }: { onAddNew: () => void; onRemove: () => void }) => {
     return (
       <ActionPane className="no-print">
         <DragIndicatorIcon
@@ -37,9 +28,6 @@ export const ContainerActionPane = memo(
         <Divider />
         <IconButton size="small" onClick={onAddNew} title="Add New Category">
           <AddIcon sx={{ fontSize: 16, color: "black" }} />
-        </IconButton>
-        <IconButton size="small" onClick={onClone} title="Clone Category">
-          <FileCopyIcon sx={{ fontSize: 16, color: "black" }} />
         </IconButton>
         <IconButton size="small" onClick={onRemove} title="Remove Category">
           <DeleteForeverIcon sx={{ fontSize: 16, color: "black" }} />
