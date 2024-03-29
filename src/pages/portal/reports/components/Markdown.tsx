@@ -1,3 +1,4 @@
+import { colors } from "@mui/material";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
@@ -98,6 +99,40 @@ export const Markdown = ({
           <p
             {...props}
             style={{ ...props.style, fontSize: "14px", margin: "8px 0" }}
+          />
+        ),
+        table: (props) => (
+          <table
+            {...props}
+            style={{
+              borderCollapse: "collapse",
+              overflowX: "auto",
+            }}
+          />
+        ),
+        th: (props) => (
+          <th
+            {...props}
+            style={{
+              textAlign: "center",
+              padding: "4px",
+              fontSize: "13px",
+              wordBreak: "break-word",
+              border: `1px solid ${colors.grey[500]}`,
+              backgroundColor: "#A9B6FF",
+            }}
+          />
+        ),
+        td: (props) => (
+          <td
+            {...props}
+            style={{
+              textAlign: "center",
+              padding: "4px",
+              fontSize: "12px",
+              border: `1px solid ${colors.grey[500]}`,
+              wordBreak: "break-word",
+            }}
           />
         ),
       }}
