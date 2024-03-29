@@ -71,7 +71,7 @@ export default function FeaturesPage() {
             >
               <Box pt={6} px={6}>
                 <Typography variant="h4" textAlign="center" gutterBottom>
-                  Welcome to Skylark AI - Enterprise
+                  Welcome to Skylark Enterprise
                 </Typography>
                 <Typography
                   variant="body1"

@@ -88,7 +88,7 @@ export default function HelpPage() {
           <Box sx={{ display: "flex", gap: 1, alignItems: "center", mb: 3 }}>
             <CircleLogo width={37} height={35} />
             <Typography variant="h5" color="primary.main">
-              Welcome To Skylark AI
+              Welcome To Skylark Enterprise
             </Typography>
           </Box>
           <Box pl={6}>

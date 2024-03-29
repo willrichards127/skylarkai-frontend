@@ -198,6 +198,12 @@ export const ExecutionModal = memo(
     return (
       <XModal
         open={open}
+        disableBackdropClose={
+          isSavingSetup ||
+          isIngestingFiles ||
+          isGeneratingReport ||
+          customQuerying
+        }
         onClose={onClose}
         header={<Box textAlign="center">Execute Graph</Box>}
         size="md"

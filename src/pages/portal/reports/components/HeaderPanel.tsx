@@ -43,6 +43,7 @@ export const HeaderPanel = memo(
   }) => {
     const navigate = useNavigate();
     const [fileUploadModal, showFileUploadModal] = useState<boolean>(false);
+    const [templateFileUploadModal, showTemplateFileUploadModal] = useState<boolean>(false);
     return (
       <Box
         sx={{
@@ -97,7 +98,7 @@ export const HeaderPanel = memo(
         >
           <IconButton
             size="small"
-            onClick={() => showFileUploadModal(true)}
+            onClick={() => showTemplateFileUploadModal(true)}
             title="Upload template"
           >
             <FormatIndentIncreaseIcon color="primary" />
@@ -150,8 +151,17 @@ export const HeaderPanel = memo(
         </ButtonGroup>
         {fileUploadModal && (
           <FileUploadModal
+            title="Upload File"
             open={fileUploadModal}
             onClose={() => showFileUploadModal(false)}
+            onUpladedFile={(files) => onUploadedFiles("file", files)}
+          />
+        )}
+        {templateFileUploadModal && (
+          <FileUploadModal
+            title="Upload Template File"
+            open={templateFileUploadModal}
+            onClose={() => showTemplateFileUploadModal(false)}
             onUpladedFile={(files) => onUploadedFiles("file", files)}
           />
         )}

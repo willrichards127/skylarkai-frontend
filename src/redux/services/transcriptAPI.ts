@@ -332,7 +332,7 @@ export const transcriptApi = createApi({
         const sys_graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
         const current_graph_id = graph_id || sys_graph_id;
         try {
-          const response: any = await apiBaseQuery({
+          const response = await apiBaseQuery({
             url: `customquery/${current_graph_id}?llm=${llm}&analysis_type=${analysis_type}${
               insider_transaction
                 ? "&insider_transaction=" + insider_transaction
@@ -349,23 +349,26 @@ export const transcriptApi = createApi({
 
           if (response.error) {
             return {
-              error: response.erorr,
+              error: response.error,
+            };
+          } else if (response.data) {
+            return {
+              data: {
+                type: "answer",
+                content: (response.data as any).answer,
+                reference: (response.data as any).reference,
+                rating: (response.data as any).rating,
+              },
             };
           }
-          return {
-            data: {
-              type: "answer",
-              content: response.data.answer,
-              reference: response.data.reference,
-              rating: response.data.rating,
-            },
-          };
+
+          throw new Error("Fetch error");
         } catch (e) {
           return {
             error: {
-              status: 404,
-              statusText: e,
-              msg: "Error in customquery API",
+              status: "CUSTOM_ERROR",
+              error: "Error in customQuery API",
+              data: e,
             },
           };
         }
