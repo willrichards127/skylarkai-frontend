@@ -45,10 +45,10 @@ export const ItemEditor = memo(
                 tag: validElements[0].rawTagName,
                 content: validElements[0].outerHTML,
               },
-      };
-      console.log(content, replaceItem);
+      };      
       // remove first container: this container is an owner of replaced item.
       const containers = categoryParser2(content).slice(1);
+      console.log(replaceItem, containers);
       onClickAway(replaceItem as IDNDItem, containers);
     }, [onClickAway, item]);
 
