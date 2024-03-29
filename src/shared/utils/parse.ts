@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { v4 as uuidv4 } from "uuid";
-import * as htmlparser2 from "htmlparser2";
-import { IReportItem } from "../models/interfaces";
 import { TColumn, TRow } from "../models/types";
 import * as cheerios from "cheerio";
 import { parse } from "node-html-parser";
 import * as marked from "marked";
+import { IDNDContainer, IDNDItem } from "../models/interfaces";
 
 export const parseSWOT = (content: string) => {
   const strengthsRegex = /Strengths:([\s\S]*?)(Weaknesses:|$)/;
@@ -234,57 +233,6 @@ export const getDate = (date: Date = new Date()) => {
 
 export const getNewId = (prefix = "md") => `${prefix}_${uuidv4()}`;
 
-export const categoryParser = (htmlString: string) => {
-  const sections: IReportItem[] = [];
-  let currentSection = "";
-  let isTable = false;
-
-  const parser = new htmlparser2.Parser(
-    {
-      onopentag(name, attr) {
-        if (name === "table" || name === "ul" || name === "ol") {
-          isTable = true;
-        }
-        if (isTable) {
-          currentSection += `<${name}${
-            attr.class ? ` class=${attr.class}` : ""
-          }>`;
-        } else {
-          if (name === "a") {
-            currentSection = attr.href
-              ? `<${name} href="${attr.href}">`
-              : `<${name}>`;
-          } else {
-            currentSection = `<${name}>`;
-          }
-        }
-      },
-      ontext(text) {
-        currentSection += text.trim();
-      },
-      onclosetag(name) {
-        currentSection += `</${name}>`;
-        if (name === "table" || name === "ul" || name === "ol") {
-          isTable = false;
-        }
-        if (!isTable) {
-          sections.push({
-            key: getNewId(),
-            value: { content: currentSection, tag: name },
-          });
-
-          currentSection = "";
-        }
-      },
-    },
-    { decodeEntities: true }
-  );
-
-  parser.write(htmlString);
-  parser.end();
-  return sections.filter((section) => section.value.tag !== "br");
-};
-
 const parseExpression = (json: any, limitWordCount?: number) => {
   let filename: string = "",
     quote: string = "";
@@ -367,40 +315,108 @@ const parseCitation = (content: string, limitWordCount?: number) => {
   return content;
 };
 
-export const categoryParser2 = (htmlString: string) => {
-  const sections: IReportItem[] = [];
+// content parser for saved report (html format)
+export const categoryParser3 = (htmlString: string) => {
+  const sections: IDNDContainer[] = [];
   const root: any = parse(htmlString);
-  root.childNodes
-    .filter((el: HTMLElement) => el.nodeType !== 3) // get rid of line-breaks
-    .forEach((el: any) => {
-      if (el.rawTagName !== "br") {
-        if (el.rawTagName === "p") {
-          const innerParsed = marked.parse(el.innerHTML) as string;
-          if (innerParsed.includes("<table>")) {
-            sections.push({
-              key: getNewId(),
-              value: { content: innerParsed, tag: "table" },
-            });
-          } else {
-            sections.push({
-              key: getNewId(),
-              value: {
-                content: parseCitation(el.outerHTML),
-                tag: el.rawTagName,
-              },
-            });
-          }
-        } else {
-          sections.push({
-            key: getNewId(),
-            value: { content: parseCitation(el.outerHTML), tag: el.rawTagName },
+  root.childNodes.forEach((el: any) => {
+    // check if el is correct container
+    if (el.rawAttrs.includes("dnd-container")) {
+      const containerId = getNewId();
+
+      // get child nodes
+      const children: IDNDItem[] = [];
+      el.childNodes.forEach((child: any) => {
+        if (child.firstChild) {
+          children.push({
+            id: getNewId(),
+            parentId: containerId,
+            type: "ITEM",
+            value:
+              child.firstChild.rawTagName === "p" &&
+              marked
+                .parse(child.firstChild.innerHTML)
+                .toString()
+                .includes("<table>")
+                ? {
+                    content: marked.parse(child.firstChild.innerHTML) as string,
+                    tag: "table",
+                  }
+                : {
+                    tag: child.firstChild.rawTagName,
+                    content: parseCitation(child.innerHTML),
+                  },
           });
         }
-      }
+      });
+      sections.push({
+        id: containerId,
+        type: "CONTAINER",
+        children,
+      });
+    }
+  });
+
+  return sections;
+};
+
+// content parser for generating report
+export const categoryParser2 = (htmlString: string) => {
+  const sections: IDNDContainer[] = [];
+  const root: any = parse(htmlString);
+  root.childNodes
+    .filter((el: any) => el.nodeType !== Node.TEXT_NODE) // Filter out text nodes
+    .forEach((el: any) => {
+      const id = getNewId();
+      const children: IDNDItem[] = [
+        {
+          id: getNewId(),
+          parentId: id,
+          type: "ITEM",
+          value:
+            el.rawTagName === "p" &&
+            marked.parse(el.innerHTML).toString().includes("<table>")
+              ? {
+                  content: marked.parse(el.innerHTML) as string,
+                  tag: "table",
+                }
+              : el.rawTagName === "p" &&
+                marked.parse(el.innerHTML).toString().includes("<img")
+              ? {
+                  tag: "img",
+                  content: marked.parse(el.innerHTML) as string,
+                }
+              : {
+                  content: parseCitation(el.outerHTML),
+                  tag: el.rawTagName as string,
+                },
+        },
+      ];
+
+      sections.push({
+        id,
+        type: "CONTAINER",
+        children,
+      });
     });
 
   return sections;
 };
+
+export const initializeHtmlResponse = (htmlString: string) => {
+  // in this htmlString, there is only one container for each item
+  let categorizedHtml = "";
+  const root: any = parse(htmlString);
+  root.childNodes
+    .filter((el: any) => el.nodeType !== Node.TEXT_NODE) // Filter out text nodes
+    .forEach((el: any) => {
+      categorizedHtml += '<div class="dnd-container"">';
+      categorizedHtml += `<div class="dnd-item">${el.outerHTML}</div>`;
+      categorizedHtml += "</div>";
+    });
+  return categorizedHtml;
+};
+
 const extractRows = (inputString: string) => {
   const trRegex = /<tr[^>]*>((?:.|\n)*?)<\/tr>/gi;
   const matches = inputString.match(trRegex);

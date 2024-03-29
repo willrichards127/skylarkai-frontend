@@ -66,24 +66,11 @@ export const MarketAnalysisReport = ({
     if (!reportPrintRef.current) return;
     const container = document.createElement("div");
     container.appendChild(reportPrintRef.current.cloneNode(true));
-    const removeItems = container.querySelectorAll(
-      ".no-print"
-    );
+    const removeItems = container.querySelectorAll(".no-print");
     for (const item of removeItems) {
       item.remove();
     }
-    const items = container.querySelectorAll('div[id^="md_"]');
-    let reportHtml = "";
-    for (const item of items) {
-      const wrapperDiv = item.querySelector('div');
-      if(wrapperDiv) {
-        reportHtml += wrapperDiv.innerHTML;
-      } else {
-        reportHtml += item.innerHTML;
-      }
-    }
-    console.log("reportHtml###", reportHtml);
-    onSaveAction(reportHtml);
+    onSaveAction(container.firstElementChild!.innerHTML);
   }, [onSaveAction]);
 
   const onDelete = useCallback(() => {

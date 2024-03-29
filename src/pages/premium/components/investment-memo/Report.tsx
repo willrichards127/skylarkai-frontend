@@ -40,9 +40,7 @@ export const Report = ({
   const onSendEmail = useCallback(async () => {
     const container = document.createElement("div");
     container.appendChild(reportPrintRef.current!.cloneNode(true));
-    const removeItems = container.querySelectorAll(
-      ".no-print"
-    );
+    const removeItems = container.querySelectorAll(".no-print");
     for (const item of removeItems) {
       item.remove();
     }
@@ -105,6 +103,7 @@ export const Report = ({
           reportContent={instance.instance_metadata.report!}
           analysisType="transcript"
           filenames={instance.instance_metadata.uploaded_file_names}
+          isSavedReport={instance.saved}
         />
       </Box>
       {exportModal && (

@@ -112,7 +112,7 @@ export const ReviewFiles = ({
           report,
         },
       }).unwrap();
-      onNext({ ...responseInstance, saved: true } as ICustomInstance);
+      onNext(responseInstance as ICustomInstance);
     } catch (e) {
       console.log("Error in next step", e);
     }

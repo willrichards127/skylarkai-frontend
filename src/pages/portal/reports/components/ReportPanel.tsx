@@ -16,6 +16,7 @@ import {
 } from "../../../../redux/services/setupApi";
 import { useGetIngestedFilesQuery } from "../../../../redux/services/transcriptAPI";
 import { toast } from "react-toastify";
+import { initializeHtmlResponse } from "../../../../shared/utils/parse";
 
 const ReportPanel = ({ reportId }: { reportId: string }) => {
   const [searchParams] = useSearchParams();
@@ -145,9 +146,10 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
               <MarketAnalysisReport
                 setup={setupData}
                 reportContent={
-                  isGeneratedReport ? generatedData : reportData.content
+                  isGeneratedReport
+                    ? initializeHtmlResponse(generatedData)
+                    : reportData.content
                 }
-                // customizedContent={isGeneratedReport ? undefined : reportData.custom_metadata}
                 reportType={reportType!}
                 filenames={dataFiles}
                 onRerunAction={OnRerun}
