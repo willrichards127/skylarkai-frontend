@@ -103,7 +103,6 @@ export const Report = ({
           reportContent={instance.instance_metadata.report!}
           analysisType="transcript"
           filenames={instance.instance_metadata.uploaded_file_names}
-          isSavedReport={instance.saved}
         />
       </Box>
       {exportModal && (
