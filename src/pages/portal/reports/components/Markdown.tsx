@@ -105,6 +105,7 @@ export const Markdown = ({
           <table
             {...props}
             style={{
+              width: "100%",
               borderCollapse: "collapse",
               overflowX: "auto",
             }}

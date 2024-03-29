@@ -9,7 +9,7 @@ import {
   IDNDItem,
   IDNDContainer,
 } from "../../../../../shared/models/interfaces";
-import { ItemEditor } from "../../templates/ItemEditor";
+import { ItemEditor } from "./ItemEditor";
 
 export const Item = ({
   id,
