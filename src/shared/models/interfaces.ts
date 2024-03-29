@@ -134,8 +134,18 @@ export type IReportItemMetadata = Required<IReportItemValue>["metadata"];
 export type IAxis = Required<IReportItemMetadata>["axis"];
 export type IAxisKey = keyof IAxis;
 
-export interface IReportItem {
-  key: string;
+export type TDNDItemType = "ITEM" | "CONTAINER";
+
+interface IDNDItemBase {
+  id: string;
+  type: TDNDItemType;
+}
+export interface IDNDContainer extends IDNDItemBase {
+  children: IDNDItem[];
+}
+
+export interface IDNDItem extends IDNDItemBase {
+  parentId: string;
   value: IReportItemValue;
 }
 

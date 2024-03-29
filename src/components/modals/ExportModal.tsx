@@ -1,6 +1,7 @@
 import React, { memo, useCallback, useState } from "react";
 import { Box, Button, MenuItem, TextField, Typography } from "@mui/material";
 import { XModal } from "../XModal";
+// import ApexCharts from "apexcharts";
 import { generatePdf } from "../../shared/utils/pdf-generator";
 
 export const ExportModal = memo(
@@ -48,21 +49,21 @@ export const ExportModal = memo(
       for (const item of removeItems) {        
         item.remove();        
       }
-      const mdElements = document.querySelectorAll('[id^="md_"]');
-      for(const item of mdElements) {
-        if(!item.childElementCount) {
-          item.remove();
-        }
-        // after remove link tag, if there's only "." existing
-        if(item.childElementCount === 1 && (item.firstChild?.textContent || "").trim() === ".") {
-          item.remove();
-        }
-      }
+      // const mdElements = document.querySelectorAll('[id^="md_"]');
+      // for(const item of mdElements) {
+      //   if(!item.childElementCount) {
+      //     item.remove();
+      //   }
+      //   // after remove link tag, if there's only "." existing
+      //   if(item.childElementCount === 1 && (item.firstChild?.textContent || "").trim() === ".") {
+      //     item.remove();
+      //   }
+      // }
       // const chartEls = container.querySelectorAll(".chart-wrapper");
       // for (const chartEl of chartEls) {
       //   chartEl.innerHTML = `<img src="${value.imgURI.replace('image/png', 'image/jpeg')}" width="672" alt="chart" />`;
       // }
-
+      console.log(container.innerHTML)
       generatePdf(container.innerHTML, reportName, "Skylark");
       onClose();
       // });
