@@ -186,10 +186,10 @@ export const ExecutionModal = memo(
             question: item.name,
             analysis_type: "financial_diligence",
           });
-          if ("data" in resp && resp.data.rating && resp.data.rating >= 3) {
+          if ("data" in resp && resp.data.rating && resp.data.rating >= 1) {
             result += `<h${depth.length + 3} class='heading-question'>${
               item.name
-            }</h${depth.length + 3}>${
+            } - Rating: ${resp.data.rating}</h${depth.length + 3}>${
               marked.parse(resp.data.content as string) as string
             }`;
           }
