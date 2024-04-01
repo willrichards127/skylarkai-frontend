@@ -14,7 +14,7 @@ import {
   useIngestFilesMutation,
   useLazyGetSetupQuery,
 } from "../../../../redux/services/setupApi";
-import { useGetIngestedFilesQuery } from "../../../../redux/services/transcriptAPI";
+// import { useGetIngestedFilesQuery } from "../../../../redux/services/transcriptAPI";
 import { toast } from "react-toastify";
 import { initializeHtmlResponse } from "../../../../shared/utils/parse";
 
@@ -38,13 +38,13 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
 
   const [getReport, { isLoading: loadingReport, data: reportData }] =
     useLazyGetReportQuery();
-  const { isLoading: loadingFiles, data: dataFiles } = useGetIngestedFilesQuery(
-    {
-      graph_id: +setupId!,
-      analysis_type: "financial_diligence",
-    },
-    { skip: !setupId }
-  );
+  // const { isLoading: loadingFiles, data: dataFiles } = useGetIngestedFilesQuery(
+  //   {
+  //     graph_id: +setupId!,
+  //     analysis_type: "financial_diligence",
+  //   },
+  //   { skip: !setupId }
+  // );
 
   const [getSetup, { isLoading: loadingSetup, data: setupData }] =
     useLazyGetSetupQuery();
@@ -112,11 +112,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
 
   return (
     <Box sx={{ width: "100%", height: "100%" }}>
-      {loadingReport ||
-      isGeneratingReport ||
-      loadingSetup ||
-      ingestingFiles ||
-      loadingFiles ? (
+      {loadingReport || isGeneratingReport || loadingSetup || ingestingFiles ? (
         <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
           <CircleSpinner
             size={120}
@@ -142,7 +138,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
           onScroll={onScroll}
         >
           <Box width="100%" height="100%">
-            {!!reportData && !!setupData && dataFiles?.length && (
+            {!!reportData && !!setupData && (
               <MarketAnalysisReport
                 setup={setupData}
                 reportContent={
@@ -151,7 +147,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
                     : reportData.content
                 }
                 reportType={reportType!}
-                filenames={dataFiles}
+                filenames={[]}
                 onRerunAction={OnRerun}
                 onSaveAction={onSave}
               />
