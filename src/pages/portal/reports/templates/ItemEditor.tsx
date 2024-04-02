@@ -64,7 +64,7 @@ export const ItemEditor = memo(
         <div>
           <Editor
             // apiKey={import.meta.env.VITE_TINYMCE_API_KEY}
-            apiKey="iv9k12eaq1zira57z25hpvzwuxzo3ditwsiaa3tcbg3va3jp"
+            apiKey="69ipaoh1jiynpwws60b1nj6fht4zidofpoagklhvb3wnh07a"
             onInit={(_, editor) => (editorRef.current = editor)}
             // inline
             initialValue={item.value.content}
