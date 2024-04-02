@@ -9,17 +9,20 @@ import {
   ButtonGroup,
   Divider,
 } from "@mui/material";
-import { CalendarIcon } from "../../../../components/Svgs";
+// import { CalendarIcon } from "../../../../components/Svgs";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import PrintIcon from "@mui/icons-material/Print";
 import SaveIcon from "@mui/icons-material/Save";
-import FormatIndentIncreaseIcon from "@mui/icons-material/FormatIndentIncrease";
+// import FormatIndentIncreaseIcon from "@mui/icons-material/FormatIndentIncrease";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import UploadFileIcon from "@mui/icons-material/UploadFile";
+// import UploadFileIcon from "@mui/icons-material/UploadFile";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import EmailIcon from "@mui/icons-material/Email";
 import { FileUploadModal } from "./FileUploadModal";
-import { REPORTS_DICT, reportHeaderHeight } from "../../../../shared/models/constants";
+import {
+  REPORTS_DICT,
+  reportHeaderHeight,
+} from "../../../../shared/models/constants";
 
 export const HeaderPanel = memo(
   ({
@@ -43,7 +46,8 @@ export const HeaderPanel = memo(
   }) => {
     const navigate = useNavigate();
     const [fileUploadModal, showFileUploadModal] = useState<boolean>(false);
-    const [templateFileUploadModal, showTemplateFileUploadModal] = useState<boolean>(false);
+    const [templateFileUploadModal, showTemplateFileUploadModal] =
+      useState<boolean>(false);
     return (
       <Box
         sx={{
@@ -74,7 +78,7 @@ export const HeaderPanel = memo(
             </Typography>
           </Box>
         </Box>
-        <Box
+        {/* <Box
           sx={{
             display: "flex",
             gap: 2,
@@ -85,7 +89,7 @@ export const HeaderPanel = memo(
           }}
         >
           <CalendarIcon /> 2022-2024 Monthly
-        </Box>
+        </Box> */}
         <Box mr="auto" />
         <ButtonGroup
           variant="outlined"
@@ -96,7 +100,7 @@ export const HeaderPanel = memo(
             },
           }}
         >
-          <IconButton
+          {/* <IconButton
             size="small"
             onClick={() => showTemplateFileUploadModal(true)}
             title="Upload template"
@@ -110,7 +114,7 @@ export const HeaderPanel = memo(
             title="Upload files"
           >
             <UploadFileIcon color="primary" />
-          </IconButton>
+          </IconButton> */}
           <Divider orientation="vertical" sx={{ width: "1px", height: 36 }} />
           <IconButton
             size="small"

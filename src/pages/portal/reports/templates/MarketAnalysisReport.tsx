@@ -28,18 +28,13 @@ export const MarketAnalysisReport = ({
   onRerunAction: (append?: Record<string, File[]>) => void;
 }) => {
   const reportPrintRef = useRef<HTMLDivElement>(null);
-  // const refFileRef = useRef<{
-  //   filename: string;
-  //   text_content: string;
-  //   quote_content: string;
-  // }>();
+
   const emailContentRef = useRef<
     { subject?: string; content: string } | undefined
   >();
 
   const [uploadedFiles, setUploadedFiles] = useState<Record<string, File[]>>();
   const [exportModal, showExportModal] = useState<boolean>(false);
-  // const [refFileModal, showRefFileModal] = useState<boolean>(false);
   const [emailModal, showEmailModal] = useState<boolean>(false);
 
   const onPrint = useCallback(() => {
@@ -56,7 +51,7 @@ export const MarketAnalysisReport = ({
     }
     const base64str = await getPdfInBase64(container.innerHTML, "Skylark");
     emailContentRef.current = {
-      subject: `${REPORTS_DICT[reportType].label} Report`,
+      subject: `${REPORTS_DICT[reportType]?.label || reportType} Report`,
       content: base64str,
     };
     showEmailModal(true);
@@ -125,13 +120,6 @@ export const MarketAnalysisReport = ({
             onClose={() => showExportModal(false)}
           />
         )}
-        {/* {refFileModal && refFileRef.current && (
-          <RefFileModal
-            open={refFileModal}
-            onClose={() => showRefFileModal(false)}
-            content={refFileRef.current}
-          />
-        )} */}
         {emailModal && (
           <SendEmailModal
             open={emailModal}

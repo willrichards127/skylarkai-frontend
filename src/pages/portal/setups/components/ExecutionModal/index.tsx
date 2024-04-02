@@ -174,11 +174,8 @@ export const ExecutionModal = memo(
               subResult;
           }
         } else {
-          const openAINode = setup.nodes.find((node) =>
-            node.attributes.graph_node_id.startsWith("GPT-4")
-          );
-          const anthropicNode = setup.nodes.find((node) =>
-            node.attributes.graph_node_id.startsWith("Anthropic")
+          const llmNode = setup.nodes.find((node) =>
+            node.attributes.graph_node_id.startsWith("LLM")
           );
 
           const loadingObj = depth.reduceRight<any>(
@@ -192,7 +189,7 @@ export const ExecutionModal = memo(
             filenames: filenames,
             question: item.name,
             analysis_type: "financial_diligence",
-            llm: openAINode ? "OpenAI" : anthropicNode ? "Anthropic" : "BOTH",
+            llm: llmNode?.properties?.model || "OpenAI",
           });
           if ("data" in resp && resp.data.rating && resp.data.rating >= 1) {
             result += `<h${depth.length + 3} class='heading-question'>${
