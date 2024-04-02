@@ -1,0 +1,185 @@
+{
+  "title": "Investment memo",
+  "data": [
+    {
+      "name": "Executive Summary",
+      "children": [
+        { "name": "What product or service is being offered and why?" }
+      ]
+    },
+    {
+      "name": "Company Leadership & History",
+      "children": [
+        {
+          "name": "In one sentence, when and by whom was the company founded?"
+        },
+        {
+          "name": "In one sentence, where is the company headquartered, do they have any additional campuses or facilities and how many employees do they have?"
+        },
+        {
+          "name": "Describe in one sentence for each person who is the CEO, COO, CCO and CTO and describe each of their previous career experience."
+        }
+      ]
+    },
+    {
+      "name": "Problem",
+      "children": [
+        {
+          "name": "List the problems the company's product or service is trying to solve and in one sentence per case describe what are the issues with the current solutions available?"
+        },
+        {
+          "name": "List the top three issues or challenges faced by the company’s customers and in one sentence in each case describe how the company’s product or technology is deployed to solve these challenges."
+        }
+      ]
+    },
+    {
+      "name": "Total Addressable Market",
+      "children": [
+        {
+          "name": "What is the total addressable market for the company’s product both in the United States and globally?"
+        }
+      ]
+    },
+    {
+      "name": "Margin Analysis",
+      "children": [
+        {
+          "name": "In a table show, for each year the data is available, the gross margin of the company as a whole and the gross margins of the various product segments. Please show $ symbol on the header."
+        }
+      ]
+    },
+    {
+      "name": "Customer ROI",
+      "children": [
+        {
+          "name": "Quantify the return on investment on buying the company's products and services for the company’s customers in terms of any listed metrics on payback period, yearly cost savings and any other metrics that illustrate the return on investment for the customer’s spending on the company’s product or service."
+        }
+      ]
+    },
+    {
+      "name": "Competition",
+      "children": [
+        {
+          "name": "What is the company’s standing in the market that it targets?"
+        },
+        {
+          "name": "List any competitors identified and in one sentence for each competitor describe their product and market position."
+        }
+      ]
+    },
+    {
+      "name": "Go-to-market & Traction",
+      "children": [
+        {
+          "name": "List the types of intended customers of the company in one sentence."
+        },
+        {
+          "name": "In one sentence give the rationale driving the customer’s decisions to use the company’s product or service."
+        },
+        {
+          "name": "In one sentence discuss how many customers the company has so far and what percentage of the total addressable market do these customers represent."
+        },
+        {
+          "name": "Identify the potential size of the engagements the company currently has so far in one sentence."
+        }
+      ]
+    },
+    {
+      "name": "Financing History",
+      "children": [
+        {
+          "name": "List how much the company raised in each individual prior round of funding, who the lead investor was and when that round was raised."
+        }
+      ]
+    },
+    {
+      "name": "Use of Proceeds",
+      "children": [
+        {
+          "name": "List in one sentence for each case the use of proceeds from the current round being raised as described by the company."
+        },
+        {
+          "name": "List any specific financial targets or milestones the company expects to be able to hit because of this round of funding."
+        }
+      ]
+    },
+    {
+      "name": "Financial Forecast",
+      "template": "- List the financial and operational forecasts the company makes including milestones, benchmarks, volume trends and revenue targets.\n-include a table to show revenue by available years\n",
+      "children": [
+        {
+          "name": "List the financial and operational forecasts the company makes including milestones, benchmarks, volume trends and revenue targets."
+        },
+        {
+          "name": "Insert a table showing revenue by year."
+        }
+      ]
+    },
+    {
+      "name": "Market Comparables",
+      "children": [
+        {
+          "name": "List any public or private companies that the company calls out as being comparable including any relevant financial details about those companies or any funding they have raised."
+        }
+      ]
+    },
+    {
+      "name": "Valuation Analysis",
+      "children": [
+        {
+          "name": "Break down the revenue streams of the company and broadly classify them as hardware, software, services, product, commodity or any other type of revenues."
+        },
+        {
+          "name": "List the valuation of the company in all prior rounds of financing."
+        }
+      ]
+    },
+    {
+      "name": "Risks",
+      "children": [
+        {
+          "name": "List the technology risks of the company in one sentence."
+        },
+        {
+          "name": "List the business risks of the company in one sentence."
+        },
+        {
+          "name": "List the liquidity risks the company faces in one sentence."
+        }
+      ]
+    },
+    {
+      "name": "Potential Exits",
+      "children": [
+        {
+          "name": "List any prospective buyers of the company and their rationale for potentially acquiring the company in one sentence each."
+        }
+      ]
+    },
+    {
+      "name": "Offering and Timing",
+      "children": [
+        {
+          "name": "Determine the current financing situation as laid out in the documents for the current round of financing in two sentences including any important dates or deadlines announced."
+        }
+      ]
+    },
+    {
+      "name": "Final Assesment",
+      "children": [
+        {
+          "name": "In twelve words or less describe the challenges the company’s product solves."
+        },
+        {
+          "name": "In twelve words or less describe how the company’s product solves the problem its customers face using its proprietary technology and processes."
+        },
+        {
+          "name": "In one sentence list the size of the total addressable market, the current deployments the company has, what the penetration rate of the company’s product is in relation to the size of the total addressable market and their forecast for the company going forward citing specific figures and milestones."
+        },
+        {
+          "name": "In one sentence describe why the company feels they are uniquely suited to solve the problem they seek to solve."
+        }
+      ]
+    }
+  ]
+}

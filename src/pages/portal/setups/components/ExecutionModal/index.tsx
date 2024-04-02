@@ -131,7 +131,7 @@ export const ExecutionModal = memo(
             new Date()
           )}</strong></p>` + ret;
           setCustomQueyring(false);
-          const reportName = `${templateData.title}-${new Date().getTime()}`;
+          const reportName = `${templateData.title}-${new Date().getTime() % 1000}`;
           const generatedId = await generateReport({
             setupId: setup.id!,
             data: initializeHtmlResponse(report),
@@ -197,7 +197,7 @@ export const ExecutionModal = memo(
           if ("data" in resp && resp.data.rating && resp.data.rating >= 1) {
             result += `<h${depth.length + 3} class='heading-question'>${
               item.name
-            } - Rating: ${resp.data.rating}</h${depth.length + 3}>${
+            }</h${depth.length + 3}>${
               marked.parse(resp.data.content as string) as string
             }`;
           }

@@ -57,6 +57,8 @@ import {
 } from "../../../../redux/services/setupApi";
 import { ExecutionModal } from "./ExecutionModal";
 
+import TemplateNodeData from "../../../../shared/utils/mocks.json";
+
 const nodeTypes = {
   custom: CustomNode,
 };
@@ -182,6 +184,15 @@ const WorkflowPanel = memo(
           x: event.clientX - reactFlowBounds.left,
           y: event.clientY - reactFlowBounds.top,
         });
+
+        // Temporary
+        if (dndItem.template_node_id === 17) {
+          dndItem.properties = {
+            ...dndItem.properties,
+            text: JSON.stringify(TemplateNodeData),
+          };
+        }
+        //
         setNodes((prev) => {
           const order =
             prev.filter(

@@ -29,6 +29,7 @@ import {
   addElementsRightAfter,
   changeOrder,
 } from "../../../../shared/utils/base";
+import { CitationModal } from "../../../../components/modals/CitationModal";
 
 export const ReportTemplate = forwardRef(
   (
@@ -50,6 +51,11 @@ export const ReportTemplate = forwardRef(
       [reportContent]
     );
 
+    const [citationData, setCitationData] = useState<{
+      filename: string;
+      quote: string;
+    }>();
+
     const [isShowQuestion, setIsShowQuestion] = useState<boolean>(false);
     const [uploadedFiles, setUploadedFiles] =
       useState<Record<string, File[]>>();
@@ -66,7 +72,6 @@ export const ReportTemplate = forwardRef(
       //   },
       // }))
     );
-    console.log(reportItems);
 
     const onRemoveFiles = useCallback((type: string, filename: string) => {
       setUploadedFiles((prev) => {
@@ -92,7 +97,9 @@ export const ReportTemplate = forwardRef(
 
     const onCitationLink = useCallback(
       ({ filename, quote }: { filename: string; quote: string }) => {
-        console.log(filename, quote);
+        console.log(filename);
+        console.log(quote);
+        setCitationData({ filename: new URL(`/static/${setup.id}/${filename}.pdf`, import.meta.env.VITE_API_URL).toString(), quote });
       },
       []
     );
@@ -244,77 +251,86 @@ export const ReportTemplate = forwardRef(
     }, []);
 
     return (
-      <SplitContainer
-        sizes={[70, 30]}
-        leftPanel={
-          <Box
-            sx={{
-              display: "flex",
-              borderRadius: 2,
-              bgcolor: "#121212",
-            }}
-          >
-            <ReportDrawer
-              isShowQuestion={isShowQuestion}
-              items={reportItems}
-              onSwitchMode={(mode) => setIsShowQuestion(mode)}
-              onRemoveFiles={onRemoveFiles}
-              uploadedFiles={uploadedFiles}
-            />
+      <>
+        <SplitContainer
+          sizes={[70, 30]}
+          leftPanel={
             <Box
               sx={{
                 display: "flex",
-                alignItems: "center",
-                flexDirection: "column",
-                overflowY: "auto",
-                flex: 1,
+                borderRadius: 2,
+                bgcolor: "#121212",
               }}
             >
+              <ReportDrawer
+                isShowQuestion={isShowQuestion}
+                items={reportItems}
+                onSwitchMode={(mode) => setIsShowQuestion(mode)}
+                onRemoveFiles={onRemoveFiles}
+                uploadedFiles={uploadedFiles}
+              />
               <Box
-                ref={ref}
                 sx={{
-                  maxWidth: "8.8in",
-                  bgcolor: "white",
-                  color: "black",
-                  p: 6,
+                  display: "flex",
+                  alignItems: "center",
+                  flexDirection: "column",
+                  overflowY: "auto",
+                  flex: 1,
                 }}
               >
-                <DndProvider backend={HTML5Backend}>
-                  <DragLayer />
-                  {reportItems.map((item) => (
-                    <Container
-                      key={item.id}
-                      id={item.id}
-                      type={item.type}
-                      children={item.children}
-                      onExchangeItem={onExchangeItem}
-                      onMoveContainer={onMoveContainer}
-                      onChangeChildOrder={onChangeChildOrder}
-                      isShowQuestion={isShowQuestion}
-                      onAddNew={() => onAddNewContainer(item)}
-                      onRemove={() => onRemoveContainer(item)}
-                      onAddNewItem={onAddNewItem}
-                      onRemoveItem={onRemoveItem}
-                      onItemValueChanged={onItemValueChanged}
-                      onCitationLink={onCitationLink}
-                    />
-                  ))}
-                </DndProvider>
+                <Box
+                  ref={ref}
+                  sx={{
+                    maxWidth: "8.8in",
+                    bgcolor: "white",
+                    color: "black",
+                    p: 6,
+                  }}
+                >
+                  <DndProvider backend={HTML5Backend}>
+                    <DragLayer />
+                    {reportItems.map((item) => (
+                      <Container
+                        key={item.id}
+                        id={item.id}
+                        type={item.type}
+                        children={item.children}
+                        onExchangeItem={onExchangeItem}
+                        onMoveContainer={onMoveContainer}
+                        onChangeChildOrder={onChangeChildOrder}
+                        isShowQuestion={isShowQuestion}
+                        onAddNew={() => onAddNewContainer(item)}
+                        onRemove={() => onRemoveContainer(item)}
+                        onAddNewItem={onAddNewItem}
+                        onRemoveItem={onRemoveItem}
+                        onItemValueChanged={onItemValueChanged}
+                        onCitationLink={onCitationLink}
+                      />
+                    ))}
+                  </DndProvider>
+                </Box>
               </Box>
             </Box>
-          </Box>
-        }
-        rightPanel={
-          <ChatPanel
-            graph_id={setup.id}
-            companyName={setup.name!}
-            analysis_type={analysisType}
-            onAddToReport={onAddToReport}
-            filenames={filenames}
-            onJumpTo={onCitationLink}
+          }
+          rightPanel={
+            <ChatPanel
+              graph_id={setup.id}
+              companyName={setup.name!}
+              analysis_type={analysisType}
+              onAddToReport={onAddToReport}
+              filenames={filenames}
+              onJumpTo={onCitationLink}
+            />
+          }
+        />
+        {citationData ? (
+          <CitationModal
+            open={!!citationData}
+            onClose={() => setCitationData(undefined)}
+            data={citationData}
           />
-        }
-      />
+        ) : null}
+      </>
     );
   }
 );

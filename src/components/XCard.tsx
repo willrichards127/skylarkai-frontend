@@ -97,20 +97,8 @@ export const XCard = memo(
               avatar={
                 <Avatar sx={{ width: 48, height: 48 }} src={logo} alt={label} />
               }
-              title={
-                <Box
-                  sx={{
-                    fontSize: 16,
-                    fontWeight: "500",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    width: width - 30,
-                  }}
-                >
-                  {label}
-                </Box>
-              }
+              title={label}
+              titleTypographyProps={{ fontSize: 16, fontWeight: "500" }}
               subheader={updatedAt || ""}
             />
           </Box>
