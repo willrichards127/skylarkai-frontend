@@ -6,20 +6,18 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { XPanel } from "../../../../../../components/XPanel";
 import { Header } from "./Header";
 import { XChip } from "../../../../../../components/XChip";
-import { OpenAINode } from "../nodes/llms/OpenAINode";
+import { LLMNode } from "../nodes/llms/LLMNode";
 import { InputNode } from "../nodes/inputs/InputNode";
 import { OutputNode } from "../nodes/outputs/OutputNode";
 import { DocUploadNode } from "../nodes/dataloaders/DocUploadNode";
 import { WebcrawlerNode } from "../nodes/dataloaders/WebcrawlerNode";
 import { PineconeNode } from "../../custom-nodes/nodes/vectors/PineconeNode";
 import { ChromaNode } from "../../custom-nodes/nodes/vectors/ChromaNode";
-import { AnthropicNode } from "../nodes/llms/AnthropicNode";
 import { DocTemplateNode } from "../nodes/resources/DocTemplateNode";
 import { CompareDocumentsNode } from "../nodes/resources/CompareDocumentsNode";
 import { GoogleSearchNode } from "../nodes/dataloaders/GoogleSearchNode";
 import { YahooFinanceNode } from "../nodes/dataloaders/YahooFinanceNode";
 import { PitchbookNode } from "../nodes/dataloaders/PitchbookNode";
-import { SkyNode } from "../nodes/dataloaders/SkyNode";
 import { CustomAPINode } from "../nodes/dataloaders/CustomAPINode";
 import { NotionNode } from "../nodes/dataloaders/NotionNode";
 import { MongoDBNode } from "../nodes/dataloaders/MongoDBNode";
@@ -59,8 +57,7 @@ const ComponentDict: Record<
   Input: InputNode,
   Output: OutputNode,
   Webcrawler: WebcrawlerNode,
-  "GPT-4": OpenAINode,
-  Anthropic: AnthropicNode,
+  LLM: LLMNode,
   File: DocUploadNode,
   GoogleSearch: GoogleSearchNode,
   Template: DocTemplateNode,
@@ -71,7 +68,6 @@ const ComponentDict: Record<
   YahooFinance: YahooFinanceNode,
   PitchBook: PitchbookNode,
   CustomAPI: CustomAPINode,
-  Sky: SkyNode,
   Edgar: EdgarNode,
   Notion: NotionNode,
   MongoDB: MongoDBNode,
@@ -108,12 +104,9 @@ const FloatPanel = memo(
     const onExecuteNode = useCallback(async () => {
       const startTime = performance.now();
       const nodes = getNodes();
-
       const inputNode = nodes.find((node) => node.data.name === "Input");
       const skyDBNode = nodes.find((node) => node.data.name === "SkyDatabase");
-      const llmNode = nodes.find(
-        (node) => node.data.name === "Anthropic" || node.data.name === "GPT-4"
-      );
+      const llmNode = nodes.find((node) => node.data.name === "LLM");
       if (!inputNode || !skyDBNode || !llmNode) {
         toast.error("Invalid graph format!");
         return;
@@ -133,7 +126,7 @@ const FloatPanel = memo(
         ),
         question: inputNode.data.properties.text,
         analysis_type: "financial_diligence",
-        llm: llmNode.data.name === "Anthropic" ? "Anthropic" : "OpenAI",
+        llm: llmNode.data.properties.model,
       }).unwrap();
 
       const endTime = performance.now();

@@ -42,7 +42,7 @@ export const ChatPanel = memo(
       { subject?: string; content: string } | undefined
     >();
     const [llm, setLlm] = useState<
-      "SkyEngine 1" | "SkyEngine 2" | "SkyEngine 3"
+      "SkyEngine 1" | "SkyEngine 2" | "SkyEngine 3" | "SkyEngine 4"
     >("SkyEngine 1");
     const [emailModal, showEmailModal] = useState<boolean>(false);
     const [chatHistory, setChatHistory] = useState<IChat[]>([]);
@@ -64,7 +64,9 @@ export const ChatPanel = memo(
               ? "OpenAI"
               : llm === "SkyEngine 2"
               ? "Anthropic"
-              : "BOTH",
+              : llm === "SkyEngine 3"
+              ? "BOTH"
+              : "Gemini",
         }).unwrap();
         if (response) {
           setChatHistory((prev) => [
@@ -175,7 +177,7 @@ export const ChatPanel = memo(
                 },
               }}
             >
-              {["SkyEngine 1", "SkyEngine 2", "SkyEngine 3"].map((item) => (
+              {["SkyEngine 1", "SkyEngine 2", "SkyEngine 3", "SkyEngine 4"].map((item) => (
                 <option key={item} value={item}>
                   {item}
                 </option>

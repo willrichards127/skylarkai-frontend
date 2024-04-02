@@ -6,20 +6,21 @@ import { ITemplateNode } from "../../../../shared/models/interfaces";
 import { useGetCategoriesQuery } from "../../../../redux/services/setupApi";
 
 const SetupPanel = memo(({ setupId }: { setupId: string }) => {
-	const { data, isFetching } = useGetCategoriesQuery();
-	return (
-		<Box sx={{ height: "100%", display: "flex", bgcolor: "secondary.dark" }}>
-			{!isFetching && (
-				<CategoryPanel categoryDict={data as Record<string, ITemplateNode[]>} />
-			)}
-			{!isFetching && (
-				<WorkflowPanel
-					setupId={setupId}
-					categoryDict={data as Record<string, ITemplateNode[]>}
-				/>
-			)}
-		</Box>
-	);
+  const { data, isFetching } = useGetCategoriesQuery();
+
+  return (
+    <Box sx={{ height: "100%", display: "flex", bgcolor: "secondary.dark" }}>
+      {!isFetching && (
+        <CategoryPanel categoryDict={data as Record<string, ITemplateNode[]>} />
+      )}
+      {!isFetching && (
+        <WorkflowPanel
+          setupId={setupId}
+          categoryDict={data as Record<string, ITemplateNode[]>}
+        />
+      )}
+    </Box>
+  );
 });
 
 SetupPanel.displayName = "SetupPanel";

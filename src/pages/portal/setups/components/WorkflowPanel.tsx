@@ -20,7 +20,6 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   updateEdge,
-  Controls,
   Connection,
   Edge,
   ReactFlowInstance,
@@ -304,10 +303,17 @@ const WorkflowPanel = memo(
           onDragOver={onDragOver}
           nodeTypes={nodeTypes}
           fitView={false}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            top: 16,
+            left: 16,
+            p: 1,
+            bgcolor: "rgba(0, 0, 0, 0.4)",
+            borderRadius: 2,
+          }}
         >
-          <Controls />
-        </ReactFlow>
-        <Box sx={{ position: "absolute", top: 16, left: 16 }}>
           {!isFetching && (
             <Typography variant="h6" fontWeight="bold">
               {isNew ? "Untitled" : savedData?.name || setup!.name}
