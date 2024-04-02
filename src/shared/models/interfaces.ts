@@ -166,3 +166,8 @@ export interface ITemplateItem extends TTreeData {
 export interface ITemplateItemPure extends Pick<TTreeData, "name" | "template" | "isUnChecked"> {
   children?: ITemplateItemPure[];
 }
+
+export interface ITemplate {
+  title: string;
+  data: ITemplateItemPure[]
+}

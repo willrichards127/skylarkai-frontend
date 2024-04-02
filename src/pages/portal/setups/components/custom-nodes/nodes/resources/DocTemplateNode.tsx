@@ -1,31 +1,41 @@
-import React, { memo, useCallback, useState } from "react";
+import React, { memo, useCallback, useMemo, useState } from "react";
 import { Box, Button, TextField } from "@mui/material";
+// import update from "immutability-helper";
+
 import { Handlers } from "../../Handlers";
 import { useReactFlow } from "reactflow";
 import { useDropzone } from "react-dropzone";
-import { ITemplateItem, ITemplateNode } from "../../../../../../../shared/models/interfaces";
+import { ITemplateNode } from "../../../../../../../shared/models/interfaces";
 import { TemplateViewModal } from "../../../../../../../components/modals/TemplateViewModal";
-import { removeIdTemplateJson } from "../../../../../../../components/TemplateView/utils";
+import { convertJSON } from "../../../../../../../components/TemplateView/utils";
 
 const templates = [
   {
     value: "text",
     label: "Plain Text",
   },
-  {
-    value: "URL",
-    label: "URL",
-  },
+  // {
+  //   value: "URL",
+  //   label: "URL",
+  // },
 ];
 
 export const DocTemplateNode = memo(
   ({ nodeId, nodeContent }: { nodeId: string; nodeContent: ITemplateNode }) => {
+    const data = useMemo(
+      () =>
+        nodeContent.properties.text
+          ? convertJSON(nodeContent.properties.text)
+          : undefined,
+      [nodeContent]
+    );
+
     const [showModal, setShowModal] = useState<boolean>(false);
 
     const { setNodes } = useReactFlow();
 
-    const onChange = useCallback(
-      (e: React.ChangeEvent<HTMLInputElement>) => {
+    const updateNode = useCallback(
+      (key: string, value: string) => {
         setNodes((prev) =>
           prev.map((node) => {
             if (node.id === nodeId) {
@@ -33,7 +43,7 @@ export const DocTemplateNode = memo(
                 ...node.data,
                 properties: {
                   ...node.data.properties,
-                  [e.target.name]: e.target.value,
+                  [key]: value,
                 },
               };
             }
@@ -41,27 +51,25 @@ export const DocTemplateNode = memo(
             return node;
           })
         );
+        // setNodes((prev) =>
+        //   update(prev, {
+        //     [nodeId]: {
+        //       data: {
+        //         properties: { [key]: { $set: value } },
+        //       },
+        //     },
+        //   })
+        // );
       },
       [nodeId, setNodes]
     );
 
-    const onViewChange = (items: ITemplateItem[]) => {
-      setNodes((prev) =>
-          prev.map((node) => {
-            if (node.id === nodeId) {
-              node.data = {
-                ...node.data,
-                properties: {
-                  ...node.data.properties,
-                  text: JSON.stringify(removeIdTemplateJson(items)),
-                },
-              };
-            }
-
-            return node;
-          })
-        );
-    }
+    const onChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        updateNode(e.target.name, e.target.value);
+      },
+      [updateNode]
+    );
 
     const onDrop = useCallback(
       (acceptedFiles: any) => {
@@ -119,6 +127,7 @@ export const DocTemplateNode = memo(
                     : ""}
                 </Box>
                 <Button
+                  disabled={!data}
                   size="small"
                   variant="outlined"
                   onClick={() => setShowModal(true)}
@@ -181,16 +190,16 @@ export const DocTemplateNode = memo(
             </TextField>
           </Box>
         </Box>
-        {showModal ? (
+        {showModal && data ? (
           <TemplateViewModal
             open={showModal}
-            onClose={() => setShowModal(false)}
-            data={
-              nodeContent.properties.text
-                ? JSON.parse(nodeContent.properties.text)
-                : []
-            }
-            onSave={onViewChange}
+            onClose={(data) => {
+              if (data) {
+                updateNode("text", JSON.stringify(data));
+              }
+              setShowModal(false);
+            }}
+            data={data}
           />
         ) : null}
       </Box>

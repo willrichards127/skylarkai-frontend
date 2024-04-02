@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { convertItems, revertItems, /* createNewItem,*/ cx } from "./utils";
 
-import { Box, CircularProgress, /* IconButton,*/ Typography } from "@mui/material";
+import {
+  Box,
+  CircularProgress,
+  /* IconButton,*/ Typography,
+} from "@mui/material";
 // import AddIcon from "@mui/icons-material/Add";
 // import EditIcon from "@mui/icons-material/Edit";
 // import DeleteIcon from "@mui/icons-material/DeleteForever";
@@ -392,11 +396,15 @@ const Templateview = ({
                     {counts.successCount}/{counts.totalCount}
                   </Typography>
                 ) : item.data.isLoading ? (
-                  <CircularProgress size={14} />
+                  <Box>
+                    <CircularProgress size={16} />
+                  </Box>
                 ) : item.data.isSuccess ? (
-                  <CheckCircleIcon
-                    sx={{ color: "success.main", fontSize: 18 }}
-                  />
+                  <Box>
+                    <CheckCircleIcon
+                      sx={{ color: "success.main", fontSize: 18 }}
+                    />
+                  </Box>
                 ) : null}
               </div>
             </div>

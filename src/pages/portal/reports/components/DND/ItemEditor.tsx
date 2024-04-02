@@ -56,7 +56,12 @@ export const ItemEditor = memo(
       <ClickAwayListener onClickAway={onClickAwayAction}>
         <div>
           <Editor
+<<<<<<< HEAD:src/pages/portal/reports/components/DND/ItemEditor.tsx
             apiKey={import.meta.env.VITE_TINYMCE_API_KEY}
+=======
+            // apiKey={import.meta.env.VITE_TINYMCE_API_KEY}
+            apiKey="69ipaoh1jiynpwws60b1nj6fht4zidofpoagklhvb3wnh07a"
+>>>>>>> develop:src/pages/portal/reports/templates/ItemEditor.tsx
             onInit={(_, editor) => (editorRef.current = editor)}
             // inline
             initialValue={item.value.content}

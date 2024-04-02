@@ -8,7 +8,10 @@ import {
   useIngestFilesMutation,
   useSaveSetupMutation,
 } from "../../../../../redux/services/setupApi";
-import { addIdtoTemplateJson } from "../../../../../components/TemplateView/utils";
+import {
+  addIdtoTemplateJson,
+  convertJSON,
+} from "../../../../../components/TemplateView/utils";
 import { useCustomQueryMutation } from "../../../../../redux/services/transcriptAPI";
 import {
   useGenerateCustomReportMutation,
@@ -107,33 +110,37 @@ export const ExecutionModal = memo(
         skyDBNodeIndex > -1 &&
         updatedSetup.nodes[templateNodeIndex].properties?.text
       ) {
-        const items = addIdtoTemplateJson(
-          JSON.parse(updatedSetup.nodes[templateNodeIndex].properties!.text),
-          { excludeUnChecked: true }
+        const templateData = convertJSON(
+          updatedSetup.nodes[templateNodeIndex].properties!.text
         );
-        setItems(items);
-        const filenames = updatedSetup.nodes[
-          skyDBNodeIndex
-        ].properties!.files.map((f: any) => f.file_name);
-        setCustomQueyring(true);
-        const ret = await handleCustomQuery(items, filenames);
-        const report =
-          `<h1 style="text-align: center;">Investment memo: ${
-            updatedSetup.name
-          }</h1>
-        <p style="text-align: center;"><strong>${longDateFormat(
-          new Date()
-        )}</strong></p>` + ret;
-        setCustomQueyring(false);
-        const reportName = `Template-${new Date().getTime()}`;
-        const generatedId = await generateReport({
-          setupId: setup.id!,
-          data: initializeHtmlResponse(report),
-          queryType: reportName,
-        }).unwrap();
-        navigate(
-          `/portal/reports/${generatedId}?reportType=${reportName}&setupId=${setup.id}&viewMode=active`
-        );
+        if (templateData) {
+          const items = addIdtoTemplateJson(templateData.data, {
+            excludeUnChecked: true,
+          });
+          setItems(items);
+          const filenames = updatedSetup.nodes[
+            skyDBNodeIndex
+          ].properties!.files.map((f: any) => f.file_name);
+          setCustomQueyring(true);
+          const ret = await handleCustomQuery(items, filenames);
+          const report =
+            `<h1 style="text-align: center;">Investment memo: ${
+              updatedSetup.name
+            }</h1>
+          <p style="text-align: center;"><strong>${longDateFormat(
+            new Date()
+          )}</strong></p>` + ret;
+          setCustomQueyring(false);
+          const reportName = `${templateData.title}-${new Date().getTime()}`;
+          const generatedId = await generateReport({
+            setupId: setup.id!,
+            data: initializeHtmlResponse(report),
+            queryType: reportName,
+          }).unwrap();
+          navigate(
+            `/portal/reports/${generatedId}?reportType=${reportName}&setupId=${setup.id}&viewMode=active`
+          );
+        }
       }
 
       onClose(updatedSetup);
@@ -167,6 +174,13 @@ export const ExecutionModal = memo(
               subResult;
           }
         } else {
+          const openAINode = setup.nodes.find((node) =>
+            node.attributes.graph_node_id.startsWith("GPT-4")
+          );
+          const anthropicNode = setup.nodes.find((node) =>
+            node.attributes.graph_node_id.startsWith("Anthropic")
+          );
+
           const loadingObj = depth.reduceRight<any>(
             (acc, curr) => ({ [curr]: { children: acc } }),
             { [i]: { isLoading: { $set: true } } }
@@ -178,6 +192,7 @@ export const ExecutionModal = memo(
             filenames: filenames,
             question: item.name,
             analysis_type: "financial_diligence",
+            llm: openAINode ? "OpenAI" : anthropicNode ? "Anthropic" : "BOTH",
           });
           if ("data" in resp && resp.data.rating && resp.data.rating >= 1) {
             result += `<h${depth.length + 3} class='heading-question'>${
@@ -218,7 +233,7 @@ export const ExecutionModal = memo(
               alignItems={"center"}
               height={"100%"}
             >
-              <Typography variant="body1" sx={{ marginBottom: 3 }}>
+              <Typography variant="body1" sx={{ marginBottom: 8 }}>
                 Upadating graph...
               </Typography>
               <CircularProgress />
@@ -232,7 +247,7 @@ export const ExecutionModal = memo(
               alignItems={"center"}
               height={"100%"}
             >
-              <Typography variant="body1" sx={{ marginBottom: 3 }}>
+              <Typography variant="body1" sx={{ marginBottom: 8 }}>
                 Ingesting files...
               </Typography>
               <CircularProgress />
@@ -246,7 +261,7 @@ export const ExecutionModal = memo(
               alignItems={"center"}
               height={"100%"}
             >
-              <Typography variant="body1" sx={{ marginBottom: 3 }}>
+              <Typography variant="body1" sx={{ marginBottom: 8 }}>
                 Generating Report...
               </Typography>
               <CircularProgress />

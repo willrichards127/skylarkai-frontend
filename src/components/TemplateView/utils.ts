@@ -2,6 +2,7 @@ import { TreeItem, TreeItemIndex } from "react-complex-tree";
 import { v4 as uuidv4 } from "uuid";
 
 import {
+  ITemplate,
   ITemplateItem,
   ITemplateItemPure,
   TTreeData,
@@ -18,24 +19,35 @@ export const createNewItem = (
   isFolder,
 });
 
+export const convertJSON = (text: string) => {
+  try {
+    const obj = JSON.parse(text);
+    if ("title" in obj && "data" in obj) {
+      return obj as ITemplate;
+    }
+  } catch (err) {}
+};
+
 export const addIdtoTemplateJson = (
   elements: ITemplateItemPure[],
   option?: { excludeUnChecked?: boolean }
 ): ITemplateItem[] => {
-  return elements.map((element) => {
-    const { children, ...elementData } = element;
-    if ( option && option.excludeUnChecked && elementData.isUnChecked) {
-      return;
-    }
-    const destinationElement: ITemplateItem = {
-      index: uuidv4(),
-      ...elementData,
-    };
-    if (children) {
-      destinationElement.children = addIdtoTemplateJson(children, option);
-    }
-    return destinationElement;
-  }).filter((element): element is ITemplateItem => !!element);
+  return elements
+    .map((element) => {
+      const { children, ...elementData } = element;
+      if (option && option.excludeUnChecked && elementData.isUnChecked) {
+        return;
+      }
+      const destinationElement: ITemplateItem = {
+        index: uuidv4(),
+        ...elementData,
+      };
+      if (children) {
+        destinationElement.children = addIdtoTemplateJson(children, option);
+      }
+      return destinationElement;
+    })
+    .filter((element): element is ITemplateItem => !!element);
 };
 
 export const removeIdTemplateJson = (

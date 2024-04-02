@@ -1,41 +1,39 @@
 import { memo, useState } from "react";
-import { Box, Button } from "@mui/material";
+import { Box, Button, TextField } from "@mui/material";
 import { XModal } from "../XModal";
 import Templateview from "../TemplateView";
+import { ITemplate, ITemplateItem } from "../../shared/models/interfaces";
 import {
-  ITemplateItem,
-  ITemplateItemPure,
-} from "../../shared/models/interfaces";
-import { addIdtoTemplateJson } from "../TemplateView/utils";
+  addIdtoTemplateJson,
+  removeIdTemplateJson,
+} from "../TemplateView/utils";
 
 export const TemplateViewModal = memo(
   ({
     open,
     onClose,
     data,
-    onSave,
   }: {
     open: boolean;
-    onClose: () => void;
-    data: ITemplateItemPure[];
-    onSave: (items: ITemplateItem[]) => void;
+    onClose: (data?: ITemplate) => void;
+    data: ITemplate;
   }) => {
+    const [title, setTitle] = useState<string>(data.title);
     const [items, setItems] = useState<ITemplateItem[]>(
-      addIdtoTemplateJson(data)
+      addIdtoTemplateJson(data.data)
     );
-    
+
     return (
       <XModal
         open={open}
-        onClose={onClose}
+        onClose={() => onClose()}
         header={<Box textAlign="center">Template View</Box>}
         footer={
           <Box display="flex" justifyContent="end" width="100%" px={1}>
             <Button
               variant="contained"
               onClick={() => {
-                onSave(items);
-                onClose();
+                onClose({ title, data: removeIdTemplateJson(items) });
               }}
             >
               Save
@@ -44,8 +42,21 @@ export const TemplateViewModal = memo(
         }
         size="md"
       >
-        <Box maxHeight={400} overflow={"auto"}>
-          <Templateview data={items} onChangeData={setItems} isEditMode={true} />
+        <Box paddingTop={1}>
+          <TextField
+            fullWidth
+            placeholder="Enter report name"
+            label="Report name"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          <Box maxHeight={400} overflow={"auto"} marginTop={1}>
+            <Templateview
+              data={items}
+              onChangeData={setItems}
+              isEditMode={true}
+            />
+          </Box>
         </Box>
       </XModal>
     );
