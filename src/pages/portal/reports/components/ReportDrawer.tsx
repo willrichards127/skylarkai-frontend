@@ -27,7 +27,7 @@ export const ReportDrawer = ({
   onRemoveFiles: (type: string, filename: string) => void;
   uploadedFiles?: Record<string, File[]>;
 }) => {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
 
   const onToggleDrawer = useCallback(() => {
     setOpen((prev) => !prev);

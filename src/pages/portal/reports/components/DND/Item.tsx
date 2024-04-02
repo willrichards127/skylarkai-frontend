@@ -3,13 +3,14 @@ import { useDrag, useDrop } from "react-dnd";
 import { Markdown } from "../Markdown";
 import { ItemWrapper } from "./ItemWrapper";
 import { ItemActionPane } from "./ItemActionPane";
+import { VizDrawer } from "./VizDrawer";
 import {
   IReportItemValue,
   TDNDItemType,
   IDNDItem,
   IDNDContainer,
 } from "../../../../../shared/models/interfaces";
-import { ItemEditor } from "../../templates/ItemEditor";
+import { ItemEditor } from "./ItemEditor";
 
 export const Item = ({
   id,
@@ -42,6 +43,7 @@ export const Item = ({
   }) => void;
 }) => {
   const [isEdit, setIsEdit] = useState<boolean>(false);
+  const [isShowViz, setIsShowViz] = useState<boolean>(false);
   const ref = useRef<HTMLDivElement>(null);
   const [{ handlerId }, drop] = useDrop({
     accept: "ITEM",
@@ -91,6 +93,10 @@ export const Item = ({
     [onItemValueChanged]
   );
 
+  const onShowViz = useCallback(() => {
+    setIsShowViz(true);
+  }, []);
+
   drag(drop(ref));
 
   return (
@@ -111,7 +117,7 @@ export const Item = ({
           item={{ id, value, type, parentId }}
           onAddNew={onAddNew}
           onRemove={onRemove}
-          onShowVisualization={() => {}}
+          onShowViz={onShowViz}
         />
       )}
       {isEdit ? (
@@ -121,6 +127,9 @@ export const Item = ({
         />
       ) : (
         <Markdown html={value.content} onCitationLink={onCitationLink} />
+      )}
+      {isShowViz && (
+        <VizDrawer open={isShowViz} onClose={() => setIsShowViz(false)} />
       )}
     </ItemWrapper>
   );

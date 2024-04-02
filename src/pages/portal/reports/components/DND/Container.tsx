@@ -1,7 +1,7 @@
 import { useCallback, useRef } from "react";
+import { Box } from "@mui/material";
 import { useDrop, useDrag } from "react-dnd";
 import { Item } from "./Item";
-import { ItemWrapper } from "./ItemWrapper";
 import { ContainerActionPane } from "./ContainerActionPane";
 import {
   IDNDContainer,
@@ -55,7 +55,7 @@ export const Container = ({
   }) => void;
 }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const [{ handlerId }, drop] = useDrop({
+  const [{ handlerId, isOver }, drop] = useDrop({
     accept: ["ITEM", "CONTAINER"],
     drop: (item: any, monitor) => {
       const didDrop = monitor.didDrop();
@@ -103,15 +103,24 @@ export const Container = ({
   drag(drop(ref));
 
   return (
-    <ItemWrapper
+    <Box
       className={children.length > 0 ? "dnd-container" : "no-print"}
-      style={{
+      sx={{
         display: "flex",
         width: "100%",
         padding: "4px",
+        marginBottom: "2px",
         height: children.length > 0 ? "auto" : "36px",
         minHeight: "36px",
         opacity: isDragging ? 0.4 : 1,
+        borderTop: isOver ? "2px solid blue" : "none",
+        position: "relative",
+        "&:hover": {
+          opacity: 0.7,
+          "& > div:first-of-type": {
+            display: "flex",
+          },
+        },
       }}
       data-handler-id={handlerId}
       ref={ref}
@@ -141,6 +150,6 @@ export const Container = ({
       ) : (
         <small style={{ color: "grey" }}>Empty Container</small>
       )}
-    </ItemWrapper>
+    </Box>
   );
 };

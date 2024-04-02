@@ -2,11 +2,11 @@ import { memo, useCallback, useRef } from "react";
 import { ClickAwayListener } from "@mui/base/ClickAwayListener";
 import { Editor } from "@tinymce/tinymce-react";
 import { parse } from "node-html-parser";
+import { categoryParser2 } from "../../../../../shared/utils/parse";
 import {
-  // correctTableFormat,
-  categoryParser2,
-} from "../../../../shared/utils/parse";
-import { IDNDContainer, IDNDItem } from "../../../../shared/models/interfaces";
+  IDNDContainer,
+  IDNDItem,
+} from "../../../../../shared/models/interfaces";
 
 export const ItemEditor = memo(
   ({
@@ -45,26 +45,23 @@ export const ItemEditor = memo(
                 tag: validElements[0].rawTagName,
                 content: validElements[0].outerHTML,
               },
-      };
-
+      };      
       // remove first container: this container is an owner of replaced item.
       const containers = categoryParser2(content).slice(1);
+      console.log(replaceItem, containers);
       onClickAway(replaceItem as IDNDItem, containers);
-      // Missing creating table in editor: need to be fixed.
-      // if (
-      //   updatedContent.includes("<table>") &&
-      //   !updatedContent.includes("<thead>")
-      // ) {
-      //   updatedContent = correctTableFormat(updatedContent);
-      // }
     }, [onClickAway, item]);
 
     return (
       <ClickAwayListener onClickAway={onClickAwayAction}>
         <div>
           <Editor
+<<<<<<< HEAD:src/pages/portal/reports/components/DND/ItemEditor.tsx
+            apiKey={import.meta.env.VITE_TINYMCE_API_KEY}
+=======
             // apiKey={import.meta.env.VITE_TINYMCE_API_KEY}
             apiKey="69ipaoh1jiynpwws60b1nj6fht4zidofpoagklhvb3wnh07a"
+>>>>>>> develop:src/pages/portal/reports/templates/ItemEditor.tsx
             onInit={(_, editor) => (editorRef.current = editor)}
             // inline
             initialValue={item.value.content}
@@ -75,10 +72,11 @@ export const ItemEditor = memo(
                 "blocks | bold italic" +
                 "alignleft aligncenter " +
                 "alignright alignjustify | bullist numlist outdent indent | " +
-                "table | image",
+                "table tablerowheader | image",
               width: "100%",
               height: 240,
               automatic_uploads: true,
+              table_header_type: "sectionCells",
               file_picker_types: "image",
               file_picker_callback: (cb) => {
                 const input = document.createElement("input");

@@ -417,33 +417,6 @@ export const initializeHtmlResponse = (htmlString: string) => {
   return categorizedHtml;
 };
 
-const extractRows = (inputString: string) => {
-  const trRegex = /<tr[^>]*>((?:.|\n)*?)<\/tr>/gi;
-  const matches = inputString.match(trRegex);
-
-  if (!matches) {
-    return []; // Return null if no <tr> tags are found
-  }
-
-  const rowContents = matches.map((match) => {
-    const contentMatch = match.match(/<tr[^>]*>((?:.|\n)*?)<\/tr>/i);
-    return contentMatch ? contentMatch[1] : null;
-  });
-
-  return rowContents;
-};
-
-export const correctTableFormat = (inputString: string) => {
-  const rows = extractRows(inputString);
-  const header = rows[0]!
-    .replaceAll("<td>", "<th>")
-    .replaceAll("</td>", "</th>");
-  return `<table><thead><tr>${header}</tr></thead><tbody>${rows
-    .slice(1)
-    .map((row) => "<tr>" + row + "</tr>")
-    .join("")}</tbody></table>`;
-};
-
 export const convertCSVToTable = (data: string[][]) => {
   const header = data[0].map((item) => `<th>${item}</th>`).join("");
   const rows = data

@@ -22,12 +22,12 @@ export const ItemActionPane = memo(
     item,
     onAddNew,
     onRemove,
-    onShowVisualization,
+    onShowViz,
   }: {
     item: IDNDItem;
     onAddNew: () => void;
     onRemove: () => void;
-    onShowVisualization: () => void;
+    onShowViz: () => void;
   }) => {
     return (
       <ActionPane className="no-print">
@@ -37,7 +37,7 @@ export const ItemActionPane = memo(
         {item.value.tag === "table" && (
           <IconButton
             size="small"
-            onClick={onShowVisualization}
+            onClick={onShowViz}
             title="Visualize"
           >
             <BarChartIcon sx={{ fontSize: 16, color: "black" }} />
