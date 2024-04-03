@@ -99,7 +99,7 @@ export const ReportTemplate = forwardRef(
       ({ filename, quote }: { filename: string; quote: string }) => {
         console.log(filename);
         console.log(quote);
-        setCitationData({ filename: new URL(`/static/${setup.id}/${filename}.pdf`, import.meta.env.VITE_API_URL).toString(), quote });
+        setCitationData({ filename: new URL(`/api/static/${setup.id}/${filename}.pdf`, import.meta.env.VITE_API_URL).toString(), quote });
       },
       []
     );
