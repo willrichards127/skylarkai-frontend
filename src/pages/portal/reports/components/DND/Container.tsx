@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { Box } from "@mui/material";
 import { useDrop, useDrag } from "react-dnd";
 import { Item } from "./Item";
@@ -102,11 +102,26 @@ export const Container = ({
 
   drag(drop(ref));
 
+  console.log(children);
+
+  const isQuestionContainer = useMemo(
+    () =>
+      children.length === 1 &&
+      children[0].value.content.includes("heading-question"),
+    [children]
+  );
+
   return (
     <Box
-      className={children.length > 1 ? "dnd-container" : "no-print"} // by default there's one child for action pane
+      className={
+        children.length > 0 ? "dnd-container" : "dnd-container no-print"
+      }
       sx={{
-        display: "flex",
+        display: isQuestionContainer
+          ? isShowQuestion
+            ? "flex"
+            : "none"
+          : "flex",
         width: "100%",
         padding: "4px",
         marginBottom: "2px",
