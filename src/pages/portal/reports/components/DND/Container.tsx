@@ -104,14 +104,12 @@ export const Container = ({
 
   return (
     <Box
-      className={children.length > 0 ? "dnd-container" : "no-print"}
+      className={children.length > 1 ? "dnd-container" : "no-print"} // by default there's one child for action pane
       sx={{
         display: "flex",
         width: "100%",
         padding: "4px",
         marginBottom: "2px",
-        height: children.length > 0 ? "auto" : "36px",
-        minHeight: "36px",
         opacity: isDragging ? 0.4 : 1,
         borderTop: isOver ? "2px solid blue" : "none",
         position: "relative",

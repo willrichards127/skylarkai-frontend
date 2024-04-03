@@ -60,18 +60,8 @@ export const ReportTemplate = forwardRef(
     const [uploadedFiles, setUploadedFiles] =
       useState<Record<string, File[]>>();
 
-    const [reportItems, setReportItems] = useState<IDNDContainer[]>(
-      initialReportItems
-      // .map((item) => ({
-      //   ...item,
-      //   value: {
-      //     ...item.value,
-      //     ...(item.value.tag === "table" && {
-      //       metadata: { ...parseTable(item.value.content), visual: "table" },
-      //     }),
-      //   },
-      // }))
-    );
+    const [reportItems, setReportItems] =
+      useState<IDNDContainer[]>(initialReportItems);
 
     const onRemoveFiles = useCallback((type: string, filename: string) => {
       setUploadedFiles((prev) => {
@@ -99,7 +89,13 @@ export const ReportTemplate = forwardRef(
       ({ filename, quote }: { filename: string; quote: string }) => {
         console.log(filename);
         console.log(quote);
-        setCitationData({ filename: new URL(`/api/static/${setup.id}/${filename}.pdf`, import.meta.env.VITE_API_URL).toString(), quote });
+        setCitationData({
+          filename: new URL(
+            `/api/static/${setup.id}/${filename}.pdf`,
+            import.meta.env.VITE_API_URL
+          ).toString(),
+          quote,
+        });
       },
       []
     );
