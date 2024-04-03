@@ -299,25 +299,42 @@ export const categoryParser3 = (htmlString: string) => {
       const children: IDNDItem[] = [];
       el.childNodes.forEach((child: any) => {
         if (child.firstChild) {
-          children.push({
-            id: getNewId(),
-            parentId: containerId,
-            type: "ITEM",
-            value:
-              child.firstChild.rawTagName === "p" &&
-              marked
-                .parse(child.firstChild.innerHTML)
-                .toString()
-                .includes("<table>")
-                ? {
-                    content: marked.parse(child.firstChild.innerHTML) as string,
-                    tag: "table",
-                  }
-                : {
-                    tag: child.firstChild.rawTagName,
-                    content: parseCitation(child.innerHTML),
-                  },
-          });
+          if (child.rawAttrs.includes("viz-item")) {
+            console.log(child.attributes);
+            children.push({
+              id: getNewId(),
+              parentId: containerId,
+              type: "ITEM",
+              value: {
+                content: child.innerHTML,
+                tag: child.firstChild.rawTagName, // table
+                vizType: child.attributes["data-viz-type"],
+                axis: child.attributes["data-viz-option"],
+              },
+            });
+          } else {
+            children.push({
+              id: getNewId(),
+              parentId: containerId,
+              type: "ITEM",
+              value:
+                child.firstChild.rawTagName === "p" &&
+                marked
+                  .parse(child.firstChild.innerHTML)
+                  .toString()
+                  .includes("<table>")
+                  ? {
+                      content: marked.parse(
+                        child.firstChild.innerHTML
+                      ) as string,
+                      tag: "table",
+                    }
+                  : {
+                      tag: child.firstChild.rawTagName,
+                      content: parseCitation(child.innerHTML),
+                    },
+            });
+          }
         }
       });
       sections.push({

@@ -119,18 +119,18 @@ export interface IChat {
 export interface IReportItemValue {
   tag: string;
   content: string;
-  metadata?: {
-    rows: TRow[];
-    columns: TColumn[];
-    visual?: string;
-    axis?: {
-      x: string;
-      y: string[];
-    };
-  };
+  vizType?: string; // "table" | "bar" | "column" etc..
+  axis?: string; // json stringified
 }
 
-export type IReportItemMetadata = Required<IReportItemValue>["metadata"];
+export type IReportItemMetadata = {
+  rows: TRow[];
+  columns: TColumn[];
+  axis: {
+    x: string;
+    y: string[];
+  };
+};
 export type IAxis = Required<IReportItemMetadata>["axis"];
 export type IAxisKey = keyof IAxis;
 
@@ -163,11 +163,12 @@ export interface ITemplateItem extends TTreeData {
   children?: ITemplateItem[];
 }
 
-export interface ITemplateItemPure extends Pick<TTreeData, "name" | "template" | "isUnChecked"> {
+export interface ITemplateItemPure
+  extends Pick<TTreeData, "name" | "template" | "isUnChecked"> {
   children?: ITemplateItemPure[];
 }
 
 export interface ITemplate {
   title: string;
-  data: ITemplateItemPure[]
+  data: ITemplateItemPure[];
 }

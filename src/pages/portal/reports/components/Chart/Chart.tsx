@@ -1,34 +1,22 @@
-import { memo, useMemo } from "react";
-import { Box } from "@mui/material";
+import { useMemo, memo } from "react";
 import { chartTypeConfig } from "./config";
 import { TChartType } from "../../../../../shared/models/types";
 import ApexChart from "react-apexcharts";
 import { IReportItemMetadata } from "../../../../../shared/models/interfaces";
 
-const colors = [
-  "#008FFB",
-  "#00E396",
-  "#FEB019",
-  "#FF4560",
-  "#775DD0",
-  "#3F51B5",
-  "#03A9F4",
-  "#4CAF50",
-  "#F9CE1D",
-  "#FF9800",
-];
-
 export const Chart = memo(
   ({
     data,
+    vizType = "bar",
     height = 320,
     title,
   }: {
     data: IReportItemMetadata;
+    vizType?: string;
     title?: string;
     height?: number | string;
   }) => {
-    const chartType = data.visual as TChartType;
+    const chartType = vizType as TChartType;
     const config = chartTypeConfig[chartType];
 
     const chartData = useMemo(() => {
@@ -40,9 +28,9 @@ export const Chart = memo(
           const colLabel = data.columns[+xIndex].label;
           categories = data.rows.map((row) => row[colLabel]);
         } else {
-          categories = Object.keys(data.rows[+xIndex])
-            .filter((key) => key !== "isUnChecked")
-            .map((key) => data.rows[+xIndex][key]);
+          categories = Object.keys(data.rows[+xIndex]).map(
+            (key) => data.rows[+xIndex][key]
+          );
         }
 
         const series = data.axis.y.map((eachY) => {
@@ -54,10 +42,10 @@ export const Chart = memo(
             sData = data.rows.map((row) => +row[colLabel]);
             sTitle = colLabel;
           } else {
-            sData = Object.keys(data.rows[+index])
-              .filter((key) => key !== "isUnChecked")
-              .map((key) => +data.rows[+index][key]);
-            sTitle = `Row-${index}`
+            sData = Object.keys(data.rows[+index]).map(
+              (key) => +data.rows[+index][key]
+            );
+            sTitle = `Row-${index}`;
           }
 
           return { data: sData, name: sTitle };
@@ -73,57 +61,26 @@ export const Chart = memo(
     if (!chartData) return <>Unable to show this chart.</>;
 
     return (
-      <Box className="chart-wrapper">
-        {/* <Box
-          className="print-legend"
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: 1,
-            visibility: "hidden",
-          }}
-        >
-          {(["pie", "donut"].includes(chartType)
-            ? chartConfig.categories!
-            : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              chartConfig.series.map((item: any) => item.name)
-          ).map((category: string | number, index: number) => (
-            <Box
-              key={category}
-              style={{
-                display: "flex",
-                fontSize: 12,
-                alignItems: "center",
-                margin: "0 8px",
-              }}
-            >
-              <svg width={15} height={10}>
-                <rect width={10} height={10} fill={colors[index]} />
-              </svg>
-              {category}
-            </Box>
-          ))}
-        </Box> */}
+      <div
+        style={{ background: "white", color: "black", borderRadius: "4px" }}
+        className="chart"
+        data-options={data}
+      >
         <ApexChart
           options={{
-            colors,
             chart: {
-              id: 'chart-1',
+              id: "chart-1",
               animations: {
                 enabled: false,
               },
-              background: "transparent",
               toolbar: {
                 show: false,
               },
               ...config.chart,
             },
             dataLabels: {
-              enabled: false,
-              offsetX: -6,
-              style: {
-                fontSize: "12px",
-              },
+              enabled: true,
+              formatter: (value) => value.toString(),
             },
             stroke: {
               show: false,
@@ -142,13 +99,18 @@ export const Chart = memo(
             }),
             xaxis: {
               categories: chartData.categories,
-              // tickPlacement: "on",
             },
-            // yaxis: {
-            //   title: {
-            //     text: chartConfig.yAxisLabel,
-            //   },
-            // },
+            yaxis: {
+              axisBorder: {
+                show: false,
+              },
+              axisTicks: {
+                show: false,
+              },
+              labels: {
+                show: false,
+              },
+            },
             ...(["pie", "donut"].includes(chartType)
               ? {
                   legend: {
@@ -175,7 +137,7 @@ export const Chart = memo(
           width="100%"
           height={height}
         />
-      </Box>
+      </div>
     );
   }
 );

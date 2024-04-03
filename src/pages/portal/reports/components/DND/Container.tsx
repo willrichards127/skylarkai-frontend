@@ -102,8 +102,6 @@ export const Container = ({
 
   drag(drop(ref));
 
-  console.log(children);
-
   const isQuestionContainer = useMemo(
     () =>
       children.length === 1 &&
