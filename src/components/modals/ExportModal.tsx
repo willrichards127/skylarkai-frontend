@@ -63,8 +63,7 @@ export const ExportModal = memo(
       // for (const chartEl of chartEls) {
       //   chartEl.innerHTML = `<img src="${value.imgURI.replace('image/png', 'image/jpeg')}" width="672" alt="chart" />`;
       // }
-      console.log(container.innerHTML)
-      generatePdf(container.innerHTML, reportName, "Skylark");
+      generatePdf(container.innerHTML, reportName, "Skylark", true);
       onClose();
       // });
     }, [onClose, exportContent, reportName]);
