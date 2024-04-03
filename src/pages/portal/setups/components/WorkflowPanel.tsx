@@ -23,6 +23,7 @@ import ReactFlow, {
   Connection,
   Edge,
   ReactFlowInstance,
+  Controls,
 } from "reactflow";
 import { XIconButton } from "../../../../components/buttons/XIconButton";
 import CustomNode from "./custom-nodes/CustomNode";
@@ -314,7 +315,9 @@ const WorkflowPanel = memo(
           onDragOver={onDragOver}
           nodeTypes={nodeTypes}
           fitView={false}
-        />
+        >
+          <Controls position="bottom-right" />
+        </ReactFlow>
         <Box
           sx={{
             position: "absolute",

@@ -273,7 +273,7 @@ export const MainAppBar = memo(() => {
               >
                 <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
                   <ToolsIcon />
-                  Small Language Model
+                  Setup SLM
                 </Box>
               </Box>
               <Box

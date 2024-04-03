@@ -36,7 +36,7 @@ const ReportsContainer = memo(() => {
         }}
       >
         <Typography variant="h6" fontWeight="bold">
-          My Reports
+          My Analysts
         </Typography>
         <Button
           size="small"
