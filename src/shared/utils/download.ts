@@ -1,17 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { loadStoreValue } from "./storage";
-export const downloadPdf = async ({
-  graph_id,
-  company_name,
-  ticker,
-  analysis_type,
-  filename,
-}: {
+export const downloadPdf = async ({graph_id, ...options}: {
   graph_id: number;
-  ticker: string;
-  company_name: string;
   analysis_type: string;
   filename: string;
+  ticker?: string;
 }) => {
   try {
     const token = loadStoreValue("token");
@@ -20,13 +13,7 @@ export const downloadPdf = async ({
     myHeaders.append("Content-Type", "application/json");
     myHeaders.append("Accept", "application/pdf");
 
-    const raw = JSON.stringify({
-      graph_id,
-      company_name,
-      ticker,
-      analysis_type,
-      filename,
-    });
+    const raw = JSON.stringify(options);
     const requestOptions = {
       method: "POST",
       headers: myHeaders,
