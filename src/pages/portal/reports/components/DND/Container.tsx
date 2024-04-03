@@ -112,7 +112,7 @@ export const Container = ({
   return (
     <Box
       className={
-        children.length > 0 ? "dnd-container" : "dnd-container no-print"
+        children.length > 0 ? "dnd-container" : "dnd-container no-save no-print"
       }
       sx={{
         display: isQuestionContainer

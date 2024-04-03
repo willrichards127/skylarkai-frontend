@@ -44,57 +44,7 @@ const getUnitFromColumn = (columnLabel: string) => {
     return "";
   }
 };
-/*
-const convertObjTable = (data: any) => {
-  try {
-    if (!data[0].props.children.props.children)
-      return {
-        headers: [],
-        rows: [],
-      };
 
-    const columns = data[0].props.children.props.children.map((column: any) =>
-      column.props.children && column.props.children.length
-        ? (column.props.children || "").trim()
-        : ""
-    );
-
-    const rows = (data && data.length >= 1 ? data[1].props.children : []).map(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (row: any) =>
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        row.props.children.map((cell: any) =>
-          cell.props.children && cell.props.children.length
-            ? (cell.props.children || "").trim()
-            : ""
-        )
-    );
-
-    const objRows: Record<string, any>[] = [];
-
-    for (let i = 0; i < rows.length; i++) {
-      const row: Record<string, string> = {};
-
-      for (let j = 0; j < columns.length; j++) {
-        if (["N/A", "NA", "NaN", ""].includes(rows[i][j].trim()))
-          row[columns[j]] = "-";
-        else row[columns[j]] = rows[i][j].trim();
-      }
-      objRows.push(row);
-    }
-
-    return {
-      headers: columns,
-      rows: objRows,
-    };
-  } catch (err) {
-    return {
-      headers: [],
-      rows: [],
-    };
-  }
-};
-*/
 export const parseTable = (data: string) => {
   const $ = cheerios.load(data);
 
@@ -300,7 +250,6 @@ export const categoryParser3 = (htmlString: string) => {
       el.childNodes.forEach((child: any) => {
         if (child.firstChild) {
           if (child.rawAttrs.includes("viz-item")) {
-            console.log(child.attributes);
             children.push({
               id: getNewId(),
               parentId: containerId,
@@ -400,14 +349,18 @@ export const initializeHtmlResponse = (htmlString: string) => {
     .forEach((el: any) => {
       categorizedHtml += '<div class="dnd-container"">';
       // replace <pre>, <code> tags and parse inner content again
-      categorizedHtml += `<div class="dnd-item">${marked.parse(
-        el.outerHTML
-          .replaceAll("<pre>", "")
-          .replaceAll("<code>", "")
-          .replaceAll("</pre>", "")
-          .replaceAll("</code>", "")
-      )}</div>`;
-      categorizedHtml += "</div>";
+      const htmlContent = el.outerHTML
+        .replaceAll("```", "")
+        .replaceAll("<pre>", "")
+        .replaceAll("<code>", "")
+        .replaceAll("</pre>", "")
+        .replaceAll("</code>", "");
+      if (htmlContent.trim()) {
+        categorizedHtml += `<div class="dnd-item">${marked
+          .parse(htmlContent)
+          .toString()}</div>`;
+        categorizedHtml += "</div>";
+      }
     });
   return categorizedHtml;
 };

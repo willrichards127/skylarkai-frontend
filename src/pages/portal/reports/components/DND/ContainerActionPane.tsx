@@ -21,7 +21,7 @@ const ActionPane = styled(Box)({
 export const ContainerActionPane = memo(
   ({ onAddNew, onRemove }: { onAddNew: () => void; onRemove: () => void }) => {
     return (
-      <ActionPane className="no-print">
+      <ActionPane className="no-save no-print">
         <DragIndicatorIcon
           sx={{ color: "black", fontSize: 16, cursor: "grab" }}
         />

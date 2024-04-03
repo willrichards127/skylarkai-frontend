@@ -31,7 +31,7 @@ export const ItemActionPane = memo(
     onShowViz: () => void;
   }) => {
     return (
-      <ActionPane className="no-print">
+      <ActionPane className="no-save no-print">
         <IconButton size="small" onClick={onAddNew} title="Add New Item">
           <AddIcon sx={{ fontSize: 16, color: "black" }} />
         </IconButton>
