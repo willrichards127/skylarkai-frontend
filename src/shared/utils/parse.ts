@@ -111,9 +111,7 @@ export const parseTable = (data: string) => {
         unit,
         type: unit ? "numeric" : "category",
       } as TColumn;
-      if ($(col).hasClass("table-cell-hide")) {
-        column["isUnChecked"] = true;
-      }
+
       columns.push(column);
     });
 
@@ -134,9 +132,6 @@ export const parseTable = (data: string) => {
         });
 
       if (Object.keys(rowData).length) {
-        if ($(row).hasClass("table-row-hide")) {
-          rowData["isUnChecked"] = true;
-        }
         rows.push(rowData);
       }
     });
@@ -145,30 +140,6 @@ export const parseTable = (data: string) => {
     rows,
     columns,
   };
-  // const json = HTMLTableParser.parse(data);
-
-  // if (json.results) {
-  //   const headers = Object.keys(json.results[0][0]);
-  //   const columns = headers.map((header: string) => {
-  //     const unit = getUnitFromColumn(header);
-  //     return { label: header, unit, type: unit ? "numeric" : "category" } as TColumn;
-  //   });
-  //   return {
-  //     columns,
-  //     rows: json.results[0].map((row: any) => {
-  //       const newRow: Record<string, string> = {};
-  //       for (const key in row) {
-  //         const column = columns.find((col: any) => col.label === key);
-  //         if (column!.type === "numeric") {
-  //           newRow[key] = row[key].replace(/\$|%|billion|million/g, "");
-  //         } else {
-  //           newRow[key] = row[key];
-  //         }
-  //       }
-  //       return newRow;
-  //     }),
-  //   };
-  // }
 };
 
 export const parse2Apex = (
@@ -328,25 +299,42 @@ export const categoryParser3 = (htmlString: string) => {
       const children: IDNDItem[] = [];
       el.childNodes.forEach((child: any) => {
         if (child.firstChild) {
-          children.push({
-            id: getNewId(),
-            parentId: containerId,
-            type: "ITEM",
-            value:
-              child.firstChild.rawTagName === "p" &&
-              marked
-                .parse(child.firstChild.innerHTML)
-                .toString()
-                .includes("<table>")
-                ? {
-                    content: marked.parse(child.firstChild.innerHTML) as string,
-                    tag: "table",
-                  }
-                : {
-                    tag: child.firstChild.rawTagName,
-                    content: parseCitation(child.innerHTML),
-                  },
-          });
+          if (child.rawAttrs.includes("viz-item")) {
+            console.log(child.attributes);
+            children.push({
+              id: getNewId(),
+              parentId: containerId,
+              type: "ITEM",
+              value: {
+                content: child.innerHTML,
+                tag: child.firstChild.rawTagName, // table
+                vizType: child.attributes["data-viz-type"],
+                axis: child.attributes["data-viz-option"],
+              },
+            });
+          } else {
+            children.push({
+              id: getNewId(),
+              parentId: containerId,
+              type: "ITEM",
+              value:
+                child.firstChild.rawTagName === "p" &&
+                marked
+                  .parse(child.firstChild.innerHTML)
+                  .toString()
+                  .includes("<table>")
+                  ? {
+                      content: marked.parse(
+                        child.firstChild.innerHTML
+                      ) as string,
+                      tag: "table",
+                    }
+                  : {
+                      tag: child.firstChild.rawTagName,
+                      content: parseCitation(child.innerHTML),
+                    },
+            });
+          }
         }
       });
       sections.push({

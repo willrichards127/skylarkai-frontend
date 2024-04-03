@@ -15,6 +15,7 @@ const ActionPane = styled(Box)({
   borderRadius: 4,
   alignItems: "center",
   display: "none",
+  zIndex: 99999
 });
 
 export const ItemActionPane = memo(
