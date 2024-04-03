@@ -382,7 +382,14 @@ export const initializeHtmlResponse = (htmlString: string) => {
     .filter((el: any) => el.nodeType !== Node.TEXT_NODE) // Filter out text nodes
     .forEach((el: any) => {
       categorizedHtml += '<div class="dnd-container"">';
-      categorizedHtml += `<div class="dnd-item">${el.outerHTML}</div>`;
+      // replace <pre>, <code> tags and parse inner content again
+      categorizedHtml += `<div class="dnd-item">${marked.parse(
+        el.outerHTML
+          .replaceAll("<pre>", "")
+          .replaceAll("<code>", "")
+          .replaceAll("</pre>", "")
+          .replaceAll("</code>", "")
+      )}</div>`;
       categorizedHtml += "</div>";
     });
   return categorizedHtml;
