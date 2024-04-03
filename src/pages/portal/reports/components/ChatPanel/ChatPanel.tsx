@@ -105,7 +105,8 @@ export const ChatPanel = memo(
       generatePdf(
         `<h1>Chat History ${today}</h1><br />${container.innerHTML}`,
         `Chat history ${today}`,
-        "Skylark"
+        "Skylark",
+        true
       );
     }, []);
 

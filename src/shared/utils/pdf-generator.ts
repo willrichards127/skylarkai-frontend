@@ -1,3 +1,5 @@
+import { GState, jsPDF } from "jspdf";
+
 import pdfMake from "pdfmake/build/pdfmake";
 // import {PageSize} from 'pdfmake/interfaces'
 import html2PdfMake from "html-to-pdfmake";
@@ -16,32 +18,64 @@ pdfMake.vfs = {
 export const generatePdf = (
   htmlContent: string,
   fileName: string,
-  watermark?: string
+  watermark?: string,
+  alternative?: boolean
 ) => {
-  const content = html2PdfMake(htmlContent, { tableAutoSize: true });
-  const docDefinition = {
-    ...(watermark && {
-      watermark: {
-        text: watermark,
-        color: "blue",
-        opacity: 0.1,
-        bold: true,
-        angle: -45,
+  if (alternative) {
+    const doc = new jsPDF({ format: "a4", unit: "px" });
+    doc.html(`<div style="width:794px">${htmlContent}</div>`, {
+      autoPaging: 'text',
+      margin: [24, 0, 24, 0],
+      html2canvas: {
+        width: 794,
+        scale: 0.57,
       },
-    }),
-    // pageSize: 'A4' as PageSize,
-    // pageSize: {
-    //   width: 792,
-    //   height: 'auto'
-    // } as PageSize,
-    content,
-    // styles: {
-    //   wrapper: {
-    //     display: "flex",
-    //   },
-    // },
-  };
-  pdfMake.createPdf(docDefinition).download(fileName);
+      callback: function (doc) {
+        if (watermark) {
+          const totalPages = doc.getNumberOfPages();
+
+          for (let i = 1; i <= totalPages; i++) {
+            doc.setPage(i);
+            doc.saveGraphicsState();
+            doc.setGState(new GState({ opacity: 0.1, "stroke-opacity": 0.1 }));
+            doc.setTextColor(0, 0, 255);
+            doc.setFont("Roboto-Italic", "italic", 700);
+            doc.setFontSize(200);
+            doc.text(watermark, 100, doc.internal.pageSize.height - 80, {
+              angle: 50,
+            });
+            doc.restoreGraphicsState();
+          }
+        }
+        doc.save(fileName);
+      },
+    });
+  } else {
+    const content = html2PdfMake(htmlContent, { tableAutoSize: true });
+    const docDefinition = {
+      ...(watermark && {
+        watermark: {
+          text: watermark,
+          color: "blue",
+          opacity: 0.1,
+          bold: true,
+          angle: -45,
+        },
+      }),
+      // pageSize: 'A4' as PageSize,
+      // pageSize: {
+      //   width: 792,
+      //   height: 'auto'
+      // } as PageSize,
+      content,
+      // styles: {
+      //   wrapper: {
+      //     display: "flex",
+      //   },
+      // },
+    };
+    pdfMake.createPdf(docDefinition).download(fileName);
+  }
 };
 
 export const getPdfInBase64 = async (
