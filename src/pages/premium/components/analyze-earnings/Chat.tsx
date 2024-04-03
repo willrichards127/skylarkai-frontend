@@ -52,7 +52,6 @@ export const Chat = ({
     const downloadFile = async () => {
       const pdfBuffer = await downloadPdf({
         graph_id: sys_graph_id!,
-        company_name: instance.company_name,
         ticker: instance.ticker,
         analysis_type: "transcript",
         filename: instance.view_doc!,

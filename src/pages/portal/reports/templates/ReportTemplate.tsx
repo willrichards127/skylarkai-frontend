@@ -90,10 +90,7 @@ export const ReportTemplate = forwardRef(
         console.log(filename);
         console.log(quote);
         setCitationData({
-          filename: new URL(
-            `/api/static/${setup.id}/${filename}.pdf`,
-            import.meta.env.VITE_API_URL
-          ).toString(),
+          filename: `${filename}.pdf`,
           quote,
         });
       },
@@ -323,7 +320,11 @@ export const ReportTemplate = forwardRef(
           <CitationModal
             open={!!citationData}
             onClose={() => setCitationData(undefined)}
-            data={citationData}
+            data={{
+              ...citationData,
+              graph_id: setup.id!,
+              analysis_type: "financial_diligence",
+            }}
           />
         ) : null}
       </>

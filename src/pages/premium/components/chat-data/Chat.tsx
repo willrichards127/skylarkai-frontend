@@ -75,7 +75,6 @@ export const Chat = ({
 
     const raw = JSON.stringify({
       graph_id: sys_graph_id!,
-      company_name: instance.company_name,
       ticker: instance.ticker,
       analysis_type: "edgar",
       filename: instance.view_doc,
