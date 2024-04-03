@@ -111,9 +111,7 @@ export const parseTable = (data: string) => {
         unit,
         type: unit ? "numeric" : "category",
       } as TColumn;
-      if ($(col).hasClass("table-cell-hide")) {
-        column["isUnChecked"] = true;
-      }
+
       columns.push(column);
     });
 
@@ -134,9 +132,6 @@ export const parseTable = (data: string) => {
         });
 
       if (Object.keys(rowData).length) {
-        if ($(row).hasClass("table-row-hide")) {
-          rowData["isUnChecked"] = true;
-        }
         rows.push(rowData);
       }
     });
@@ -145,30 +140,6 @@ export const parseTable = (data: string) => {
     rows,
     columns,
   };
-  // const json = HTMLTableParser.parse(data);
-
-  // if (json.results) {
-  //   const headers = Object.keys(json.results[0][0]);
-  //   const columns = headers.map((header: string) => {
-  //     const unit = getUnitFromColumn(header);
-  //     return { label: header, unit, type: unit ? "numeric" : "category" } as TColumn;
-  //   });
-  //   return {
-  //     columns,
-  //     rows: json.results[0].map((row: any) => {
-  //       const newRow: Record<string, string> = {};
-  //       for (const key in row) {
-  //         const column = columns.find((col: any) => col.label === key);
-  //         if (column!.type === "numeric") {
-  //           newRow[key] = row[key].replace(/\$|%|billion|million/g, "");
-  //         } else {
-  //           newRow[key] = row[key];
-  //         }
-  //       }
-  //       return newRow;
-  //     }),
-  //   };
-  // }
 };
 
 export const parse2Apex = (

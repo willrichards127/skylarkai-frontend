@@ -3,7 +3,7 @@ import { useDrag, useDrop } from "react-dnd";
 import { Markdown } from "../Markdown";
 import { ItemWrapper } from "./ItemWrapper";
 import { ItemActionPane } from "./ItemActionPane";
-import { VizDrawer } from "./VizDrawer";
+import { VizModal } from "./VizModal";
 import {
   IReportItemValue,
   TDNDItemType,
@@ -43,7 +43,7 @@ export const Item = ({
   }) => void;
 }) => {
   const [isEdit, setIsEdit] = useState<boolean>(false);
-  const [isShowViz, setIsShowViz] = useState<boolean>(false);
+  const [vizModal, showVizModal] = useState<boolean>(false);
   const ref = useRef<HTMLDivElement>(null);
   const [{ handlerId }, drop] = useDrop({
     accept: "ITEM",
@@ -94,7 +94,7 @@ export const Item = ({
   );
 
   const onShowViz = useCallback(() => {
-    setIsShowViz(true);
+    showVizModal(true);
   }, []);
 
   drag(drop(ref));
@@ -128,8 +128,12 @@ export const Item = ({
       ) : (
         <Markdown html={value.content} onCitationLink={onCitationLink} />
       )}
-      {isShowViz && (
-        <VizDrawer open={isShowViz} onClose={() => setIsShowViz(false)} />
+      {vizModal && (
+        <VizModal
+          open={vizModal}
+          tableHtml={value.content}
+          onClose={() => showVizModal(false)}
+        />
       )}
     </ItemWrapper>
   );
