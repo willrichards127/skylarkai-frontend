@@ -40,7 +40,11 @@ export const CitationModal = memo(
         header={<Box textAlign="center">Citation</Box>}
         size="md"
       >
-        {file && <PdfViewer pdfUrl={file} keyword={data.quote} />}
+        {file && (
+          <div style={{ height: 800 }}>
+            <PdfViewer pdfUrl={file} keyword={data.quote} />
+          </div>
+        )}
       </XModal>
     );
   }

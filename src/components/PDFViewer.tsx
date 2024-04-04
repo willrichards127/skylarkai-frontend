@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { Viewer, Worker } from "@react-pdf-viewer/core";
 import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
-import { generateMatches } from "../shared/utils/basic";
+import { OnHighlightKeyword, searchPlugin } from "@react-pdf-viewer/search";
+// import { generateMatches } from "../shared/utils/basic";
+
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
-import "@react-pdf-viewer/search/lib/styles/index.css";
+import "@react-pdf-viewer/highlight/lib/styles/index.css";
 
 export const PdfViewer = ({
   pdfUrl,
@@ -17,26 +19,24 @@ export const PdfViewer = ({
   const handleDocumentLoad = () => setDocumentLoaded(true);
 
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
-  const { toolbarPluginInstance } = defaultLayoutPluginInstance;
-  const { searchPluginInstance } = toolbarPluginInstance;
-  const { highlight } = searchPluginInstance;
-
-  useEffect(() => {
-    setDocumentLoaded(false);
-  }, [keyword]);
+  const searchPluginInstance = searchPlugin();
+  const { highlight} = searchPluginInstance;
 
   useEffect(() => {
     if (isDocumentLoaded && keyword) {
-      highlight(generateMatches(keyword));
+      
+      const search = keyword.split(" ").slice(0, 3).join(" ");
+      console.log("-------------", keyword, search);
+      highlight([search]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDocumentLoaded]);
+  }, [isDocumentLoaded, keyword]);
 
   return (
     <Worker workerUrl="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js">
       <Viewer
         fileUrl={pdfUrl}
-        plugins={[defaultLayoutPluginInstance]}
+        plugins={[defaultLayoutPluginInstance, searchPluginInstance]}
         onDocumentLoad={handleDocumentLoad}
       />
     </Worker>
