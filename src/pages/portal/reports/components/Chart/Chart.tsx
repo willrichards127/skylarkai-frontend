@@ -3,6 +3,7 @@ import { chartTypeConfig } from "./config";
 import { TChartType } from "../../../../../shared/models/types";
 import ApexChart from "react-apexcharts";
 import { IReportItemMetadata } from "../../../../../shared/models/interfaces";
+import { parseCellData } from "../../../../../shared/utils/parse";
 
 export const Chart = memo(
   ({
@@ -39,11 +40,11 @@ export const Chart = memo(
           const [direct, index] = eachY.split("-");
           if (direct === "col") {
             const colLabel = data.columns[+index].label;
-            sData = data.rows.map((row) => +row[colLabel]);
+            sData = data.rows.map((row) => parseCellData(row[colLabel]));
             sTitle = colLabel;
           } else {
-            sData = Object.keys(data.rows[+index]).map(
-              (key) => +data.rows[+index][key]
+            sData = Object.keys(data.rows[+index]).map((key) =>
+              parseCellData(data.rows[+index][key])
             );
             sTitle = `Row-${index}`;
           }
@@ -80,10 +81,18 @@ export const Chart = memo(
             },
             dataLabels: {
               enabled: true,
-              formatter: (value) => value.toString(),
+              formatter: (value) => {
+                if (["pie", "donut"].includes(config.chart!.type!)) {
+                  return (value as number).toFixed(1) + "%";
+                }
+                return value.toLocaleString();
+              },
+              style: {
+                colors: ['black']
+              }
             },
             stroke: {
-              show: false,
+              show: true,
             },
             tooltip: {
               shared: true,

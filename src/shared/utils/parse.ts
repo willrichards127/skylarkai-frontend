@@ -390,3 +390,20 @@ export const parseObj = (inputString: string) => {
     return [];
   }
 };
+
+export const parseCellData = (data: string) => {
+  // Remove any non-numeric characters except for '.' and 'e' (for scientific notation)
+  const cleanedData = data.replace(/[$,]/g, '');
+
+  // Parse the cleaned data into a numeric value
+  let numericValue = parseFloat(cleanedData);
+
+  // Check if the original data contains 'million' or 'billion' and adjust the numeric value accordingly
+  if (data.toLowerCase().includes('m')) {
+      numericValue *= 1000000;
+  } else if (data.toLowerCase().includes('b')) {
+      numericValue *= 1000000000;
+  }
+
+  return numericValue;
+}

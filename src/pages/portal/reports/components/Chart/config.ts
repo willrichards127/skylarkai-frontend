@@ -18,16 +18,9 @@ export const chartTypeConfig: Record<string, Partial<ApexOptions>> = {
   line: {
     chart: {
       type: "line",
-      dropShadow: {
-        enabled: false,
-        top: 18,
-        left: 7,
-        blur: 10,
-        opacity: 0.2,
-      },
     },
     stroke: {
-      curve: "smooth",
+      curve: "straight",
       width: 4,
     },
     plotOptions: {
