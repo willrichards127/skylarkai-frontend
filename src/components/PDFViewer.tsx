@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Viewer, Worker } from "@react-pdf-viewer/core";
 import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
-import { OnHighlightKeyword, searchPlugin } from "@react-pdf-viewer/search";
+import { searchPlugin } from "@react-pdf-viewer/search";
 // import { generateMatches } from "../shared/utils/basic";
 
 import "@react-pdf-viewer/core/lib/styles/index.css";
