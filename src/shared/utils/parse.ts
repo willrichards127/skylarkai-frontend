@@ -249,7 +249,7 @@ export const categoryParser3 = (htmlString: string) => {
       const children: IDNDItem[] = [];
       el.childNodes.forEach((child: any) => {
         if (child.firstChild) {
-          if (child.rawAttrs.includes("viz-item")) {
+          if (child.rawAttrs?.includes("viz-item")) {
             children.push({
               id: getNewId(),
               parentId: containerId,
