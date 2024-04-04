@@ -45,7 +45,7 @@ export const ItemEditor = memo(
                 tag: validElements[0].rawTagName,
                 content: validElements[0].outerHTML,
               },
-      };      
+      };
       // remove first container: this container is an owner of replaced item.
       const containers = categoryParser2(content).slice(1);
       console.log(replaceItem, containers);
@@ -60,7 +60,7 @@ export const ItemEditor = memo(
             apiKey="69ipaoh1jiynpwws60b1nj6fht4zidofpoagklhvb3wnh07a"
             onInit={(_, editor) => (editorRef.current = editor)}
             // inline
-            initialValue={item.value.content}
+            initialValue={item.value.content.replaceAll("display: none;", "")} // when table is visualized by chart
             init={{
               menubar: false,
               plugins: "lists anchor link image code media table",

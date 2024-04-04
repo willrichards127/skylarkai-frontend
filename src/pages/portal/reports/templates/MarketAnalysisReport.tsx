@@ -61,10 +61,11 @@ export const MarketAnalysisReport = ({
     if (!reportPrintRef.current) return;
     const container = document.createElement("div");
     container.appendChild(reportPrintRef.current.cloneNode(true));
-    const removeItems = container.querySelectorAll(".no-print");
+    const removeItems = container.querySelectorAll(".chart, .no-save");
     for (const item of removeItems) {
       item.remove();
     }
+
     onSaveAction(container.firstElementChild!.innerHTML);
   }, [onSaveAction]);
 

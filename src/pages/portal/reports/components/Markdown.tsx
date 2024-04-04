@@ -5,9 +5,11 @@ import remarkGfm from "remark-gfm";
 
 export const Markdown = ({
   html,
+  isHidden = false,
   onCitationLink,
 }: {
   html: string;
+  isHidden?: boolean;
   onCitationLink: ({
     filename,
     quote,
@@ -105,7 +107,8 @@ export const Markdown = ({
           <table
             {...props}
             style={{
-              width: '100%',
+              display: isHidden ? "none" : "auto",
+              width: "100%",
               borderCollapse: "collapse",
               overflowX: "auto",
             }}

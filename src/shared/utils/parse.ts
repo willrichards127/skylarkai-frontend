@@ -44,57 +44,7 @@ const getUnitFromColumn = (columnLabel: string) => {
     return "";
   }
 };
-/*
-const convertObjTable = (data: any) => {
-  try {
-    if (!data[0].props.children.props.children)
-      return {
-        headers: [],
-        rows: [],
-      };
 
-    const columns = data[0].props.children.props.children.map((column: any) =>
-      column.props.children && column.props.children.length
-        ? (column.props.children || "").trim()
-        : ""
-    );
-
-    const rows = (data && data.length >= 1 ? data[1].props.children : []).map(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (row: any) =>
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        row.props.children.map((cell: any) =>
-          cell.props.children && cell.props.children.length
-            ? (cell.props.children || "").trim()
-            : ""
-        )
-    );
-
-    const objRows: Record<string, any>[] = [];
-
-    for (let i = 0; i < rows.length; i++) {
-      const row: Record<string, string> = {};
-
-      for (let j = 0; j < columns.length; j++) {
-        if (["N/A", "NA", "NaN", ""].includes(rows[i][j].trim()))
-          row[columns[j]] = "-";
-        else row[columns[j]] = rows[i][j].trim();
-      }
-      objRows.push(row);
-    }
-
-    return {
-      headers: columns,
-      rows: objRows,
-    };
-  } catch (err) {
-    return {
-      headers: [],
-      rows: [],
-    };
-  }
-};
-*/
 export const parseTable = (data: string) => {
   const $ = cheerios.load(data);
 
@@ -111,9 +61,7 @@ export const parseTable = (data: string) => {
         unit,
         type: unit ? "numeric" : "category",
       } as TColumn;
-      if ($(col).hasClass("table-cell-hide")) {
-        column["isUnChecked"] = true;
-      }
+
       columns.push(column);
     });
 
@@ -134,9 +82,6 @@ export const parseTable = (data: string) => {
         });
 
       if (Object.keys(rowData).length) {
-        if ($(row).hasClass("table-row-hide")) {
-          rowData["isUnChecked"] = true;
-        }
         rows.push(rowData);
       }
     });
@@ -145,30 +90,6 @@ export const parseTable = (data: string) => {
     rows,
     columns,
   };
-  // const json = HTMLTableParser.parse(data);
-
-  // if (json.results) {
-  //   const headers = Object.keys(json.results[0][0]);
-  //   const columns = headers.map((header: string) => {
-  //     const unit = getUnitFromColumn(header);
-  //     return { label: header, unit, type: unit ? "numeric" : "category" } as TColumn;
-  //   });
-  //   return {
-  //     columns,
-  //     rows: json.results[0].map((row: any) => {
-  //       const newRow: Record<string, string> = {};
-  //       for (const key in row) {
-  //         const column = columns.find((col: any) => col.label === key);
-  //         if (column!.type === "numeric") {
-  //           newRow[key] = row[key].replace(/\$|%|billion|million/g, "");
-  //         } else {
-  //           newRow[key] = row[key];
-  //         }
-  //       }
-  //       return newRow;
-  //     }),
-  //   };
-  // }
 };
 
 export const parse2Apex = (
@@ -328,25 +249,41 @@ export const categoryParser3 = (htmlString: string) => {
       const children: IDNDItem[] = [];
       el.childNodes.forEach((child: any) => {
         if (child.firstChild) {
-          children.push({
-            id: getNewId(),
-            parentId: containerId,
-            type: "ITEM",
-            value:
-              child.firstChild.rawTagName === "p" &&
-              marked
-                .parse(child.firstChild.innerHTML)
-                .toString()
-                .includes("<table>")
-                ? {
-                    content: marked.parse(child.firstChild.innerHTML) as string,
-                    tag: "table",
-                  }
-                : {
-                    tag: child.firstChild.rawTagName,
-                    content: parseCitation(child.innerHTML),
-                  },
-          });
+          if (child.rawAttrs?.includes("viz-item")) {
+            children.push({
+              id: getNewId(),
+              parentId: containerId,
+              type: "ITEM",
+              value: {
+                content: child.innerHTML,
+                tag: child.firstChild.rawTagName, // table
+                vizType: child.attributes["data-viz-type"],
+                axis: child.attributes["data-viz-option"],
+              },
+            });
+          } else {
+            children.push({
+              id: getNewId(),
+              parentId: containerId,
+              type: "ITEM",
+              value:
+                child.firstChild.rawTagName === "p" &&
+                marked
+                  .parse(child.firstChild.innerHTML)
+                  .toString()
+                  .includes("<table>")
+                  ? {
+                      content: marked.parse(
+                        child.firstChild.innerHTML
+                      ) as string,
+                      tag: "table",
+                    }
+                  : {
+                      tag: child.firstChild.rawTagName,
+                      content: parseCitation(child.innerHTML),
+                    },
+            });
+          }
         }
       });
       sections.push({
@@ -412,14 +349,18 @@ export const initializeHtmlResponse = (htmlString: string) => {
     .forEach((el: any) => {
       categorizedHtml += '<div class="dnd-container"">';
       // replace <pre>, <code> tags and parse inner content again
-      categorizedHtml += `<div class="dnd-item">${marked.parse(
-        el.outerHTML
-          .replaceAll("<pre>", "")
-          .replaceAll("<code>", "")
-          .replaceAll("</pre>", "")
-          .replaceAll("</code>", "")
-      )}</div>`;
-      categorizedHtml += "</div>";
+      const htmlContent = el.outerHTML
+        .replaceAll("```", "")
+        .replaceAll("<pre>", "")
+        .replaceAll("<code>", "")
+        .replaceAll("</pre>", "")
+        .replaceAll("</code>", "");
+      if (htmlContent.trim()) {
+        categorizedHtml += `<div class="dnd-item">${marked
+          .parse(htmlContent)
+          .toString()}</div>`;
+        categorizedHtml += "</div>";
+      }
     });
   return categorizedHtml;
 };
@@ -449,3 +390,20 @@ export const parseObj = (inputString: string) => {
     return [];
   }
 };
+
+export const parseCellData = (data: string) => {
+  // Remove any non-numeric characters except for '.' and 'e' (for scientific notation)
+  const cleanedData = data.replace(/[$,]/g, '');
+
+  // Parse the cleaned data into a numeric value
+  let numericValue = parseFloat(cleanedData);
+
+  // Check if the original data contains 'million' or 'billion' and adjust the numeric value accordingly
+  if (data.toLowerCase().includes('m')) {
+      numericValue *= 1000000;
+  } else if (data.toLowerCase().includes('b')) {
+      numericValue *= 1000000000;
+  }
+
+  return numericValue;
+}
