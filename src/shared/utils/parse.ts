@@ -242,7 +242,7 @@ export const categoryParser3 = (htmlString: string) => {
   const root: any = parse(htmlString);
   root.childNodes.forEach((el: any) => {
     // check if el is correct container
-    if (el.rawAttrs.includes("dnd-container")) {
+    if ((el.rawAttrs || "").includes("dnd-container")) {
       const containerId = getNewId();
 
       // get child nodes
@@ -393,17 +393,17 @@ export const parseObj = (inputString: string) => {
 
 export const parseCellData = (data: string) => {
   // Remove any non-numeric characters except for '.' and 'e' (for scientific notation)
-  const cleanedData = data.replace(/[$,]/g, '');
+  const cleanedData = data.replace(/[$,]/g, "");
 
   // Parse the cleaned data into a numeric value
   let numericValue = parseFloat(cleanedData);
 
   // Check if the original data contains 'million' or 'billion' and adjust the numeric value accordingly
-  if (data.toLowerCase().includes('m')) {
-      numericValue *= 1000000;
-  } else if (data.toLowerCase().includes('b')) {
-      numericValue *= 1000000000;
+  if (data.toLowerCase().includes("m")) {
+    numericValue *= 1000000;
+  } else if (data.toLowerCase().includes("b")) {
+    numericValue *= 1000000000;
   }
 
   return numericValue;
-}
+};
