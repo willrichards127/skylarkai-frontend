@@ -4,6 +4,7 @@ import { IResponseAnswer } from "../interfaces";
 import { ISetup } from "../../shared/models/interfaces";
 import { REPORTS_DICT } from "../../shared/models/constants";
 import { groupBy } from "../../shared/utils/base";
+import { handleCatchError } from "./helper";
 
 // const removeRegexes = [
 //   /Based on the available data,/i,
@@ -43,6 +44,54 @@ export const reportApi = createApi({
   baseQuery,
   tagTypes: ["Report"],
   endpoints: (builder) => ({
+    getReport: builder.query<
+      any,
+      {
+        reportId: number;
+      }
+    >({
+      query: ({ reportId }) => `reports/${reportId}`,
+    }),
+
+    updateReport: builder.mutation<
+      any,
+      {
+        reportId: number;
+        content: string;
+        custom: Record<string, any>;
+      }
+    >({
+      query: ({ reportId, content, custom }) => ({
+        url: `reports/${reportId}`,
+        method: "PUT",
+        body: {
+          data: content,
+          custom,
+        },
+      }),
+    }),
+
+    saveReport: builder.mutation<
+      any,
+      {
+        setupId: number;
+        reportName: string;
+        data: string;
+        template?: string;
+      }
+    >({
+      query: ({ setupId, reportName, data, template }) => ({
+        url: `reports`,
+        method: "PUT",
+        body: {
+          graph_id: setupId,
+          report_name: reportName,
+          data,
+          ...(template ? { template } : { is_template_with_content: false }),
+        },
+      }),
+    }),
+
     getAnswer: builder.query<
       IResponseAnswer,
       {
@@ -58,25 +107,26 @@ export const reportApi = createApi({
         }`,
     }),
 
-    getReportTemplate: builder.query<
+    getChatWithData: builder.mutation<
       any,
-      {
-        queryType?: string;
-        question?: string;
-        setupId: number;
-      }
+      { setupId: number; content: string; question: string }
     >({
-      query: ({ setupId, queryType, question }) =>
-        queryType
-          ? `${queryType}/${setupId}`
-          : `customquery/${setupId}?question=${question}`,
+      query: ({ setupId, question, content = "" }) => ({
+        url: `chatwithdata/${setupId}`,
+        method: "POST",
+        body: {
+          question,
+          data: content,
+        },
+      }),
     }),
+
     createReportTemplate: builder.mutation<
       any,
-      { setupId: number; queryType: string; formatJson?: any }
+      { setupId: number; queryType: string; llm: string; formatJson?: any }
     >({
-      query: ({ setupId, queryType, formatJson }) => ({
-        url: `${queryType}/${setupId}`,
+      query: ({ setupId, queryType, llm, formatJson }) => ({
+        url: `${queryType}/${setupId}?llm=${llm}`,
         method: "POST",
         ...(!!formatJson && {
           body: {
@@ -85,63 +135,54 @@ export const reportApi = createApi({
         }),
       }),
     }),
+
     generateReport: builder.mutation<
       any,
-      { setupId: number; queryType?: string; template?: string; data?: string }
+      { setupId: number; queryType: string; template?: string; data?: string }
     >({
-      async queryFn(args, __, ___, apiBaseQuery) {
+      async queryFn(args, queryApi) {
         const { setupId, queryType, template, data } = args;
+        let dataContent: string;
         try {
-          let templateResponse: any;
+          if (!data) {
+            const jsonResponse = await queryApi.dispatch(
+              reportApi.endpoints.createReportTemplate.initiate({
+                setupId,
+                queryType,
+                llm: "OpenAI",
+              })
+            );
+            if ("error" in jsonResponse) {
+              throw jsonResponse.error;
+            }
 
-          if (queryType && template) {
-            const jsonResponse: any = await apiBaseQuery({
-              url: `${queryType}/${setupId}?llm=${"OpenAI"}`,
-              method: "POST",
-            });
-
-            templateResponse = await apiBaseQuery({
-              url: `reports`,
-              method: "POST",
-              body: {
-                data: JSON.stringify({
-                  answer: jsonResponse.data.answer,
-                  data: jsonResponse.data.data,
-                }),
-                graph_id: setupId,
-                report_name: queryType,
-                template: `
-                    <h1>${REPORTS_DICT[queryType].label} Report</h1>
-                    ${template}`,
-              },
+            dataContent = JSON.stringify({
+              answer: jsonResponse.data.answer,
+              data: jsonResponse.data.data,
             });
           } else {
-            templateResponse = await apiBaseQuery({
-              url: `reports`,
-              method: "POST",
-              body: {
-                data,
-                graph_id: setupId,
-                report_name: queryType,
-                is_template_with_content: false,
-                is_file_with_content: true,
-              },
-            });
+            dataContent = data;
           }
-
+          const templateResponse = await queryApi.dispatch(
+            reportApi.endpoints.saveReport.initiate({
+              data: dataContent,
+              setupId,
+              reportName: queryType,
+              ...(template && {
+                template: `<h1>${REPORTS_DICT[queryType].label} Report</h1>${template}`,
+              }),
+            })
+          );
+          if ("error" in templateResponse) {
+            throw templateResponse.error;
+          }
           const generatedId: number = templateResponse.data.new_id;
 
           return {
             data: generatedId,
           };
-        } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              data: "Error in generateReport API",
-            },
-          };
+        } catch (err) {
+          return handleCatchError(err, "generateReport");
         }
       },
     }),
@@ -150,15 +191,21 @@ export const reportApi = createApi({
       any,
       { reportId: number; setupId: number; queryType: string; template: string }
     >({
-      async queryFn(args, __, ___, apiBaseQuery) {
+      async queryFn(args, queryApi, _, apiBaseQuery) {
         const { reportId, setupId, queryType, template } = args;
         try {
-          const jsonResponse: any = await apiBaseQuery({
-            url: `${queryType}/${setupId}?llm=${"OpenAI"}`,
-            method: "POST",
-          });
+          const jsonResponse = await queryApi.dispatch(
+            reportApi.endpoints.createReportTemplate.initiate({
+              setupId,
+              queryType,
+              llm: "OpenAI",
+            })
+          );
+          if ("error" in jsonResponse) {
+            throw jsonResponse.error;
+          }
 
-          const templateResponse: any = await apiBaseQuery({
+          const templateResponse = await apiBaseQuery({
             url: `reports/${reportId}/regenerate`,
             method: "POST",
             body: {
@@ -171,20 +218,18 @@ export const reportApi = createApi({
                   ${template}`,
             },
           });
-          const filledTemplate: string = templateResponse.data.filled_template;
+          if (templateResponse.error) {
+            throw templateResponse.error;
+          } else {
+            const filledTemplate: string = (templateResponse.data as any)
+              .filled_template;
 
-          return {
-            data: filledTemplate,
-          };
-          // }
-        } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              data: "Error in generateReport API",
-            },
-          };
+            return {
+              data: filledTemplate,
+            };
+          }
+        } catch (err) {
+          return handleCatchError(err, "reGenerateReport");
         }
       },
     }),
@@ -198,87 +243,46 @@ export const reportApi = createApi({
         body: {
           graph_id: setupId,
           data,
-          template
-        }
+          template,
+        },
       }),
     }),
-    getReport: builder.query<
-      any,
-      {
-        reportId: number;
-      }
-    >({
-      async queryFn(args, __, ___, apiBaseQuery) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { reportId } = args;
 
-        try {
-          const reportResponse: any = await apiBaseQuery({
-            url: `reports/${reportId}`,
-          });
-
-          return {
-            data: reportResponse.data,
-          };
-        } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              data: "Error in getCategories API",
-            },
-          };
-        }
-      },
-    }),
     markReport: builder.mutation<any, { reportId: number }>({
       query: ({ reportId }) => ({
         url: `reports/${reportId}/marked`,
         method: "PUT",
       }),
-      invalidatesTags: ["Report"],
     }),
+
     deleteReport: builder.mutation<any, { reportId: number; viewMode: string }>(
       {
         query: ({ reportId }) => ({
           url: `reports/${reportId}`,
           method: "DELETE",
         }),
-        invalidatesTags: ["Report"],
       }
     ),
-    saveReport: builder.mutation<
-      any,
-      {
-        reportId?: number;
-        content: string;
-        custom: Record<string, any>;
-      }
-    >({
-      query: ({ reportId, content, custom }) => ({
-        url: `reports/${reportId}`,
-        method: "PUT",
-        body: {
-          data: content,
-          custom,
-        },
-      }),
-      invalidatesTags: ["Report"],
-    }),
+
     getReports: builder.query<any, { viewMode?: string }>({
       async queryFn({ viewMode = "active" }, __, ___, apiBaseQuery) {
         try {
-          const setupsReponse: any = await apiBaseQuery({
+          const setupsReponse = await apiBaseQuery({
             url: "graphs",
           });
-
-          const reportsReponse: any = await apiBaseQuery({
+          if (setupsReponse.error) {
+            throw setupsReponse.error;
+          }
+          const reportsReponse = await apiBaseQuery({
             url: `reports?view_mode=${viewMode}`,
           });
 
-          const updatedReports = reportsReponse.data
+          if (reportsReponse.error) {
+            throw reportsReponse.error;
+          }
+          const updatedReports = (reportsReponse.data as any)
             .map((response: any) => {
-              const graph = setupsReponse.data.find(
+              const graph = (setupsReponse.data as any).find(
                 (setup: ISetup) => setup.id === +response.graph_id
               );
               if (graph) {
@@ -298,64 +302,31 @@ export const reportApi = createApi({
           return {
             data: groups,
           };
-        } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              data: "Error in getReports API",
-            },
-          };
+        } catch (err) {
+          return handleCatchError(err);
         }
       },
       keepUnusedDataFor: 0,
       providesTags: ["Report"],
     }),
-    // getAllCreatedReports: builder.query<any, void>({
-    // 	query: () => "reports",
-    // }),
+
     getCustomQuery: builder.mutation<
       string,
       { setupId: number; question: string; chatMode?: boolean }
     >({
-      async queryFn(args, __, ___, apiBaseQuery) {
-        const { setupId, question, chatMode = false } = args;
-        try {
-          const response = await apiBaseQuery({
-            url: `customquery/${setupId}?chatmode=${chatMode}&llm=Anthropic`,
-            method: "POST",
-            body: {
-              question,
-            },
-          });
-          if (response.data) {
-            const regex = /```[^`]+```/g;
-            const finalResult: string = (response.data as any).answer.replace(
-              regex,
-              ""
-            );
-
-            return {
-              data: finalResult,
-            };
-          } else if (response.error) {
-            return { error: response.error };
-          }
-
-          throw new Error("Fetch error");
-        } catch (err) {
-          return {
-            error: {
-              status: "CUSTOM_ERROR",
-              error: "Error in getCustomQuery API",
-              data: err,
-            },
-          };
-        }
+      query: ({ setupId, question, chatMode }) => ({
+        url: `customquery/${setupId}?chatmode=${chatMode}&llm=Anthropic`,
+        method: "POST",
+        body: { question },
+      }),
+      transformResponse: (response: any) => {
+        const regex = /```[^`]+```/g;
+        const finalResult: string = response.data.answer.replace(regex, "");
+        return finalResult;
       },
     }),
     generateWarrantReport: builder.mutation<
-      any,
+      string,
       {
         setupId: number;
         question: string;
@@ -363,101 +334,45 @@ export const reportApi = createApi({
         chatMode?: boolean;
       }
     >({
-      async queryFn(args, __, ___, apiBaseQuery) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { setupId, reportName } = args;
-        try {
-          // const response: any = await apiBaseQuery({
-          //   url: `customquery/${setupId}?chatmode=${true}&llm=Anthropic`,
-          //   method: "POST",
-          //   body: {
-          //     question,
-          //   },
-          // });
-
-          const reportResponse: any = await apiBaseQuery({
-            url: `generate_report/${setupId}`,
-            method: "POST",
-            body: {
-              data: JSON.stringify({
-                answer: "",
-                data: "",
-              }),
-              report_name: reportName,
-              template: ``,
-            },
-          });
-          console.log(reportResponse, "reportResponse---");
-          // let reportFinal = "";
-          // for (const removeRegex of removeRegexes) {
-          //   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          //   reportFinal = reportResponse.data.filled_template.replace(
-          //     removeRegex,
-          //     ""
-          //   );
-          // }
-          return {
-            data: reportResponse.data.filled_template,
-          };
-        } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              data: "Error in generateWarrantReport API",
-            },
-          };
-        }
-      },
-    }),
-    getChatWithData: builder.mutation<
-      any,
-      { setupId: number; content: string; question: string }
-    >({
-      query: ({ setupId, question, content = "" }) => ({
-        url: `chatwithdata/${setupId}`,
+      query: ({ setupId, reportName }) => ({
+        url: `generate_report/${setupId}`,
         method: "POST",
         body: {
-          question,
-          data: content,
+          data: JSON.stringify({
+            answer: "",
+            data: "",
+          }),
+          report_name: reportName,
+          template: ``,
         },
       }),
+      transformResponse: (response: any) => {
+        return response.data.filled_template;
+      },
     }),
+
     getChatHistory: builder.query<any, { setupId: number }>({
-      async queryFn({ setupId }, __, ___, apiBaseQuery) {
-        try {
-          const response: any = await apiBaseQuery({
-            url: `chat_history/${setupId}`,
-          });
+      query: ({ setupId }) => ({
+        url: `chat_history/${setupId}`,
+      }),
+      transformResponse: (response: any) => {
+        if (!response.length) return null;
 
-          if (!response.data.length) return { data: null };
+        const updated = response
+          .sort(
+            (a: any, b: any) =>
+              new Date(a.created_at).getTime() -
+              new Date(b.created_at).getTime()
+          )
+          .map((record: any) => ({
+            ...record,
+            created_at: record.created_at.split("T")[0],
+          }));
 
-          const updated = response.data
-            .sort(
-              (a: any, b: any) =>
-                new Date(a.created_at).getTime() -
-                new Date(b.created_at).getTime()
-            )
-            .map((record: any) => ({
-              ...record,
-              created_at: record.created_at.split("T")[0],
-            }));
+        // group by date
+        const groups = groupBy("created_at")(updated);
 
-          // group by date
-          const groups = groupBy("created_at")(updated);
-
-          return {
-            data: groups,
-          };
-        } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              data: "Error in getAllCreatedReports API",
-            },
-          };
-        }
+        return groups;
       },
       keepUnusedDataFor: 0,
       providesTags: ["Report"],
@@ -467,8 +382,6 @@ export const reportApi = createApi({
 
 export const {
   useLazyGetAnswerQuery,
-  useGetReportTemplateQuery,
-  useLazyGetReportTemplateQuery,
   useGetCustomQueryMutation,
   useCreateReportTemplateMutation,
   useGenerateReportMutation,
@@ -482,6 +395,6 @@ export const {
   useGetChatWithDataMutation,
   useGenerateWarrantReportMutation,
   useGetChatHistoryQuery,
-  useSaveReportMutation,
+  useUpdateReportMutation,
   useMarkReportMutation,
 } = reportApi;
