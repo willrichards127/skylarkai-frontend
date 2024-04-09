@@ -41,8 +41,10 @@ export const Markdown = ({
         a: (props: any) => {
           if (props.href) {
             const splited = props.href.split("______");
-            const filename = splited[0].replaceAll("___", " ").slice(1);
-            const quote = splited[1].replaceAll("___", " ");
+            const filename = (splited?.[0] || "")
+              .replaceAll("___", " ")
+              .slice(1);
+            const quote = (splited?.[1] || "").replaceAll("___", " ");
             return (
               <a
                 {...props}
