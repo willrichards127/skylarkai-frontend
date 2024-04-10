@@ -853,12 +853,14 @@ export const transcriptApi = createApi({
       any,
       {
         base64str: string;
+        template: string;
         emails: string[];
         subject?: string;
+        filename: string;
       }
     >({
       async queryFn(
-        { base64str, emails, subject = "Report" },
+        { base64str, template, emails, filename, subject = "Report" },
         _,
         __,
         apiBaseQuery
@@ -866,6 +868,8 @@ export const transcriptApi = createApi({
         try {
           const formdata = new FormData();
           formdata.append("file_content_base64", base64str);
+          formdata.append('filename', filename);
+          formdata.append('html_template', template);
           formdata.append("subject", subject);
           emails.forEach((email) => {
             formdata.append("email_addresses", email);
