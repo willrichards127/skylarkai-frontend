@@ -15,19 +15,17 @@ import {
 import { IChat } from "../../../../../redux/interfaces";
 import { parseCitation } from "../../../../../shared/utils/string";
 import { SendEmailModal } from "../../../../../components/modals/SendEmailModal";
-import { getPdfInBase64 } from "../../../../../shared/utils/pdf-generator";
 
 export const ChatBlock = memo(
   ({
     chat,
     chats,
-    companyName,
     onJumpTo,
     onAddToReport,
   }: {
     chat: IChat;
     chats: IChat[];
-    companyName: string;
+    companyName?: string;
     onAddToReport: (question: string, content: string) => void;
     onJumpTo: ({
       filename,
@@ -41,9 +39,7 @@ export const ChatBlock = memo(
     const isLoading = chat.type === "loading";
 
     const ref = useRef<HTMLDivElement>();
-    const emailContentRef = useRef<
-      { subject?: string; content: string } | undefined
-    >();
+    const questionRef = useRef<string>("");
 
     const [blogHovered, setBlogHovered] = useState<boolean>(false);
     const [emailModal, showEmailModal] = useState<boolean>(false);
@@ -61,38 +57,10 @@ export const ChatBlock = memo(
       setBlogHovered(false);
     }, []);
 
-    const onSendViaEmail = useCallback(
-      async (question: string) => {
-        if (!ref.current) return;
-        const container = document.createElement("div");
-        container.appendChild(ref.current.cloneNode(true));
-        const removeItems = container.querySelectorAll(
-          ".suggestions, .topic, .loading, .no-print"
-        );
-        for (const item of removeItems) {
-          item.remove();
-        }
-        const listings = container.querySelectorAll("li");
-        for (const item of listings) {
-          const paragraphs = item.querySelectorAll("p");
-          for (const paragraph of paragraphs) {
-            paragraph.before(...paragraph.childNodes);
-            const br = document.createElement("br");
-            paragraph.replaceWith(br);
-          }
-        }
-        const base64str = await getPdfInBase64(
-          `<b>Question: ${question}</b><br />Answer: ` + container.innerHTML,
-          "Skylark"
-        );
-        emailContentRef.current = {
-          subject: `Skylark ${companyName} Analysis`,
-          content: base64str,
-        };
-        showEmailModal(true);
-      },
-      [companyName]
-    );
+    const onSendViaEmail = useCallback((question: string) => {
+      questionRef.current = `<b>Question: ${question}</b><br />Answer: `;
+      showEmailModal(true);
+    }, []);
 
     return (
       <Box
@@ -253,13 +221,12 @@ export const ChatBlock = memo(
             </Box>
           )}
         </Box>
-
         {emailModal && (
           <SendEmailModal
             open={emailModal}
+            prefix={questionRef.current}
+            element={ref.current!}
             onClose={() => showEmailModal(false)}
-            content={emailContentRef.current!.content}
-            initialSubject={emailContentRef.current!.subject}
           />
         )}
       </Box>

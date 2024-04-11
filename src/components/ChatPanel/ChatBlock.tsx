@@ -12,7 +12,6 @@ import { SkylarkChatBotIcon, UserChatIcon } from "../Svgs";
 import { IChat } from "../../redux/interfaces";
 import { parseCitation } from "../../shared/utils/string";
 import { SendEmailModal } from "../modals/SendEmailModal";
-import { getPdfInBase64 } from "../../shared/utils/pdf-generator";
 
 export const ChatBlock = memo(
   ({
@@ -20,13 +19,12 @@ export const ChatBlock = memo(
     chat,
     insider_transaction,
     chats,
-    companyName,
     onChooseTopic,
     onChooseSuggestion,
     onJumpTo,
   }: {
     loading?: boolean;
-    companyName: string;
+    companyName?: string;
     chat: IChat;
     chats: IChat[];
     insider_transaction?: boolean;
@@ -40,9 +38,7 @@ export const ChatBlock = memo(
     const isSuggestions = chat.type === "suggestions";
 
     const ref = useRef<HTMLDivElement>();
-    const emailContentRef = useRef<
-      { subject?: string; content: string } | undefined
-    >();
+    const questionRef = useRef<string>("");
 
     const [blogHovered, setBlogHovered] = useState<boolean>(false);
     const [emailModal, showEmailModal] = useState<boolean>(false);
@@ -63,29 +59,10 @@ export const ChatBlock = memo(
       setBlogHovered(false);
     }, []);
 
-    const onSendViaEmail = useCallback(
-      async (question: string) => {
-        if (!ref.current) return;
-        const container = document.createElement("div");
-        container.appendChild(ref.current.cloneNode(true));
-        const removeItems = container.querySelectorAll(
-          ".no-print"
-        );
-        for (const item of removeItems) {
-          item.remove();
-        }
-        const base64str = await getPdfInBase64(
-          `<b>Question: ${question}</b><br />Answer: ` + container.innerHTML,
-          "Skylark"
-        );
-        emailContentRef.current = {
-          subject: `Skylark ${companyName} Analysis`,
-          content: base64str,
-        };
-        showEmailModal(true);
-      },
-      [companyName]
-    );
+    const onSendViaEmail = useCallback((question: string) => {
+      questionRef.current = `<b>Question: ${question}</b><br />Answer: `;
+      showEmailModal(true);
+    }, []);
 
     return (
       <Box
@@ -196,7 +173,10 @@ export const ChatBlock = memo(
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeRaw as any]}
                 allowElement={(element, _, parent) => {
-                  if (element.tagName === "p" && (parent as any).tagName === "li") {
+                  if (
+                    element.tagName === "p" &&
+                    (parent as any).tagName === "li"
+                  ) {
                     return false;
                   }
                   if (
@@ -220,7 +200,9 @@ export const ChatBlock = memo(
                   a: (props: any) => {
                     if (props.href) {
                       const splited = props.href.split("______");
-                      const filename = splited[0].replaceAll("___", " ").slice(1);
+                      const filename = splited[0]
+                        .replaceAll("___", " ")
+                        .slice(1);
                       const quote = splited[1].replaceAll("___", " ");
                       return (
                         <a
@@ -232,7 +214,7 @@ export const ChatBlock = memo(
                         />
                       );
                     } else return <p {...props} />;
-                  },                  
+                  },
                   table: (props) => (
                     <table
                       {...props}
@@ -293,9 +275,9 @@ export const ChatBlock = memo(
         {emailModal && (
           <SendEmailModal
             open={emailModal}
+            prefix={questionRef.current}
+            element={ref.current!}
             onClose={() => showEmailModal(false)}
-            content={emailContentRef.current!.content}
-            initialSubject={emailContentRef.current!.subject}
           />
         )}
       </Box>

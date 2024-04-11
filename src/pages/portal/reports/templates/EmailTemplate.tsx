@@ -2,7 +2,6 @@ import { useCallback, useRef, useState, memo } from "react";
 import {
   Stack,
   Breadcrumbs,
-  Link,
   Box,
   IconButton,
   TextField,
@@ -15,7 +14,7 @@ import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { ConfirmModal } from "../../../../components/modals/ConfirmModal";
-import { useGetSetupsQuery } from "../../../../redux/services/setupApi";
+// import { useGetSetupsQuery } from "../../../../redux/services/setupApi";
 import { useSendReportsViaEmailsMutation } from "../../../../redux/services/transcriptAPI";
 import { getPdfInBase64 } from "../../../../shared/utils/pdf-generator";
 
@@ -51,19 +50,28 @@ body {
 </html>`;
 
 export const EmailTemplate = memo(
-  ({ element, onClose }: { element: HTMLDivElement; onClose: () => void }) => {
+  ({
+    prefix,
+    element,
+    onClose,
+  }: {
+    element: HTMLDivElement;
+    prefix?: string;
+    onClose: () => void;
+  }) => {
     const editorRef = useRef<any>(null);
     const iframeRef = useRef<HTMLIFrameElement>(null);
-    const { data: companies } = useGetSetupsQuery();
+    // const { data: companies } = useGetSetupsQuery();
     const [sendEmails, { isLoading, isSuccess }] =
       useSendReportsViaEmailsMutation();
 
     const [confirmModal, showConfirmModal] = useState<boolean>(false);
     const [form, setForm] = useState<{
-      company: string;
+      // company: string;
+      emails: string;
       title: string;
       content: string;
-    }>({ company: "", title: "", content: "" });
+    }>({ emails: "", title: "", content: "" });
 
     const onChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -75,7 +83,9 @@ export const EmailTemplate = memo(
     const onSend = useCallback(async () => {
       const container = document.createElement("div");
       container.appendChild(element.cloneNode(true));
-      const removeItems = container.querySelectorAll(".no-print");
+      const removeItems = container.querySelectorAll(
+        ".suggestions, .topic, .loading, .no-print"
+      );
       for (const item of removeItems) {
         item.remove();
       }
@@ -98,16 +108,19 @@ export const EmailTemplate = memo(
         iframeContainer.querySelector(".linkedin")!;
       linkedinEl!.src = "_cid:linkedin";
 
-      const base64str = await getPdfInBase64(container.innerHTML, "Skylark");
+      const base64str = await getPdfInBase64(
+        (prefix || "") + container.innerHTML,
+        "Skylark"
+      );
       sendEmails({
         subject: form.title,
         base64str,
         filename: "investment memo report.pdf",
         template: iframeContainer.outerHTML,
-        emails: ["kevin@alphagroup.ai"],
+        emails: form.emails.split(",").map((email) => email.trim()),
       });
       showConfirmModal(true);
-    }, [form, element, sendEmails]);
+    }, [form, element, prefix, sendEmails]);
 
     return (
       <Stack
@@ -129,23 +142,25 @@ export const EmailTemplate = memo(
               <ArrowBackIcon sx={{ fontSize: 18 }} />
             </IconButton>
             <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
-              <Link
-                underline="hover"
-                color="inherit"
-                href="#"
-                onClick={onClose}
-              >
-                Report
-              </Link>
-              <Typography color="text.primary">Email</Typography>
+              <Typography color="text.primary">Email Template</Typography>
             </Breadcrumbs>
           </Box>
           <Stack spacing={2} direction="row">
             <Stack spacing={2} width="100%">
               <Typography variant="h6" fontWeight="bold">
-                Send Email
+                Send Email(s)
               </Typography>
               <TextField
+                label="Emails"
+                name="emails"
+                fullWidth
+                value={form.emails}
+                onChange={onChange}
+                size="small"
+                helperText="You can input several emails by adding comma(,)."
+                sx={{ "& .MuiInputBase-root": { width: 540 } }}
+              />
+              {/* <TextField
                 select
                 size="small"
                 name="company"
@@ -162,7 +177,7 @@ export const EmailTemplate = memo(
                     {company.name!}
                   </option>
                 ))}
-              </TextField>
+              </TextField> */}
               <Typography variant="body1" fontWeight="bold">
                 Create Email
               </Typography>
