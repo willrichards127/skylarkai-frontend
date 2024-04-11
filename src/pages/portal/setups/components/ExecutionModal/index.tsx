@@ -87,9 +87,10 @@ export const ExecutionModal = memo(
           setupId: updatedSetup.id!,
           companyName: updatedSetup.name!,
           analysisType: "financial_diligence",
-          background: true,
+          // background: true,
           files: uploadFiles,
         }).unwrap();
+
 
         if (skyDBNodeIndex > -1 && updateIngestResponse.length) {
           updatedSetup.nodes[skyDBNodeIndex].properties = {
