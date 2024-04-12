@@ -24,10 +24,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { SplitContainer } from "../../../../components/SplitContainer";
 import { useLazyGetFilesDataQuery } from "../../../../redux/services/transcriptAPI";
-import {
-  generatePdf,
-  getPdfInBase64,
-} from "../../../../shared/utils/pdf-generator";
+import { generatePdf } from "../../../../shared/utils/pdf-generator";
 import {
   parseCitationInReport,
   scrollToAndHighlightText,
@@ -41,9 +38,6 @@ export const Report = ({
   instance: ICustomInstance;
   onGotoMain: () => void;
 }) => {
-  const emailContentRef = useRef<
-    { subject?: string; content: string } | undefined
-  >();
   const tagRef = useRef<string>("");
   const ref = useRef<HTMLDivElement>();
   const file1Ref = useRef<HTMLDivElement>();
@@ -62,15 +56,6 @@ export const Report = ({
   }, []);
 
   const onSendEmail = useCallback(async () => {
-    const base64str = await getPdfInBase64(
-      `<h1>Compare documents</h1><br />${ref.current!.innerHTML}`,
-      "Skylark"
-    );
-
-    emailContentRef.current = {
-      subject: "Compare documents Report",
-      content: base64str,
-    };
     showEmailModal(true);
   }, []);
 
@@ -183,7 +168,10 @@ export const Report = ({
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               allowElement={(element, _, parent) => {
-                if (element.tagName === "p" && (parent as any).tagName === "li") {
+                if (
+                  element.tagName === "p" &&
+                  (parent as any).tagName === "li"
+                ) {
                   return false;
                 }
                 if (
@@ -284,8 +272,7 @@ export const Report = ({
         <SendEmailModal
           open={emailModal}
           onClose={() => showEmailModal(false)}
-          content={emailContentRef.current!.content}
-          initialSubject={emailContentRef.current!.subject}
+          element={ref.current!}
         />
       )}
     </Box>

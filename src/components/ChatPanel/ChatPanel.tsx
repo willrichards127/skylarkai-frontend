@@ -13,7 +13,7 @@ import {
   useAddChatMutation,
   useGetChatHistoryQuery,
 } from "../../redux/services/transcriptAPI";
-import { generatePdf, getPdfInBase64 } from "../../shared/utils/pdf-generator";
+import { generatePdf } from "../../shared/utils/pdf-generator";
 import { SendEmailModal } from "../modals/SendEmailModal";
 
 export const ChatPanel = memo(
@@ -35,9 +35,7 @@ export const ChatPanel = memo(
     onJumpTo: (tag: string) => void;
   }) => {
     const ref = useRef<HTMLDivElement>();
-    const emailContentRef = useRef<
-      { subject?: string; content: string } | undefined
-    >();
+
     const [llm, setLlm] = useState<"SkyEngine" | "Sky2Engine">("SkyEngine");
     const [emailModal, showEmailModal] = useState<boolean>(false);
 
@@ -115,37 +113,8 @@ export const ChatPanel = memo(
     }, []);
 
     const onSendViaEmail = useCallback(async () => {
-      if (!ref.current) return;
-
-      const today = new Date().toLocaleDateString();
-      const container = document.createElement("div");
-      container.appendChild(ref.current.cloneNode(true));
-      const removeItems = container.querySelectorAll(
-        ".suggestions, .topic, .loading, .no-print"
-      );
-      for (const item of removeItems) {
-        item.remove();
-      }
-      const listings = container.querySelectorAll("li");
-      for (const item of listings) {
-        const paragraphs = item.querySelectorAll("p");
-        for (const paragraph of paragraphs) {
-          paragraph.before(...paragraph.childNodes);
-          const br = document.createElement("br");
-          paragraph.replaceWith(br);
-        }
-      }
-      const base64str = await getPdfInBase64(
-        `<h1>Skylark ${companyName} Analysis</h1><br /><b>Created At: ${today}</b><br />${container.innerHTML}`,
-        "Skylark"
-      );
-
-      emailContentRef.current = {
-        subject: `Skylark ${companyName} Analysis`,
-        content: base64str,
-      };
       showEmailModal(true);
-    }, [companyName]);
+    }, []);
 
     const onChooseSuggestion = useCallback((suggest: string) => {
       setSuggestion(suggest);
@@ -292,9 +261,8 @@ export const ChatPanel = memo(
         {emailModal && (
           <SendEmailModal
             open={emailModal}
+            element={ref.current!}
             onClose={() => showEmailModal(false)}
-            content={emailContentRef.current!.content}
-            initialSubject={emailContentRef.current!.subject}
           />
         )}
       </XPanel>

@@ -16,7 +16,6 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { ExportModal } from "../../../../components/modals/ExportModal";
 import { ICustomInstance } from "./interfaces";
 import { ReportTemplate } from "../../../portal/reports/templates/ReportTemplate";
-import { getPdfInBase64 } from "../../../../shared/utils/pdf-generator";
 import { SendEmailModal } from "../../../../components/modals/SendEmailModal";
 
 export const Report = ({
@@ -26,9 +25,6 @@ export const Report = ({
   instance: ICustomInstance;
   onGotoMain: () => void;
 }) => {
-  const emailContentRef = useRef<
-    { subject?: string; content: string } | undefined
-  >();
   const reportPrintRef = useRef<HTMLDivElement>(null);
   const [exportModal, showExportModal] = useState<boolean>(false);
   const [emailModal, showEmailModal] = useState<boolean>(false);
@@ -37,22 +33,7 @@ export const Report = ({
     showExportModal(true);
   }, []);
 
-  const onSendEmail = useCallback(async () => {
-    const container = document.createElement("div");
-    container.appendChild(reportPrintRef.current!.cloneNode(true));
-    const removeItems = container.querySelectorAll(".no-print");
-    for (const item of removeItems) {
-      item.remove();
-    }
-    const base64str = await getPdfInBase64(
-      `<h1>Investment memo</h1><br />${container.innerHTML}`,
-      "Skylark"
-    );
-
-    emailContentRef.current = {
-      subject: "Investment Memo Report",
-      content: base64str,
-    };
+  const onSendEmail = useCallback(() => {
     showEmailModal(true);
   }, []);
 
@@ -116,8 +97,7 @@ export const Report = ({
         <SendEmailModal
           open={emailModal}
           onClose={() => showEmailModal(false)}
-          content={emailContentRef.current!.content}
-          initialSubject={emailContentRef.current!.subject}
+          element={reportPrintRef.current!}
         />
       )}
     </Box>
