@@ -1,13 +1,13 @@
 import { memo, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Divider, Typography } from "@mui/material";
-import { XCard } from "../../../../components/XCard";
+import { Box, Divider, Grid, Typography } from "@mui/material";
 import {
   useDeleteReportMutation,
   useMarkReportMutation,
 } from "../../../../redux/services/reportApi";
 import { REPORTS_DICT } from "../../../../shared/models/constants";
 import { getDate } from "../../../../shared/utils/parse";
+import { ReportCard } from "./ReportCard";
 
 export const ReportTabContainer = memo(
   ({
@@ -70,13 +70,7 @@ export const ReportTabContainer = memo(
         <Typography variant="h5" my={2}>
           {companyName}
         </Typography>
-        <Box
-          sx={{
-            display: "flex",
-            gap: 4,
-            flexWrap: "wrap",
-          }}
-        >
+        <Grid container spacing={4}>
           {[...reports]
             .sort(
               (a: any, b: any) =>
@@ -84,21 +78,29 @@ export const ReportTabContainer = memo(
                 new Date(b.created_at).getTime()
             )
             .map((card: any) => (
-              <XCard
-                key={card.id}
-                id={card.id}
-                label={REPORTS_DICT[card.report_metadata.reportname]?.label || card.report_metadata.reportname}
-                updatedAt={getDate(
-                  new Date(card.created_at || card.executed_at)
-                )}
-                moreItems={moreItems}
-                onMoreItem={(menuItemId) => onMoreItem(card.id, menuItemId)}
-                onCard={() => onCard(card.id, card.graph_id, card.report_metadata.reportname)}
-                width={400}
-                height={100}
-              />
+              <Grid key={card.id} item xs={12} sm={6} md={4} lg={3}>
+                <ReportCard
+                  id={card.id}
+                  label={
+                    REPORTS_DICT[card.report_metadata.reportname]?.label ||
+                    card.report_metadata.reportname
+                  }
+                  updatedAt={getDate(
+                    new Date(card.created_at || card.executed_at)
+                  )}
+                  moreItems={moreItems}
+                  onMoreItem={(menuItemId) => onMoreItem(card.id, menuItemId)}
+                  onCard={() =>
+                    onCard(
+                      card.id,
+                      card.graph_id,
+                      card.report_metadata.reportname
+                    )
+                  }
+                />
+              </Grid>
             ))}
-        </Box>
+        </Grid>
       </Box>
     );
   }
