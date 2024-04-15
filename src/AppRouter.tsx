@@ -14,6 +14,8 @@ import { useAddUserActivityMutation } from "./redux/services/userAPI";
 import FeaturePage from "./pages/premium/feature";
 import ReportsPage from "./pages/portal/reports/ReportsPage";
 import ReportDetailPage from "./pages/portal/reports/ReportDetailPage";
+import VDRsPage from "./pages/portal/vdr/VDRsPage";
+import VDRDetailPage from "./pages/portal/vdr/VDRDetailPage";
 import SetupsPage from "./pages/portal/setups/SetupsPage";
 import SetupDetailPage from "./pages/portal/setups/SetupDetailPage";
 import OrdersPage from "./pages/portal/workorders/OrdersPage";
@@ -33,9 +35,7 @@ const ForgotPasswordOTPForm = lazy(
   () => import("./pages/auth/ForgotPasswordOTPForm")
 );
 const RegisterForm = lazy(() => import("./pages/auth/RegisterForm"));
-const RegisterOTPForm = lazy(
-  () => import("./pages/auth/RegisterOTPForm")
-);
+const RegisterOTPForm = lazy(() => import("./pages/auth/RegisterOTPForm"));
 const LoginForm = lazy(() => import("./pages/auth/LoginForm"));
 
 const HelpPage = lazy(() => import("./pages/help"));
@@ -95,7 +95,6 @@ function AppRouter() {
             errorElement: <ErrorBoundary />,
           },
           {
-
             path: "/register",
             element: <RegisterForm />,
             errorElement: <ErrorBoundary />,
@@ -156,6 +155,14 @@ function AppRouter() {
               {
                 path: "/portal/setups/:setupId",
                 element: <SetupDetailPage />,
+              },
+              {
+                path: "/portal/vdrs",
+                element: <VDRsPage />,
+              },
+              {
+                path: "/portal/vdrs/:vdrId",
+                element: <VDRDetailPage />,
               },
               {
                 path: "/portal/orders",

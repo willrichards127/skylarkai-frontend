@@ -28,11 +28,21 @@ export const ChatContentBox = forwardRef(
     ref: any
   ) => {
     const [openFeedbackFloat, setOpenFeedbackFloat] = useState<boolean>(true);
+
+    useEffect(() => {
+      if (!chats.length || chats[chats.length - 1].type === "loading") {
+        setOpenFeedbackFloat(false);
+      } else {
+        setOpenFeedbackFloat(true);
+      }
+    }, [chats]);
+
     useEffect(() => {
       if (!ref.current) return;
       ref.current.scrollTop = ref.current.scrollHeight;
     }, [ref, chats]);
 
+    console.log(chats, "chats===");
     return (
       <Box
         ref={ref}
@@ -58,9 +68,9 @@ export const ChatContentBox = forwardRef(
             onAddToReport={onAddToReport}
           />
         ))}
-        {openFeedbackFloat && (
+        {/* {openFeedbackFloat && (
           <FeedbackFloat onClose={() => setOpenFeedbackFloat(false)} />
-        )}
+        )} */}
       </Box>
     );
   }
