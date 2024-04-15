@@ -157,12 +157,12 @@ export const userAuthSlice = createSlice({
         }
         state.user = {
           ...payload,
-          main_features: (payload.main_features || []).filter((item: any) => item.id < 7) // remove 7, 8 features now
+          main_features: (payload.main_features || []).filter((item: any) => item.id < 7 && item.id !== 2) // remove 7, 8 features now
         };
         
         state.token = payload.token;
         state.sys_graph_id = payload.sys_graph_id;
-        saveStoreValue("user-info", payload);
+        saveStoreValue("user-info", state.user);
         saveStoreValue("token", payload.token);
         saveStoreValue("sys_graph_id", payload.sys_graph_id);
       }),
