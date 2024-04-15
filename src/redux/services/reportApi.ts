@@ -82,7 +82,7 @@ export const reportApi = createApi({
     >({
       query: ({ setupId, reportName, data, template }) => ({
         url: `reports`,
-        method: "PUT",
+        method: "POST",
         body: {
           graph_id: setupId,
           report_name: reportName,
