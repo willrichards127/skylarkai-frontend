@@ -2,15 +2,10 @@ import { useCallback, useState, useRef } from "react";
 import { Box } from "@mui/material";
 import { HeaderPanel } from "../components/HeaderPanel";
 import { ExportModal } from "../../../../components/modals/ExportModal";
-// import { RefFileModal } from "../components/RefFileModal";
-import { SendEmailModal } from "../../../../components/modals/SendEmailModal";
 import { ReportTemplate } from "./ReportTemplate";
 import { ISetup } from "../../../../shared/models/interfaces";
-import {
-  REPORTS_DICT,
-  reportHeaderHeight,
-} from "../../../../shared/models/constants";
-import { getPdfInBase64 } from "../../../../shared/utils/pdf-generator";
+import { reportHeaderHeight } from "../../../../shared/models/constants";
+import { EmailTemplate } from "./EmailTemplate";
 
 export const MarketAnalysisReport = ({
   setup,
@@ -29,33 +24,17 @@ export const MarketAnalysisReport = ({
 }) => {
   const reportPrintRef = useRef<HTMLDivElement>(null);
 
-  const emailContentRef = useRef<
-    { subject?: string; content: string } | undefined
-  >();
-
   const [uploadedFiles, setUploadedFiles] = useState<Record<string, File[]>>();
   const [exportModal, showExportModal] = useState<boolean>(false);
-  const [emailModal, showEmailModal] = useState<boolean>(false);
+  const [emailTemplate, showEmailTemplate] = useState<boolean>(false);
 
   const onPrint = useCallback(() => {
     showExportModal(true);
   }, []);
 
-  const onSendEmail = useCallback(async () => {
-    if (!reportPrintRef.current) return;
-    const container = document.createElement("div");
-    container.appendChild(reportPrintRef.current!.cloneNode(true));
-    const removeItems = container.querySelectorAll(".no-print");
-    for (const item of removeItems) {
-      item.remove();
-    }
-    const base64str = await getPdfInBase64(container.innerHTML, "Skylark");
-    emailContentRef.current = {
-      subject: `${REPORTS_DICT[reportType]?.label || reportType} Report`,
-      content: base64str,
-    };
-    showEmailModal(true);
-  }, [reportType]);
+  const onSendEmail = useCallback(() => {
+    showEmailTemplate(true);
+  }, []);
 
   const onSave = useCallback(() => {
     if (!reportPrintRef.current) return;
@@ -121,12 +100,10 @@ export const MarketAnalysisReport = ({
             onClose={() => showExportModal(false)}
           />
         )}
-        {emailModal && (
-          <SendEmailModal
-            open={emailModal}
-            onClose={() => showEmailModal(false)}
-            content={emailContentRef.current!.content}
-            initialSubject={emailContentRef.current!.subject}
+        {emailTemplate && (
+          <EmailTemplate
+            element={reportPrintRef.current!}
+            onClose={() => showEmailTemplate(false)}
           />
         )}
       </Box>

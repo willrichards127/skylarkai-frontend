@@ -103,17 +103,26 @@ export const setupApi = createApi({
         setupId: number;
         companyName: string;
         analysisType: string;
+        background?: boolean;
+        extractTable?: boolean;
         files: File[];
       }
     >({
-      query: ({ setupId, companyName, analysisType, files }) => {
+      query: ({
+        setupId,
+        companyName,
+        background = false,
+        extractTable = false,
+        analysisType,
+        files,
+      }) => {
         const formData = new FormData();
         formData.append("analysis_type", analysisType);
         for (const file of files) {
           formData.append("files", file);
         }
         return {
-          url: `ingestfiles?graph_id=${setupId}&company_name=${companyName}`,
+          url: `ingestfiles?graph_id=${setupId}&company_name=${companyName}&ingestinbackground=${background}&tableextractiononly=${extractTable}`,
           method: "POST",
           body: formData,
         };

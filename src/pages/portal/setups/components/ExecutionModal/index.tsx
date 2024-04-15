@@ -87,8 +87,10 @@ export const ExecutionModal = memo(
           setupId: updatedSetup.id!,
           companyName: updatedSetup.name!,
           analysisType: "financial_diligence",
+          // background: true,
           files: uploadFiles,
         }).unwrap();
+
 
         if (skyDBNodeIndex > -1 && updateIngestResponse.length) {
           updatedSetup.nodes[skyDBNodeIndex].properties = {
@@ -131,7 +133,9 @@ export const ExecutionModal = memo(
             new Date()
           )}</strong></p>` + ret;
           setCustomQueyring(false);
-          const reportName = `${templateData.title}-${new Date().getTime() % 1000}`;
+          const reportName = `${templateData.title}-${
+            new Date().getTime() % 1000
+          }`;
           const generatedId = await generateReport({
             setupId: setup.id!,
             data: initializeHtmlResponse(report),

@@ -20,7 +20,7 @@ export const CollapsiblePanel = memo(
       setOpen((prev) => !prev);
     }, []);
     return (
-      <Box mb={2} sx={{ p: 1, borderRadius: 2, bgcolor: bgcolor || "#202024" }}>
+      <Box sx={{ p: 1, borderRadius: 2, bgcolor: bgcolor }}>
         <Box
           onClick={onClick}
           sx={{
@@ -29,7 +29,7 @@ export const CollapsiblePanel = memo(
             alignItems: "center",
             justifyContent: "space-between",
             cursor: "pointer",
-						mb: open ? 2 : 0,
+            mb: open ? 0.4 : 0,
           }}
         >
           {label}
@@ -38,13 +38,21 @@ export const CollapsiblePanel = memo(
         <Collapse in={open} timeout="auto" unmountOnExit>
           <Box
             sx={{
-              maxHeight: 220,
-              overflowY: "auto",
-							pl: 6
+              background: "rgba(0, 0, 0, 0.2)",
+              padding: "9px 0px 9px 12px",
+              borderRadius: "12px",
             }}
           >
             {children ? (
-              children
+              <Box
+                sx={{
+                  maxHeight: 220,
+                  overflowY: "auto",
+                  paddingRight: 2,
+                }}
+              >
+                {children}
+              </Box>
             ) : (
               <Box
                 sx={{
