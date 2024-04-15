@@ -5,7 +5,7 @@ import { CircleSpinner } from "../../../../components/loading-spinners/CircleSpi
 import {
   useLazyGetReportQuery,
   useReGenerateReportMutation,
-  useSaveReportMutation,
+  useUpdateReportMutation,
 } from "../../../../redux/services/reportApi";
 import { MarketAnalysisReport } from "../templates/MarketAnalysisReport";
 import { REPORTS_DICT } from "../../../../shared/models/constants";
@@ -48,7 +48,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
 
   const [getSetup, { isLoading: loadingSetup, data: setupData }] =
     useLazyGetSetupQuery();
-  const [saveReport, { isSuccess: isSaved }] = useSaveReportMutation({});
+  const [saveReport, { isSuccess: isSaved }] = useUpdateReportMutation();
 
   const [ingestFiles, { isLoading: ingestingFiles }] = useIngestFilesMutation();
 
@@ -98,7 +98,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
 
   const onSave = (content: string) => {
     saveReport({
-      ...(reportId && { reportId: +reportId }),
+      reportId: +reportId,
       content,
       custom: [],
     });

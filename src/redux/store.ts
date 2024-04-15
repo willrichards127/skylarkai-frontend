@@ -1,5 +1,4 @@
-import { configureStore, isRejectedWithValue } from "@reduxjs/toolkit";
-import type { Middleware } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import { userAuthSlice } from "./features/authSlice";
 import { userApi } from "./services/userAPI";
 import { adminApi } from "./services/adminAPI";
@@ -11,16 +10,7 @@ import { reportApi } from "./services/reportApi";
 import { workOrderApi } from "./services/workOrderApi";
 
 import { loadStoreValue } from "../shared/utils/storage";
-
-// Global error handler
-const rtkQueryErrorLogger: Middleware = () => (next) => (action) => {
-  // RTK Query uses `createAsyncThunk` from redux-toolkit under the hood, so we're able to utilize these matchers!
-  if (isRejectedWithValue(action)) {
-    console.warn("We got a rejected action!", action);
-  }
-
-  return next(action);
-};
+import { checkForUnauthorized, rtkQueryErrorLogger } from "./middleware";
 
 export const store = configureStore({
   preloadedState: {
@@ -51,6 +41,7 @@ export const store = configureStore({
 			reportApi.middleware,
 			workOrderApi.middleware,
       rtkQueryErrorLogger,
+      checkForUnauthorized,
     ]),
 });
 

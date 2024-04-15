@@ -2,6 +2,7 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQuery } from "./base";
 import { ISetup } from "../../shared/models/interfaces";
 import update from "immutability-helper";
+import { handleCatchError } from "./helper";
 
 export const setupApi = createApi({
   reducerPath: "setupApi",
@@ -10,29 +11,24 @@ export const setupApi = createApi({
   tagTypes: ["Setup"],
   endpoints: (builder) => ({
     getCategories: builder.query<any, void>({
-      // queryFn(arg, queryApi, extraOptions, apiBaseQuery)
       async queryFn(_, __, ___, apiBaseQuery) {
         try {
-          const categoriesReponse: any = await apiBaseQuery({
+          const categoriesReponse = await apiBaseQuery({
             url: "categories",
           });
 
-          const promises: Promise<unknown>[] = [];
-          for (const categoryName of categoriesReponse.data.categories) {
-            const promise = new Promise((resolve) =>
-              resolve(
-                apiBaseQuery({
-                  url: `template_nodes?category_name=${categoryName}`,
-                })
-              )
-            );
-            promises.push(promise);
+          if (categoriesReponse.error) {
+            throw categoriesReponse.error;
           }
-
+          const promises: Promise<unknown>[] = (
+            categoriesReponse.data as any
+          ).categories.map((category: string) =>
+            apiBaseQuery({ url: `template_nodes?category_name=${category}` })
+          );
           const responses = await Promise.all(promises);
           const categoryDict = responses.reduce(
             (cv: Record<string, any>, pv: any, index) => {
-              cv[categoriesReponse.data.categories[index]] =
+              cv[(categoriesReponse.data as any).categories[index]] =
                 pv.data.template_nodes.map((node: any) => ({
                   template_node_id: node.id,
                   name: node.name,
@@ -50,13 +46,7 @@ export const setupApi = createApi({
             data: categoryDict,
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              data: "Error in getCategories API",
-            },
-          };
+          return handleCatchError(e);
         }
       },
     }),
@@ -86,7 +76,6 @@ export const setupApi = createApi({
               [fileUploadNodeIndex]: { properties: { files: { $set: [] } } },
             },
           });
-          // (setup.nodes[fileUploadNodeIndex].properties as any).files = [];
         }
 
         return {
@@ -152,7 +141,7 @@ export const setupApi = createApi({
       ISetup,
       { setup: ISetup; analysisType: string }
     >({
-      async queryFn({ setup, analysisType }, queryApi, ___, apiBaseQuery) {
+      async queryFn({ setup, analysisType }, queryApi) {
         try {
           // save current graph
           let uploadFiles: File[] | undefined;
@@ -169,23 +158,28 @@ export const setupApi = createApi({
           ) {
             uploadFiles = fileUploadNode.properties["files"];
           }
-          const updateResponse: any = await queryApi.dispatch(
+          const updateResponse = await queryApi.dispatch(
             setupApi.endpoints.saveSetup.initiate({ setupId: setup.id, setup })
           );
+
+          if ("error" in updateResponse) {
+            throw updateResponse.error;
+          }
 
           const updatedSetup = updateResponse.data as ISetup;
 
           if (uploadFiles) {
-            const formData = new FormData();
-            formData.append("analysis_type", analysisType);
-            for (const file of uploadFiles) {
-              formData.append("files", file);
+            const updateIngestResponse = await queryApi.dispatch(
+              setupApi.endpoints.ingestFiles.initiate({
+                setupId: setup.id!,
+                companyName: setup.name!,
+                analysisType,
+                files: uploadFiles,
+              })
+            );
+            if ("error" in updateIngestResponse) {
+              throw updateIngestResponse.error;
             }
-            const updateIngestResponse = await apiBaseQuery({
-              url: `ingestfiles?graph_id=${setup.id}&company_name=${setup.name}`,
-              method: "POST",
-              body: formData,
-            });
 
             const skyDBNodeIndex = updatedSetup.nodes.findIndex(
               (node) => node.template_node_id === 46
@@ -200,91 +194,7 @@ export const setupApi = createApi({
 
           return { data: updatedSetup };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              data: "Error in executeGraph API",
-            },
-          };
-        }
-      },
-    }),
-    executeNode: builder.mutation<any, ISetup>({
-      async queryFn(args, __, ___, apiBaseQuery) {
-        const setup = args;
-
-        try {
-          // save current graph
-          const updateResponse: any = await apiBaseQuery({
-            url: `graphs/${setup.id}`,
-            method: "PUT",
-            body: setup,
-          });
-
-          const updatedOutputNodeId = updateResponse.data.nodes.find(
-            (node: any) => node.attributes.graph_node_id === "Output_1"
-          )!.id;
-
-          const executeResponse: any = await apiBaseQuery({
-            url: `graphs/${setup.id}/execute/${updatedOutputNodeId}`,
-            method: "POST",
-          });
-
-          if (executeResponse.data) {
-            const executionResponse: any = await apiBaseQuery({
-              url: `graphs/${setup.id}/executions/${updatedOutputNodeId}`,
-            });
-            if (
-              !!executionResponse.data.data &&
-              typeof executionResponse.data.data === "object"
-            ) {
-              const result = Object.entries(executionResponse.data.data)
-                .map(([key, value]) => `${key}\n${value}`)
-                .join("\n");
-              return {
-                data: {
-                  id: updateResponse.data.id,
-                  name: updateResponse.data.name,
-                  edges: updateResponse.data.edges,
-                  nodes: updateResponse.data.nodes,
-                  result,
-                },
-              };
-            }
-            const finalResult = executionResponse.data.data.includes(
-              "CSV Output"
-            )
-              ? executionResponse.data.data.substring(
-                  0,
-                  executionResponse.data.data.indexOf("CSV Output:")
-                )
-              : executionResponse.data.data;
-            console.log(finalResult, "finalResult---");
-            let replaced = finalResult.replace("<investment_memo>", "");
-            replaced = replaced.replace("</investment_memo>", "");
-            return {
-              data: {
-                id: updateResponse.data.id,
-                name: updateResponse.data.name,
-                edges: updateResponse.data.edges,
-                nodes: updateResponse.data.nodes,
-                result: replaced,
-              },
-            };
-          }
-          return {
-            data: "",
-            message: "Failed to execute this node.",
-          };
-        } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              data: "Error in executeNode API",
-            },
-          };
+          return handleCatchError(e);
         }
       },
     }),
@@ -301,5 +211,4 @@ export const {
   useIngestFilesMutation,
   useUploadFilesMutation,
   useExecuteGraphMutation,
-  useExecuteNodeMutation,
 } = setupApi;
