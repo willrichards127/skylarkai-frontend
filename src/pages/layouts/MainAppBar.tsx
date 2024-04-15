@@ -16,6 +16,7 @@ import { useSelector, useDispatch } from "react-redux";
 import LogoutIcon from "@mui/icons-material/Logout";
 import HelpIcon from "@mui/icons-material/Help";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import CloudSyncIcon from '@mui/icons-material/CloudSync';
 import {
   Logo,
   FeaturesIcon,
@@ -253,6 +254,27 @@ export const MainAppBar = memo(() => {
                 <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
                   <AnalysisIcon />
                   Analysis
+                </Box>
+              </Box>
+              <Box
+                component={Link}
+                to="/portal/vdrs"
+                sx={{
+                  ml: 4,
+                  color: "white",
+                  textDecoration: "none",
+                  fontSize: 14,
+                  fontWeight: location.pathname.includes("/portal/vdrs")
+                    ? "bold"
+                    : "normal",
+                  opacity: location.pathname.includes("/portal/vdrs")
+                    ? 1
+                    : 0.3,
+                }}
+              >
+                <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                  <CloudSyncIcon />
+                  Virtual Data Rooms
                 </Box>
               </Box>
               <Box

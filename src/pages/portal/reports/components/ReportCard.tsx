@@ -46,6 +46,19 @@ export const ReportCard = memo(
           alignItems: "center",
         }}
       >
+        <Box sx={{ position: "absolute", right: 4, top: 4 }}>
+          {!!moreItems?.length && (
+            <XPopmenu
+              triggerEl={
+                <IconButton size="small" sx={{ zIndex: 999 }}>
+                  <MoreVertIcon />
+                </IconButton>
+              }
+              items={moreItems}
+              onItem={(id) => (onMoreItem ? onMoreItem(id) : null)}
+            />
+          )}
+        </Box>
         <CardActionArea
           onClick={onCard}
           title={label}
@@ -72,19 +85,7 @@ export const ReportCard = memo(
               titleTypographyProps={{ fontSize: 16, fontWeight: "500" }}
               subheader={updatedAt || ""}
             />
-            {!!moreItems?.length && (
-              <XPopmenu
-                triggerEl={
-                  <IconButton>
-                    <MoreVertIcon />
-                  </IconButton>
-                }
-                items={moreItems}
-                onItem={(id) => (onMoreItem ? onMoreItem(id) : null)}
-              />
-            )}
           </Box>
-          <Box></Box>
         </CardActionArea>
       </Card>
     );
