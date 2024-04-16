@@ -41,7 +41,39 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
   borderTop: "1px solid rgba(0, 0, 0, .125)",
 }));
 
-export const XAccordion = ({
+const SmallAccordion = styled((props: AccordionProps) => (
+  <MuiAccordion disableGutters elevation={0} square {...props} />
+))(() => ({
+  "&:before": {
+    display: "none",
+  },
+}));
+
+const SmallAccordionSummary = styled((props: AccordionSummaryProps) => (
+  <MuiAccordionSummary
+    expandIcon={<ArrowForwardIosSharpIcon sx={{ fontSize: "0.7rem" }} />}
+    {...props}
+  />
+))(() => ({
+  backgroundColor: "#484863",
+  flexDirection: "row-reverse",
+  "& .MuiAccordionSummary-expandIconWrapper.Mui-expanded": {
+    transform: "rotate(90deg)",
+  },
+  "&.MuiAccordionSummary-root": {
+    minHeight: 32,
+    padding: 4,
+  },
+  "& .MuiAccordionSummary-content": {
+    margin: 0.5,
+  },
+}));
+
+const SmallAccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
+  padding: theme.spacing(1),
+}));
+
+export const XAccordions = ({
   options,
   defaultExpanded = false,
 }: {
@@ -52,14 +84,31 @@ export const XAccordion = ({
     <div>
       {options.map((option, index) => (
         <Accordion defaultExpanded={defaultExpanded} key={`panel-${index}`}>
-          <AccordionSummary>
-            {option.summary}
-          </AccordionSummary>
+          <AccordionSummary>{option.summary}</AccordionSummary>
           <AccordionDetails>
             <Typography>{option.detail}</Typography>
           </AccordionDetails>
         </Accordion>
       ))}
     </div>
+  );
+};
+
+export const XSmallAccordion = ({
+  summary,
+  detail,
+  defaultExpanded = false,
+}: {
+  defaultExpanded?: boolean;
+  summary: React.ReactNode;
+  detail: React.ReactNode;
+}) => {
+  return (
+    <SmallAccordion defaultExpanded={defaultExpanded}>
+      <SmallAccordionSummary>{summary}</SmallAccordionSummary>
+      <SmallAccordionDetails>
+        <Typography>{detail}</Typography>
+      </SmallAccordionDetails>
+    </SmallAccordion>
   );
 };

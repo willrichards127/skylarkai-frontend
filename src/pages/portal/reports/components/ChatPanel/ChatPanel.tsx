@@ -21,7 +21,7 @@ export const ChatPanel = memo(
     onAddToReport,
     onJumpTo,
   }: {
-    graph_id?: number;
+    graph_id: number;
     analysis_type: string;
     companyName: string;
     filenames: string[];
@@ -50,7 +50,7 @@ export const ChatPanel = memo(
           { type: "question", content: question },
         ]);
         const response = await getAnswer({
-          ...(!!graph_id && { graph_id }),
+          graph_id,
           question,
           filenames,
           analysis_type,
@@ -69,6 +69,8 @@ export const ChatPanel = memo(
             {
               type: "answer",
               content: response.content,
+              rating: response.rating,
+              rating_response: response.rating_response,
             },
           ]);
         }
@@ -183,6 +185,7 @@ export const ChatPanel = memo(
       >
         <ChatContentBox
           ref={ref}
+          graph_id={graph_id}
           chats={chatHistory}
           companyName={companyName}
           onAddToReport={onAddToReport}

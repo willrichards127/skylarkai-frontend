@@ -35,12 +35,33 @@ export interface ITranscript {
   file_name: string;
 }
 
+export const metrics: TMetric[] = [
+  "Accuracy",
+  "Relevance",
+  "Specificity",
+  "Currentness",
+  "Verbosity",
+];
+
+export interface IMetricContent {
+  rating: number | null;
+  feedback: string;
+}
+
+export type TMetric =
+  | "Accuracy"
+  | "Relevance"
+  | "Specificity"
+  | "Currentness"
+  | "Verbosity";
+
 export interface IChat {
   type: "question" | "answer" | "loading" | "topic" | "suggestions";
   content: string | string[];
   tables?: string[];
   reference?: string[];
   rating?: number;
+  rating_response?: Record<TMetric, IMetricContent>;
 }
 
 export interface ICompany {
@@ -117,8 +138,8 @@ export interface ITopic {
 }
 
 export interface IResponseAnswer {
-	question?: string;
-	answer: string;
-	data: string[];
-	question_history?: string[][] | string[] | string;
+  question?: string;
+  answer: string;
+  data: string[];
+  question_history?: string[][] | string[] | string;
 }
