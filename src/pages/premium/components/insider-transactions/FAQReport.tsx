@@ -1,7 +1,7 @@
 import { Box, Button, Link, Typography, Breadcrumbs } from "@mui/material";
 import IosShareIcon from "@mui/icons-material/IosShare";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import { XAccordion } from "../../../../components/XAccordion";
+import { XAccordions } from "../../../../components/XAccordion";
 
 export const FAQReport = ({ onGotoMain }: { onGotoMain: () => void }) => {
   return (
@@ -23,7 +23,7 @@ export const FAQReport = ({ onGotoMain }: { onGotoMain: () => void }) => {
         </Button>
       </Box>
       <Box py={2}>
-        <XAccordion
+        <XAccordions
           options={[
             {
               summary:
