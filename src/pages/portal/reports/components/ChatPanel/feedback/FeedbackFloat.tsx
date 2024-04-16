@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useState } from "react";
 import { Box, Link, Popper, Typography, Button } from "@mui/material";
 import { XSmallAccordion } from "../../../../../../components/XAccordion";
 import { Metric } from "./Metric";
@@ -22,30 +22,30 @@ export const FeedbackFloat = memo(
   }) => {
     const [updateFeedback, { isLoading }] = useUpdateFeedbackMutation();
     const [overallFeedback, setOverallFeedback] = useState<IMetricContent>({
-      rating: 1,
+      rating: 5,
       feedback: "",
     });
     const [feedbackStatus, setFeedbackStatus] = useState<
       Record<TMetric, IMetricContent>
     >({
       Accuracy: {
-        rating: 1,
+        rating: 5,
         feedback: "",
       },
       Relevance: {
-        rating: 1,
+        rating: 5,
         feedback: "",
       },
       Specificity: {
-        rating: 1,
+        rating: 5,
         feedback: "",
       },
       Currentness: {
-        rating: 1,
+        rating: 5,
         feedback: "",
       },
       Verbosity: {
-        rating: 1,
+        rating: 5,
         feedback: "",
       },
     });
@@ -81,18 +81,6 @@ export const FeedbackFloat = memo(
       feedbackStatus,
       chat,
     ]);
-
-    const isValidFeedback = useMemo(() => {
-      // one of feedback's ratings is less than 1 ( 0 or undefined)
-      if (
-        Object.values(feedbackStatus).some(
-          (item: IMetricContent) => !item.rating
-        )
-      )
-        return false;
-      if (!overallFeedback.rating) return false;
-      return true;
-    }, [feedbackStatus, overallFeedback]);
 
     return (
       <Box
@@ -179,7 +167,7 @@ export const FeedbackFloat = memo(
           <Button
             size="small"
             variant="outlined"
-            disabled={!isValidFeedback || isLoading}
+            disabled={isLoading}
             onClick={onSubmit}
           >
             Submit
