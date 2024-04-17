@@ -54,7 +54,6 @@ export const loginAPI = createAsyncThunk(
       return {
         ...response.data,
         sys_graph_id: responseSystemGraph.data,
-        password,
       };
     } catch (e) {
       return {
