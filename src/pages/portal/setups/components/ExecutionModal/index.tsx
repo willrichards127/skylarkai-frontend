@@ -91,7 +91,6 @@ export const ExecutionModal = memo(
           files: uploadFiles,
         }).unwrap();
 
-
         if (skyDBNodeIndex > -1 && updateIngestResponse.length) {
           updatedSetup.nodes[skyDBNodeIndex].properties = {
             ...(updatedSetup.nodes[skyDBNodeIndex].properties || {}),
@@ -194,6 +193,7 @@ export const ExecutionModal = memo(
             question: item.name,
             analysis_type: "financial_diligence",
             llm: llmNode?.properties?.model || "OpenAI",
+            recursion: llmNode?.properties?.recursion || 5,
           });
           if ("data" in resp && resp.data.rating && resp.data.rating >= 1) {
             result += `<h${depth.length + 3} class='heading-question'>${

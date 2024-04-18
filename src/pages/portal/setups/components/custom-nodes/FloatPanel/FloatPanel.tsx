@@ -126,7 +126,8 @@ const FloatPanel = memo(
         ),
         question: inputNode.data.properties.text,
         analysis_type: "financial_diligence",
-        llm: llmNode.data.properties.model,
+        llm: llmNode.data.properties?.model || "OpenAI",
+        recursion: llmNode?.data.properties?.recursion || 5,
       }).unwrap();
 
       const endTime = performance.now();
