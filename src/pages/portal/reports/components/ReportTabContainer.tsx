@@ -36,7 +36,7 @@ export const ReportTabContainer = memo(
           clickable: true,
         },
       ],
-      []
+      [viewMode]
     );
     const navigate = useNavigate();
 
