@@ -39,6 +39,7 @@ export const ChatPanel = memo(
     const [llm, setLlm] = useState<
       "SkyEngine 1" | "SkyEngine 2" | "SkyEngine 3" | "SkyEngine 4"
     >("SkyEngine 1");
+    const [recursion, setRecursion] = useState<number>(5);
     const [emailModal, showEmailModal] = useState<boolean>(false);
     const [chatHistory, setChatHistory] = useState<IChat[]>([]);
 
@@ -54,6 +55,7 @@ export const ChatPanel = memo(
           question,
           filenames,
           analysis_type,
+          recursion,
           llm:
             llm === "SkyEngine 1"
               ? "OpenAI"
@@ -75,7 +77,7 @@ export const ChatPanel = memo(
           ]);
         }
       },
-      [getAnswer, llm, filenames, graph_id, analysis_type]
+      [getAnswer, llm, recursion, filenames, graph_id, analysis_type]
     );
 
     const onPrint = useCallback(() => {
@@ -141,7 +143,8 @@ export const ChatPanel = memo(
                 mr: 1,
                 "& .MuiNativeSelect-select": {
                   fontSize: 12,
-                  padding: "4px 14px",
+                  padding: "8px 14px",
+                  lineHeight: "14px",
                 },
               }}
             >
@@ -152,6 +155,29 @@ export const ChatPanel = memo(
                   </option>
                 )
               )}
+            </TextField>
+            <TextField
+              size="small"
+              select
+              value={recursion}
+              onChange={(e) => setRecursion(+e.target.value)}
+              SelectProps={{
+                native: true,
+              }}
+              sx={{
+                mr: 1,
+                "& .MuiNativeSelect-select": {
+                  fontSize: 12,
+                  padding: "8px 14px",
+                  lineHeight: "14px",
+                },
+              }}
+            >
+              {[1, 2, 3, 4, 5].map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
             </TextField>
             <XIconButton
               size="small"
