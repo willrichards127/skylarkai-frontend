@@ -365,6 +365,7 @@ export const transcriptApi = createApi({
         filenames: string[];
         analysis_type?: string;
         llm?: string;
+        recursion?: number;
         chatmode?: boolean;
         insider_transaction?: boolean;
       }
@@ -374,6 +375,7 @@ export const transcriptApi = createApi({
           graph_id,
           question,
           filenames,
+          recursion = 5,
           analysis_type = "transcript",
           chatmode = false,
           llm = "OpenAI",
@@ -387,7 +389,7 @@ export const transcriptApi = createApi({
         const current_graph_id = graph_id || sys_graph_id;
         try {
           const response = await apiBaseQuery({
-            url: `customquery/${current_graph_id}?llm=${llm}&analysis_type=${analysis_type}${
+            url: `customquery/${current_graph_id}?llm=${llm}&recursion=${recursion}&analysis_type=${analysis_type}${
               insider_transaction
                 ? "&insider_transaction=" + insider_transaction
                 : ""
