@@ -1,57 +1,17 @@
-import { Box, Button, Grid, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Grid, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { VDRCard } from "./components/VDRCard";
-import { IVDR } from "./interfaces";
-
-const tempVDRs: IVDR[] = [
-  {
-    id: 1,
-    name: "VDR 1",
-    filenames: ["file1.pdf", "file2.pdf", "file3.pdf", "file4.pdf"],
-    rating: 5,
-		status: 2,
-    created: "2024-04-12 02:33 PM",
-    updated: "2024-04-12 03:50 PM",
-  },
-  {
-    id: 2,
-    name: "VDR 2",
-    filenames: ["file1.pdf", "file2.pdf", "file3.pdf"],
-    rating: 2,
-		status: 1,
-    created: "2024-04-12 02:33 PM",
-    updated: "2024-04-12 03:50 PM",
-  },
-  {
-    id: 3,
-    name: "VDR 3",
-    filenames: ["file1.pdf", "file2.pdf"],
-    rating: 3,
-		status: 0,
-    created: "2024-04-12 02:33 PM",
-    updated: "2024-04-12 03:50 PM",
-  },
-  {
-    id: 4,
-    name: "VDR 4",
-    filenames: ["file1.pdf", "file2.pdf"],
-    rating: 4,
-		status: 2,
-    created: "2024-04-12 02:33 PM",
-    updated: "2024-04-12 03:50 PM",
-  },
-  {
-    id: 5,
-    name: "VDR 5",
-    filenames: ["file1.pdf", "file2.pdf"],
-    rating: 1,
-		status: 2,
-    created: "2024-04-12 02:33 PM",
-    updated: "2024-04-12 03:50 PM",
-  },
-];
+import { useState } from "react";
+import { NewVDRModal } from "./components/NewVDRModal";
+import { useGetVDRsQuery } from "../../../redux/services/vdrApi";
+import { useNavigate } from "react-router-dom";
 
 export default function VDRsPage() {
+  const navigate = useNavigate();
+
+  const [newVDRModal, showNewVDRModal] = useState<boolean>(false);
+  const { data, isLoading } = useGetVDRsQuery();
+
   return (
     <Box
       sx={{ display: "flex", flexDirection: "column", height: "100%", p: 8 }}
@@ -67,7 +27,11 @@ export default function VDRsPage() {
         <Typography variant="h6" fontWeight="bold">
           Virtual Data Rooms
         </Typography>
-        <Button variant="contained" startIcon={<AddIcon />}>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => showNewVDRModal(true)}
+        >
           Add VDR
         </Button>
       </Box>
@@ -76,14 +40,30 @@ export default function VDRsPage() {
           height: "calc(100% - 64px)",
         }}
       >
-        <Grid container spacing={4}>
-          {tempVDRs.map((vdr) => (
-            <Grid key={vdr.id} item xs={12} sm={6} md={4} lg={3}>
-              <VDRCard key={vdr.id} {...vdr} />
-            </Grid>
-          ))}
-        </Grid>
+        {isLoading ? (
+          <Box textAlign="center" p={4}>
+            <CircularProgress />
+          </Box>
+        ) : data ? (
+          <Grid container spacing={4}>
+            {data.map((vdr) => (
+              <Grid key={vdr.id} item xs={12} sm={6} md={4} lg={3}>
+                <VDRCard
+                  key={vdr.id}
+                  {...vdr}
+                  onCard={() => navigate(`/portal/vdrs/${vdr.id}`)}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        ) : null}
       </Box>
+      {newVDRModal && (
+        <NewVDRModal
+          open={newVDRModal}
+          onClose={() => showNewVDRModal(false)}
+        />
+      )}
     </Box>
   );
 }

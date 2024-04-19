@@ -8,6 +8,7 @@ import { authApi } from "./services/authAPI";
 import { setupApi } from "./services/setupApi";
 import { reportApi } from "./services/reportApi";
 import { workOrderApi } from "./services/workOrderApi";
+import { vdrApi } from "./services/vdrApi";
 
 import { loadStoreValue } from "../shared/utils/storage";
 import { checkForUnauthorized, rtkQueryErrorLogger } from "./middleware";
@@ -29,6 +30,7 @@ export const store = configureStore({
 		[reportApi.reducerPath]: reportApi.reducer,
 		[workOrderApi.reducerPath]: workOrderApi.reducer,
     [authApi.reducerPath]: authApi.reducer,
+    [vdrApi.reducerPath]: vdrApi.reducer,
   },
   devTools: import.meta.env.VITE_NODE_ENV !== "production",
   middleware: (getDefaultMiddleware) =>
@@ -40,6 +42,7 @@ export const store = configureStore({
       setupApi.middleware,
 			reportApi.middleware,
 			workOrderApi.middleware,
+      vdrApi.middleware,
       rtkQueryErrorLogger,
       checkForUnauthorized,
     ]),

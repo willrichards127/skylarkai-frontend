@@ -3,7 +3,6 @@ import { useEffect, forwardRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Box } from "@mui/material";
 import { ChatBlock } from "./ChatBlock";
-import { FeedbackFloat } from "./FeedbackFloat";
 import { IChat } from "../../../../../redux/interfaces";
 
 export const ChatContentBox = forwardRef(
@@ -27,7 +26,7 @@ export const ChatContentBox = forwardRef(
     },
     ref: any
   ) => {
-    const [openFeedbackFloat, setOpenFeedbackFloat] = useState<boolean>(true);
+    const [, setOpenFeedbackFloat] = useState<boolean>(true);
 
     useEffect(() => {
       if (!chats.length || chats[chats.length - 1].type === "loading") {

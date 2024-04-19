@@ -1,30 +1,23 @@
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import {
   Box,
   IconButton,
   Chip,
   Card,
   CardActionArea,
-  Rating,
+  // Rating,
   Typography,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { XPopmenu } from "../../../../components/XPopmenu";
 import { IMenuItem } from "../../../../shared/models/interfaces";
-import { IVDR } from "../interfaces";
+import { IVDRList } from "../interfaces";
 
-const statusDict: Record<number, string> = {
-  0: "info",
-  1: "warning",
-  2: "success",
-};
 
 export const VDRCard = memo(
   ({
     name,
-    filenames,
-    updated,
-    rating,
+    count,
     status,
     moreItems,
     onMoreItem,
@@ -33,7 +26,31 @@ export const VDRCard = memo(
     moreItems?: IMenuItem[];
     onCard?: () => void;
     onMoreItem?: (itemId: string) => void;
-  } & IVDR) => {
+  } & IVDRList) => {
+    const label = useMemo(
+      () =>
+        !count
+          ? "Draft"
+          : status === 1
+          ? "Processing"
+          : status === 2
+          ? "Success"
+          : status === 3
+          ? "Fail"
+          : "Draft",
+      [count, status]
+    );
+    const color = useMemo(
+      () =>
+        label === "Draft"
+          ? "warning"
+          : label === "Success"
+          ? "primary"
+          : label === "Fail"
+          ? "error"
+          : "info",
+      [label]
+    );
     return (
       <Card
         sx={{
@@ -55,11 +72,11 @@ export const VDRCard = memo(
               {name}
             </Typography>
             <Typography variant="body2" gutterBottom>
-              Files: {filenames.length}
+              Files: {count}
             </Typography>
-            <Typography variant="body2" gutterBottom>
+            {/* <Typography variant="body2" gutterBottom>
               {updated || ""}
-            </Typography>
+            </Typography> */}
 
             {!!moreItems?.length && (
               <XPopmenu
@@ -81,17 +98,11 @@ export const VDRCard = memo(
             >
               <Chip
                 size="small"
-                label={
-                  status === 1
-                    ? "Processing"
-                    : status === 2
-                    ? "Completed"
-                    : "Draft"
-                }
-                color={statusDict[status] as any}
+                label={label}
+                color={color}
                 variant="filled"
               />
-              <Rating name="read-only" value={rating} size="small" readOnly />
+              {/* <Rating name="read-only" value={rating} size="small" readOnly /> */}
             </Box>
           </Box>
         </CardActionArea>
