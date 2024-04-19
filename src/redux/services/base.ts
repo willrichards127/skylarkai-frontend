@@ -4,36 +4,35 @@ import { fetchBaseQuery, retry } from "@reduxjs/toolkit/query/react";
 import type { BaseQueryFn } from "@reduxjs/toolkit/query";
 import axios from "axios";
 import type { AxiosRequestConfig, AxiosError } from "axios";
-import { clearUserInfo, updateTokenAsync } from "../features/authSlice";
 import { loadStoreValue } from "../../shared/utils/storage";
 
 export const baseQuery = retry(
-	async (args, api, extraOptions) => {
-		const result = await fetchBaseQuery({
-			baseUrl: import.meta.env.VITE_API_URL,
-			prepareHeaders: (headers) => {
-				const token = loadStoreValue("token");
-				if (!token) {
-					// do action for logout
-					return headers;
-				}
-				if (token) {
-					headers.set("Authorization", `Bearer ${token}`);
-				}
-				return headers;
-			},
-		})(args, api, extraOptions);
+  async (args, api, extraOptions) => {
+    const result = await fetchBaseQuery({
+      baseUrl: import.meta.env.VITE_API_URL,
+      prepareHeaders: (headers) => {
+        const token = loadStoreValue("token");
+        if (!token) {
+          // do action for logout
+          return headers;
+        }
+        if (token) {
+          headers.set("Authorization", `Bearer ${token}`);
+        }
+        return headers;
+      },
+    })(args, api, extraOptions);
 
-		// if any error, need to try to call this api again
-		// if (!!result.error) {
-		// 	clearItems();
-		// 	window.location.href = "/auth/login";
-		// }
-		return result;
-	},
-	{
-		maxRetries: 0,
-	}
+    // if any error, need to try to call this api again
+    // if (!!result.error) {
+    // 	clearItems();
+    // 	window.location.href = "/auth/login";
+    // }
+    return result;
+  },
+  {
+    maxRetries: 0,
+  }
 );
 
 export const axiosBaseQuery =
@@ -97,34 +96,10 @@ export const axiosBaseQueryWithReauth =
     unknown
   > =>
   async (args, api, extraOptions) => {
-    const auth = (api.getState() as any).userAuthSlice;
+    const token = loadStoreValue("token");
     const result: any = await axiosBaseQuery({
       baseUrl,
-      ...(isGuarded && { token: auth.token }),
+      ...(isGuarded && { token }),
     })(args, api, extraOptions);
-
-    if (result.error && result.error.status === 401 && isGuarded) {
-      // try to get a new token
-      const formdata = new FormData();
-      formdata.append("username", auth.userInfo.email);
-      formdata.append("password", auth.userInfo.password);
-      const refreshTokenResult: any = await axiosBaseQuery({
-        baseUrl,
-      })(
-        {
-          url: "token",
-          method: "POST",
-          data: formdata,
-        },
-        api,
-        extraOptions
-      );
-      if (refreshTokenResult.data.access_token) {
-        // store the new token
-        api.dispatch(updateTokenAsync(refreshTokenResult.data.access_token));
-      } else {
-        api.dispatch(clearUserInfo());
-      }
-    }
     return result;
   };

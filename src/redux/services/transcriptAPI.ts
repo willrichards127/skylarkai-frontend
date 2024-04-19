@@ -303,6 +303,60 @@ export const transcriptApi = createApi({
       },
       keepUnusedDataFor: 0,
     }),
+    updateFeedback: builder.mutation<
+      any,
+      {
+        graph_id: number;
+        question_text: string;
+        user_feedback: any;
+        system_feedback: any;
+      }
+    >({
+      async queryFn(
+        { graph_id, question_text, user_feedback, system_feedback },
+        api,
+        __,
+        apiBaseQuery
+      ) {
+        const user = (api.getState() as any).userAuthSlice.user;
+
+        try {
+          const response = await apiBaseQuery({
+            url: "update-feedback",
+            method: "POST",
+            data: {
+              graph_id,
+              user_id: user.user_id,
+              question_text,
+              user_feedback,
+              system_feedback,
+            },
+          });
+
+          if (response.error) {
+            return {
+              error: response.error,
+            };
+          } else if (response.data) {
+            return {
+              data: {
+                message: (response.data as any).status,
+              },
+            };
+          }
+
+          throw new Error("Fetch error");
+        } catch (e) {
+          return {
+            error: {
+              status: "Update feedback error",
+              error: "Error in update-feedback API",
+              data: e,
+            },
+          };
+        }
+      },
+    }),
     customQuery: builder.mutation<
       IChat,
       {
@@ -311,6 +365,7 @@ export const transcriptApi = createApi({
         filenames: string[];
         analysis_type?: string;
         llm?: string;
+        recursion?: number;
         chatmode?: boolean;
         insider_transaction?: boolean;
       }
@@ -320,6 +375,7 @@ export const transcriptApi = createApi({
           graph_id,
           question,
           filenames,
+          recursion = 5,
           analysis_type = "transcript",
           chatmode = false,
           llm = "OpenAI",
@@ -333,7 +389,7 @@ export const transcriptApi = createApi({
         const current_graph_id = graph_id || sys_graph_id;
         try {
           const response = await apiBaseQuery({
-            url: `customquery/${current_graph_id}?llm=${llm}&analysis_type=${analysis_type}${
+            url: `customquery/${current_graph_id}?llm=${llm}&recursion=${recursion}&analysis_type=${analysis_type}${
               insider_transaction
                 ? "&insider_transaction=" + insider_transaction
                 : ""
@@ -358,6 +414,7 @@ export const transcriptApi = createApi({
                 content: (response.data as any).answer,
                 reference: (response.data as any).reference,
                 rating: (response.data as any).rating,
+                rating_response: (response.data as any).rating_response,
               },
             };
           }
@@ -485,7 +542,7 @@ export const transcriptApi = createApi({
       },
     }),
     generateSentimentAnalysis: builder.mutation<
-      IChat,
+      any,
       {
         sentiments: string[];
         filenames: string[];
@@ -868,8 +925,8 @@ export const transcriptApi = createApi({
         try {
           const formdata = new FormData();
           formdata.append("file_content_base64", base64str);
-          formdata.append('filename', filename);
-          formdata.append('html_template', template);
+          formdata.append("filename", filename);
+          formdata.append("html_template", template);
           formdata.append("subject", subject);
           emails.forEach((email) => {
             formdata.append("email_addresses", email);
@@ -916,6 +973,8 @@ export const {
   // compare documents
   useCompareDocumentsMutation,
 
+  // feedback
+  useUpdateFeedbackMutation,
   // chatbot
   useCustomQueryMutation,
   // get ingested files for graph

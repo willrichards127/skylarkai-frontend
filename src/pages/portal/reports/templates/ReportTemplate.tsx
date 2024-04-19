@@ -307,7 +307,7 @@ export const ReportTemplate = forwardRef(
           }
           rightPanel={
             <ChatPanel
-              graph_id={setup.id}
+              graph_id={setup.id!}
               companyName={setup.name!}
               analysis_type={analysisType}
               onAddToReport={onAddToReport}

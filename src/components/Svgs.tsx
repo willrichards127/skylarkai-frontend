@@ -1794,8 +1794,8 @@ export const BadFace = () => (
 
 export const NeedIprvFace = () => (
   <svg
-    width="28"
-    height="28"
+    width="24"
+    height="24"
     viewBox="0 0 28 28"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -1828,8 +1828,8 @@ export const NeedIprvFace = () => (
 );
 export const GoodFace = () => (
   <svg
-    width="29"
-    height="28"
+    width="25"
+    height="24"
     viewBox="0 0 29 28"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -1871,8 +1871,8 @@ export const GoodFace = () => (
 
 export const GreatFace = () => (
   <svg
-    width="29"
-    height="28"
+    width="25"
+    height="24"
     viewBox="0 0 29 28"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"

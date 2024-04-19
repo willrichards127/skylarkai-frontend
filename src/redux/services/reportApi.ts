@@ -51,6 +51,8 @@ export const reportApi = createApi({
       }
     >({
       query: ({ reportId }) => `reports/${reportId}`,
+      keepUnusedDataFor: 0,
+      providesTags: ["Report"],
     }),
 
     updateReport: builder.mutation<
@@ -261,6 +263,7 @@ export const reportApi = createApi({
           url: `reports/${reportId}`,
           method: "DELETE",
         }),
+        invalidatesTags: ["Report"],
       }
     ),
 
