@@ -39,7 +39,7 @@ export const ChatPanel = memo(
     const [llm, setLlm] = useState<
       "SkyEngine 1" | "SkyEngine 2" | "SkyEngine 3" | "SkyEngine 4"
     >("SkyEngine 1");
-    const [recursion, setRecursion] = useState<number>(5);
+    const [recursion, setRecursion] = useState<number>(2);
     const [emailModal, showEmailModal] = useState<boolean>(false);
     const [chatHistory, setChatHistory] = useState<IChat[]>([]);
 

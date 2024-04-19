@@ -32,11 +32,19 @@ export const ChatPanel = memo(
     companyName: string;
     suggestions?: ITopic[];
     insider_transaction?: boolean;
-    onJumpTo: (tag: string) => void;
+    onJumpTo: ({
+      filename,
+      quote,
+    }: {
+      filename: string;
+      quote: string;
+    }) => void;
   }) => {
     const ref = useRef<HTMLDivElement>();
 
-    const [llm, setLlm] = useState<"SkyEngine" | "Sky2Engine">("SkyEngine");
+    const [llm, setLlm] = useState<
+      "SkyEngine 1" | "SkyEngine 2" | "SkyEngine 3" | "SkyEngine 4"
+    >("SkyEngine 1");
     const [emailModal, showEmailModal] = useState<boolean>(false);
 
     const [suggestion, setSuggestion] = useState<string>("");
@@ -59,7 +67,14 @@ export const ChatPanel = memo(
           filenames,
           analysis_type,
           insider_transaction,
-          llm,
+          llm:
+            llm === "SkyEngine 1"
+              ? "OpenAI"
+              : llm === "SkyEngine 2"
+              ? "Anthropic"
+              : llm === "SkyEngine 3"
+              ? "BOTH"
+              : "Gemini",
         }).unwrap();
         if (response) {
           setChatHistory((prev) => [
@@ -203,15 +218,18 @@ export const ChatPanel = memo(
                 mr: 1,
                 "& .MuiNativeSelect-select": {
                   fontSize: 12,
-                  padding: "4px 14px",
+                  padding: "8px 14px",
+                  lineHeight: "14px",
                 },
               }}
             >
-              {["SkyEngine", "Sky2Engine"].map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
+              {["SkyEngine 1", "SkyEngine 2", "SkyEngine 3", "SkyEngine 4"].map(
+                (item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                )
+              )}
             </TextField>
             <XIconButton
               size="small"
@@ -250,6 +268,7 @@ export const ChatPanel = memo(
           onChooseTopic={onChooseTopic}
           onChooseSuggestion={onChooseSuggestion}
           onJumpTo={onJumpTo}
+          analysis_type={analysis_type}
           insider_transaction={insider_transaction}
           companyName={companyName}
         />
