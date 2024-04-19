@@ -6,7 +6,7 @@ export const CollapsiblePanel = memo(
   ({
     label,
     children,
-    opened = false,
+    opened = true,
     bgcolor,
   }: {
     label: React.ReactNode;
