@@ -23,6 +23,7 @@ import OrderDetailPage from "./pages/portal/workorders/OrderDetailPage";
 import CompaniesPage from "./pages/portal/workorders/CompaniesPage";
 import CompanyDetailPage from "./pages/portal/workorders/CompanyDetailPage";
 import ProfilePage from "./pages/portal/profile/ProfilePage";
+import DashboardPage from "./pages/dashboard";
 
 // const LandingPage = lazy(() => import("./pages/landing"));
 
@@ -122,6 +123,10 @@ function AppRouter() {
               {
                 path: "/admin",
                 element: <AdminPage />,
+              },
+              {
+                path: "/dashboard",
+                element: <DashboardPage />,
               },
               {
                 path: "/help",

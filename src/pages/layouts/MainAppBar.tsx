@@ -22,8 +22,7 @@ import {
   FeaturesIcon,
   HelpIcon as Help2Icon,
   SupportIcon,
-  // WelcomeIcon,
-  // AdvancedFeaturesIcon,
+  DashboardIcon,
   AnalysisIcon,
   ToolsIcon,
 } from "../../components/Svgs";
@@ -153,27 +152,25 @@ export const MainAppBar = memo(() => {
               height: "100%",
             }}
           >
-            {/* <Box
-                component={Link}
-                to="/portal/dashboard"
-                sx={{
-                  ml: 4,
-                  color: "white",
-                  textDecoration: "none",
-                  fontSize: 14,
-                  fontWeight: location.pathname.includes("/portal/dashboard")
-                    ? "bold"
-                    : "normal",
-                  opacity: location.pathname.includes("/portal/dashboard")
-                    ? 1
-                    : 0.3,
-                }}
-              >
-                <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-                  <WelcomeIcon />
-                  Dashboard
-                </Box>
-              </Box> */}
+            <Box
+              component={Link}
+              to="/dashboard"
+              sx={{
+                ml: 4,
+                color: "white",
+                textDecoration: "none",
+                fontSize: 14,
+                fontWeight: location.pathname.includes("/dashboard")
+                  ? "bold"
+                  : "normal",
+                opacity: location.pathname.includes("/dashboard") ? 1 : 0.3,
+              }}
+            >
+              <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                <DashboardIcon />
+                Dashboard
+              </Box>
+            </Box>
             <Box
               sx={{
                 ml: 4,
