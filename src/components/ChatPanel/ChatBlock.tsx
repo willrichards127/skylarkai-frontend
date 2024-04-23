@@ -17,6 +17,7 @@ export const ChatBlock = memo(
   ({
     loading = false,
     chat,
+    analysis_type,
     insider_transaction,
     chats,
     onChooseTopic,
@@ -24,13 +25,20 @@ export const ChatBlock = memo(
     onJumpTo,
   }: {
     loading?: boolean;
+    analysis_type: string;
     companyName?: string;
     chat: IChat;
     chats: IChat[];
     insider_transaction?: boolean;
     onChooseTopic: (topicId: string) => void;
     onChooseSuggestion: (suggestion: string) => void;
-    onJumpTo: (tag: string) => void;
+    onJumpTo: ({
+      filename,
+      quote,
+    }: {
+      filename: string;
+      quote: string;
+    }) => void;
   }) => {
     const isBot = chat.type === "answer";
     const isLoading = chat.type === "loading";
@@ -207,10 +215,12 @@ export const ChatBlock = memo(
                       return (
                         <a
                           {...props}
-                          style={{ color: "tomato" }}
                           className="no-print"
-                          onClick={() => onJumpTo(props.href)}
-                          title={`${filename}.pdf:${quote}`}
+                          style={{ color: "tomato" }}
+                          onClick={() => onJumpTo({ filename, quote })}
+                          title={`${filename}.${
+                            analysis_type === "edgar" ? "html" : "pdf"
+                          }:${quote}`}
                         />
                       );
                     } else return <p {...props} />;

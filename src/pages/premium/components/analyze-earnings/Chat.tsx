@@ -37,13 +37,12 @@ export const Chat = ({
   const [quote, setQuote] = useState<string>("");
 
   const onJumpTo = useCallback(
-    (tag: string) => {
-      const [filename, quote] = tag.substring(1).split("______");
-      const parsedFilename = filename.replace(/___/g, " ");
-      const parsedQuote = quote.replace(/___/g, " ").trim();
-      console.log(parsedFilename, parsedQuote, "### parsed---");
-      onChangeViewFile(parsedFilename);
-      setQuote(parsedQuote);
+    ({ filename, quote: keyword }: { filename: string; quote: string }) => {
+      console.log(filename, keyword, "### parsed---");
+      onChangeViewFile(filename);
+      setTimeout(() => {
+        setQuote(keyword);
+      }, 1000);
     },
     [onChangeViewFile]
   );

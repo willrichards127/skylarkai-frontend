@@ -40,12 +40,10 @@ export const Chat = ({
   );
 
   const onJumpTo = useCallback(
-    (tag: string) => {
-      const [filename, quote] = tag.substring(1).split("______");
-      const parsedFilename = filename.replace(/___/g, " ");
-      const parsedQuote = quote.replace(/___/g, " ").trim();
-      onChangeViewFile(parsedFilename);
-      tagRef.current = parsedQuote;
+    ({ filename, quote }: { filename: string; quote: string }) => {
+      console.log(filename, quote, "citation===");
+      onChangeViewFile(filename);
+      tagRef.current = quote;
       iframeRef.current!.contentDocument!.location.reload();
     },
     [onChangeViewFile]

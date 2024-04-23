@@ -6,7 +6,7 @@ import InsiderTransactionFeature from "./components/insider-transactions";
 import AnalyzeEarningCallsFeature from "./components/analyze-earnings";
 import CompareDocumentsFeature from "./components/compare-documents";
 import SentimentalAnalysisFeature from "./components/sentimental-analysis";
-import ChatDataFeature from "./components/chat-data";
+// import ChatDataFeature from "./components/chat-data";
 import FinanceFeature from "./components/finance";
 
 const compDict: Record<number, any> = {
@@ -16,7 +16,7 @@ const compDict: Record<number, any> = {
   4: AnalyzeEarningCallsFeature,
   5: CompareDocumentsFeature,
   6: SentimentalAnalysisFeature,
-  7: ChatDataFeature,
+  // 7: ChatDataFeature,
   8: FinanceFeature,
 };
 

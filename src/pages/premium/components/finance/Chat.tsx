@@ -16,7 +16,10 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ChatPanel from "../../../../components/ChatPanel";
 import { ICustomInstance } from "./interface";
 import { loadStoreValue } from "../../../../shared/utils/storage";
-import { myRandomInts, scrollToAndHighlightInIFrame } from "../../../../shared/utils/basic";
+import {
+  myRandomInts,
+  scrollToAndHighlightInIFrame,
+} from "../../../../shared/utils/basic";
 // import { useGetSuggestionsQuery } from "../../../../redux/services/transcriptAPI";
 import { addDownloadButtons } from "../../../../shared/utils/xlsx";
 import { ITopic } from "../../../../redux/interfaces";
@@ -24,11 +27,10 @@ import { suggestionDict as suggestions } from "../../../../shared/models/constan
 
 export const Chat = ({
   instance,
-  onChangeViewFile,
   onGotoMain,
 }: {
   instance: ICustomInstance;
-  onChangeViewFile: (filename: string) => void;
+  onChangeViewFile?: (filename: string) => void;
   onGotoMain: () => void;
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -45,21 +47,16 @@ export const Chat = ({
   );
 
   const onJumpTo = useCallback(
-    (tag: string) => {
-      const [filename, quote] = tag.substring(1).split("______");
-      const parsedFilename = filename.replace(/___/g, " ");
-      const parsedQuote = quote.replace(/___/g, " ").trim();      
-      onChangeViewFile(parsedFilename);
-      tagRef.current = parsedQuote;
-      iframeRef.current!.contentDocument!.location.reload();
+    ({ filename, quote }: { filename: string; quote: string }) => {
+      console.log(filename, quote);
     },
-    [onChangeViewFile]
+    []
   );
 
   const onloadIframe = useCallback(() => {
     console.log(tagRef.current, "### jumping to---");
-    addDownloadButtons(iframeRef.current!.contentDocument!)
-    
+    addDownloadButtons(iframeRef.current!.contentDocument!);
+
     scrollToAndHighlightInIFrame(
       iframeRef.current!.contentDocument!,
       tagRef.current
@@ -111,20 +108,27 @@ export const Chat = ({
 
   const selectedSuggestions = useMemo(() => {
     if (suggestions && instance.instance_metadata.docs.length) {
-      const formTypes = instance.instance_metadata.docs.map(doc => doc.form_type);
+      const formTypes = instance.instance_metadata.docs.map(
+        (doc) => doc.form_type
+      );
       if (formTypes.length < 2) {
         if (suggestions[formTypes[0]]) {
-          return myRandomInts(3, suggestions[formTypes[0]].length).map(index => suggestions[formTypes[0]][index])
+          return myRandomInts(3, suggestions[formTypes[0]].length).map(
+            (index) => suggestions[formTypes[0]][index]
+          );
         }
       } else {
-        return formTypes.reduce<ITopic[]>((prev: ITopic[], formType: string) => {
-          if (suggestions[formType]) {
-            const random = myRandomInts(1, suggestions[formType].length);
-            return [...prev, suggestions[formType][random[0]]];
-          } else {
-            return prev;
-          }
-        }, []);
+        return formTypes.reduce<ITopic[]>(
+          (prev: ITopic[], formType: string) => {
+            if (suggestions[formType]) {
+              const random = myRandomInts(1, suggestions[formType].length);
+              return [...prev, suggestions[formType][random[0]]];
+            } else {
+              return prev;
+            }
+          },
+          []
+        );
       }
     }
   }, [instance]);
@@ -155,7 +159,9 @@ export const Chat = ({
         </Typography>
         <Box mr="auto" />
         <Box>
-          <Typography variant="body2">Name: {instance.ticker} {viewFile!.form_type}</Typography>
+          <Typography variant="body2">
+            Name: {instance.ticker} {viewFile!.form_type}
+          </Typography>
           <Typography variant="body2">
             Filed On: {viewFile!.filing_date}
           </Typography>
