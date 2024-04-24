@@ -2,6 +2,7 @@ import { memo } from "react";
 import { IconButton, Box, styled } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import BarChartIcon from "@mui/icons-material/BarChart";
+// import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { IDNDItem } from "../../../../../shared/models/interfaces";
 
@@ -15,7 +16,7 @@ const ActionPane = styled(Box)({
   borderRadius: 4,
   alignItems: "center",
   display: "none",
-  zIndex: 99999
+  zIndex: 99999,
 });
 
 export const ItemActionPane = memo(
@@ -24,11 +25,13 @@ export const ItemActionPane = memo(
     onAddNew,
     onRemove,
     onShowViz,
+    // onDownloadCSV,
   }: {
     item: IDNDItem;
     onAddNew: () => void;
     onRemove: () => void;
     onShowViz: () => void;
+    // onDownloadCSV: () => void;
   }) => {
     return (
       <ActionPane className="no-save no-print">
@@ -36,13 +39,14 @@ export const ItemActionPane = memo(
           <AddIcon sx={{ fontSize: 16, color: "black" }} />
         </IconButton>
         {item.value.tag === "table" && (
-          <IconButton
-            size="small"
-            onClick={onShowViz}
-            title="Visualize"
-          >
-            <BarChartIcon sx={{ fontSize: 16, color: "black" }} />
-          </IconButton>
+          <>
+            {/* <IconButton size="small" onClick={onShowViz} title="Visualize">
+              <FileDownloadIcon sx={{ fontSize: 16, color: "black" }} />
+            </IconButton> */}
+            <IconButton size="small" onClick={onShowViz} title="Visualize">
+              <BarChartIcon sx={{ fontSize: 16, color: "black" }} />
+            </IconButton>
+          </>
         )}
         <IconButton size="small" onClick={onRemove} title="Remove Item">
           <DeleteForeverIcon sx={{ fontSize: 16, color: "black" }} />

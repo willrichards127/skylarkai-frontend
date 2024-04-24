@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useCallback, useMemo, useRef, useState } from "react";
-import { colors, Box, Button } from "@mui/material";
+import { colors, Box, Button, Tooltip } from "@mui/material";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import EmailIcon from "@mui/icons-material/Email";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import { DotSpinner } from "../../../../../components/DotSpinner";
 import { XIconButton } from "../../../../../components/buttons/XIconButton";
 import {
@@ -49,8 +50,26 @@ export const ChatBlock = ({
   const onMouseOver = useCallback(() => {
     setBlogHovered(true);
   }, []);
+
   const onMouseOut = useCallback(() => {
     setBlogHovered(false);
+  }, []);
+
+  const onDownloadCSV = useCallback((csvStr: string) => {
+    const blob = new Blob([csvStr], { type: "text/csv;charset=utf-8," });
+
+    // Create a temporary anchor element
+    const anchor = document.createElement("a");
+    anchor.href = window.URL.createObjectURL(blob);
+
+    // Set the file name
+    anchor.download = "data.csv";
+
+    // Programmatically trigger the download
+    anchor.click();
+
+    // Clean up
+    window.URL.revokeObjectURL(anchor.href);
   }, []);
 
   const onSendViaEmail = useCallback((question: string) => {
@@ -139,16 +158,36 @@ export const ChatBlock = ({
                   );
                 } else return <p {...props} />;
               },
-              table: (props) => (
-                <table
-                  {...props}
-                  style={{
-                    borderCollapse: "collapse",
-                    margin: "4px 2px",
-                    overflowX: "auto",
-                  }}
-                />
-              ),
+              table: (props: any) => {
+                return (
+                  <Tooltip
+                    title={
+                      <XIconButton
+                        size="small"
+                        variant="contained"
+                        sxProps={{
+                          "&.MuiButtonBase-root": {
+                            minHeight: 31,
+                            minWidth: 31,
+                          },
+                        }}
+                        onClick={() => onDownloadCSV(props["data-csv"])}
+                      >
+                        <FileDownloadIcon />
+                      </XIconButton>
+                    }
+                  >
+                    <table
+                      {...props}
+                      style={{
+                        borderCollapse: "collapse",
+                        margin: "4px 2px",
+                        overflowX: "auto",
+                      }}
+                    />
+                  </Tooltip>
+                );
+              },
               th: (props) => (
                 <th
                   {...props}
