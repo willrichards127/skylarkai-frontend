@@ -124,6 +124,7 @@ const FloatPanel = memo(
         filenames: skyDBNode.data.properties.files.map(
           ({ file_name }: { file_name: string }) => removeExtension(file_name)
         ),
+        company_name: inputNode.data.setupDescription || inputNode.data.setupName,
         question: inputNode.data.properties.text,
         analysis_type: "financial_diligence",
         llm: llmNode.data.properties?.model || "OpenAI",

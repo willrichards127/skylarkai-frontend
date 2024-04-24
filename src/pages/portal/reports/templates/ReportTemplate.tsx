@@ -39,7 +39,7 @@ export const ReportTemplate = forwardRef(
       analysisType,
       filenames,
     }: {
-      setup: { id?: number; name: string };
+      setup: { id?: number; name: string; description?: string };
       reportContent: string;
       analysisType: string;
       filenames: string[];
@@ -308,7 +308,7 @@ export const ReportTemplate = forwardRef(
           rightPanel={
             <ChatPanel
               graph_id={setup.id!}
-              companyName={setup.name!}
+              companyName={setup.description || setup.name!}
               analysis_type={analysisType}
               onAddToReport={onAddToReport}
               filenames={filenames}

@@ -58,17 +58,11 @@ export const ChatBlock = ({
   const onDownloadCSV = useCallback((csvStr: string) => {
     const blob = new Blob([csvStr], { type: "text/csv;charset=utf-8," });
 
-    // Create a temporary anchor element
     const anchor = document.createElement("a");
     anchor.href = window.URL.createObjectURL(blob);
-
-    // Set the file name
     anchor.download = "data.csv";
-
-    // Programmatically trigger the download
     anchor.click();
 
-    // Clean up
     window.URL.revokeObjectURL(anchor.href);
   }, []);
 
