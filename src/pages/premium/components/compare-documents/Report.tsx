@@ -226,7 +226,7 @@ export const Report = ({
                 ),
               }}
             >
-              {parseCitationInReport(instance?.instance_metadata?.report || "")}
+              {(instance?.instance_metadata?.report || "")}
             </ReactMarkdown>
           </Box>
         )}

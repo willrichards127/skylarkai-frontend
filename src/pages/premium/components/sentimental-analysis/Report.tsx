@@ -120,7 +120,7 @@ export const Report = ({
               ),
             }}
           >
-            {parseCitation(instance.instance_metadata?.report || "", 4)}
+            {(instance.instance_metadata?.report || "", 4)}
           </ReactMarkdown>
         </Box>
       </Box>
