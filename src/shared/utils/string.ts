@@ -92,12 +92,13 @@ const cleanUp = (inputString: string, limitWordCount?: number) => {
   // replace all `("` and `")` with `"`
   let result = inputString.replace(/\("\s?/g, '"');
   result = result.replace(/"\)/g, '"');
-  // replace all `(` and `)` with `"`;
-  result = result.replace(/[()]/g, '"');
+  // replace all `(` and `)` with `'`;
+  result = result.replace(/[()]/g, "'");
   let filename: string = "",
     quote: string = "";
   try {
     const parsed = JSON.parse(result);
+    
     if (parsed.citation) {
       filename = parsed.citation["Document Title"];
       quote = parsed.citation["Direct Quote"];
@@ -120,6 +121,7 @@ const cleanUp = (inputString: string, limitWordCount?: number) => {
       : quote;
     return `[Link](#${filename}______${quote})`;
   } catch (e) {
+    console.log("parsing citation error.")
     return "";
   }
 };
@@ -142,7 +144,7 @@ export const parseCitation = (
 ) => {
   // convert ``` content to html table
   let content: string = replaceContentBetweenTripleBackticks(documentContent);
-
+  
   let startIndex = -1;
   let braceCount = 0;
 
