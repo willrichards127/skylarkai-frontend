@@ -155,20 +155,25 @@ export const ExecutionModal = memo(
         const templateData = convertJSON(
           updatedSetup.nodes[templateNodeIndex].properties!.text
         );
+        
         if (templateData) {
           const items = addIdtoTemplateJson(templateData.data, {
             excludeUnChecked: true,
           });
-          setItems(items);
-
+          
           if (isBackground) {
             const res = await executionReport({
               setupId: setup.id!,
               analysisType: "financial_diligence",
-              report: templateData,
+              report: {
+                "title": templateData.title,
+                "data": items
+              },
             }).unwrap();
             console.log(res);
           } else {
+            setItems(items);
+
             setCustomQueyring(true);
             const filenames = updatedSetup.nodes[
               skyDBNodeIndex
@@ -185,7 +190,7 @@ export const ExecutionModal = memo(
             const reportName = `${templateData.title}-${
               new Date().getTime() % 1000
             }`;
-            1;
+
             const generatedId = await generateReport({
               setupId: setup.id!,
               data: initializeHtmlResponse(report),
