@@ -56,6 +56,7 @@ export const ChatPanel = memo(
           filenames,
           analysis_type,
           recursion,
+          company_name: companyName,
           llm:
             llm === "SkyEngine 1"
               ? "OpenAI"
@@ -77,7 +78,15 @@ export const ChatPanel = memo(
           ]);
         }
       },
-      [getAnswer, llm, recursion, filenames, graph_id, analysis_type]
+      [
+        getAnswer,
+        llm,
+        recursion,
+        companyName,
+        filenames,
+        graph_id,
+        analysis_type,
+      ]
     );
 
     const onPrint = useCallback(() => {

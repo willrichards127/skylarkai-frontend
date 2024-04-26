@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useState } from "react";
+import { useSelector } from "react-redux";
 import {
-  colors,
   Box,
   Button,
   Breadcrumbs,
@@ -13,10 +11,10 @@ import {
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import IosShareIcon from "@mui/icons-material/IosShare";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { CitationModal } from "../../../../components/modals/CitationModal";
 import { ICustomInstance } from "./interfaces";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { generatePdf } from "../../../../shared/utils/pdf-generator";
+import { Markdown } from "../../../portal/reports/components/Markdown";
 import { parseCitation } from "../../../../shared/utils/string";
 
 export const Report = ({
@@ -26,11 +24,27 @@ export const Report = ({
   instance: ICustomInstance;
   onGotoMain: () => void;
 }) => {
+  const { sys_graph_id } = useSelector((state: any) => state.userAuthSlice);
   const ref = useRef<HTMLDivElement>();
+  const [citationData, setCitationData] = useState<{
+    filename: string;
+    quote: string;
+  }>();
 
   const onExport = useCallback(() => {
     generatePdf(ref.current!.innerHTML, "Sentiment Analysis", "Skylark", true);
   }, []);
+
+  const onCitationLink = useCallback(
+    ({ filename, quote }: { filename: string; quote: string }) => {
+      console.log(filename, quote, "citation==");
+      setCitationData({
+        filename: `${filename}.pdf`,
+        quote,
+      });
+    },
+    []
+  );
 
   return (
     <Box sx={{ height: "100%" }}>
@@ -69,61 +83,23 @@ export const Report = ({
           }}
           ref={ref}
         >
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            allowElement={(element, _, parent) => {
-              if (element.tagName === "p" && (parent as any).tagName === "li") {
-                return false;
-              }
-              if (
-                element.tagName === "strong" &&
-                (parent as any).tagName === "li"
-              ) {
-                return false;
-              }
-              return true;
-            }}
-            unwrapDisallowed={true}
-            components={{
-              pre: (props) => <div {...(props as any)} />,
-              table: (props) => (
-                <table
-                  {...props}
-                  style={{
-                    borderCollapse: "collapse",
-                    margin: "4px 2px",
-                    overflowX: "auto",
-                  }}
-                />
-              ),
-              th: (props) => (
-                <th
-                  {...props}
-                  style={{
-                    textAlign: "center",
-                    padding: "2px 4px",
-                    color: "white",
-                    background: "black",
-                    border: `1px solid ${colors.grey[500]}`,
-                  }}
-                />
-              ),
-              td: (props) => (
-                <td
-                  {...props}
-                  style={{
-                    textAlign: "center",
-                    padding: "4px 8px",
-                    border: `1px solid ${colors.grey[500]}`,
-                  }}
-                />
-              ),
-            }}
-          >
-            {parseCitation(instance.instance_metadata?.report || "", 4)}
-          </ReactMarkdown>
+          <Markdown
+            html={parseCitation(instance.instance_metadata?.report || "")}
+            onCitationLink={onCitationLink}
+          />
         </Box>
       </Box>
+      {citationData ? (
+        <CitationModal
+          open={!!citationData}
+          onClose={() => setCitationData(undefined)}
+          data={{
+            ...citationData,
+            graph_id: sys_graph_id!,
+            analysis_type: "compare",
+          }}
+        />
+      ) : null}
     </Box>
   );
 };

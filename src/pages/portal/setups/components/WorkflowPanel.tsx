@@ -87,6 +87,7 @@ const WorkflowPanel = memo(
     const setupRef = useRef<{
       id?: number;
       name?: string;
+      description?: string;
     }>({});
 
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -208,6 +209,7 @@ const WorkflowPanel = memo(
               ...dndItem,
               setupId,
               setupName: setupRef.current.name,
+              setupDescription: setupRef.current.description,
               graph_node_id,
               categoryDict,
             },
@@ -229,15 +231,22 @@ const WorkflowPanel = memo(
     }, []);
 
     const onSaveName = useCallback(
-      (newSetupName: string) => {
+      ({
+        setup: setupName,
+        company: companyName,
+      }: {
+        setup: string;
+        company: string;
+      }) => {
         const dbNodes = nodes.map((node) => convert2DBNode(node as INode));
         const dbEdges = edges.map((edge) => convert2DBEdge(edge as IEdge));
         saveSetup({
           setupId: setupRef.current.id,
           setup: {
-            name: newSetupName,
+            name: setupName,
             nodes: dbNodes,
             edges: dbEdges,
+            description: companyName,
           },
         });
       },
@@ -249,9 +258,10 @@ const WorkflowPanel = memo(
         setupRef.current = {
           id: loadedSetup.id,
           name: loadedSetup.name,
+          description: loadedSetup.description,
         };
         const loadedNodes = loadedSetup.nodes.map((node) =>
-          convert2Node(node, categoryDict, +loadedSetup.id!, loadedSetup.name)
+          convert2Node(node, categoryDict, +loadedSetup.id!, loadedSetup.name, loadedSetup.description)
         );
         const loadedEdges = loadedSetup.edges.map((edge) =>
           convert2Edge(edge, loadedSetup.nodes)
@@ -393,6 +403,7 @@ const WorkflowPanel = memo(
         {saveSetupModal && (
           <SaveSetupModal
             existingSetupName={setupRef.current.name}
+            existingCompanyName={setupRef.current.description}
             open={saveSetupModal}
             onClose={() => showSaveSetupModal(false)}
             onSaveName={onSaveName}
@@ -406,6 +417,7 @@ const WorkflowPanel = memo(
               name: savedData?.name || setup?.name,
               nodes: nodes.map((node) => convert2DBNode(node as INode)),
               edges: edges.map((edge) => convert2DBEdge(edge as IEdge)),
+              description: setup?.description,
             }}
             onClose={(setup?: ISetup) => {
               showProgressModal(false);

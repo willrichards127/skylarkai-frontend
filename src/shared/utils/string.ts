@@ -1,57 +1,104 @@
 /* eslint-disable no-prototype-builtins */
-
 import { ITransaction } from "../../redux/interfaces";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-export const parseAnswer = (inputString: string) => {
-  // Step 1: Check all sections that start with "{" and end with "}" (potential JSON objects)
-  const jsonMatches = inputString.match(/{[^{}]+}/g) || [];
+export const isCSVFormat = (csvStr: string) => {
+  // remove all " symbols
+  const replaced = csvStr.replaceAll('"', "");
+  // Split the string into lines
+  const lines = replaced.split("\n").filter((line) => !!line.trim());
 
-  // Step 2: Replace sections based on the criteria
-  let stringWithReplacedSections = inputString;
-  for (const jsonSection of jsonMatches) {
-    try {
-      const jsonObj = JSON.parse(jsonSection);
-
-      if (jsonObj && typeof jsonObj === "object") {
-        if (jsonObj.hasOwnProperty("citation")) {
-          // If JSON object includes "citation"
-          const firstCitationValue: any = Object.values(jsonObj.citation)[0];
-          const replacement = `[link](#${encodeURIComponent(
-            firstCitationValue
-          )})`;
-          stringWithReplacedSections = stringWithReplacedSections.replace(
-            `{"citation": ${jsonSection}}`,
-            replacement
-          );
-        } else {
-          // If JSON object does not include "citation"
-          const firstObjValue: any = Object.values(jsonObj)[0];
-          const replacement = `[link](#${encodeURIComponent(firstObjValue)})`;
-          stringWithReplacedSections = stringWithReplacedSections.replace(
-            jsonSection,
-            replacement
-          );
-        }
-      }
-    } catch (error) {
-      console.error("Error parsing JSON:", error);
+  // Check if each line has the same number of commas
+  const numColumns = lines[0].split(",").length;
+  for (let i = 1; i < lines.length; i++) {
+    const columns = lines[i].split(",");
+    if (columns.length !== numColumns) {
+      return false;
     }
   }
 
-  return stringWithReplacedSections;
+  // If all lines have the same number of columns, it's likely CSV
+  return true;
+};
+
+export const csvToMDTable = (csv: string) => {
+  // Split the CSV into rows
+  const rows = csv.trim().split("\n");
+
+  // Extract headers
+  const headers = rows[0].split(",");
+
+  // Generate Markdown table header
+  let markdown = "|" + headers.join(" | ") + " |\n";
+  markdown += "|" + Array(headers.length).fill("---").join(" | ") + " |\n";
+
+  // Generate Markdown table rows
+  for (let i = 1; i < rows.length; i++) {
+    const values = rows[i].split(",");
+    markdown += "|" + values.join(" | ") + " |\n";
+  }
+
+  return markdown;
+};
+
+export const csvToHtmlTable = (csv: string) => {
+  // remove all "
+  const replaced = csv.replaceAll('"', "");
+  // Split CSV into rows
+  const rows = replaced.trim().split("\n");
+
+  // Extract headers
+  const headers = rows[0].split(",");
+
+  // Generate table headers
+  let html = `<table data-csv="${replaced}"><thead><tr>`;
+  headers.forEach((header) => {
+    html += `<th>${header}</th>`;
+  });
+  html += "</tr></thead><tbody>";
+
+  // Generate table rows
+  for (let i = 1; i < rows.length; i++) {
+    const values = rows[i].split(",");
+    html += "<tr>";
+    values.forEach((value) => {
+      html += `<td>${value}</td>`;
+    });
+    html += "</tr>";
+  }
+
+  // Close table
+  html += "</tbody></table>";
+
+  return html;
+};
+
+export const htmlTable2CSV = (html: string) => {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+  const rows = Array.from(doc.querySelectorAll("table tr"));
+  const csvData = rows
+    .map((row) => {
+      const cells = Array.from(row.querySelectorAll("th, td"));
+      return cells
+        .map((cell) => (cell.textContent || "").trim().replaceAll(",", ""))
+        .join(",");
+    })
+    .join("\n");
+
+  return csvData;
 };
 
 const cleanUp = (inputString: string, limitWordCount?: number) => {
   // replace all `("` and `")` with `"`
   let result = inputString.replace(/\("\s?/g, '"');
   result = result.replace(/"\)/g, '"');
-  // replace all `(` and `)` with `"`;
-  result = result.replace(/[()]/g, '"');
+  // replace all `(` and `)` with `'`;
+  result = result.replace(/[()]/g, "'");
   let filename: string = "",
     quote: string = "";
   try {
     const parsed = JSON.parse(result);
+    
     if (parsed.citation) {
       filename = parsed.citation["Document Title"];
       quote = parsed.citation["Direct Quote"];
@@ -67,21 +114,37 @@ const cleanUp = (inputString: string, limitWordCount?: number) => {
     quote = quote.replace(/\s/g, "___");
     // reduce the count of words of quote
     const splited = quote.split("___");
-    quote =
-    limitWordCount ? splited.length > limitWordCount
+    quote = limitWordCount
+      ? splited.length > limitWordCount
         ? splited.slice(0, limitWordCount).join("___")
-        : quote : quote;
+        : quote
+      : quote;
     return `[Link](#${filename}______${quote})`;
   } catch (e) {
+    console.log("parsing citation error.")
     return "";
   }
 };
 
-// parse citation phase only
-export const parseCitation = (documentContent: string, limitWordCount?: number) => {
-  // step 1. remove all ```
-  let content: string = documentContent.replace(/```/g, "");
+const replaceContentBetweenTripleBackticks = (str: string) => {
+  const regex = /```([\s\S]*?)```/g;
+  return str.replace(regex, (_: string, p1: string) => {
+    // p1 contains the text between triple backticks
+    if (isCSVFormat(p1)) {
+      return csvToHtmlTable(p1);
+    }
+    return p1;
+  });
+};
 
+// parse citation phase and convert csv format to table
+export const parseCitation = (
+  documentContent: string,
+  limitWordCount?: number
+) => {
+  // convert ``` content to html table
+  let content: string = replaceContentBetweenTripleBackticks(documentContent);
+  
   let startIndex = -1;
   let braceCount = 0;
 
@@ -359,6 +422,5 @@ export const parseTransaction = (transaction: ITransaction) => {
 };
 
 export const removeExtension = (filename: string) => {
-  return filename.split('.').slice(0, -1).join('.');
-
-}
+  return filename.split(".").slice(0, -1).join(".");
+};

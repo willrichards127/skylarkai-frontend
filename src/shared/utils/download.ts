@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { loadStoreValue } from "./storage";
-export const downloadPdf = async ({graph_id, ...options}: {
+export const downloadPdf = async ({
+  graph_id,
+  ...options
+}: {
   graph_id: number;
   analysis_type: string;
   filename: string;
@@ -30,4 +33,15 @@ export const downloadPdf = async ({graph_id, ...options}: {
   } catch (e) {
     return null;
   }
+};
+
+export const downloadCSV = (csvStr: string) => {
+  const blob = new Blob([csvStr], { type: "text/csv;charset=utf-8" });
+
+  const anchor = document.createElement("a");
+  anchor.href = window.URL.createObjectURL(blob);
+  anchor.download = "data.csv";
+  anchor.click();
+
+  window.URL.revokeObjectURL(anchor.href);
 };

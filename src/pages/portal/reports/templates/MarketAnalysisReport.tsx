@@ -69,7 +69,7 @@ export const MarketAnalysisReport = ({
         }}
       >
         <HeaderPanel
-          companyName={setup.name!}
+          companyName={setup.description || setup.name!}
           reportType={reportType}
           onPrint={onPrint}
           onSave={onSave}
@@ -87,7 +87,7 @@ export const MarketAnalysisReport = ({
         >
           <ReportTemplate
             ref={reportPrintRef}
-            setup={setup as { id: number; name: string }}
+            setup={setup as { id: number; name: string; description?: string }}
             reportContent={reportContent}
             analysisType="financial_diligence"
             filenames={filenames}

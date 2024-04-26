@@ -77,6 +77,7 @@ export interface ISetup {
   name?: string;
   nodes: IDBNode[];
   edges: IDBEdge[];
+  description?: string;
 }
 
 export interface IDropdownItem {

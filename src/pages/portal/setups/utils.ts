@@ -59,7 +59,8 @@ export const convert2Node = (
 	node: IDBNode,
 	categoryDict: Record<string, ITemplateNode[]>,
 	setupId?: number,
-	setupName?: string
+	setupName?: string,
+	setupDescription?: string
 ): INode => {
 	const templateNodes = Object.values(categoryDict).reduce((pv, cv) => {
 		pv.push(...cv);
@@ -80,6 +81,7 @@ export const convert2Node = (
 			...tempNode!,
 			...(!!setupId && { setupId }),
 			...(!!setupName && { setupName }),
+			...(!!setupDescription && { setupDescription }),
 			categoryDict,
 			graph_node_id: node.attributes.graph_node_id,
 			db_node_id: node.id,

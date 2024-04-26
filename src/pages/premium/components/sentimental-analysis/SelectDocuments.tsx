@@ -3,6 +3,8 @@ import { useCallback, useEffect, useState } from "react";
 import {
   Box,
   Button,
+  Stack,
+  MenuItem,
   Backdrop,
   CircularProgress,
   Breadcrumbs,
@@ -71,6 +73,7 @@ export const SelectDocuments = ({
     } & ITranscript)[]
   >([]);
   const [criteria, setCriteria] = useState<string[]>([]);
+  const [llm, setLlm] = useState<string>("Gemini");
 
   const onSelectRow = useCallback(
     (row: any) => {
@@ -94,11 +97,19 @@ export const SelectDocuments = ({
     []
   );
 
+  const onChangeLLM = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setLlm(e.target.value);
+    },
+    []
+  );
+
   const onNextStep = useCallback(async () => {
     const selectedDocuments = rows.filter((row) => row.selected);
     const responseReport = await generateReport({
       filenames: selectedDocuments.map((doc) => doc.file_name),
       sentiments: criteria,
+      llm,
     }).unwrap();
     const responseInstance = await createInstance({
       ...instance,
@@ -110,7 +121,7 @@ export const SelectDocuments = ({
     }).unwrap();
 
     onNext(responseInstance as ICustomInstance);
-  }, [onNext, createInstance, generateReport, criteria, rows, instance]);
+  }, [onNext, createInstance, generateReport, llm, criteria, rows, instance]);
 
   useEffect(() => {
     if (loadingTranscripts || !dataTranscripts) return;
@@ -157,11 +168,12 @@ export const SelectDocuments = ({
           Next
         </Button>
       </Box>
-      <Box sx={{ display: "flex", alignItems: "center", my: 4 }}>
+      <Box sx={{ my: 2 }}>
         <Typography variant="h5">
           {instance.company_name} ({instance.ticker})
         </Typography>
-        <Box mr="auto" />
+      </Box>
+      <Stack spacing={2} direction="row" mb={2}>
         <Autocomplete
           multiple
           fullWidth
@@ -179,8 +191,8 @@ export const SelectDocuments = ({
             "ESG (Environmental, Social, Governance) Factors",
             "Acquisition and Expansion Plans",
           ]}
+          sx={{ minWidth: 650 }}
           getOptionLabel={(option) => option}
-          sx={{ maxWidth: 540 }}
           value={criteria}
           onChange={onChangeCriteria}
           renderOption={(props, option, { selected }) => (
@@ -214,7 +226,21 @@ export const SelectDocuments = ({
             />
           )}
         />
-      </Box>
+        <TextField
+          label="Large Language Model"
+          value={llm}
+          onChange={onChangeLLM}
+          select
+          size="small"
+          sx={{ ml: 1, minWidth: 240 }}
+        >
+          {["Gemini", "OpenAI", "Anthropic"].map((option) => (
+            <MenuItem key={option} value={option}>
+              {option}
+            </MenuItem>
+          ))}
+        </TextField>
+      </Stack>
 
       <XPanel sxProps={{ bgcolor: "#000D1C", py: 4, px: 8 }}>
         <XTable

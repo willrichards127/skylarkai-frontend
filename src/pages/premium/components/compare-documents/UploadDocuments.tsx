@@ -14,6 +14,7 @@ import {
   Backdrop,
   CircularProgress,
   Stack,
+  MenuItem,
 } from "@mui/material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
@@ -54,6 +55,7 @@ export const UploadDocuments = ({
   const [fileContent0, setFileContent0] = useState<string>("");
   const [fileContent1, setFileContent1] = useState<string>("");
   const [criteria, setCriteria] = useState<string[]>([]);
+  const [llm, setLlm] = useState<string>("Gemini");
 
   const onFileUploaded = useCallback(
     (fileIndex: number) => (selectedFiles: File[]) => {
@@ -85,6 +87,13 @@ export const UploadDocuments = ({
     []
   );
 
+  const onChangeLLM = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setLlm(e.target.value);
+    },
+    []
+  );
+
   const onNextStep = useCallback(async () => {
     await ingestFiles({
       analysis_type: "compare",
@@ -100,6 +109,7 @@ export const UploadDocuments = ({
       document1: file0!.name.replace(".pdf", ""),
       document2: file1!.name.replace(".pdf", ""),
       template,
+      llm,
       is_template_with_content: true,
     }).unwrap();
 
@@ -122,6 +132,7 @@ export const UploadDocuments = ({
     instance,
     file0,
     file1,
+    llm,
   ]);
 
   return (
@@ -166,53 +177,69 @@ export const UploadDocuments = ({
         />
       </Stack>
       <Divider sx={{ my: 2 }} />
-      <Autocomplete
-        id="autocomplete-criteria"
-        multiple
-        limitTags={2}
-        options={[
-          "Similarity Analysis",
-          "Contrast Analysis",
-          "Key Themes Extraction",
-          "Data Comparison",
-          "Tone and Style Analysis",
-          "Conclusion Comparison",
-          "Author's Intent and Purpose",
-          "Target Audience Analysis",
-          "Comprehensive Analysis",
-          "Executive Summary",
-        ]}
-        getOptionLabel={(option) => option}
-        sx={{ maxWidth: 480 }}
-        value={criteria}
-        onChange={onChangeCriteria}
-        renderOption={(props, option, { selected }) => (
-          <li {...props} key={option}>
-            <Checkbox
-              icon={icon}
-              checkedIcon={checkedIcon}
-              style={{ marginRight: 8 }}
-              checked={selected}
-              key={option}
-            />
-            {option}
-          </li>
-        )}
-        renderTags={(value, getTagProps) =>
-          value.map((option, index) => (
-            <Chip
-              variant="outlined"
-              label={option}
-              size="small"
-              {...getTagProps({ index })}
-              key={option}
-            />
-          ))
-        }
-        renderInput={(params) => (
-          <TextField {...params} size="small" label="Comparison Criteria" />
-        )}
-      />
+      <Stack spacing={2} direction="row" justifyContent="space-between">
+        <Autocomplete
+          id="autocomplete-criteria"
+          multiple
+          fullWidth
+          limitTags={2}
+          options={[
+            "Similarity Analysis",
+            "Contrast Analysis",
+            "Key Themes Extraction",
+            "Data Comparison",
+            "Tone and Style Analysis",
+            "Conclusion Comparison",
+            "Author's Intent and Purpose",
+            "Target Audience Analysis",
+            "Comprehensive Analysis",
+            "Executive Summary",
+          ]}
+          getOptionLabel={(option) => option}
+          value={criteria}
+          onChange={onChangeCriteria}
+          renderOption={(props, option, { selected }) => (
+            <li {...props} key={option}>
+              <Checkbox
+                icon={icon}
+                checkedIcon={checkedIcon}
+                style={{ marginRight: 8 }}
+                checked={selected}
+                key={option}
+              />
+              {option}
+            </li>
+          )}
+          renderTags={(value, getTagProps) =>
+            value.map((option, index) => (
+              <Chip
+                variant="outlined"
+                label={option}
+                size="small"
+                {...getTagProps({ index })}
+                key={option}
+              />
+            ))
+          }
+          renderInput={(params) => (
+            <TextField {...params} size="small" label="Comparison Criteria" />
+          )}
+        />
+        <TextField
+          label="Large Language Model"
+          value={llm}
+          onChange={onChangeLLM}
+          select
+          size="small"
+          fullWidth
+        >
+          {["Gemini", "OpenAI", "Anthropic"].map((option) => (
+            <MenuItem key={option} value={option}>
+              {option}
+            </MenuItem>
+          ))}
+        </TextField>
+      </Stack>
       <Divider sx={{ my: 2 }} />
       {(fileContent0 || fileContent1) && (
         <SplitContainer

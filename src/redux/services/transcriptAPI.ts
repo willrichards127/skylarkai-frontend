@@ -362,6 +362,7 @@ export const transcriptApi = createApi({
       {
         graph_id?: number;
         question: string;
+        company_name?: string;
         filenames: string[];
         analysis_type?: string;
         llm?: string;
@@ -375,6 +376,7 @@ export const transcriptApi = createApi({
           graph_id,
           question,
           filenames,
+          company_name,
           recursion = 5,
           analysis_type = "transcript",
           chatmode = false,
@@ -389,13 +391,14 @@ export const transcriptApi = createApi({
         const current_graph_id = graph_id || sys_graph_id;
         try {
           const response = await apiBaseQuery({
-            url: `customquery/${current_graph_id}?llm=${llm}&recursion=${recursion}&analysis_type=${analysis_type}${
+            url: `customquery/${current_graph_id}?llm=${llm}&recursion=${recursion}&analysis_type=${analysis_type}&company_name=${company_name}&${
               insider_transaction
                 ? "&insider_transaction=" + insider_transaction
                 : ""
             }`,
             method: "POST",
             data: {
+              company_name,
               question,
               filenames,
               chatmode,
@@ -546,13 +549,14 @@ export const transcriptApi = createApi({
       {
         sentiments: string[];
         filenames: string[];
+        llm?: string;
       }
     >({
-      async queryFn({ sentiments, filenames }, api, __, apiBaseQuery) {
+      async queryFn({ sentiments, filenames, llm = 'OpenAI' }, api, __, apiBaseQuery) {
         const graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
         try {
           const response: any = await apiBaseQuery({
-            url: `sentimentanalysis/${graph_id}?llm=${"Anthropic"}`,
+            url: `sentimentanalysis/${graph_id}?llm=${llm}`,
             method: "POST",
             data: {
               sentiments,
@@ -636,7 +640,7 @@ export const transcriptApi = createApi({
           document1,
           document2,
           template = "",
-          llm = "OpenAI",
+          llm = "Gemini",
           is_file_with_content = false,
           is_template_with_content = false,
           analysis_type = "compare",

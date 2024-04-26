@@ -66,6 +66,7 @@ export const ChatPanel = memo(
           question,
           filenames,
           analysis_type,
+          company_name: companyName,
           insider_transaction,
           llm:
             llm === "SkyEngine 1"
@@ -92,6 +93,7 @@ export const ChatPanel = memo(
         llm,
         getAnswer,
         addChat,
+        companyName,
         feature_instance_id,
         filenames,
         analysis_type,

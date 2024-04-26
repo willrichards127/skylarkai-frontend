@@ -16,7 +16,6 @@ import ChatPanel from "../../../../components/ChatPanel";
 import { ICustomInstance } from "./interface";
 import { loadStoreValue } from "../../../../shared/utils/storage";
 import { scrollToAndHighlightInIFrame } from "../../../../shared/utils/basic";
-// import { useGetSuggestionsQuery } from "../../../../redux/services/transcriptAPI";
 import { addDownloadButtons } from "../../../../shared/utils/xlsx";
 
 export const Chat = ({

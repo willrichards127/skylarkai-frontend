@@ -77,6 +77,7 @@ export const ExecutionModal = memo(
           name: setup.name,
           nodes: setup.nodes,
           edges: setup.edges,
+          description: setup.description,
         },
       }).unwrap();
 
@@ -117,7 +118,7 @@ export const ExecutionModal = memo(
       if (uploadFiles) {
         const updateIngestResponse = await ingestFiles({
           setupId: updatedSetup.id!,
-          companyName: updatedSetup.name!,
+          companyName: updatedSetup.description || updatedSetup.name!,
           analysisType: "financial_diligence",
           // background: true,
           files: uploadFiles,
@@ -243,6 +244,7 @@ export const ExecutionModal = memo(
             graph_id: setup.id,
             filenames: filenames,
             question: item.name,
+            company_name: setup.description || setup.name!,
             analysis_type: "financial_diligence",
             llm: llmNode?.properties?.model || "OpenAI",
             recursion: llmNode?.properties?.recursion || 5,
