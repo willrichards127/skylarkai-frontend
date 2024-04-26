@@ -5,9 +5,22 @@ import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArro
 import { CollapsiblePanel } from "../../../../components/CollapsiblePanel";
 import DndListItem from "./DndListItem";
 import { ITemplateNode } from "../../../../shared/models/interfaces";
+import { useGetVDRsQuery } from "../../../../redux/services/vdrApi";
+import { IVDRDetail, IVDRFileWithId } from "../../vdr/interfaces";
 
 const CategoryPanel = memo(
   ({ categoryDict }: { categoryDict: Record<string, ITemplateNode[]> }) => {
+    const { data: vdrs } = useGetVDRsQuery();
+
+    const vdrsWithId = useMemo(() => {
+      if (vdrs) {
+        return vdrs.map((vdr) => ({
+          ...vdr,
+          files: vdr.files.map((f, index) => ({ ...f, id: `${vdr.name}-${index + 1}` })),
+        }));
+      }
+    }, [vdrs]);
+
     const categoryList = useMemo(
       () => Object.entries(categoryDict),
       [categoryDict]
@@ -17,6 +30,21 @@ const CategoryPanel = memo(
     const onToggleDrawer = useCallback(() => {
       setOpen((prev) => !prev);
     }, []);
+
+    const convertToTemplateNode = (
+      node: ITemplateNode,
+      vdr: IVDRDetail
+    ): ITemplateNode => {
+      return {
+        ...node,
+        label: vdr.name,
+        properties: {
+          vdrId: vdr.id,
+          files: vdr.files,
+        },
+      };
+    };
+
     return (
       <Box sx={{ position: "relative", width: open ? 340 : 60 }}>
         {!open ? (
@@ -53,7 +81,7 @@ const CategoryPanel = memo(
               </IconButton>
             </Box>
             {categoryList.map(([label, items]) => (
-              <Box key={label} mb={1}>
+              <Box key={`category-${label}`} mb={1}>
                 <CollapsiblePanel
                   label={
                     <Typography
@@ -66,9 +94,29 @@ const CategoryPanel = memo(
                     </Typography>
                   }
                 >
-                  {items.map((item) => (
-                    <DndListItem key={item.template_node_id} item={item} />
-                  ))}
+                  {items.map((item) =>
+                    item.template_node_id === 1 ? (
+                      <>
+                        <DndListItem
+                          key={`template-${item.template_node_id}`}
+                          item={item}
+                          draggable={false}
+                        />
+                        {vdrsWithId && vdrsWithId.length && (
+                          <Box sx={{ pl: 2 }}>
+                            {vdrsWithId.map((vdr, index) => (
+                              <DndListItem
+                                key={`vdr-${item.template_node_id}-${index}`}
+                                item={convertToTemplateNode(item, vdr)}
+                              />
+                            ))}
+                          </Box>
+                        )}
+                      </>
+                    ) : (
+                      <DndListItem key={item.template_node_id} item={item} />
+                    )
+                  )}
                 </CollapsiblePanel>
               </Box>
             ))}

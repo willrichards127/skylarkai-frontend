@@ -14,6 +14,7 @@ import {
 } from "../../../../../components/TemplateView/utils";
 import { useCustomQueryMutation } from "../../../../../redux/services/transcriptAPI";
 import {
+  useExecuteReportBackgroundMutation,
   useGenerateCustomReportMutation,
   useGenerateReportMutation,
 } from "../../../../../redux/services/reportApi";
@@ -21,7 +22,9 @@ import { useNavigate } from "react-router-dom";
 import { longDateFormat } from "../../../../../shared/utils/basic";
 import * as marked from "marked";
 import { initializeHtmlResponse } from "../../../../../shared/utils/parse";
+import { useConvertToGraphMutation } from "../../../../../redux/services/vdrApi";
 
+const isBackground = true;
 export const ExecutionModal = memo(
   ({
     open,
@@ -43,6 +46,8 @@ export const ExecutionModal = memo(
       useGenerateReportMutation();
     const [generateCustomReport] = useGenerateCustomReportMutation();
     const [customQuery] = useCustomQueryMutation();
+    const [convertToGraph] = useConvertToGraphMutation();
+    const [executionReport] = useExecuteReportBackgroundMutation();
 
     const [items, setItems] = useState<ITemplateItem[]>([]);
 
@@ -78,11 +83,38 @@ export const ExecutionModal = memo(
       const updatedSetup: ISetup = JSON.parse(
         JSON.stringify(updatedSetupResponse)
       );
-      const skyDBNodeIndex = updatedSetup.nodes.findIndex(
-        (node) => node.template_node_id === 46
+
+      const vdrNodes = setup.nodes.filter(
+        (node) => node.template_node_id === 1
       );
 
-      if (uploadFiles && skyDBNodeIndex > -1) {
+      let ingestedFiles: any = [];
+      if (vdrNodes.length) {
+        for (let i = 0; i < vdrNodes.length; i++) {
+          const properties = vdrNodes[i].properties;
+          if (
+            setup.id &&
+            properties &&
+            properties.files.filter((f: any) => f.checked).length
+          ) {
+            const convertResponse = await convertToGraph({
+              vdrId: properties.vdrId,
+              graphId: setup.id,
+              files: properties!.files
+                .filter((f: any) => f.checked)
+                .map((f: any) => f.file_name),
+            }).unwrap();
+            ingestedFiles = [
+              ...ingestedFiles,
+              ...convertResponse.files_moved.map((f: string) => ({
+                file_name: f,
+              })),
+            ];
+          }
+        }
+      }
+
+      if (uploadFiles) {
         const updateIngestResponse = await ingestFiles({
           setupId: updatedSetup.id!,
           companyName: updatedSetup.name!,
@@ -91,15 +123,23 @@ export const ExecutionModal = memo(
           files: uploadFiles,
         }).unwrap();
 
-        if (skyDBNodeIndex > -1 && updateIngestResponse.length) {
-          updatedSetup.nodes[skyDBNodeIndex].properties = {
-            ...(updatedSetup.nodes[skyDBNodeIndex].properties || {}),
-            files: [
-              ...(updatedSetup.nodes[skyDBNodeIndex].properties?.files || []),
-              ...updateIngestResponse,
-            ],
-          };
-        }
+        ingestedFiles = [...ingestedFiles, ...updateIngestResponse];
+      }
+
+      const skyDBNodeIndex = updatedSetup.nodes.findIndex(
+        (node) => node.template_node_id === 46
+      );
+
+      if (skyDBNodeIndex > -1 && ingestedFiles.length) {
+        updatedSetup.nodes[skyDBNodeIndex].properties = {
+          ...(updatedSetup.nodes[skyDBNodeIndex].properties || {}),
+          files: [
+            ...(updatedSetup.nodes[skyDBNodeIndex].properties?.files || []),
+            ...ingestedFiles,
+          ].filter(
+            (v, i, a) => a.findIndex((v2) => v2.file_name === v.file_name) === i
+          ),
+        };
       }
 
       const templateNodeIndex = updatedSetup.nodes.findIndex(
@@ -119,30 +159,42 @@ export const ExecutionModal = memo(
             excludeUnChecked: true,
           });
           setItems(items);
-          const filenames = updatedSetup.nodes[
-            skyDBNodeIndex
-          ].properties!.files.map((f: any) => f.file_name);
-          setCustomQueyring(true);
-          const ret = await handleCustomQuery(items, filenames);
-          const report =
-            `<h1 style="text-align: center;">Investment memo: ${
-              updatedSetup.name
-            }</h1>
-          <p style="text-align: center;"><strong>${longDateFormat(
-            new Date()
-          )}</strong></p>` + ret;
-          setCustomQueyring(false);
-          const reportName = `${templateData.title}-${
-            new Date().getTime() % 1000
-          }`;
-          const generatedId = await generateReport({
-            setupId: setup.id!,
-            data: initializeHtmlResponse(report),
-            queryType: reportName,
-          }).unwrap();
-          navigate(
-            `/portal/reports/${generatedId}?reportType=${reportName}&setupId=${setup.id}&viewMode=active`
-          );
+
+          if (isBackground) {
+            const res = await executionReport({
+              setupId: setup.id!,
+              analysisType: "financial_diligence",
+              report: templateData,
+            }).unwrap();
+            console.log(res);
+          } else {
+            setCustomQueyring(true);
+            const filenames = updatedSetup.nodes[
+              skyDBNodeIndex
+            ].properties!.files.map((f: any) => f.file_name);
+            const ret = await handleCustomQuery(items, filenames);
+            const report =
+              `<h1 style="text-align: center;">Investment memo: ${
+                updatedSetup.name
+              }</h1>
+            <p style="text-align: center;"><strong>${longDateFormat(
+              new Date()
+            )}</strong></p>` + ret;
+
+            const reportName = `${templateData.title}-${
+              new Date().getTime() % 1000
+            }`;
+            1;
+            const generatedId = await generateReport({
+              setupId: setup.id!,
+              data: initializeHtmlResponse(report),
+              queryType: reportName,
+            }).unwrap();
+            navigate(
+              `/portal/reports/${generatedId}?reportType=${reportName}&setupId=${setup.id}&viewMode=active`
+            );
+            setCustomQueyring(false);
+          }
         }
       }
 

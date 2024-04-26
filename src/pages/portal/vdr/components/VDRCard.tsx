@@ -11,13 +11,13 @@ import {
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { XPopmenu } from "../../../../components/XPopmenu";
 import { IMenuItem } from "../../../../shared/models/interfaces";
-import { IVDRList } from "../interfaces";
+import { IVDRDetail } from "../interfaces";
 
 
 export const VDRCard = memo(
   ({
     name,
-    count,
+    files,
     status,
     moreItems,
     onMoreItem,
@@ -26,10 +26,10 @@ export const VDRCard = memo(
     moreItems?: IMenuItem[];
     onCard?: () => void;
     onMoreItem?: (itemId: string) => void;
-  } & IVDRList) => {
+  } & IVDRDetail) => {
     const label = useMemo(
       () =>
-        !count
+        !files.length
           ? "Draft"
           : status === 1
           ? "Processing"
@@ -38,7 +38,7 @@ export const VDRCard = memo(
           : status === 3
           ? "Fail"
           : "Draft",
-      [count, status]
+      [files.length, status]
     );
     const color = useMemo(
       () =>
@@ -72,7 +72,7 @@ export const VDRCard = memo(
               {name}
             </Typography>
             <Typography variant="body2" gutterBottom>
-              Files: {count}
+              Files: {files.length}
             </Typography>
             {/* <Typography variant="body2" gutterBottom>
               {updated || ""}

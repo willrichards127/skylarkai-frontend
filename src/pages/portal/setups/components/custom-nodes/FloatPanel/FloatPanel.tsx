@@ -42,6 +42,7 @@ import {
   removeExtension,
 } from "../../../../../../shared/utils/string";
 import { ExportModal } from "../../../../../../components/modals/ExportModal";
+import { VDDNode } from "../nodes/dataloaders/VDDNode";
 // key is corresponding to items.name
 const ComponentDict: Record<
   string,
@@ -79,6 +80,7 @@ const ComponentDict: Record<
   Youtube: YoutubuNode,
   GoogleDrive: GoogleDriveNode,
   DataSearch: DataSearchNode,
+  VDD: VDDNode,
 };
 
 const FloatPanel = memo(
@@ -207,7 +209,7 @@ const FloatPanel = memo(
             )}
           </Box>
         }
-        sxProps={{ minWidth: 320 }}
+        sxProps={{ minWidth: 320, maxWidth: 400 }}
       >
         {!!XForm && <XForm nodeId={nodeId} nodeContent={nodeContent} />}
         {["Output"].includes(nodeContent.name) &&

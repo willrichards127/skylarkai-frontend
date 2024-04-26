@@ -141,11 +141,9 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
             {!!reportData && !!setupData && (
               <MarketAnalysisReport
                 setup={setupData}
-                reportContent={
-                  isGeneratedReport
-                    ? initializeHtmlResponse(generatedData)
-                    : reportData.content
-                }
+                reportContent={initializeHtmlResponse(
+                  isGeneratedReport ? generatedData : reportData.content
+                )}
                 reportType={reportType!}
                 filenames={[]}
                 onRerunAction={OnRerun}
