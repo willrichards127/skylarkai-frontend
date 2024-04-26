@@ -6,7 +6,7 @@ import { CollapsiblePanel } from "../../../../components/CollapsiblePanel";
 import DndListItem from "./DndListItem";
 import { ITemplateNode } from "../../../../shared/models/interfaces";
 import { useGetVDRsQuery } from "../../../../redux/services/vdrApi";
-import { IVDRDetail, IVDRFileWithId } from "../../vdr/interfaces";
+import { IVDRDetail } from "../../vdr/interfaces";
 
 const CategoryPanel = memo(
   ({ categoryDict }: { categoryDict: Record<string, ITemplateNode[]> }) => {
