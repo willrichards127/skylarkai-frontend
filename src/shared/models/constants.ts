@@ -54317,6 +54317,7 @@ export const ACCEPT_TEMPLATE_NODE_DICT: Record<string, string[]> = {
     "GoogleSearch",
     "YahooFinance",
     "Webcrawler",
+    "VDD",
   ],
   Pinecone: [
     "File",

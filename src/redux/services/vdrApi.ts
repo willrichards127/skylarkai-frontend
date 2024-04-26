@@ -2,7 +2,7 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQuery } from "./base";
 // import update from "immutability-helper";
 // import { handleCatchError } from "./helper";
-import { IVDR, IVDRDetail, IVDRList } from "../../pages/portal/vdr/interfaces";
+import { IVDR, IVDRDetail } from "../../pages/portal/vdr/interfaces";
 
 export const vdrApi = createApi({
   reducerPath: "vdrApi",
@@ -10,7 +10,7 @@ export const vdrApi = createApi({
   baseQuery,
   tagTypes: ["VDR"],
   endpoints: (builder) => ({
-    getVDRs: builder.query<IVDRList[], void>({
+    getVDRs: builder.query<IVDRDetail[], void>({
       query: () => "vdrs",
       keepUnusedDataFor: 0,
     }),
@@ -18,19 +18,35 @@ export const vdrApi = createApi({
       query: ({ vdrId }) => `vdrs/${vdrId}`,
       keepUnusedDataFor: 0,
     }),
-    saveVDR: builder.mutation<IVDR, { vdrId?: number; data: Omit<IVDR, 'id'> }>({
-      query: ({ vdrId, data }) => {
-        return {
-          url: vdrId ? `vdrs/${vdrId}` : "vdrs",
-          method: vdrId ? "PUT" : "POST",
-          body: data,
-        };
-      },
-    }),
+    saveVDR: builder.mutation<IVDR, { vdrId?: number; data: Omit<IVDR, "id"> }>(
+      {
+        query: ({ vdrId, data }) => {
+          return {
+            url: vdrId ? `vdrs/${vdrId}` : "vdrs",
+            method: vdrId ? "PUT" : "POST",
+            body: data,
+          };
+        },
+      }
+    ),
     deleteSetup: builder.mutation<void, { vdrId: number }>({
       query: ({ vdrId }) => ({
         url: `vdrs/${vdrId}`,
         method: "DELETE",
+      }),
+    }),
+    convertToGraph: builder.mutation<
+      any,
+      { vdrId: number; graphId: number; files: string[] }
+    >({
+      query: ({ vdrId, graphId, files }) => ({
+        url: `copy-categorized-entries/${vdrId}/${graphId}`,
+        method: "POST",
+        body: {
+          filenames: files,
+          analysis_type_id_old: 3,
+          analysis_type_id_new: 3,
+        },
       }),
     }),
   }),
@@ -43,4 +59,5 @@ export const {
   useLazyGetVDRsQuery,
   useSaveVDRMutation,
   useDeleteSetupMutation,
+  useConvertToGraphMutation,
 } = vdrApi;

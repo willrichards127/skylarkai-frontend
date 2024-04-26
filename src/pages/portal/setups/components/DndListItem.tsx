@@ -3,7 +3,7 @@ import { Box } from "@mui/material";
 import DragIndicatorIcon from "@mui/icons-material/Menu";
 import { ITemplateNode } from "../../../../shared/models/interfaces";
 
-const DndListItem = memo(({ item }: { item: ITemplateNode }) => {
+const DndListItem = memo(({ item, draggable = true }: { item: ITemplateNode, draggable?: boolean }) => {
   const onDragStart = useCallback(
     (event: React.DragEvent<HTMLDivElement> | undefined) => {
       if (!event) return;
@@ -26,7 +26,7 @@ const DndListItem = memo(({ item }: { item: ITemplateNode }) => {
         my: 0.5,
       }}
       onDragStart={onDragStart}
-      draggable
+      draggable={draggable}
     >
       <Box width={40} height={37} sx={{ position: "relative", borderRadius: "3px", overflow: "hidden" }}>
         <img
@@ -37,7 +37,7 @@ const DndListItem = memo(({ item }: { item: ITemplateNode }) => {
         />
       </Box>
       <Box mr="auto">{item.label}</Box>
-      <DragIndicatorIcon />
+      {draggable && <DragIndicatorIcon />}
     </Box>
   );
 });
