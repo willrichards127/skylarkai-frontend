@@ -75,6 +75,8 @@ const SetupsContainer = memo(({ hasNewCard }: { hasNewCard?: boolean }) => {
               id={setup.id!.toString()}
               label={setup.name!}
               thumbnail="/tool1.png"
+              height={140}
+              thumbnailHeight={80}
               hasThumbnail
               moreItems={moreItems}
               onMoreItem={(menuItemId) =>

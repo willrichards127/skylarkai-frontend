@@ -64,7 +64,7 @@ export const setupApi = createApi({
         let setupData = { ...setup };
         // Fix some data
         const fileUploadNodeIndex = setup.nodes.findIndex(
-          (node) => node.template_node_id == 2
+          (node) => node.template_node_id === 2
         );
 
         if (
@@ -74,6 +74,21 @@ export const setupApi = createApi({
           setupData = update(setupData, {
             nodes: {
               [fileUploadNodeIndex]: { properties: { files: { $set: [] } } },
+            },
+          });
+        }
+
+        const skylarkDBNodeIndex = setup.nodes.findIndex(
+          (node) => node.template_node_id === 46
+        );
+
+        if (
+          skylarkDBNodeIndex > -1 &&
+          setup.nodes[skylarkDBNodeIndex].properties?.files
+        ) {
+          setupData = update(setupData, {
+            nodes: {
+              [skylarkDBNodeIndex]: { properties: { files: { $set: [] } } },
             },
           });
         }

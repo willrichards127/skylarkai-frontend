@@ -1,7 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQuery } from "./base";
 import { IResponseAnswer } from "../interfaces";
-import { ISetup } from "../../shared/models/interfaces";
+import { ISetup, ITemplate } from "../../shared/models/interfaces";
 import { REPORTS_DICT } from "../../shared/models/constants";
 import { groupBy } from "../../shared/utils/base";
 import { handleCatchError } from "./helper";
@@ -380,6 +380,28 @@ export const reportApi = createApi({
       keepUnusedDataFor: 0,
       providesTags: ["Report"],
     }),
+
+    executeReportBackground: builder.mutation<
+      any,
+      {
+        setupId: number;
+        analysisType: string;
+        llm?: string;
+        rating?: number;
+        report: ITemplate;
+      }
+    >({
+      query: ({ setupId, analysisType, llm, rating, report }) => ({
+        url: `execute_report_background/${setupId}`,
+        method: "POST",
+        body: {
+          analysis_type: analysisType,
+          llm,
+          rating,
+          report,
+        },
+      }),
+    }),
   }),
 });
 
@@ -400,4 +422,5 @@ export const {
   useGetChatHistoryQuery,
   useUpdateReportMutation,
   useMarkReportMutation,
+  useExecuteReportBackgroundMutation,
 } = reportApi;

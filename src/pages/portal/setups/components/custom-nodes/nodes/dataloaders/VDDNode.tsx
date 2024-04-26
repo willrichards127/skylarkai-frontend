@@ -1,5 +1,8 @@
-import { memo, useState } from "react";
-import TreeView, { flattenTree } from "react-accessible-treeview";
+import { memo, useMemo } from "react";
+import TreeView, {
+  ITreeViewOnNodeSelectProps,
+  flattenTree,
+} from "react-accessible-treeview";
 import { Box } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
@@ -8,26 +11,8 @@ import IndeterminateCheckBoxIcon from "@mui/icons-material/IndeterminateCheckBox
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { Handlers } from "../../Handlers";
 import { ITemplateNode } from "../../../../../../../shared/models/interfaces";
-
-const files = {
-  name: "",
-  children: [
-    {
-      name: "CARR",
-      children: [
-        { name: "T_CP_document_dated_29-11-2023 1701307635239.pdf" },
-        { name: "T_CP_document_dated_29-11-2023 1701307666432.pptx" },
-        { name: "T_CP_document_dated_29-11-2022.pptx" },
-        { name: "Carrier-2021-Proxy-Statement.pdf" },
-        {
-          name: "PitchBook_Public_Company_Financials_2023_11_09_10_53_03.xlsx",
-        },
-      ],
-    }    
-  ],
-};
-
-const data = flattenTree(files);
+import { IVDRFileExtend } from "../../../../../vdr/interfaces";
+import { useReactFlow } from "reactflow";
 
 const CustomCheckBoxIcon = ({
   variant,
@@ -39,41 +24,88 @@ const CustomCheckBoxIcon = ({
 }) => {
   switch (variant) {
     case "all":
-      return <CheckBoxIcon {...rest} onClick={onClick} />;
+      return <CheckBoxIcon {...rest} onClick={onClick} fontSize="small" />;
     case "none":
-      return <CheckBoxOutlineBlankIcon {...rest} onClick={onClick} />;
+      return (
+        <CheckBoxOutlineBlankIcon
+          {...rest}
+          onClick={onClick}
+          fontSize="small"
+        />
+      );
     case "some":
-      return <IndeterminateCheckBoxIcon {...rest} onClick={onClick} />;
+      return (
+        <IndeterminateCheckBoxIcon
+          {...rest}
+          onClick={onClick}
+          fontSize="small"
+        />
+      );
     default:
       return null;
   }
 };
 
 export const VDDNode = memo(
-  ({ nodeId }: { nodeId: string; nodeContent: ITemplateNode }) => {
-    const [selectedIds] = useState([]);
+  ({ nodeId, nodeContent }: { nodeId: string; nodeContent: ITemplateNode }) => {
+    const { setNodes } = useReactFlow();
+
+    const data = useMemo(() => {
+      const files = nodeContent.properties.files as IVDRFileExtend[];
+      return flattenTree({
+        name: "",
+        children: [
+          {
+            name: nodeContent.label,
+            children: files.map((f) => ({ name: f.file_name, id: f.id })),
+          },
+        ],
+      });
+    }, [nodeContent.properties]);
+
+    const onNodeSelect = (props: ITreeViewOnNodeSelectProps) => {
+      const selectedIds = props.treeState?.selectedIds;
+      if (selectedIds) {
+        setNodes((prev) =>
+          prev.map((node) => {
+            if (node.id === nodeId) {
+              node.data = {
+                ...node.data,
+                properties: {
+                  ...node.data.properties,
+                  files: node.data.properties.files.map(
+                    (f: IVDRFileExtend) => ({
+                      ...f,
+                      checked: selectedIds.has(f.id),
+                    })
+                  ),
+                },
+              };
+            }
+            return node;
+          })
+        );
+      }
+    };
 
     return (
       <Box position="relative">
         <Handlers nodeId={nodeId} handlerType="source" />
         <Box fontSize={12}>Files:</Box>
         <Box
-          className="nowheel"
+          className="nowheel checkbox"
           sx={{ height: 240, overflow: "auto", border: "1px solid grey" }}
         >
           <TreeView
             data={data}
             multiSelect
-            selectedIds={selectedIds}
+            nodeAction="check"
             defaultExpandedIds={[1]}
             propagateSelect
             propagateSelectUpwards
             togglableSelect
-            onSelect={(props) => console.log("onSelect callback: ", props)}
-            onNodeSelect={(props) => {
-              console.log("onNodeSelect callback: ", props);
-              // if(props.isBranch)
-            }}
+            // onSelect={(props) => console.log("onSelect callback: ", props)}
+            onNodeSelect={onNodeSelect}
             nodeRenderer={({
               element,
               isBranch,
@@ -112,6 +144,7 @@ export const VDDNode = memo(
                 </div>
               );
             }}
+            selectedIds={nodeContent.properties.files.filter((f: any) => f.checked).map((f: any) => f.id)}
           />
         </Box>
       </Box>

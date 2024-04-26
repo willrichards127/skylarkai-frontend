@@ -342,27 +342,31 @@ export const categoryParser2 = (htmlString: string) => {
 
 export const initializeHtmlResponse = (htmlString: string) => {
   // in this htmlString, there is only one container for each item
-  let categorizedHtml = "";
-  const root: any = parse(htmlString);
-  root.childNodes
-    .filter((el: any) => el.nodeType !== Node.TEXT_NODE) // Filter out text nodes
-    .forEach((el: any) => {
-      categorizedHtml += '<div class="dnd-container"">';
-      // replace <pre>, <code> tags and parse inner content again
-      const htmlContent = el.outerHTML
-        .replaceAll("```", "")
-        .replaceAll("<pre>", "")
-        .replaceAll("<code>", "")
-        .replaceAll("</pre>", "")
-        .replaceAll("</code>", "");
-      if (htmlContent.trim()) {
-        categorizedHtml += `<div class="dnd-item">${marked
-          .parse(htmlContent)
-          .toString()}</div>`;
-        categorizedHtml += "</div>";
-      }
-    });
-  return categorizedHtml;
+  if (htmlString.startsWith('<div class="dnd-container')) {
+    return htmlString;
+  } else {
+    let categorizedHtml = "";
+    const root: any = parse(htmlString);
+    root.childNodes
+      .filter((el: any) => el.nodeType !== Node.TEXT_NODE) // Filter out text nodes
+      .forEach((el: any) => {
+        categorizedHtml += '<div class="dnd-container">';
+        // replace <pre>, <code> tags and parse inner content again
+        const htmlContent = el.outerHTML
+          .replaceAll("```", "")
+          .replaceAll("<pre>", "")
+          .replaceAll("<code>", "")
+          .replaceAll("</pre>", "")
+          .replaceAll("</code>", "");
+        if (htmlContent.trim()) {
+          categorizedHtml += `<div class="dnd-item">${marked
+            .parse(htmlContent)
+            .toString()}</div>`;
+          categorizedHtml += "</div>";
+        }
+      });
+    return categorizedHtml;
+  }
 };
 
 export const convertCSVToTable = (data: string[][]) => {

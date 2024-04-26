@@ -7,6 +7,7 @@ import { useGetCategoriesQuery } from "../../../../redux/services/setupApi";
 
 const SetupPanel = memo(({ setupId }: { setupId: string }) => {
   const { data, isFetching } = useGetCategoriesQuery();
+  
 
   return (
     <Box sx={{ height: "100%", display: "flex", bgcolor: "secondary.dark" }}>
