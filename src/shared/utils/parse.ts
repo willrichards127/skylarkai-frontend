@@ -5,6 +5,7 @@ import * as cheerios from "cheerio";
 import { parse } from "node-html-parser";
 import * as marked from "marked";
 import { IDNDContainer, IDNDItem } from "../models/interfaces";
+import { csvToHtmlTable } from "./string";
 
 export const parseSWOT = (content: string) => {
   const strengthsRegex = /Strengths:([\s\S]*?)(Weaknesses:|$)/;
@@ -277,6 +278,11 @@ export const categoryParser3 = (htmlString: string) => {
                         child.firstChild.innerHTML
                       ) as string,
                       tag: "table",
+                    }
+                  : child.firstChild.rawTagName === "code"
+                  ? {
+                      tag: "table",
+                      content: csvToHtmlTable(child.firstChild.innerHTML),
                     }
                   : {
                       tag: child.firstChild.rawTagName,

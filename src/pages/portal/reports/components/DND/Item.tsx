@@ -14,6 +14,8 @@ import {
 import { ItemEditor } from "./ItemEditor";
 import { parseTable } from "../../../../../shared/utils/parse";
 import { Chart } from "../Chart";
+import { htmlTable2CSV } from "../../../../../shared/utils/string";
+import { downloadCSV } from "../../../../../shared/utils/download";
 
 export const Item = ({
   id,
@@ -100,6 +102,10 @@ export const Item = ({
     showVizModal(true);
   }, []);
 
+  const onDownloadCSV = useCallback(() => {
+    downloadCSV(htmlTable2CSV(value.content));
+  }, [value]);
+
   const onAddChart = useCallback(
     (vizType: string, axis: string) => {
       onItemValueChanged(
@@ -163,6 +169,7 @@ export const Item = ({
           onAddNew={onAddNew}
           onRemove={onRemove}
           onShowViz={onShowViz}
+          onDownloadCSV={onDownloadCSV}
         />
       )}
       {isEdit && (

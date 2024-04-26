@@ -50,7 +50,7 @@ export const ReportTemplate = forwardRef(
       () => categoryParser3(reportContent),
       [reportContent]
     );
-
+    console.log(initialReportItems, 'initialReportItems===')
     const [citationData, setCitationData] = useState<{
       filename: string;
       quote: string;

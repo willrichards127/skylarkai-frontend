@@ -2,7 +2,7 @@ import { memo } from "react";
 import { IconButton, Box, styled } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import BarChartIcon from "@mui/icons-material/BarChart";
-// import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { IDNDItem } from "../../../../../shared/models/interfaces";
 
@@ -25,13 +25,13 @@ export const ItemActionPane = memo(
     onAddNew,
     onRemove,
     onShowViz,
-    // onDownloadCSV,
+    onDownloadCSV,
   }: {
     item: IDNDItem;
     onAddNew: () => void;
     onRemove: () => void;
     onShowViz: () => void;
-    // onDownloadCSV: () => void;
+    onDownloadCSV: () => void;
   }) => {
     return (
       <ActionPane className="no-save no-print">
@@ -40,9 +40,9 @@ export const ItemActionPane = memo(
         </IconButton>
         {item.value.tag === "table" && (
           <>
-            {/* <IconButton size="small" onClick={onShowViz} title="Visualize">
+            <IconButton size="small" onClick={onDownloadCSV} title="Download CSV File">
               <FileDownloadIcon sx={{ fontSize: 16, color: "black" }} />
-            </IconButton> */}
+            </IconButton>
             <IconButton size="small" onClick={onShowViz} title="Visualize">
               <BarChartIcon sx={{ fontSize: 16, color: "black" }} />
             </IconButton>

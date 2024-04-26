@@ -17,6 +17,7 @@ import { IChat } from "../../../../../redux/interfaces";
 import { parseCitation } from "../../../../../shared/utils/string";
 import { SendEmailModal } from "../../../../../components/modals/SendEmailModal";
 import { FeedbackFloat } from "./feedback/FeedbackFloat";
+import { downloadCSV } from "../../../../../shared/utils/download";
 
 export const ChatBlock = ({
   graph_id,
@@ -56,14 +57,7 @@ export const ChatBlock = ({
   }, []);
 
   const onDownloadCSV = useCallback((csvStr: string) => {
-    const blob = new Blob([csvStr], { type: "text/csv;charset=utf-8," });
-
-    const anchor = document.createElement("a");
-    anchor.href = window.URL.createObjectURL(blob);
-    anchor.download = "data.csv";
-    anchor.click();
-
-    window.URL.revokeObjectURL(anchor.href);
+    downloadCSV(csvStr);
   }, []);
 
   const onSendViaEmail = useCallback((question: string) => {

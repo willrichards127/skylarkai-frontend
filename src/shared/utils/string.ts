@@ -72,6 +72,22 @@ export const csvToHtmlTable = (csv: string) => {
   return html;
 };
 
+export const htmlTable2CSV = (html: string) => {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+  const rows = Array.from(doc.querySelectorAll("table tr"));
+  const csvData = rows
+    .map((row) => {
+      const cells = Array.from(row.querySelectorAll("th, td"));
+      return cells
+        .map((cell) => (cell.textContent || "").trim().replaceAll(",", ""))
+        .join(",");
+    })
+    .join("\n");
+
+  return csvData;
+};
+
 const cleanUp = (inputString: string, limitWordCount?: number) => {
   // replace all `("` and `")` with `"`
   let result = inputString.replace(/\("\s?/g, '"');
@@ -124,7 +140,7 @@ export const parseCitation = (
   documentContent: string,
   limitWordCount?: number
 ) => {
-  // convert ``` content to markdown table
+  // convert ``` content to html table
   let content: string = replaceContentBetweenTripleBackticks(documentContent);
 
   let startIndex = -1;
