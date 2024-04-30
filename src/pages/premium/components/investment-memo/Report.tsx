@@ -9,13 +9,14 @@ import {
   IconButton,
   Typography,
 } from "@mui/material";
+// import { useSelector } from "react-redux";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import IosShareIcon from "@mui/icons-material/IosShare";
 import EmailIcon from "@mui/icons-material/Email";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { ExportModal } from "../../../../components/modals/ExportModal";
 import { ICustomInstance } from "./interfaces";
-import { ReportTemplate } from "../../../portal/reports/templates/ReportTemplate";
+// import { ReportTemplate } from "../../../portal/reports/templates/ReportTemplate";
 import { SendEmailModal } from "../../../../components/modals/SendEmailModal";
 
 export const Report = ({
@@ -78,13 +79,16 @@ export const Report = ({
         </Typography>
       </Box>
       <Box sx={{ height: "calc(100% - 120px)" }}>
-        <ReportTemplate
-          ref={reportPrintRef}
-          setup={{ name: instance.company_name }}
+        {/* <ReportTemplate
+          setup={{
+            id: sys_graph_id,
+            name: instance.company_name,
+            nodes: [],
+            edges: [],
+          }}
           reportContent={instance.instance_metadata.report!}
           analysisType="transcript"
-          filenames={instance.instance_metadata.uploaded_file_names}
-        />
+        /> */}
       </Box>
       {exportModal && (
         <ExportModal

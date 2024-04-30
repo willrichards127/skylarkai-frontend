@@ -44,7 +44,8 @@ export const InputBox = memo(
           value={text}
           fullWidth
           multiline
-          rows={2}
+          minRows={1}
+          maxRows={1}
           size="small"
           disabled={disabled}
           autoComplete="new-password"
@@ -61,7 +62,7 @@ export const InputBox = memo(
           size="small"
           variant="contained"
           disabled={disabled}
-          sxProps={{ "&.MuiButtonBase-root": { minWidth: 63 } }}
+          sxProps={{ "&.MuiButtonBase-root": { minWidth: 43 } }}
         >
           <SendIcon width={16} height={16} />
         </XIconButton>

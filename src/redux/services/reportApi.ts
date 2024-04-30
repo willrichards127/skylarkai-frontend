@@ -71,6 +71,7 @@ export const reportApi = createApi({
           custom,
         },
       }),
+      invalidatesTags: ["Report"],
     }),
 
     saveReport: builder.mutation<
@@ -92,6 +93,7 @@ export const reportApi = createApi({
           ...(template ? { template } : { is_template_with_content: false }),
         },
       }),
+      invalidatesTags: ["Report"],
     }),
 
     getAnswer: builder.query<
@@ -312,6 +314,32 @@ export const reportApi = createApi({
       keepUnusedDataFor: 0,
       providesTags: ["Report"],
     }),
+    getReportsBySetup: builder.query<
+      any,
+      { viewMode?: string; setupId?: number }
+    >({
+      async queryFn({ setupId, viewMode = "active" }, __, ___, apiBaseQuery) {
+        try {
+          const reportsReponse: any = await apiBaseQuery({
+            url: `reports?view_mode=${viewMode}`,
+          });
+
+          if (reportsReponse.error) {
+            throw reportsReponse.error;
+          }
+
+          return {
+            data: reportsReponse.data.filter(
+              (report: any) => report.graph_id === setupId
+            ),
+          };
+        } catch (err) {
+          return handleCatchError(err);
+        }
+      },
+      keepUnusedDataFor: 0,
+      providesTags: ["Report"],
+    }),
 
     getCustomQuery: builder.mutation<
       string,
@@ -413,6 +441,7 @@ export const {
   useReGenerateReportMutation,
   useGenerateCustomReportMutation,
   useGetReportsQuery,
+  useGetReportsBySetupQuery,
   useLazyGetReportsQuery,
   useGetReportQuery,
   useLazyGetReportQuery,

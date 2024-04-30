@@ -1,169 +1,181 @@
-import { useEffect, useRef, useCallback, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { Box, IconButton } from "@mui/material";
-import { CircleSpinner } from "../../../../components/loading-spinners/CircleSpinner";
+import { useState, useCallback, useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import {
-  useLazyGetReportQuery,
-  useReGenerateReportMutation,
-  useUpdateReportMutation,
-} from "../../../../redux/services/reportApi";
-import { MarketAnalysisReport } from "../templates/MarketAnalysisReport";
-import { REPORTS_DICT } from "../../../../shared/models/constants";
-import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
-import {
-  useIngestFilesMutation,
-  useLazyGetSetupQuery,
-} from "../../../../redux/services/setupApi";
-// import { useGetIngestedFilesQuery } from "../../../../redux/services/transcriptAPI";
-import { toast } from "react-toastify";
-import { initializeHtmlResponse } from "../../../../shared/utils/parse";
+  Box,
+  Tabs,
+  Tab,
+  IconButton,
+  Stack,
+  CircularProgress,
+  Backdrop,
+  Button,
+  Typography,
+} from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
+import { ReportViewer } from "../templates/ReportViewer";
+import { ReportsSelectionModal } from "./ReportsSelectionModal";
+import { useGetSetupsQuery } from "../../../../redux/services/setupApi";
+import { ISetup } from "../../../../shared/models/interfaces";
+import { reportTabHeaderHeight } from "../../../../shared/models/constants";
 
 const ReportPanel = ({ reportId }: { reportId: string }) => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const reportType = searchParams.get("reportType"); // report api name
   const setupId = searchParams.get("setupId");
+  const reportName = searchParams.get("reportName");
 
-  const parentRef = useRef<any>();
+  const { isLoading, data: setups } = useGetSetupsQuery();
 
-  const [upward, setUpward] = useState<boolean>(false);
-
-  const [
-    regenerateReport,
+  const [reportsModal, showReportsModal] = useState<boolean>(false);
+  const [reportTabs, setReportTabs] = useState<
     {
-      isLoading: isGeneratingReport,
-      isSuccess: isGeneratedReport,
-      data: generatedData,
+      setup: ISetup;
+      reportId: number;
+      reportName: string;
+    }[]
+  >([]);
+
+  const [selectedReport, setSelectedReport] = useState<number>(+reportId);
+
+  const onChangeReport = useCallback(
+    (_: React.SyntheticEvent, newReportId: number) => {
+      setSelectedReport(newReportId);
     },
-  ] = useReGenerateReportMutation();
+    []
+  );
 
-  const [getReport, { isLoading: loadingReport, data: reportData }] =
-    useLazyGetReportQuery();
-  // const { isLoading: loadingFiles, data: dataFiles } = useGetIngestedFilesQuery(
-  //   {
-  //     graph_id: +setupId!,
-  //     analysis_type: "financial_diligence",
-  //   },
-  //   { skip: !setupId }
-  // );
-
-  const [getSetup, { isLoading: loadingSetup, data: setupData }] =
-    useLazyGetSetupQuery();
-  const [saveReport, { isSuccess: isSaved }] = useUpdateReportMutation();
-
-  const [ingestFiles, { isLoading: ingestingFiles }] = useIngestFilesMutation();
-
-  useEffect(() => {
-    getReport({
-      reportId: +reportId,
-    });
-  }, [getReport, reportType, reportId]);
-
-  useEffect(() => {
-    if (setupId) {
-      getSetup({
-        setupId: +setupId,
-      });
-    }
-  }, [getSetup, setupId]);
-
-  const onScroll = useCallback(() => {
-    if (parentRef.current.scrollTop > 600) {
-      setUpward(true);
-    } else {
-      setUpward(false);
-    }
+  const onShowReportsModal = useCallback(() => {
+    showReportsModal(true);
   }, []);
 
-  const onUpward = useCallback(() => {
-    parentRef.current.scrollTop = 0;
+  const onAddReport = useCallback((newSetup: ISetup, newReport: any) => {
+    setReportTabs((prev) => {
+      const reportIds = prev.map((item) => item.reportId);
+      if (reportIds.includes(newReport.id)) return prev;
+      return [
+        ...prev,
+        {
+          setup: newSetup,
+          reportId: +newReport.id,
+          reportName: newReport.report_metadata.reportname,
+        },
+      ];
+    });
   }, []);
 
-  const OnRerun = async (append?: Record<string, File[]>) => {
-    if (append && append["file"] && setupData) {
-      await ingestFiles({
-        setupId: +setupId!,
-        companyName: setupData.name!,
-        analysisType: "financial_diligence",
-        files: append["file"],
-      });
-    }
-
-    regenerateReport({
-      reportId: +reportId,
-      setupId: +setupId!,
-      queryType: reportType!,
-      template: REPORTS_DICT[reportType!].template,
-    });
-  };
-
-  const onSave = (content: string) => {
-    saveReport({
-      reportId: +reportId,
-      content,
-      custom: [],
-    });
-  };
+  const onRemoveReport = useCallback(
+    (closeReportId: number) => {
+      setSelectedReport(+reportId);
+      setReportTabs((prev) =>
+        prev.filter((item) => item.reportId !== closeReportId)
+      );
+    },
+    [reportId]
+  );
 
   useEffect(() => {
-    if (isSaved) {
-      toast.success("The report is updated successfully.");
-    }
-  }, [isSaved]);
+    if (isLoading || !setups?.length) return;
+    setReportTabs([
+      {
+        setup: setups.find((item: ISetup) => item.id! === +setupId!)!,
+        reportId: +reportId!,
+        reportName: reportName!,
+      },
+    ]);
+  }, [isLoading, setups, setupId, reportId, reportName]);
 
   return (
-    <Box sx={{ width: "100%", height: "100%" }}>
-      {loadingReport || isGeneratingReport || loadingSetup || ingestingFiles ? (
-        <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
-          <CircleSpinner
-            size={120}
-            description={
-              isGeneratingReport ? "Generating report..." : "Reading report..."
-            }
+    <Box
+      sx={{
+        bgcolor: "rgba(0, 0, 0, 0.1)",
+        display: "flex",
+        alignItems: "center",
+        flexDirection: "column",
+        height: "100%",
+      }}
+    >
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={isLoading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+      <Stack spacing={2} direction="row" width="100%" px={1} bgcolor="black">
+        <IconButton
+          size="small"
+          onClick={() => navigate("/portal/reports")}
+          sx={{ minWidth: 48, minHeight: 48 }}
+        >
+          <ArrowBackIcon sx={{ fontSize: 20 }} />
+        </IconButton>
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <Tabs
+            value={selectedReport}
+            onChange={onChangeReport}
+            variant="scrollable"
+            scrollButtons="auto"
+            sx={{
+              "&.MuiTabs-root": {
+                maxWidth: 720,
+              },
+            }}
+          >
+            {reportTabs.map((reportTab) => (
+              <Tab
+                key={reportTab.reportId}
+                label={
+                  <Box sx={{ display: "flex", gap: 4, alignItems: "center" }}>
+                    <Typography variant="body2">
+                      {reportTab.reportName}-{reportTab.setup.name}
+                    </Typography>
+                    {reportTab.reportId !== +reportId && (
+                      <CloseIcon
+                        sx={{ fontSize: 16, cursor: "pointer" }}
+                        onClick={() => onRemoveReport(reportTab.reportId)}
+                      />
+                    )}
+                  </Box>
+                }
+                value={reportTab.reportId}
+              />
+            ))}
+          </Tabs>
+        </Box>
+        <Button
+          size="small"
+          startIcon={<AddIcon />}
+          onClick={onShowReportsModal}
+        >
+          Add Report
+        </Button>
+      </Stack>
+      {reportTabs.map((reportTab) => (
+        <Box
+          key={reportTab.reportId}
+          sx={{
+            width: "100%",
+            height: `calc(100% - ${reportTabHeaderHeight}px)`,
+            display: reportTab.reportId === selectedReport ? "block" : "none",
+          }}
+        >
+          <ReportViewer
+            setup={reportTab.setup}
+            reportId={reportTab.reportId}
+            reportName={reportName!}
           />
         </Box>
-      ) : (
-        <Box
-          ref={parentRef}
-          sx={{
-            bgcolor: "rgba(0, 0, 0, 0.1)",
-            display: "flex",
-            alignItems: "center",
-            flexDirection: "column",
-            height: "100%",
-            // overflowY: "auto",
-            // px: 8,
-            // pb: 8,
-            position: "relative",
-          }}
-          onScroll={onScroll}
-        >
-          <Box width="100%" height="100%">
-            {!!reportData && !!setupData && (
-              <MarketAnalysisReport
-                setup={setupData}
-                reportContent={initializeHtmlResponse(
-                  isGeneratedReport ? generatedData : reportData.content
-                )}
-                reportType={reportType!}
-                filenames={[]}
-                onRerunAction={OnRerun}
-                onSaveAction={onSave}
-              />
-            )}
-          </Box>
-          {upward && (
-            <Box sx={{ position: "fixed", bottom: 32, right: 32 }}>
-              <IconButton onClick={onUpward}>
-                <ArrowCircleUpIcon />
-              </IconButton>
-            </Box>
-          )}
-        </Box>
+      ))}
+      {reportsModal && (
+        <ReportsSelectionModal
+          open={reportsModal}
+          onClose={() => showReportsModal(false)}
+          onActionPerformed={onAddReport}
+        />
       )}
     </Box>
   );
 };
-
-ReportPanel.displayName = "ReportPanel";
 
 export default ReportPanel;
