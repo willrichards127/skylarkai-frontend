@@ -65,15 +65,11 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
     });
   }, []);
 
-  const onRemoveReport = useCallback(
-    (closeReportId: number) => {
-      setSelectedReport(+reportId);
-      setReportTabs((prev) =>
-        prev.filter((item) => item.reportId !== closeReportId)
-      );
-    },
-    [reportId]
-  );
+  const onRemoveReport = useCallback((closeReportId: number) => {
+    setReportTabs((prev) =>
+      prev.filter((item) => item.reportId !== closeReportId)
+    );
+  }, []);
 
   useEffect(() => {
     if (isLoading || !setups?.length) return;
@@ -85,6 +81,11 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
       },
     ]);
   }, [isLoading, setups, setupId, reportId, reportName]);
+
+  useEffect(() => {
+    if (!reportTabs.length) return;
+    setSelectedReport(reportTabs[reportTabs.length - 1].reportId);
+  }, [reportTabs]);
 
   return (
     <Box
@@ -106,7 +107,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
         <IconButton
           size="small"
           onClick={() => navigate("/portal/reports")}
-          sx={{ minWidth: 48, minHeight: 48 }}
+          sx={{ minWidth: 48, maxHeight: 48 }}
         >
           <ArrowBackIcon sx={{ fontSize: 20 }} />
         </IconButton>
@@ -118,7 +119,11 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
             scrollButtons="auto"
             sx={{
               "&.MuiTabs-root": {
-                maxWidth: 720,
+                maxWidth: 1100,
+                height: 50,
+              },
+              "& .MuiTypography-root": {
+                whiteSpace: "nowrap",
               },
             }}
           >
