@@ -57,7 +57,6 @@ export const setupApi = createApi({
     }),
     getSetup: builder.query<ISetup, { setupId: number }>({
       query: ({ setupId }) => `graphs/${setupId}`,
-      keepUnusedDataFor: 0,
     }),
     saveSetup: builder.mutation<ISetup, { setupId?: number; setup: ISetup }>({
       query: ({ setupId = undefined, setup }) => {

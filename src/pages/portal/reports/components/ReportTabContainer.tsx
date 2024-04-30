@@ -58,7 +58,7 @@ export const ReportTabContainer = memo(
     const onCard = useCallback(
       (cardId: number, setupId: number, reportName: string) => {
         navigate(
-          `/portal/reports/${cardId}?reportType=${reportName}&setupId=${setupId}&viewMode=${viewMode}`
+          `/portal/reports/${cardId}?reportName=${reportName}&setupId=${setupId}&viewMode=${viewMode}`
         );
       },
       [navigate, viewMode]
