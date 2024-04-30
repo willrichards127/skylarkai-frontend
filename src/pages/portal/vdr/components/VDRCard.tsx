@@ -34,10 +34,10 @@ export const VDRCard = memo(
           : status === 1
           ? "Processing"
           : status === 2
-          ? "Success"
-          : status === 3
           ? "Fail"
-          : "Draft",
+          : status === 3
+          ? "Success"
+          : "Pending",
       [files.length, status]
     );
     const color = useMemo(

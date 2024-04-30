@@ -50,14 +50,20 @@ export const setupApi = createApi({
         }
       },
     }),
-    getSetups: builder.query<ISetup[], void>({
-      query: () => "graphs",
+    getSetups: builder.query<ISetup[], { viewMode: string }>({
+      query: ({ viewMode }) => `graphs?view_mode=${viewMode}`,
       keepUnusedDataFor: 0,
       providesTags: ["Setup"],
     }),
     getSetup: builder.query<ISetup, { setupId: number }>({
       query: ({ setupId }) => `graphs/${setupId}`,
       keepUnusedDataFor: 0,
+    }),
+    markSetup: builder.mutation<ISetup, {setupId: number}>({
+      query: ({setupId}) => ({
+        url: `graphs/${setupId}/marked_as_active`,
+        method: "POST",
+      })
     }),
     saveSetup: builder.mutation<ISetup, { setupId?: number; setup: ISetup }>({
       query: ({ setupId = undefined, setup }) => {
@@ -223,6 +229,7 @@ export const {
   useGetSetupsQuery,
   useGetSetupQuery,
   useLazyGetSetupQuery,
+  useMarkSetupMutation,
   useIngestFilesMutation,
   useUploadFilesMutation,
   useExecuteGraphMutation,
