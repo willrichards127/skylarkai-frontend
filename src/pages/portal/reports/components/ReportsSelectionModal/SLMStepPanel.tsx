@@ -70,7 +70,7 @@ export const SLMStepPanel = ({
                   p: 2,
                   bgcolor: "secondary.main",
                   borderRadius: 1,
-                  width: 270,
+                  width: 320,
                   "&:hover": {
                     cursor: "pointer",
                     filter: "brightness(1.25)",

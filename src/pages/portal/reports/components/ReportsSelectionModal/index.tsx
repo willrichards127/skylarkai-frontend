@@ -59,7 +59,7 @@ export const ReportsSelectionModal = ({
           <Button onClick={onClose}>Close</Button>
         </Box>
       }
-      size="md"
+      size="lg"
     >
       <Box pb={4} px={8}>
         <Stepper activeStep={activeStep}>
