@@ -107,7 +107,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
         <IconButton
           size="small"
           onClick={() => navigate("/portal/reports")}
-          sx={{ minWidth: 48, minHeight: 48 }}
+          sx={{ minWidth: 48, maxHeight: 48 }}
         >
           <ArrowBackIcon sx={{ fontSize: 20 }} />
         </IconButton>
