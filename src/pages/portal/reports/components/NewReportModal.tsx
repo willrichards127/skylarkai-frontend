@@ -24,7 +24,7 @@ import {
 export const NewReportModal = memo(
   ({ open, onClose }: { open: boolean; onClose: () => void }) => {
     const navigate = useNavigate();
-    const { isLoading, data } = useGetSetupsQuery();
+    const { isLoading, data } = useGetSetupsQuery({});
     const [
       generateReport,
       { isLoading: isGeneratingReport, isSuccess: isGeneratedReport, data: generatedReportId },
