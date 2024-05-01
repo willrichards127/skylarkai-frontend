@@ -5,30 +5,51 @@ import {
   FormControlLabel,
   Switch,
   IconButton,
+  ButtonGroup,
   Stack,
 } from "@mui/material";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
 import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import PrintIcon from "@mui/icons-material/Print";
+import SaveIcon from "@mui/icons-material/Save";
+// import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import EmailIcon from "@mui/icons-material/Email";
 import { IndexView } from "../templates/IndexView";
+import { FileUploadModal } from "./FileUploadModal";
 import { DocumentChip } from "../../../../components/DocumentChip";
 import { reportDrawerWidth } from "../../../../shared/models/constants";
 import { IDNDContainer } from "../../../../shared/models/interfaces";
 
 export const ReportDrawer = ({
+  items,
   isShowQuestion,
   uploadedFiles,
   onRemoveFiles,
   onSwitchMode,
-  items,
+  onUploadedFiles,
+  onRerunReport,
+  onSave,
+  // onDelete,
+  onPrint,
+  onSendEmail,
 }: {
   isShowQuestion?: boolean;
   items: IDNDContainer[];
   onSwitchMode: (showQuestion: boolean) => void;
   onRemoveFiles: (type: string, filename: string) => void;
+  onUploadedFiles: (type: string, files: File[]) => void;
+  onRerunReport: () => void;
+  onPrint: () => void;
+  // onDelete: () => void;
+  onSave: () => void;
+  onSendEmail: () => void;
   uploadedFiles?: Record<string, File[]>;
 }) => {
   const [open, setOpen] = useState(false);
-
+  const [fileUploadModal, showFileUploadModal] = useState<boolean>(false);
+  const [templateFileUploadModal, showTemplateFileUploadModal] =
+    useState<boolean>(false);
   const onToggleDrawer = useCallback(() => {
     setOpen((prev) => !prev);
   }, []);
@@ -46,32 +67,78 @@ export const ReportDrawer = ({
         position: "relative",
         width: open ? reportDrawerWidth : 60,
         height: "100%",
+        bgcolor: "secondary.main",
       }}
     >
       {!open ? (
-        <IconButton
-          color="primary"
+        <Box
           sx={{
             position: "absolute",
-            top: 8,
-            right: 8,
+            top: 0,
+            left: 0,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            width: "100%",
           }}
-          onClick={onToggleDrawer}
         >
-          <KeyboardDoubleArrowRightIcon />
-        </IconButton>
+          <IconButton color="primary" onClick={onToggleDrawer} sx={{ my: 1 }}>
+            <KeyboardDoubleArrowRightIcon />
+          </IconButton>
+          <Divider sx={{ width: "100%" }} />
+          <ButtonGroup orientation="vertical" sx={{ pt: 1 }}>
+            <IconButton onClick={onRerunReport} title="Re-run report">
+              <RestartAltIcon color="primary" />
+            </IconButton>
+            <IconButton onClick={onSendEmail} title="Send report via email">
+              <EmailIcon color="primary" />
+            </IconButton>
+            <IconButton title="Print" onClick={onPrint}>
+              <PrintIcon color="primary" />
+            </IconButton>
+            <IconButton title="Save" onClick={onSave}>
+              <SaveIcon color="primary" />
+            </IconButton>
+            {/* <IconButton title="Delete">
+              <DeleteForeverIcon color="primary" sx={{ fontSize: 26 }} />
+            </IconButton> */}
+          </ButtonGroup>
+        </Box>
       ) : (
         <Box
           sx={{
             width: "100%",
             height: "100%",
             display: open ? "block" : "none",
-            bgcolor: "secondary.main",
-            borderTopLeftRadius: 8,
-            borderBottomLeftRadius: 8,
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center", pl: 4 }}>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <ButtonGroup>
+              <IconButton onClick={onRerunReport} title="Re-run report">
+                <RestartAltIcon color="primary" />
+              </IconButton>
+              <IconButton onClick={onSendEmail} title="Send report via email">
+                <EmailIcon color="primary" />
+              </IconButton>
+              <IconButton title="Print" onClick={onPrint}>
+                <PrintIcon color="primary" />
+              </IconButton>
+              <IconButton title="Save" onClick={onSave}>
+                <SaveIcon color="primary" />
+              </IconButton>
+              {/* <IconButton title="Delete">
+                <DeleteForeverIcon color="primary" sx={{ fontSize: 26 }} />
+              </IconButton> */}
+            </ButtonGroup>
+            <IconButton
+              color="primary"
+              onClick={onToggleDrawer}
+              sx={{ ml: "auto" }}
+            >
+              <KeyboardDoubleArrowLeftIcon />
+            </IconButton>
+          </Box>
+          <Box py={1} textAlign="right">
             <FormControlLabel
               control={
                 <Switch
@@ -88,13 +155,6 @@ export const ReportDrawer = ({
               }
               labelPlacement="end"
             />
-            <IconButton
-              color="primary"
-              onClick={onToggleDrawer}
-              sx={{ ml: "auto" }}
-            >
-              <KeyboardDoubleArrowLeftIcon />
-            </IconButton>
           </Box>
           <Divider />
           <Box sx={{ p: 2, height: 420, overflowY: "auto" }}>
@@ -129,6 +189,22 @@ export const ReportDrawer = ({
             </Box>
           )}
         </Box>
+      )}
+      {fileUploadModal && (
+        <FileUploadModal
+          title="Upload File"
+          open={fileUploadModal}
+          onClose={() => showFileUploadModal(false)}
+          onUpladedFile={(files) => onUploadedFiles("file", files)}
+        />
+      )}
+      {templateFileUploadModal && (
+        <FileUploadModal
+          title="Upload Template File"
+          open={templateFileUploadModal}
+          onClose={() => showTemplateFileUploadModal(false)}
+          onUpladedFile={(files) => onUploadedFiles("file", files)}
+        />
       )}
     </Box>
   );

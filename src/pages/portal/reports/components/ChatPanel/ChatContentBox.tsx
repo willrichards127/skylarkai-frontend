@@ -44,7 +44,7 @@ export const ChatContentBox = forwardRef(
           flexDirection: "column",
           overflowY: "auto",
           gap: 1,
-          height: "calc(100% - 74px)",
+          height: "calc(100% - 46px)",
           position: "relative",
         }}
       >

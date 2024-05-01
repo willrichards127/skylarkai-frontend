@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { memo, useRef, useCallback, useEffect, useState } from "react";
-import { Box, TextField, Typography } from "@mui/material";
+import { Box, TextField } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
 import EmailIcon from "@mui/icons-material/Email";
 import { XIconButton } from "../../../../../components/buttons/XIconButton";
@@ -129,8 +129,14 @@ export const ChatPanel = memo(
 
     return (
       <XPanel
-        sxProps={{ height: "100%", bgcolor: "#060606", width: "100%" }}
+        sxProps={{
+          height: "100%",
+          bgcolor: "#060606",
+          width: "100%",
+          borderRadius: "none",
+        }}
         sxBodyProps={{ p: 1, flex: "none", height: "calc(100% - 45px)" }}
+        sxHeaderProps={{ bgcolor: "secondary.main" }}
         header={
           <Box
             sx={{
@@ -138,8 +144,6 @@ export const ChatPanel = memo(
               alignItems: "center",
             }}
           >
-            <Typography variant="body1">Sky Chat</Typography>
-            <Box mr="auto" />
             <TextField
               size="small"
               select
@@ -188,6 +192,7 @@ export const ChatPanel = memo(
                 </option>
               ))}
             </TextField>
+            <Box mr="auto" />
             <XIconButton
               size="small"
               variant="contained"

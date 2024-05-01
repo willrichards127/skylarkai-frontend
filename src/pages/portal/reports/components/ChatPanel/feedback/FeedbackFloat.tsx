@@ -1,5 +1,6 @@
 import { memo, useCallback, useState } from "react";
 import { Box, Link, Popper, Typography, Button } from "@mui/material";
+import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
 import { XSmallAccordion } from "../../../../../../components/XAccordion";
 import { Metric } from "./Metric";
 import {
@@ -9,6 +10,29 @@ import {
   IChat,
 } from "../../../../../../redux/interfaces";
 import { useUpdateFeedbackMutation } from "../../../../../../redux/services/transcriptAPI";
+
+const initialFeedbackStatus = {
+  Accuracy: {
+    rating: 5,
+    feedback: "",
+  },
+  Relevance: {
+    rating: 5,
+    feedback: "",
+  },
+  Specificity: {
+    rating: 5,
+    feedback: "",
+  },
+  Currentness: {
+    rating: 5,
+    feedback: "",
+  },
+  Verbosity: {
+    rating: 5,
+    feedback: "",
+  },
+};
 
 export const FeedbackFloat = memo(
   ({
@@ -21,34 +45,14 @@ export const FeedbackFloat = memo(
     chat: IChat;
   }) => {
     const [updateFeedback, { isLoading }] = useUpdateFeedbackMutation();
+    const [ratingPanel, showRatingPanel] = useState<boolean>(false);
     const [overallFeedback, setOverallFeedback] = useState<IMetricContent>({
       rating: 5,
       feedback: "",
     });
     const [feedbackStatus, setFeedbackStatus] = useState<
       Record<TMetric, IMetricContent>
-    >({
-      Accuracy: {
-        rating: 5,
-        feedback: "",
-      },
-      Relevance: {
-        rating: 5,
-        feedback: "",
-      },
-      Specificity: {
-        rating: 5,
-        feedback: "",
-      },
-      Currentness: {
-        rating: 5,
-        feedback: "",
-      },
-      Verbosity: {
-        rating: 5,
-        feedback: "",
-      },
-    });
+    >(initialFeedbackStatus);
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -73,6 +77,9 @@ export const FeedbackFloat = memo(
         },
         system_feedback: chat.rating_response,
       });
+      setOverallFeedback({ rating: 5, feedback: "" });
+      setFeedbackStatus(initialFeedbackStatus);
+      showRatingPanel(false);
     }, [
       updateFeedback,
       graph_id,
@@ -82,97 +89,111 @@ export const FeedbackFloat = memo(
       chat,
     ]);
 
+    const onShowRating = useCallback(() => {
+      showRatingPanel((prev) => !prev);
+    }, []);
+
     return (
-      <Box
-        className="no-print"
-        sx={{
-          padding: "4px",
-          background: "#484863",
-          borderLeft: "2px solid white",
-          display: "flex",
-          justifyContent: "center",
-          flexDirection: "column",
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            pb: 1,
-          }}
-        >
-          <Typography variant="body2" fontWeight="bold" fontSize={13}>
-            Rating
-          </Typography>
-          <Link
-            // href="#"
-            sx={{ fontSize: 11, cursor: "pointer" }}
-            onClick={(e: React.MouseEvent<HTMLElement>) =>
-              setAnchorEl(anchorEl ? null : e.currentTarget)
-            }
+      <Box className="no-print">
+        <Box sx={{ textAlign: "right", pb: 1 }}>
+          <Button
+            size="small"
+            endIcon={<KeyboardDoubleArrowDownIcon />}
+            onClick={onShowRating}
+            sx={{ fontSize: 13 }}
           >
-            System Ratings
-          </Link>
-          <Popper
-            open={Boolean(anchorEl)}
-            anchorEl={anchorEl}
-            placement="bottom-end"
+            Rating
+          </Button>
+        </Box>
+        {ratingPanel && (
+          <Box
+            className="no-print"
+            sx={{
+              padding: "4px",
+              background: "#484863",
+              borderLeft: "2px solid white",
+              display: "flex",
+              justifyContent: "center",
+              flexDirection: "column",
+            }}
           >
             <Box
               sx={{
-                border: 1,
-                borderRadius: 1,
-                p: 0.5,
-                background: "black",
-                fontSize: 11,
-                maxWidth: 600,
-                maxHeight: 600,
-                overflow: "auto",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-end",
+                pb: 1,
               }}
             >
-              <pre>{JSON.stringify(chat.rating_response, null, 2)}</pre>
+              <Link
+                sx={{ fontSize: 11, cursor: "pointer" }}
+                onClick={(e: React.MouseEvent<HTMLElement>) =>
+                  setAnchorEl(anchorEl ? null : e.currentTarget)
+                }
+              >
+                System Ratings
+              </Link>
+              <Popper
+                open={Boolean(anchorEl)}
+                anchorEl={anchorEl}
+                placement="bottom-end"
+              >
+                <Box
+                  sx={{
+                    border: 1,
+                    borderRadius: 1,
+                    p: 0.5,
+                    background: "black",
+                    fontSize: 11,
+                    maxWidth: 600,
+                    maxHeight: 600,
+                    overflow: "auto",
+                  }}
+                >
+                  <pre>{JSON.stringify(chat.rating_response, null, 2)}</pre>
+                </Box>
+              </Popper>
             </Box>
-          </Popper>
-        </Box>
-        {metrics.map((metric) => (
-          <XSmallAccordion
-            defaultExpanded={false}
-            key={metric}
-            summary={metric}
-            detail={
-              <Metric
-                rating={feedbackStatus[metric].rating}
-                feedback={feedbackStatus[metric].feedback}
-                onChangeRating={onChangeMetric(metric, "rating")}
-                onChangeFeedback={onChangeMetric(metric, "feedback")}
+            {metrics.map((metric) => (
+              <XSmallAccordion
+                defaultExpanded={false}
+                key={metric}
+                summary={metric}
+                detail={
+                  <Metric
+                    rating={feedbackStatus[metric].rating}
+                    feedback={feedbackStatus[metric].feedback}
+                    onChangeRating={onChangeMetric(metric, "rating")}
+                    onChangeFeedback={onChangeMetric(metric, "feedback")}
+                  />
+                }
               />
-            }
-          />
-        ))}
-        <Typography variant="body2" fontWeight="bold" fontSize={12}>
-          Overall
-        </Typography>
-        <Metric
-          rating={overallFeedback.rating}
-          feedback={overallFeedback.feedback}
-          onChangeRating={(newValue) =>
-            setOverallFeedback((prev) => ({ ...prev, rating: newValue }))
-          }
-          onChangeFeedback={(newValue) =>
-            setOverallFeedback((prev) => ({ ...prev, feedback: newValue }))
-          }
-        />
-        <Box sx={{ textAlign: "right", pt: 1 }}>
-          <Button
-            size="small"
-            variant="outlined"
-            disabled={isLoading}
-            onClick={onSubmit}
-          >
-            Submit
-          </Button>
-        </Box>
+            ))}
+            <Typography variant="body2" fontWeight="bold" fontSize={12}>
+              Overall
+            </Typography>
+            <Metric
+              rating={overallFeedback.rating}
+              feedback={overallFeedback.feedback}
+              onChangeRating={(newValue) =>
+                setOverallFeedback((prev) => ({ ...prev, rating: newValue }))
+              }
+              onChangeFeedback={(newValue) =>
+                setOverallFeedback((prev) => ({ ...prev, feedback: newValue }))
+              }
+            />
+            <Box sx={{ textAlign: "right", pt: 1 }}>
+              <Button
+                size="small"
+                variant="outlined"
+                disabled={isLoading}
+                onClick={onSubmit}
+              >
+                Submit
+              </Button>
+            </Box>
+          </Box>
+        )}
       </Box>
     );
   }

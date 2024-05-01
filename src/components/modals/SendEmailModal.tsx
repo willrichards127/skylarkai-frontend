@@ -17,7 +17,7 @@ export const SendEmailModal = memo(
   }) => {
     return (
       <XModal open={open} onClose={onClose} size="lg">
-        <Box sx={{ p: 1, height: 800 }}>
+        <Box sx={{ p: 1, height: 720 }}>
           <EmailTemplate prefix={prefix} element={element} onClose={onClose} />
         </Box>
       </XModal>

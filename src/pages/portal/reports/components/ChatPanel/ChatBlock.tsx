@@ -200,14 +200,12 @@ export const ChatBlock = ({
           >
             {isBot ? answer : (chat.content as string)}
           </ReactMarkdown>
-          {blogHovered && isBot && chat.rating && chat.rating_response && (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 1 }}>
-              <FeedbackFloat
-                graph_id={graph_id}
-                chat={chat}
-                question={chats[chats.length - 2].content.toString()}
-              />
-            </Box>
+          {chat.rating && chat.rating_response && (
+            <FeedbackFloat
+              graph_id={graph_id}
+              chat={chat}
+              question={chats[chats.length - 2].content.toString()}
+            />
           )}
         </Box>
         {blogHovered && isBot && (
