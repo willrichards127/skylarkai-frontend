@@ -1,6 +1,14 @@
-import { Box, SxProps, Theme, Tooltip, Typography, colors } from "@mui/material";
+import {
+  Box,
+  SxProps,
+  Theme,
+  Tooltip,
+  Typography,
+  colors,
+} from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
+import { FC } from "react";
 
 export const DocumentChip = ({
   label,
@@ -10,6 +18,7 @@ export const DocumentChip = ({
   onClick,
   onDelete,
   sx,
+  renderIcon,
 }: {
   label: string;
   description?: React.ReactNode;
@@ -18,6 +27,7 @@ export const DocumentChip = ({
   onClick?: () => void;
   onDelete?: () => void;
   sx?: SxProps<Theme>;
+  renderIcon?: () => JSX.Element;
 }) => {
   return (
     <Box
@@ -37,14 +47,21 @@ export const DocumentChip = ({
         if (onClick) onClick();
       }}
     >
-      <VisibilityIcon
-        sx={{
-          opacity: selected ? 1 : 0.05,
-        }}
-      />
-      <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}>
+      {renderIcon ? (
+        renderIcon()
+      ) : (
+        <VisibilityIcon
+          sx={{
+            opacity: selected ? 1 : 0.05,
+          }}
+        />
+      )}
+      <Box
+        sx={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}
+      >
         <Tooltip title={label}>
-          <Typography variant="body1"
+          <Typography
+            variant="body1"
             sx={{
               overflow: "hidden",
               whiteSpace: "nowrap",

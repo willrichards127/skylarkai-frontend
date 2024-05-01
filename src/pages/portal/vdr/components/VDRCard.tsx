@@ -2,23 +2,22 @@ import { memo, useMemo } from "react";
 import {
   Box,
   IconButton,
-  Chip,
   Card,
   CardActionArea,
   // Rating,
   Typography,
+  LinearProgress,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { XPopmenu } from "../../../../components/XPopmenu";
 import { IMenuItem } from "../../../../shared/models/interfaces";
 import { IVDRDetail } from "../interfaces";
 
-
 export const VDRCard = memo(
   ({
     name,
     files,
-    status,
+    // status,
     moreItems,
     onMoreItem,
     onCard,
@@ -27,30 +26,34 @@ export const VDRCard = memo(
     onCard?: () => void;
     onMoreItem?: (itemId: string) => void;
   } & IVDRDetail) => {
-    const label = useMemo(
-      () =>
-        !files.length
-          ? "Draft"
-          : status === 1
-          ? "Processing"
-          : status === 2
-          ? "Fail"
-          : status === 3
-          ? "Success"
-          : "Pending",
-      [files.length, status]
+    const value = useMemo(
+      () => Math.ceil(files.reduce((prev, cur) => cur.ingested ? prev + 1 : prev, 0) / files.length * 100),
+      [files]
     );
-    const color = useMemo(
-      () =>
-        label === "Draft"
-          ? "warning"
-          : label === "Success"
-          ? "primary"
-          : label === "Fail"
-          ? "error"
-          : "info",
-      [label]
-    );
+    // const label = useMemo(
+    //   () =>
+    //     !files.length
+    //       ? "Draft"
+    //       : status === 1
+    //       ? "Processing"
+    //       : status === 2
+    //       ? "Fail"
+    //       : status === 3
+    //       ? "Success"
+    //       : "Pending",
+    //   [files.length, status]
+    // );
+    // const color = useMemo(
+    //   () =>
+    //     label === "Draft"
+    //       ? "warning"
+    //       : label === "Success"
+    //       ? "primary"
+    //       : label === "Fail"
+    //       ? "error"
+    //       : "info",
+    //   [label]
+    // );
     return (
       <Card
         sx={{
@@ -96,12 +99,18 @@ export const VDRCard = memo(
                 justifyContent: "space-between",
               }}
             >
-              <Chip
+              <LinearProgress
+                sx={{ width: "100%" }}
+                variant="determinate"
+                value={value}
+                color="success"
+              />
+              {/* <Chip
                 size="small"
                 label={label}
                 color={color}
                 variant="filled"
-              />
+              /> */}
               {/* <Rating name="read-only" value={rating} size="small" readOnly /> */}
             </Box>
           </Box>

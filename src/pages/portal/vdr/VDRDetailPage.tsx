@@ -7,9 +7,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useParams } from "react-router-dom";
-import {
-  useGetVDRQuery,
-} from "../../../redux/services/vdrApi";
+import { useGetVDRQuery } from "../../../redux/services/vdrApi";
 import { FileUploader } from "../../../components/FileUploader";
 import { useEffect, useState } from "react";
 import { DocumentChip } from "../../../components/DocumentChip";
@@ -148,6 +146,20 @@ export default function VDRDetailPage() {
                         </>
                       }
                       selected={false}
+                      renderIcon={() => (
+                        <Box
+                          sx={{
+                            width: 16,
+                            height: 16,
+                            borderRadius: "100%",
+                            bgcolor: !file.ingested_at
+                              ? "orange"
+                              : file.ingested
+                              ? "green"
+                              : "red",
+                          }}
+                        />
+                      )}
                       onClick={() => {}}
                     />
                   </Grid>
