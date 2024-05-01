@@ -11,7 +11,9 @@ export const SLMStepPanel = ({
   const [searchText, setSearchText] = useState<string>("");
   const [selectedSlm, setSelectedSlm] = useState<ISetup | null>(null);
 
-  const { isLoading: loadingSlms, data: slms } = useGetSetupsQuery();
+  const { isLoading: loadingSlms, data: slms } = useGetSetupsQuery({
+    viewMode: "active",
+  });
 
   const onChangeSearchText = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {

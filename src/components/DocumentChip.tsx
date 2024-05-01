@@ -8,7 +8,6 @@ import {
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
-import { FC } from "react";
 
 export const DocumentChip = ({
   label,

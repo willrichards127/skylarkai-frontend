@@ -26,7 +26,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
   const setupId = searchParams.get("setupId");
   const reportName = searchParams.get("reportName");
 
-  const { isLoading, data: setups } = useGetSetupsQuery();
+  const { isLoading, data: setups } = useGetSetupsQuery({ viewMode: "active" });
 
   const [reportsModal, showReportsModal] = useState<boolean>(false);
   const [reportTabs, setReportTabs] = useState<
