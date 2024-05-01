@@ -61,7 +61,7 @@ export const ReportTemplate = ({
   const [ingestFiles] = useIngestFilesMutation();
 
   const initialReportItems = useMemo(
-    () => categoryParser3(reportContent),
+    () => categoryParser3(initializeHtmlResponse(reportContent)),
     [reportContent]
   );
 
