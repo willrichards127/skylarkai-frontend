@@ -1,6 +1,6 @@
 import { memo, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Divider, Grid, Typography } from "@mui/material";
+import { Box, Grid, Typography } from "@mui/material";
 import {
   useDeleteReportMutation,
   useMarkReportMutation,
@@ -66,7 +66,6 @@ export const ReportTabContainer = memo(
 
     return (
       <Box sx={{ width: "100%" }}>
-        <Divider />
         <Typography variant="h5" my={2}>
           {companyName}
         </Typography>

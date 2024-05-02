@@ -8,8 +8,9 @@ import { useGetReportsQuery } from "../../../../redux/services/reportApi";
 const ReportsContainer = memo(() => {
   const [viewMode, setViewMode] = useState<string>("active");
   const [newReportModal, showNewReportModal] = useState<boolean>(false);
-  const { isFetching: fetchingReports, data: reportsData } =
-    useGetReportsQuery({ viewMode });
+  const { isFetching: fetchingReports, data: reportsData } = useGetReportsQuery(
+    { viewMode }
+  );
 
   const onNewReportModal = useCallback(() => {
     showNewReportModal(true);
@@ -23,20 +24,17 @@ const ReportsContainer = memo(() => {
   );
 
   return (
-    <Box sx={{ height: "calc(100% - 64px)" }}>
+    <Box sx={{ height: "100%" }}>
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
           gap: 2,
-          ml: 4,
-          mr: 4,
-          mt: 6,
-          mb: 2,
+          p: 2,
         }}
       >
         <Typography variant="h6" fontWeight="bold">
-          My Analysts
+          Reports
         </Typography>
         <Button
           size="small"
@@ -67,9 +65,7 @@ const ReportsContainer = memo(() => {
           <CircularProgress />
         </Box>
       ) : (
-        <Box
-          sx={{ height: "calc(100% - 37px)", overflowY: "auto", px: 4, pb: 2 }}
-        >
+        <Box sx={{ height: "calc(100% - 37px)", overflowY: "auto", p: 2 }}>
           <Box
             sx={{
               display: "flex",
@@ -100,7 +96,5 @@ const ReportsContainer = memo(() => {
     </Box>
   );
 });
-
-ReportsContainer.displayName = "ReportsContainer";
 
 export default ReportsContainer;

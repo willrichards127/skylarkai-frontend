@@ -14,14 +14,13 @@ export default function VDRsPage() {
 
   return (
     <Box
-      sx={{ display: "flex", flexDirection: "column", height: "100%", p: 8 }}
+      sx={{ display: "flex", flexDirection: "column", height: "100%", p: 2 }}
     >
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          mb: 4,
         }}
       >
         <Typography variant="h6" fontWeight="bold">

@@ -18,12 +18,14 @@ import VDRsPage from "./pages/portal/vdr/VDRsPage";
 import VDRDetailPage from "./pages/portal/vdr/VDRDetailPage";
 import SetupsPage from "./pages/portal/setups/SetupsPage";
 import SetupDetailPage from "./pages/portal/setups/SetupDetailPage";
-import OrdersPage from "./pages/portal/workorders/OrdersPage";
-import OrderDetailPage from "./pages/portal/workorders/OrderDetailPage";
-import CompaniesPage from "./pages/portal/workorders/CompaniesPage";
-import CompanyDetailPage from "./pages/portal/workorders/CompanyDetailPage";
+// import OrdersPage from "./pages/portal/workorders/OrdersPage";
+// import OrderDetailPage from "./pages/portal/workorders/OrderDetailPage";
+// import CompaniesPage from "./pages/portal/workorders/CompaniesPage";
+// import CompanyDetailPage from "./pages/portal/workorders/CompanyDetailPage";
 import ProfilePage from "./pages/portal/profile/ProfilePage";
 import DashboardPage from "./pages/dashboard";
+import UnitsPage from "./pages/portal/units";
+import UnitPage from "./pages/portal/units/unit";
 
 // const LandingPage = lazy(() => import("./pages/landing"));
 
@@ -146,6 +148,40 @@ function AppRouter() {
               },
               // portal routing
               {
+                path: "/portal/units",
+                element: <UnitsPage />,
+              },
+              {
+                path: "/portal/units/:unitId",
+                element: <UnitPage />,
+                children: [
+                  {
+                    path: "reports",
+                    element: <ReportsPage />,
+                  },
+                  {
+                    path: "reports/:reportId",
+                    element: <ReportDetailPage />,
+                  },
+                  {
+                    path: "setups",
+                    element: <SetupsPage />,
+                  },
+                  {
+                    path: "setups/:setupId",
+                    element: <SetupDetailPage />,
+                  },
+                  {
+                    path: "vdrs",
+                    element: <VDRsPage />,
+                  },
+                  {
+                    path: "vdrs/:vdrId",
+                    element: <VDRDetailPage />,
+                  },
+                ],
+              },
+              {
                 path: "/portal/reports",
                 element: <ReportsPage />,
               },
@@ -169,22 +205,22 @@ function AppRouter() {
                 path: "/portal/vdrs/:vdrId",
                 element: <VDRDetailPage />,
               },
-              {
-                path: "/portal/orders",
-                element: <OrdersPage />,
-              },
-              {
-                path: "/portal/companies",
-                element: <CompaniesPage />,
-              },
-              {
-                path: "/portal/companies/:companyId",
-                element: <CompanyDetailPage />,
-              },
-              {
-                path: "/portal/companies/:companyId/:orderId",
-                element: <OrderDetailPage />,
-              },
+              // {
+              //   path: "/portal/orders",
+              //   element: <OrdersPage />,
+              // },
+              // {
+              //   path: "/portal/companies",
+              //   element: <CompaniesPage />,
+              // },
+              // {
+              //   path: "/portal/companies/:companyId",
+              //   element: <CompanyDetailPage />,
+              // },
+              // {
+              //   path: "/portal/companies/:companyId/:orderId",
+              //   element: <OrderDetailPage />,
+              // },
               {
                 path: "/portal/profile",
                 element: <ProfilePage />,

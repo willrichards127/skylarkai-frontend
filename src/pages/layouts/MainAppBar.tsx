@@ -16,15 +16,14 @@ import { useSelector, useDispatch } from "react-redux";
 import LogoutIcon from "@mui/icons-material/Logout";
 import HelpIcon from "@mui/icons-material/Help";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import CloudSyncIcon from "@mui/icons-material/CloudSync";
+import ApartmentIcon from "@mui/icons-material/Apartment";
+import BusinessCenterIcon from "@mui/icons-material/BusinessCenter";
 import {
   Logo,
   FeaturesIcon,
   HelpIcon as Help2Icon,
   SupportIcon,
   DashboardIcon,
-  AnalysisIcon,
-  ToolsIcon,
 } from "../../components/Svgs";
 import { Notifications } from "./Notifications";
 import { XPopmenu } from "../../components/XPopmenu";
@@ -60,11 +59,6 @@ export const MainAppBar = memo(() => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-
-  // const isPortal = useMemo(
-  //   () => location.pathname.includes("/portal/"),
-  //   [location]
-  // );
 
   const [addActivity] = useAddUserActivityMutation();
 
@@ -229,61 +223,40 @@ export const MainAppBar = memo(() => {
             </Box>
             <Box
               component={Link}
-              to="/portal/reports"
+              to="/portal/units?type=companies"
               sx={{
                 ml: 4,
                 color: "white",
                 textDecoration: "none",
                 fontSize: 14,
-                fontWeight: location.pathname.includes("/portal/reports")
+                fontWeight: location.search.includes("type=companies")
                   ? "bold"
                   : "normal",
-                opacity: location.pathname.includes("/portal/reports")
-                  ? 1
-                  : 0.3,
+                opacity: location.search.includes("type=companies") ? 1 : 0.3,
               }}
             >
               <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-                <AnalysisIcon />
-                Analysis
+                <ApartmentIcon />
+                Companies
               </Box>
             </Box>
             <Box
               component={Link}
-              to="/portal/vdrs"
+              to="/portal/units?type=sectors"
               sx={{
                 ml: 4,
                 color: "white",
                 textDecoration: "none",
                 fontSize: 14,
-                fontWeight: location.pathname.includes("/portal/vdrs")
+                fontWeight: location.search.includes("type=sectors")
                   ? "bold"
                   : "normal",
-                opacity: location.pathname.includes("/portal/vdrs") ? 1 : 0.3,
+                opacity: location.search.includes("type=sectors") ? 1 : 0.3,
               }}
             >
               <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-                <CloudSyncIcon />
-                Virtual Data Rooms
-              </Box>
-            </Box>
-            <Box
-              component={Link}
-              to="/portal/setups"
-              sx={{
-                ml: 4,
-                color: "white",
-                textDecoration: "none",
-                fontSize: 14,
-                fontWeight: location.pathname.includes("/portal/setups")
-                  ? "bold"
-                  : "normal",
-                opacity: location.pathname.includes("/portal/setups") ? 1 : 0.3,
-              }}
-            >
-              <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-                <ToolsIcon />
-                Setup SLM
+                <BusinessCenterIcon />
+                Sectors
               </Box>
             </Box>
             <Box

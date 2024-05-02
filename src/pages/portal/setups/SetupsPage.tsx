@@ -1,8 +1,11 @@
 import { Box, Typography, Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import AddIcon from "@mui/icons-material/Add";
 import SetupsContainer from "./components/SetupsContainer";
 import { useCallback, useState } from "react";
 
 export default function SetupsPage() {
+  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<string>("active");
 
   const onSwitchView = useCallback(
@@ -13,12 +16,10 @@ export default function SetupsPage() {
   );
 
   return (
-    <Box
-      sx={{ display: "flex", flexDirection: "column", height: "100%", pl: 6 }}
-    >
-      <Box sx={{ display: "flex", gap: 2 }} m={4}>
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <Box sx={{ display: "flex", gap: 2, p: 2 }}>
         <Typography variant="h6" fontWeight="bold">
-          New Setup
+          Small Language Models
         </Typography>
         <Button
           size="small"
@@ -35,9 +36,18 @@ export default function SetupsPage() {
         >
           Archived
         </Button>
+        <Box mr="auto" />
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => navigate("/portal/setups/new")}
+          sx={{ ml: "auto" }}
+        >
+          New SLM
+        </Button>
       </Box>
 
-      <SetupsContainer hasNewCard viewMode={viewMode}/>
+      <SetupsContainer viewMode={viewMode} />
     </Box>
   );
 }

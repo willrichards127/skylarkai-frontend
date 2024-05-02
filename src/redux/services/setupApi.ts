@@ -8,7 +8,7 @@ export const setupApi = createApi({
   reducerPath: "setupApi",
   refetchOnFocus: true,
   baseQuery,
-  tagTypes: ["Setup"],
+  tagTypes: ["Setup", "Unit"],
   endpoints: (builder) => ({
     getCategories: builder.query<any, void>({
       async queryFn(_, __, ___, apiBaseQuery) {
@@ -218,6 +218,48 @@ export const setupApi = createApi({
         }
       },
     }),
+    getUnits: builder.query<any[], { type?: number; view_mode?: string }>({
+      query: ({ type = 1, view_mode = "active" }) =>
+        `target_companies?type=${type}&view_mode=${view_mode}`,
+      keepUnusedDataFor: 0,
+      providesTags: ["Unit"],
+    }),
+    addUnit: builder.mutation<
+      any,
+      { name: string; logo_file?: File; type?: number }
+    >({
+      async queryFn({ name, logo_file, type = 1 }, _, __, apiBaseQuery) {
+        try {
+          const formdata = new FormData();
+          formdata.append("name", name);
+          if (type) {
+            formdata.append("type", type.toString());
+          }
+          if (logo_file) {
+            formdata.append("logo_file", logo_file);
+          }
+
+          const response: any = await apiBaseQuery({
+            url: "target_companies",
+            method: "POST",
+            body: formdata,
+          });
+
+          return {
+            data: response.data,
+          };
+        } catch (e) {
+          return {
+            error: {
+              status: 404,
+              statusText: e,
+              msg: "Error in ingestfiles API",
+            },
+          } as any;
+        }
+      },
+      invalidatesTags: ["Unit"],
+    }),
   }),
 });
 
@@ -232,4 +274,7 @@ export const {
   useIngestFilesMutation,
   useUploadFilesMutation,
   useExecuteGraphMutation,
+
+  useGetUnitsQuery,
+  useAddUnitMutation,
 } = setupApi;
