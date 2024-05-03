@@ -4,11 +4,13 @@ import { VDRCard } from "./components/VDRCard";
 import { useState } from "react";
 import { NewVDRModal } from "./components/NewVDRModal";
 import { useGetVDRsQuery } from "../../../redux/services/vdrApi";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 export default function VDRsPage() {
   const params = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const unitName = searchParams.get("unitName");
 
   const [newVDRModal, showNewVDRModal] = useState<boolean>(false);
   const { data, isLoading } = useGetVDRsQuery({ unitId: +params.unitId! });
@@ -51,7 +53,7 @@ export default function VDRsPage() {
                 <VDRCard
                   key={vdr.id}
                   {...vdr}
-                  onCard={() => navigate(`/portal/vdrs/${vdr.id}`)}
+                  onCard={() => navigate(`/portal/vdrs/${vdr.id}?unitName=${unitName}`)}
                 />
               </Grid>
             ))}
@@ -61,6 +63,7 @@ export default function VDRsPage() {
       {newVDRModal && (
         <NewVDRModal
           open={newVDRModal}
+          unitName={unitName!}
           onClose={() => showNewVDRModal(false)}
         />
       )}

@@ -181,22 +181,6 @@ function AppRouter() {
                 path: "/portal/vdrs/:vdrId",
                 element: <VDRDetailPage />,
               },
-              // {
-              //   path: "/portal/orders",
-              //   element: <OrdersPage />,
-              // },
-              // {
-              //   path: "/portal/companies",
-              //   element: <CompaniesPage />,
-              // },
-              // {
-              //   path: "/portal/companies/:companyId",
-              //   element: <CompanyDetailPage />,
-              // },
-              // {
-              //   path: "/portal/companies/:companyId/:orderId",
-              //   element: <OrderDetailPage />,
-              // },
               {
                 path: "/portal/profile",
                 element: <ProfilePage />,

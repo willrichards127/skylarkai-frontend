@@ -12,7 +12,15 @@ import { XModal } from "../../../../components/XModal";
 import { useSaveVDRMutation } from "../../../../redux/services/vdrApi";
 
 export const NewVDRModal = memo(
-  ({ open, onClose }: { open: boolean; onClose: () => void }) => {
+  ({
+    open,
+    unitName,
+    onClose,
+  }: {
+    unitName: string;
+    open: boolean;
+    onClose: () => void;
+  }) => {
     const [name, setName] = useState<string>("");
 
     const params = useParams();
@@ -27,9 +35,9 @@ export const NewVDRModal = memo(
 
     useEffect(() => {
       if (isSuccess && data) {
-        navigate(`/portal/vdrs/${data.id}`);
+        navigate(`/portal/vdrs/${data.id}?unitName=${unitName}`);
       }
-    }, [navigate, isSuccess, data]);
+    }, [navigate, isSuccess, data, unitName]);
 
     return (
       <XModal
@@ -80,5 +88,3 @@ export const NewVDRModal = memo(
     );
   }
 );
-
-NewVDRModal.displayName = "NewVDRModal";

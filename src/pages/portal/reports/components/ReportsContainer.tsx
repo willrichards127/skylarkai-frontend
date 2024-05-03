@@ -2,7 +2,7 @@ import { memo, useCallback, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { NewReportModal } from "./NewReportModal";
+// import { NewReportModal } from "./NewReportModal";
 import { ReportTabContainer } from "./ReportTabContainer";
 import { useGetReportsQuery } from "../../../../redux/services/reportApi";
 
@@ -10,14 +10,14 @@ const ReportsContainer = memo(() => {
   const params = useParams();
 
   const [viewMode, setViewMode] = useState<string>("active");
-  const [newReportModal, showNewReportModal] = useState<boolean>(false);
-  const { isFetching: fetchingReports, data: reportsData } = useGetReportsQuery(
+  // const [newReportModal, showNewReportModal] = useState<boolean>(false);
+  const { isFetching: fetchingReports, data: reports } = useGetReportsQuery(
     { unitId: +params.unitId!, viewMode }
   );
 
-  const onNewReportModal = useCallback(() => {
-    showNewReportModal(true);
-  }, []);
+  // const onNewReportModal = useCallback(() => {
+  //   showNewReportModal(true);
+  // }, []);
 
   const onSwitchView = useCallback(
     (viewMode: string) => () => {
@@ -57,7 +57,8 @@ const ReportsContainer = memo(() => {
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={onNewReportModal}
+          // onClick={onNewReportModal}
+          disabled
           sx={{ ml: "auto" }}
         >
           New Report
@@ -76,24 +77,16 @@ const ReportsContainer = memo(() => {
               flexWrap: "wrap",
             }}
           >
-            {!!reportsData &&
-              Object.entries(reportsData).map(
-                ([company, reports]: [string, any], index: number) => (
-                  <ReportTabContainer
-                    key={`${company}-${index}`}
-                    companyName={company}
-                    reports={reports}
-                    viewMode={viewMode}
-                  />
-                )
-              )}
+            {!!reports?.length && (
+              <ReportTabContainer reports={reports} viewMode={viewMode} />
+            )}
           </Box>
-          {newReportModal && (
+          {/* {newReportModal && (
             <NewReportModal
               open={newReportModal}
               onClose={() => showNewReportModal(false)}
             />
-          )}
+          )} */}
         </Box>
       )}
     </Box>

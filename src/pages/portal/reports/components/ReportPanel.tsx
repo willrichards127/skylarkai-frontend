@@ -24,9 +24,13 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const setupId = searchParams.get("setupId");
+  const unitId = searchParams.get("unitId");
   const reportName = searchParams.get("reportName");
 
-  const { isLoading, data: setups } = useGetSetupsQuery({ viewMode: "active" });
+  const { isLoading, data: setups } = useGetSetupsQuery({
+    unitId: +unitId!,
+    viewMode: "active",
+  });
 
   const [reportsModal, showReportsModal] = useState<boolean>(false);
   const [reportTabs, setReportTabs] = useState<

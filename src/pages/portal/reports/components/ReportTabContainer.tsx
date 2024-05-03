@@ -1,5 +1,5 @@
 import { memo, useCallback, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Box, Grid, Typography } from "@mui/material";
 import {
   useDeleteReportMutation,
@@ -10,15 +10,11 @@ import { getDate } from "../../../../shared/utils/parse";
 import { ReportCard } from "./ReportCard";
 
 export const ReportTabContainer = memo(
-  ({
-    companyName,
-    reports,
-    viewMode,
-  }: {
-    companyName: string;
-    reports: any;
-    viewMode: string;
-  }) => {
+  ({ reports, viewMode }: { reports: any; viewMode: string }) => {
+    const params = useParams();
+    const [searchParams] = useSearchParams();
+    const unitName = searchParams.get("unitName");
+
     const moreItems = useMemo(
       () => [
         ...(viewMode === "archived"
@@ -58,16 +54,16 @@ export const ReportTabContainer = memo(
     const onCard = useCallback(
       (cardId: number, setupId: number, reportName: string) => {
         navigate(
-          `/portal/reports/${cardId}?reportName=${reportName}&setupId=${setupId}&viewMode=${viewMode}`
+          `/portal/reports/${cardId}?unitId=${params.unitId}&reportName=${reportName}&setupId=${setupId}&viewMode=${viewMode}`
         );
       },
-      [navigate, viewMode]
+      [navigate, params, viewMode]
     );
 
     return (
       <Box sx={{ width: "100%" }}>
         <Typography variant="h5" my={2}>
-          {companyName}
+          {unitName}
         </Typography>
         <Grid container spacing={4}>
           {[...reports]
@@ -104,5 +100,3 @@ export const ReportTabContainer = memo(
     );
   }
 );
-
-ReportTabContainer.displayName = "ReportTabContainer";

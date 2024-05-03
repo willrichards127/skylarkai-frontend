@@ -6,7 +6,7 @@ import {
   Grid,
   Typography,
 } from "@mui/material";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useGetVDRQuery } from "../../../redux/services/vdrApi";
 import { FileUploader } from "../../../components/FileUploader";
 import { useEffect, useState } from "react";
@@ -17,6 +17,9 @@ import { getDate } from "../../../shared/utils/parse";
 
 export default function VDRDetailPage() {
   const vdrId = useParams<{ vdrId: string }>().vdrId!;
+  const [searchParams] = useSearchParams();
+  const unitName = searchParams.get("unitName");
+
   const { data, isLoading, refetch } = useGetVDRQuery({ vdrId: +vdrId });
   const [ingestFiles] = useIngestFilesMutation();
 
@@ -36,7 +39,7 @@ export default function VDRDetailPage() {
     if (data && selectedFiles.length) {
       await ingestFiles({
         setupId: data.id,
-        companyName: data.name,
+        companyName: unitName!,
         analysisType: "financial_diligence",
         background: true,
         files: selectedFiles,
@@ -114,7 +117,7 @@ export default function VDRDetailPage() {
             <Typography variant="body1" sx={{ mb: 1 }}>
               Ingested Documents
             </Typography>
-            {data && data.files.length ? (
+            {data && data.files?.length ? (
               <Grid container columnSpacing={3} rowSpacing={3}>
                 {data.files.map((file, index) => (
                   <Grid

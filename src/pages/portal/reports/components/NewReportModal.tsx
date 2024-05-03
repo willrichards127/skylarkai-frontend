@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Box,
   Button,
@@ -15,7 +15,10 @@ import {
 import { XModal } from "../../../../components/XModal";
 import { NeutralLoadingButton } from "../../../../components/buttons/NeutralLoadingButton";
 import { useGetSetupsQuery } from "../../../../redux/services/setupApi";
-import { useGenerateReportMutation, useGenerateWarrantReportMutation } from "../../../../redux/services/reportApi";
+import {
+  useGenerateReportMutation,
+  useGenerateWarrantReportMutation,
+} from "../../../../redux/services/reportApi";
 import {
   REPORTS_DICT,
   EdgarFilings,
@@ -24,15 +27,24 @@ import {
 export const NewReportModal = memo(
   ({ open, onClose }: { open: boolean; onClose: () => void }) => {
     const navigate = useNavigate();
-    const { isLoading, data } = useGetSetupsQuery({});
+    const params = useParams();
+    const { isLoading, data } = useGetSetupsQuery({ unitId: +params.unitId! });
     const [
       generateReport,
-      { isLoading: isGeneratingReport, isSuccess: isGeneratedReport, data: generatedReportId },
+      {
+        isLoading: isGeneratingReport,
+        isSuccess: isGeneratedReport,
+        data: generatedReportId,
+      },
     ] = useGenerateReportMutation();
 
     const [
       generateWarrantReport,
-      { isLoading: isGeneratingWarrantReport, isSuccess: isGeneratedWarrantReport, data: generatedWarrantReportId },
+      {
+        isLoading: isGeneratingWarrantReport,
+        isSuccess: isGeneratedWarrantReport,
+        data: generatedWarrantReportId,
+      },
     ] = useGenerateWarrantReportMutation();
 
     const [documentType, setDocumentType] = useState<string>("report");
@@ -75,7 +87,7 @@ export const NewReportModal = memo(
           reportName: matched!.value,
         });
       }
-    }, [navigate, form, documentType, filing, generateReport, generateWarrantReport]);
+    }, [form, documentType, filing, generateReport, generateWarrantReport]);
 
     const onCreateNew = useCallback(() => {
       navigate("/portal/setups/");

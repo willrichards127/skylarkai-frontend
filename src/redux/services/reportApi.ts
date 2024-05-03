@@ -241,7 +241,7 @@ export const reportApi = createApi({
       async queryFn({ unitId, viewMode = "active" }, __, ___, apiBaseQuery) {
         try {
           const reportsReponse = await apiBaseQuery({
-            url: `reports/${unitId}?view_mode=${viewMode}`,
+            url: `reports/company/${unitId}?view_mode=${viewMode}`,
           });
 
           if (reportsReponse.error) {

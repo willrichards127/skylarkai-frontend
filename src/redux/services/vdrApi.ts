@@ -11,7 +11,7 @@ export const vdrApi = createApi({
   tagTypes: ["VDR"],
   endpoints: (builder) => ({
     getVDRs: builder.query<IVDRDetail[], { unitId: number }>({
-      query: ({ unitId }) => `vdrs/${unitId}`,
+      query: ({ unitId }) => `vdrs/company/${unitId}`,
       keepUnusedDataFor: 0,
     }),
     getVDR: builder.query<IVDRDetail, { vdrId: number }>({

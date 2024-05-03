@@ -54,7 +54,7 @@ export const Layout = ({
         />
         <Tab
           icon={<CloudSyncIcon sx={{ color: "white" }} />}
-          label={<Box ml={2}>Virtual Data Rooms</Box>}
+          label={<Box ml={1}>Virtual Data Rooms</Box>}
           value="vdrs"
           iconPosition="start"
         />

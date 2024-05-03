@@ -52,7 +52,7 @@ export const setupApi = createApi({
     }),
     getSetups: builder.query<ISetup[], { unitId: number; viewMode?: string }>({
       query: ({ unitId, viewMode = "active" }) =>
-        `graphs/${unitId}?view_mode=${viewMode}`,
+        `graphs/company/${unitId}?view_mode=${viewMode}`,
       keepUnusedDataFor: 0,
       providesTags: ["Setup"],
     }),
