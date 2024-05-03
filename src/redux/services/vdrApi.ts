@@ -10,25 +10,26 @@ export const vdrApi = createApi({
   baseQuery,
   tagTypes: ["VDR"],
   endpoints: (builder) => ({
-    getVDRs: builder.query<IVDRDetail[], void>({
-      query: () => "vdrs",
+    getVDRs: builder.query<IVDRDetail[], { unitId: number }>({
+      query: ({ unitId }) => `vdrs/${unitId}`,
       keepUnusedDataFor: 0,
     }),
     getVDR: builder.query<IVDRDetail, { vdrId: number }>({
       query: ({ vdrId }) => `vdrs/${vdrId}`,
       keepUnusedDataFor: 0,
     }),
-    saveVDR: builder.mutation<IVDR, { vdrId?: number; data: Omit<IVDR, "id"> }>(
-      {
-        query: ({ vdrId, data }) => {
-          return {
-            url: vdrId ? `vdrs/${vdrId}` : "vdrs",
-            method: vdrId ? "PUT" : "POST",
-            body: data,
-          };
-        },
-      }
-    ),
+    saveVDR: builder.mutation<
+      IVDR,
+      { unitId: number; vdrId?: number; data: Omit<IVDR, "id"> }
+    >({
+      query: ({ unitId, vdrId, data }) => {
+        return {
+          url: vdrId ? `vdrs/${vdrId}` : `vdrs/${unitId}`,
+          method: vdrId ? "PUT" : "POST",
+          body: data,
+        };
+      },
+    }),
     deleteSetup: builder.mutation<void, { vdrId: number }>({
       query: ({ vdrId }) => ({
         url: `vdrs/${vdrId}`,

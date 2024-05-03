@@ -1,4 +1,5 @@
 import { memo, useMemo, useState, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Box, Typography, IconButton } from "@mui/material";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
 import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
@@ -10,13 +11,18 @@ import { IVDRDetail } from "../../vdr/interfaces";
 
 const CategoryPanel = memo(
   ({ categoryDict }: { categoryDict: Record<string, ITemplateNode[]> }) => {
-    const { data: vdrs } = useGetVDRsQuery();
+    const [searchParams] = useSearchParams();
+    const unitId = searchParams.get("unitId");
+    const { data: vdrs } = useGetVDRsQuery({ unitId: +unitId! });
 
     const vdrsWithId = useMemo(() => {
       if (vdrs) {
         return vdrs.map((vdr) => ({
           ...vdr,
-          files: vdr.files.map((f, index) => ({ ...f, id: `${vdr.name}-${index + 1}` })),
+          files: vdr.files.map((f, index) => ({
+            ...f,
+            id: `${vdr.name}-${index + 1}`,
+          })),
         }));
       }
     }, [vdrs]);

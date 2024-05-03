@@ -160,46 +160,22 @@ function AppRouter() {
                     element: <ReportsPage />,
                   },
                   {
-                    path: "reports/:reportId",
-                    element: <ReportDetailPage />,
-                  },
-                  {
                     path: "setups",
                     element: <SetupsPage />,
-                  },
-                  {
-                    path: "setups/:setupId",
-                    element: <SetupDetailPage />,
                   },
                   {
                     path: "vdrs",
                     element: <VDRsPage />,
                   },
-                  {
-                    path: "vdrs/:vdrId",
-                    element: <VDRDetailPage />,
-                  },
                 ],
-              },
-              {
-                path: "/portal/reports",
-                element: <ReportsPage />,
               },
               {
                 path: "/portal/reports/:reportId",
                 element: <ReportDetailPage />,
               },
               {
-                path: "/portal/setups",
-                element: <SetupsPage />,
-              },
-              {
                 path: "/portal/setups/:setupId",
                 element: <SetupDetailPage />,
-              },
-              {
-                path: "/portal/vdrs",
-                element: <VDRsPage />,
               },
               {
                 path: "/portal/vdrs/:vdrId",

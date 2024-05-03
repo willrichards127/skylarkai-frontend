@@ -6,32 +6,22 @@ export const SaveSetupModal = memo(
   ({
     open,
     existingSetupName,
-    existingCompanyName,
     onClose,
     onSaveName,
   }: {
     existingSetupName?: string;
-    existingCompanyName?: string;
     open: boolean;
     onClose: () => void;
-    onSaveName: ({
-      setup,
-      company,
-    }: {
-      setup: string;
-      company: string;
-    }) => void;
+    onSaveName: (setupName: string) => void;
   }) => {
     const [form, setForm] = useState<{
       setup: string;
-      company: string;
     }>({
       setup: "",
-      company: "",
     });
 
     const onSave = useCallback(() => {
-      onSaveName(form);
+      onSaveName(form.setup);
       onClose();
     }, [onSaveName, onClose, form]);
 
@@ -43,9 +33,9 @@ export const SaveSetupModal = memo(
     );
 
     useEffect(() => {
-      if (!existingSetupName || !existingCompanyName) return;
-      setForm({ setup: existingSetupName, company: existingCompanyName });
-    }, [existingSetupName, existingCompanyName]);
+      if (!existingSetupName) return;
+      setForm({ setup: existingSetupName });
+    }, [existingSetupName]);
 
     return (
       <XModal
@@ -62,7 +52,7 @@ export const SaveSetupModal = memo(
             </Button>
             <Button
               variant="contained"
-              disabled={!form.setup || !form.company}
+              disabled={!form.setup}
               onClick={onSave}
               sx={{ minWidth: 92 }}
             >
@@ -80,18 +70,8 @@ export const SaveSetupModal = memo(
             size="small"
             fullWidth
           />
-          <TextField
-            name="company"
-            label="Company name"
-            value={form.company}
-            onChange={onChange}
-            size="small"
-            fullWidth
-          />
         </Stack>
       </XModal>
     );
   }
 );
-
-SaveSetupModal.displayName = "SaveSetupModal";

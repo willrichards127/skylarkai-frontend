@@ -4,13 +4,14 @@ import { VDRCard } from "./components/VDRCard";
 import { useState } from "react";
 import { NewVDRModal } from "./components/NewVDRModal";
 import { useGetVDRsQuery } from "../../../redux/services/vdrApi";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 export default function VDRsPage() {
+  const params = useParams();
   const navigate = useNavigate();
 
   const [newVDRModal, showNewVDRModal] = useState<boolean>(false);
-  const { data, isLoading } = useGetVDRsQuery();
+  const { data, isLoading } = useGetVDRsQuery({ unitId: +params.unitId! });
 
   return (
     <Box

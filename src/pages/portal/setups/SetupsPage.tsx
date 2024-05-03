@@ -1,11 +1,16 @@
 import { Box, Typography, Button } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import SetupsContainer from "./components/SetupsContainer";
 import { useCallback, useState } from "react";
 
 export default function SetupsPage() {
+  const params = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const type = searchParams.get("type");
+  const unitName = searchParams.get("unitName");
+
   const [viewMode, setViewMode] = useState<string>("active");
 
   const onSwitchView = useCallback(
@@ -40,7 +45,11 @@ export default function SetupsPage() {
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => navigate("/portal/setups/new")}
+          onClick={() =>
+            navigate(
+              `/portal/setups/new?unitId=${params.unitId}&unitName=${unitName}&type=${type}`
+            )
+          }
           sx={{ ml: "auto" }}
         >
           New SLM

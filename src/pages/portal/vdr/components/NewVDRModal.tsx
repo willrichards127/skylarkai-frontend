@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Box,
   Button,
@@ -15,14 +15,15 @@ export const NewVDRModal = memo(
   ({ open, onClose }: { open: boolean; onClose: () => void }) => {
     const [name, setName] = useState<string>("");
 
+    const params = useParams();
     const navigate = useNavigate();
     const [saveVDR, { isLoading, isSuccess, data }] = useSaveVDRMutation();
 
     const onCreateNew = useCallback(() => {
       if (name) {
-        saveVDR({ data: { name } });
+        saveVDR({ unitId: +params.unitId!, data: { name } });
       }
-    }, [saveVDR, name]);
+    }, [saveVDR, params, name]);
 
     useEffect(() => {
       if (isSuccess && data) {

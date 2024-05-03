@@ -6,7 +6,7 @@ import React, {
   useEffect,
   useMemo,
 } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams, useParams } from "react-router-dom";
 import {
   Box,
   Button,
@@ -27,13 +27,7 @@ import ReactFlow, {
 } from "reactflow";
 import { XIconButton } from "../../../../components/buttons/XIconButton";
 import CustomNode from "./custom-nodes/CustomNode";
-import {
-  DeleteIcon,
-  // DeployIcon,
-  // ImportIcon,
-  PlayIcon,
-  // UploadIcon,
-} from "../../../../components/Svgs";
+import { DeleteIcon, PlayIcon } from "../../../../components/Svgs";
 import { ExportModal } from "./ExportModal/ExportModal";
 import { SaveSetupModal } from "./SaveSetupModal";
 import {
@@ -64,17 +58,18 @@ const nodeTypes = {
 };
 
 const WorkflowPanel = memo(
-  ({
-    setupId,
-    categoryDict,
-  }: {
-    setupId: string;
-    categoryDict: Record<string, ITemplateNode[]>;
-  }) => {
-    const isNew = setupId === "new";
+  ({ categoryDict }: { categoryDict: Record<string, ITemplateNode[]> }) => {
     const navigate = useNavigate();
+    const params = useParams();
+    const [searchParams] = useSearchParams();
+
+    const unitId = searchParams.get("unitId");
+    const unitName = searchParams.get("unitName");
+
+    const isNew = params.setupId === "new";
+
     const { data: setup, isFetching } = useGetSetupQuery(
-      { setupId: +setupId },
+      { setupId: +params.setupId! },
       {
         skip: isNew,
       }
@@ -87,7 +82,6 @@ const WorkflowPanel = memo(
     const setupRef = useRef<{
       id?: number;
       name?: string;
-      description?: string;
     }>({});
 
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -207,20 +201,17 @@ const WorkflowPanel = memo(
             position,
             data: {
               ...dndItem,
-              setupId,
+              setupId: params.setupId,
               setupName: setupRef.current.name,
-              setupDescription: setupRef.current.description,
+              unitName,
               graph_node_id,
               categoryDict,
             },
           });
         });
       },
-      [reactFlowInstance, setupId, categoryDict, setNodes]
+      [reactFlowInstance, params.setupId, unitName, categoryDict, setNodes]
     );
-    // const onExport = useCallback(() => {
-    //   showDeployModal(true);
-    // }, []);
 
     const onExecute = useCallback(async () => {
       showProgressModal(true);
@@ -231,37 +222,37 @@ const WorkflowPanel = memo(
     }, []);
 
     const onSaveName = useCallback(
-      ({
-        setup: setupName,
-        company: companyName,
-      }: {
-        setup: string;
-        company: string;
-      }) => {
+      (setupName: string) => {
         const dbNodes = nodes.map((node) => convert2DBNode(node as INode));
         const dbEdges = edges.map((edge) => convert2DBEdge(edge as IEdge));
         saveSetup({
+          unitId: +unitId!,
           setupId: setupRef.current.id,
           setup: {
             name: setupName,
             nodes: dbNodes,
             edges: dbEdges,
-            description: companyName,
           },
         });
       },
-      [saveSetup, nodes, edges]
+      [saveSetup, unitId, nodes, edges]
     );
 
     const updateSetupWithLoadedData = useCallback(
       (loadedSetup: ISetup) => {
+        console.log(loadedSetup, "loadedSetup===");
         setupRef.current = {
           id: loadedSetup.id,
           name: loadedSetup.name,
-          description: loadedSetup.description,
         };
         const loadedNodes = loadedSetup.nodes.map((node) =>
-          convert2Node(node, categoryDict, +loadedSetup.id!, loadedSetup.name, loadedSetup.description)
+          convert2Node(
+            unitName!,
+            node,
+            categoryDict,
+            +loadedSetup.id!,
+            loadedSetup.name
+          )
         );
         const loadedEdges = loadedSetup.edges.map((edge) =>
           convert2Edge(edge, loadedSetup.nodes)
@@ -270,7 +261,7 @@ const WorkflowPanel = memo(
         setNodes(loadedNodes);
         setEdges(loadedEdges as Edge<any>[]);
       },
-      [categoryDict, setNodes, setEdges]
+      [categoryDict, unitName, setNodes, setEdges]
     );
     /** FIXME: React Navigate */
     useEffect(() => {
@@ -362,28 +353,6 @@ const WorkflowPanel = memo(
             disabled={isNew || !isValid}
             onClick={onExecute}
           />
-          {/* <XIconButton
-						variant='contained'
-						startIcon={<DeployIcon />}
-						size='small'
-						isNeutral
-						disabled
-					/> */}
-          {/* <XIconButton
-            variant="contained"
-            startIcon={<UploadIcon />}
-            size="small"
-            isNeutral
-            disabled={!setup || !setup?.id || !isValid}
-            onClick={onExport}
-          /> */}
-          {/* <XIconButton
-						variant='contained'
-						startIcon={<ImportIcon />}
-						size='small'
-						isNeutral
-						disabled
-					/> */}
           <Button
             variant="contained"
             // disabled={!nodes.length || !edges.length}
@@ -403,7 +372,6 @@ const WorkflowPanel = memo(
         {saveSetupModal && (
           <SaveSetupModal
             existingSetupName={setupRef.current.name}
-            existingCompanyName={setupRef.current.description}
             open={saveSetupModal}
             onClose={() => showSaveSetupModal(false)}
             onSaveName={onSaveName}
@@ -417,8 +385,9 @@ const WorkflowPanel = memo(
               name: savedData?.name || setup?.name,
               nodes: nodes.map((node) => convert2DBNode(node as INode)),
               edges: edges.map((edge) => convert2DBEdge(edge as IEdge)),
-              description: setup?.description,
             }}
+            unitId={+unitId!}
+            unitName={unitName!}
             onClose={(setup?: ISetup) => {
               showProgressModal(false);
               if (setup) {
@@ -431,7 +400,5 @@ const WorkflowPanel = memo(
     );
   }
 );
-
-WorkflowPanel.displayName = "WorkflowPanel";
 
 export default WorkflowPanel;

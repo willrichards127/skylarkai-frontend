@@ -39,8 +39,9 @@ const UnitsPage = () => {
   );
 
   const onMoreItem = useCallback((cardId: string, menuItemId: string) => {
-    if (menuItemId === "delete") {
-    }
+    console.log(cardId, menuItemId);
+    // if (menuItemId === "delete") {
+    // }
   }, []);
 
   return (

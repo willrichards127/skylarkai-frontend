@@ -1,5 +1,5 @@
 import { memo, useCallback, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Box, Backdrop, CircularProgress } from "@mui/material";
 import { XCard } from "../../../../components/XCard";
 import {
@@ -9,7 +9,12 @@ import {
 } from "../../../../redux/services/setupApi";
 
 const SetupsContainer = memo(({ viewMode }: { viewMode: string }) => {
+  const params = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const type = searchParams.get("type");
+  const unitName = searchParams.get("unitName");
 
   const moreItems = useMemo(
     () => [
@@ -31,7 +36,11 @@ const SetupsContainer = memo(({ viewMode }: { viewMode: string }) => {
     [viewMode]
   );
 
-  const { data: setups, isLoading, refetch } = useGetSetupsQuery({ viewMode });
+  const {
+    data: setups,
+    isLoading,
+    refetch,
+  } = useGetSetupsQuery({ unitId: +params.unitId!, viewMode });
   const [deleteSetup, { isLoading: isDeleting }] = useDeleteSetupMutation();
   const [markdSetup, { isLoading: isActivating }] = useMarkSetupMutation();
 
@@ -46,19 +55,16 @@ const SetupsContainer = memo(({ viewMode }: { viewMode: string }) => {
       }
       await refetch();
     },
-    [navigate, deleteSetup]
+    [refetch, markdSetup, deleteSetup]
   );
 
-  /** FIXME: React Navigate */
   const onCard = useCallback(
-    (setupId?: string) => {
-      if (setupId) {
-        navigate(`/portal/setups/${setupId}`);
-      } else {
-        navigate("/portal/setups/new");
-      }
+    (setupId: string) => {
+      navigate(
+        `/portal/setups/${setupId}?unitId=${params.unitId}&unitName=${unitName}&type=${type}`
+      );
     },
-    [navigate]
+    [navigate, params, unitName, type]
   );
 
   return (
@@ -97,7 +103,5 @@ const SetupsContainer = memo(({ viewMode }: { viewMode: string }) => {
     </Box>
   );
 });
-
-SetupsContainer.displayName = "SetupsContainer";
 
 export default SetupsContainer;

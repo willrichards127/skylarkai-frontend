@@ -50,8 +50,9 @@ export const setupApi = createApi({
         }
       },
     }),
-    getSetups: builder.query<ISetup[], { viewMode?: string }>({
-      query: ({ viewMode = "active" }) => `graphs?view_mode=${viewMode}`,
+    getSetups: builder.query<ISetup[], { unitId: number; viewMode?: string }>({
+      query: ({ unitId, viewMode = "active" }) =>
+        `graphs/${unitId}?view_mode=${viewMode}`,
       keepUnusedDataFor: 0,
       providesTags: ["Setup"],
     }),
@@ -64,8 +65,11 @@ export const setupApi = createApi({
         method: "POST",
       }),
     }),
-    saveSetup: builder.mutation<ISetup, { setupId?: number; setup: ISetup }>({
-      query: ({ setupId = undefined, setup }) => {
+    saveSetup: builder.mutation<
+      ISetup,
+      { unitId: number; setupId?: number; setup: ISetup }
+    >({
+      query: ({ unitId, setupId = undefined, setup }) => {
         let setupData = { ...setup };
         // Fix some data
         const fileUploadNodeIndex = setup.nodes.findIndex(
@@ -99,7 +103,7 @@ export const setupApi = createApi({
         }
 
         return {
-          url: setupId ? `graphs/${setupId}` : "graphs",
+          url: setupId ? `graphs/${setupId}` : `graphs/${unitId}`,
           method: setupId ? "PUT" : "POST",
           body: setupId
             ? {
@@ -157,67 +161,6 @@ export const setupApi = createApi({
         };
       },
     }),
-    executeGraph: builder.mutation<
-      ISetup,
-      { setup: ISetup; analysisType: string }
-    >({
-      async queryFn({ setup, analysisType }, queryApi) {
-        try {
-          // save current graph
-          let uploadFiles: File[] | undefined;
-
-          const fileUploadNode = setup.nodes.find(
-            (node) => node.template_node_id === 2
-          );
-
-          if (
-            fileUploadNode &&
-            fileUploadNode.template_node_id === 2 &&
-            fileUploadNode.properties &&
-            "files" in fileUploadNode.properties
-          ) {
-            uploadFiles = fileUploadNode.properties["files"];
-          }
-          const updateResponse = await queryApi.dispatch(
-            setupApi.endpoints.saveSetup.initiate({ setupId: setup.id, setup })
-          );
-
-          if ("error" in updateResponse) {
-            throw updateResponse.error;
-          }
-
-          const updatedSetup = updateResponse.data as ISetup;
-
-          if (uploadFiles) {
-            const updateIngestResponse = await queryApi.dispatch(
-              setupApi.endpoints.ingestFiles.initiate({
-                setupId: setup.id!,
-                companyName: setup.name!,
-                analysisType,
-                files: uploadFiles,
-              })
-            );
-            if ("error" in updateIngestResponse) {
-              throw updateIngestResponse.error;
-            }
-
-            const skyDBNodeIndex = updatedSetup.nodes.findIndex(
-              (node) => node.template_node_id === 46
-            );
-            if (skyDBNodeIndex > -1) {
-              updatedSetup.nodes[skyDBNodeIndex].properties!.files = [
-                ...(updatedSetup.nodes[skyDBNodeIndex].properties?.files || []),
-                ...(updateIngestResponse.data as any),
-              ];
-            }
-          }
-
-          return { data: updatedSetup };
-        } catch (e) {
-          return handleCatchError(e);
-        }
-      },
-    }),
     getUnits: builder.query<any[], { type?: number; view_mode?: string }>({
       query: ({ type = 1, view_mode = "active" }) =>
         `target_companies?type=${type}&view_mode=${view_mode}`,
@@ -273,7 +216,6 @@ export const {
   useMarkSetupMutation,
   useIngestFilesMutation,
   useUploadFilesMutation,
-  useExecuteGraphMutation,
 
   useGetUnitsQuery,
   useAddUnitMutation,

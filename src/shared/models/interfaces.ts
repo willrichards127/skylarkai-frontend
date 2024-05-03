@@ -23,6 +23,7 @@ export interface ITemplateNode {
   category_id: number;
   name: string; // this is a node template
   description: string;
+  unitName?: string;
   label: string;
   attributes?: Record<string, any>;
   properties: Record<string, any>;

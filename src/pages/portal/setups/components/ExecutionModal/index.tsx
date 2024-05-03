@@ -30,10 +30,14 @@ export const ExecutionModal = memo(
     open,
     onClose,
     setup,
+    unitId,
+    unitName,
   }: {
     open: boolean;
     onClose: (ret?: ISetup) => void;
     setup: ISetup;
+    unitId: number;
+    unitName: string;
   }) => {
     const navigate = useNavigate();
 
@@ -72,12 +76,12 @@ export const ExecutionModal = memo(
       }
 
       const updatedSetupResponse = await saveSetup({
+        unitId,
         setupId: setup.id,
         setup: {
           name: setup.name,
           nodes: setup.nodes,
           edges: setup.edges,
-          description: setup.description,
         },
       }).unwrap();
 
@@ -118,7 +122,7 @@ export const ExecutionModal = memo(
       if (uploadFiles) {
         const updateIngestResponse = await ingestFiles({
           setupId: updatedSetup.id!,
-          companyName: updatedSetup.description || updatedSetup.name!,
+          companyName: unitName,
           analysisType: "financial_diligence",
           // background: true,
           files: uploadFiles,
@@ -155,19 +159,20 @@ export const ExecutionModal = memo(
         const templateData = convertJSON(
           updatedSetup.nodes[templateNodeIndex].properties!.text
         );
-        
+
         if (templateData) {
           const items = addIdtoTemplateJson(templateData.data, {
             excludeUnChecked: true,
           });
-          
+
           if (isBackground) {
             const res = await executionReport({
+              unitName,
               setupId: setup.id!,
               analysisType: "financial_diligence",
               report: {
-                "title": templateData.title,
-                "data": items
+                title: templateData.title,
+                data: items,
               },
             }).unwrap();
             console.log(res);
@@ -249,7 +254,7 @@ export const ExecutionModal = memo(
             graph_id: setup.id,
             filenames: filenames,
             question: item.name,
-            company_name: setup.description || setup.name!,
+            company_name: unitName,
             analysis_type: "financial_diligence",
             llm: llmNode?.properties?.model || "OpenAI",
             recursion: llmNode?.properties?.recursion || 5,
