@@ -25,6 +25,7 @@ import ReactFlow, {
   ReactFlowInstance,
   Controls,
 } from "reactflow";
+import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import { XIconButton } from "../../../../components/buttons/XIconButton";
 import CustomNode from "./custom-nodes/CustomNode";
 import { DeleteIcon, PlayIcon } from "../../../../components/Svgs";
@@ -322,11 +323,12 @@ const WorkflowPanel = memo(
         <Box
           sx={{
             position: "absolute",
-            top: 16,
-            left: 16,
-            p: 1,
+            top: 8,
+            left: 8,
+            px: 1,
+            py: 0.5,
             bgcolor: "rgba(0, 0, 0, 0.4)",
-            borderRadius: 2,
+            borderRadius: 1,
           }}
         >
           {!isFetching && (
@@ -344,6 +346,15 @@ const WorkflowPanel = memo(
             gap: 1.2,
           }}
         >
+          <XIconButton
+            variant="contained"
+            startIcon={<KeyboardReturnIcon />}
+            onClick={() =>
+              navigate(
+                `/portal/units/${unitId}/setups?unitName=${unitName}&type=companies`
+              )
+            }
+          />
           <XIconButton variant="outlined" startIcon={<DeleteIcon />} disabled />
 
           <XIconButton

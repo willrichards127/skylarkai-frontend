@@ -169,14 +169,31 @@ export const setupApi = createApi({
     }),
     addUnit: builder.mutation<
       any,
-      { name: string; logo_file?: File; type?: number }
+      {
+        name: string;
+        logo_file?: File;
+        type?: number;
+        website?: string;
+        description?: string;
+      }
     >({
-      async queryFn({ name, logo_file, type = 1 }, _, __, apiBaseQuery) {
+      async queryFn(
+        { name, logo_file, website, description, type = 1 },
+        _,
+        __,
+        apiBaseQuery
+      ) {
         try {
           const formdata = new FormData();
           formdata.append("name", name);
           if (type) {
             formdata.append("type", type.toString());
+          }
+          if (website) {
+            formdata.append("website", website);
+          }
+          if (description) {
+            formdata.append("description", description);
           }
           if (logo_file) {
             formdata.append("logo_file", logo_file);
@@ -196,7 +213,63 @@ export const setupApi = createApi({
             error: {
               status: 404,
               statusText: e,
-              msg: "Error in ingestfiles API",
+              msg: "Error in Add Unit API",
+            },
+          } as any;
+        }
+      },
+      invalidatesTags: ["Unit"],
+    }),
+    updateUnit: builder.mutation<
+      any,
+      {
+        id: number;
+        name: string;
+        logo_file?: File;
+        type?: number;
+        website?: string;
+        description?: string;
+      }
+    >({
+      async queryFn(
+        { id, name, logo_file, website, description, type = 1 },
+        _,
+        __,
+        apiBaseQuery
+      ) {
+        try {
+          const formdata = new FormData();
+          if (name) {
+            formdata.append("name", name);
+          }
+          if (type) {
+            formdata.append("type", type.toString());
+          }
+          if (website) {
+            formdata.append("website", website);
+          }
+          if (description) {
+            formdata.append("description", description);
+          }
+          if (logo_file) {
+            formdata.append("logo_file", logo_file);
+          }
+
+          const response: any = await apiBaseQuery({
+            url: `target_companies/${id}`,
+            method: "PUT",
+            body: formdata,
+          });
+
+          return {
+            data: response.data,
+          };
+        } catch (e) {
+          return {
+            error: {
+              status: 404,
+              statusText: e,
+              msg: "Error in Update Unit API",
             },
           } as any;
         }
@@ -219,4 +292,5 @@ export const {
 
   useGetUnitsQuery,
   useAddUnitMutation,
+  useUpdateUnitMutation,
 } = setupApi;

@@ -11,6 +11,7 @@ export default function VDRsPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const unitName = searchParams.get("unitName");
+  const type = searchParams.get("type");
 
   const [newVDRModal, showNewVDRModal] = useState<boolean>(false);
   const { data, isLoading } = useGetVDRsQuery({ unitId: +params.unitId! });
@@ -53,7 +54,11 @@ export default function VDRsPage() {
                 <VDRCard
                   key={vdr.id}
                   {...vdr}
-                  onCard={() => navigate(`/portal/vdrs/${vdr.id}?unitName=${unitName}`)}
+                  onCard={() =>
+                    navigate(
+                      `/portal/vdrs/${vdr.id}?unitId=${params.unitId}&unitName=${unitName}&type=${type}`
+                    )
+                  }
                 />
               </Grid>
             ))}

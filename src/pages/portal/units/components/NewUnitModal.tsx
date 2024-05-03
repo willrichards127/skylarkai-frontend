@@ -4,26 +4,39 @@ import { Box, Stack, Button, TextField, CircularProgress } from "@mui/material";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import { XModal } from "../../../../components/XModal";
 import { NeutralLoadingButton } from "../../../../components/buttons/NeutralLoadingButton";
-import { useAddUnitMutation } from "../../../../redux/services/setupApi";
+import {
+  useAddUnitMutation,
+  useUpdateUnitMutation,
+} from "../../../../redux/services/setupApi";
 
 export const NewUnitModal = memo(
   ({
     open,
+    initialUnit,
     category,
     onClose,
   }: {
     category: string;
+    initialUnit: any;
     open: boolean;
     onClose: () => void;
   }) => {
+    const isEdit = !!initialUnit;
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const [addUnit, { isLoading, isSuccess }] = useAddUnitMutation();
+    const [addUnit, { isLoading: isLoadingAdd, isSuccess: isSuccessAdd }] =
+      useAddUnitMutation();
+    const [
+      updateUnit,
+      { isLoading: isLoadingUpdate, isSuccess: isSuccessUpdate },
+    ] = useUpdateUnitMutation();
     const [form, setForm] = useState<{
+      id?: number;
       name: string;
       website?: string;
       logo_file?: File;
       logo?: string;
+      description?: string;
     }>({
       name: "",
     });
@@ -35,12 +48,19 @@ export const NewUnitModal = memo(
       []
     );
 
-    const onAddUnit = useCallback(() => {
-      addUnit({
-        ...form,
-        type: category === "company" ? 1 : 2,
-      });
-    }, [addUnit, form, category]);
+    const onAction = useCallback(() => {
+      if (isEdit) {
+        updateUnit({
+          ...form,
+          id: form.id!,
+        });
+      } else {
+        addUnit({
+          ...form,
+          type: category === "company" ? 1 : 2,
+        });
+      }
+    }, [addUnit, isEdit, updateUnit, form, category]);
 
     const onUploadLogo = useCallback(() => {
       if (!fileInputRef.current) return;
@@ -63,18 +83,35 @@ export const NewUnitModal = memo(
     }, []);
 
     useEffect(() => {
-      if (isSuccess) {
-        toast.success(`The new ${category} was added successfully.`);
+      if (isSuccessAdd || isSuccessUpdate) {
+        toast.success(
+          `The new ${category} was ${
+            isEdit ? "updated" : "added"
+          } successfully.`
+        );
         onClose();
       }
-    }, [isSuccess, category, onClose]);
+    }, [isSuccessAdd, isSuccessUpdate, category, isEdit, onClose]);
+
+    useEffect(() => {
+      if (!initialUnit) return;
+      setForm({
+        id: initialUnit.id,
+        description: initialUnit.description,
+        website: initialUnit.website,
+        name: initialUnit.name,
+        logo: `${import.meta.env.VITE_API_URL}api/static/avatar/${
+          initialUnit.logo
+        }`,
+      });
+    }, [initialUnit]);
 
     return (
       <XModal
         open={open}
         onClose={onClose}
-        size="sm"
-        header={`Add new ${category}`}
+        size="md"
+        header={`${isEdit ? "Update" : "Add new"} ${category}`}
         footer={
           <Box
             sx={{
@@ -92,28 +129,28 @@ export const NewUnitModal = memo(
               Close
             </Button>
             <NeutralLoadingButton
-              // loading={isLoading}
+              loading={isLoadingAdd || isLoadingUpdate}
               variant="contained"
               sx={{ minWidth: 120 }}
-              onClick={onAddUnit}
+              onClick={onAction}
               disabled={!form.name}
             >
-              Add {category}
+              {isEdit ? "Update" : "Add"} {category}
             </NeutralLoadingButton>
           </Box>
         }
       >
-        {isLoading ? (
+        {isLoadingAdd || isLoadingUpdate ? (
           <Box textAlign="center" p={4}>
             <CircularProgress />
           </Box>
         ) : (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 4, pt: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 4, p: 2 }}>
             <Box
               sx={{
                 borderRadius: "50%",
-                width: 90,
-                height: 90,
+                width: 120,
+                height: 120,
                 bgcolor: "white",
                 display: "flex",
                 alignItems: "center",
@@ -127,11 +164,11 @@ export const NewUnitModal = memo(
                 onChange={onFileChange}
                 style={{ display: "none" }}
               />
-              {form.logo_file ? (
+              {form.logo ? (
                 <img
                   src={form.logo}
-                  width={90}
-                  height={90}
+                  width={120}
+                  height={120}
                   alt="company logo"
                   style={{
                     position: "absolute",
@@ -139,7 +176,9 @@ export const NewUnitModal = memo(
                     top: 0,
                     borderRadius: "50%",
                     border: "2px solid white",
+                    cursor: "pointer",
                   }}
+                  onClick={onUploadLogo}
                 />
               ) : (
                 <CameraAltIcon
@@ -155,7 +194,7 @@ export const NewUnitModal = memo(
                 label={`${category} name`}
                 value={form.name}
                 onChange={onChange}
-                sx={{ width: 400, textTransform: "capitalize" }}
+                sx={{ width: 600, textTransform: "capitalize" }}
               />
               {category === "company" && (
                 <TextField
@@ -164,9 +203,19 @@ export const NewUnitModal = memo(
                   label="Website (Optional)"
                   value={form.website}
                   onChange={onChange}
-                  sx={{ width: 400 }}
+                  sx={{ width: 600 }}
                 />
               )}
+              <TextField
+                size="small"
+                name="description"
+                label={`${category} Description`}
+                value={form.description}
+                rows={4}
+                multiline
+                onChange={onChange}
+                sx={{ width: 600, textTransform: "capitalize" }}
+              />
             </Stack>
           </Box>
         )}

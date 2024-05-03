@@ -25,6 +25,8 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
   const [searchParams] = useSearchParams();
   const setupId = searchParams.get("setupId");
   const unitId = searchParams.get("unitId");
+  const unitName = searchParams.get("unitName");
+  const type = searchParams.get("type");
   const reportName = searchParams.get("reportName");
 
   const { isLoading, data: setups } = useGetSetupsQuery({
@@ -110,7 +112,11 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
       <Stack spacing={2} direction="row" width="100%" px={1} bgcolor="black">
         <IconButton
           size="small"
-          onClick={() => navigate("/portal/reports")}
+          onClick={() =>
+            navigate(
+              `/portal/units/${unitId}/reports?unitName=${unitName}&type=${type}`
+            )
+          }
           sx={{ minWidth: 48, maxHeight: 48 }}
         >
           <ArrowBackIcon sx={{ fontSize: 20 }} />

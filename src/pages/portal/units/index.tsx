@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   Box,
@@ -16,6 +16,7 @@ import { useGetUnitsQuery } from "../../../redux/services/setupApi";
 
 const UnitsPage = () => {
   const navigate = useNavigate();
+  const unitRef = useRef<any>();
   const [searchParams] = useSearchParams();
   const type = searchParams.get("type");
 
@@ -32,16 +33,18 @@ const UnitsPage = () => {
   const onCard = useCallback(
     ({ id, name, logo }: { id: number; name: string; logo?: string }) => {
       navigate(
-        `/portal/units/${id}?unitName=${name}&type=${type}&logo=${logo}`
+        `/portal/units/${id}/reports?unitName=${name}&type=${type}&logo=${logo}`
       );
     },
     [navigate, type]
   );
 
-  const onMoreItem = useCallback((cardId: string, menuItemId: string) => {
-    console.log(cardId, menuItemId);
-    // if (menuItemId === "delete") {
-    // }
+  const onMoreItem = useCallback((unit: any, menuItemId: string) => {
+    console.log(unit, menuItemId);
+    if (menuItemId === "edit") {
+      unitRef.current = unit;
+      showUnitModal(true);
+    }
   }, []);
 
   return (
@@ -90,8 +93,13 @@ const UnitsPage = () => {
                   created_at={unit.created_at}
                   logo={unit.logo}
                   onCard={() => onCard(unit)}
-                  onMoreItem={(menuItemId) => onMoreItem(unit.id, menuItemId)}
+                  onMoreItem={(menuItemId) => onMoreItem(unit, menuItemId)}
                   moreItems={[
+                    {
+                      id: "edit",
+                      content: "Edit",
+                      clickable: true,
+                    },
                     {
                       id: "delete",
                       content: "Delete",
@@ -118,7 +126,11 @@ const UnitsPage = () => {
         <NewUnitModal
           open={unitModal}
           category={type === "companies" ? "company" : "sector"}
-          onClose={() => showUnitModal(false)}
+          initialUnit={unitRef.current}
+          onClose={() => {
+            unitRef.current = null;
+            showUnitModal(false);
+          }}
         />
       )}
     </Stack>

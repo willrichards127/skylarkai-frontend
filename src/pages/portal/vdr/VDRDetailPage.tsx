@@ -5,8 +5,10 @@ import {
   Divider,
   Grid,
   Typography,
+  IconButton,
 } from "@mui/material";
-import { useParams, useSearchParams } from "react-router-dom";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useGetVDRQuery } from "../../../redux/services/vdrApi";
 import { FileUploader } from "../../../components/FileUploader";
 import { useEffect, useState } from "react";
@@ -17,8 +19,11 @@ import { getDate } from "../../../shared/utils/parse";
 
 export default function VDRDetailPage() {
   const vdrId = useParams<{ vdrId: string }>().vdrId!;
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const unitId = searchParams.get("unitId");
   const unitName = searchParams.get("unitName");
+  const type = searchParams.get("type");
 
   const { data, isLoading, refetch } = useGetVDRQuery({ vdrId: +vdrId });
   const [ingestFiles] = useIngestFilesMutation();
@@ -58,21 +63,41 @@ export default function VDRDetailPage() {
       ) : data ? (
         <>
           <Box
-            sx={{ width: "100%", minHeight: 100, background: "black", p: 2 }}
+            sx={{
+              width: "100%",
+              background: "black",
+              p: 1,
+              display: "flex",
+              gap: 2,
+              alignItems: "center",
+            }}
           >
+            <IconButton
+              size="small"
+              onClick={() =>
+                navigate(
+                  `/portal/units/${unitId}/vdrs?unitName=${unitName}&type=${type}`
+                )
+              }
+              sx={{ minWidth: 32, minHeight: 32 }}
+            >
+              <ArrowBackIcon sx={{ fontSize: 20 }} />
+            </IconButton>
             <Typography variant="h6">{data.name}</Typography>
+            <Box mr="auto" />
+            <Button variant="contained" sx={{ minWidth: 140 }}>
+              Send Email
+            </Button>
+            <Button
+              variant="contained"
+              sx={{ minWidth: 140, mr: 2 }}
+              onClick={onIngestFiles}
+            >
+              Ingest File
+            </Button>
           </Box>
           <Box sx={{ p: 2 }}>
             <Box>
-              <Box sx={{ display: "flex", justifyContent: "end", mb: 1 }}>
-                <Button
-                  variant="contained"
-                  sx={{ minWidth: 140 }}
-                  onClick={onIngestFiles}
-                >
-                  Ingest File
-                </Button>
-              </Box>
               <Typography variant="body1" sx={{ mb: 1 }}>
                 Select Documents
               </Typography>

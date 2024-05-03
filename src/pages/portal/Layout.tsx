@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useCallback, useMemo } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Box, Tab, Tabs } from "@mui/material";
 import CloudSyncIcon from "@mui/icons-material/CloudSync";
 import { AnalysisIcon, ToolsIcon } from "../../components/Svgs";
@@ -14,25 +14,28 @@ export const Layout = ({
   type: string;
 }) => {
   const navigate = useNavigate();
-  const [tab, setTab] = useState<string>("reports");
+  const location = useLocation();
+
+  const selectedTab = useMemo(() => {
+    if (!location.pathname) return "reports";
+    if (location.pathname.includes("reports")) return "reports";
+    if (location.pathname.includes("vdrs")) return "vdrs";
+    return "setups";
+  }, [location.pathname]);
 
   const onChangeTab = useCallback(
     (_: React.SyntheticEvent, newValue: string) => {
-      setTab(newValue);
+      navigate(
+        `/portal/units/${unitId}/${newValue}?unitName=${unitName}&type=${type}`
+      );
     },
-    []
+    [navigate, unitName, type, unitId]
   );
-
-  useEffect(() => {
-    navigate(
-      `/portal/units/${unitId}/${tab}?unitName=${unitName}&type=${type}`
-    );
-  }, [navigate, tab, unitId, unitName, type]);
 
   return (
     <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
       <Tabs
-        value={tab}
+        value={selectedTab}
         onChange={onChangeTab}
         sx={{
           "&.MuiTabs-root": {
