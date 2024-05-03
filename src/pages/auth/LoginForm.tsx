@@ -54,6 +54,8 @@ const LoginForm = memo(() => {
     if (isLoggedIn) {
       if (user.user_role === 4) { // admin role
         navigate("/admin");
+      } else if(user.user_role == 2) {
+        navigate("/portal/units?type=companies")
       } else {
         navigate("/welcome");
       }

@@ -108,7 +108,7 @@ const CategoryPanel = memo(
                           item={item}
                           draggable={false}
                         />
-                        {vdrsWithId && vdrsWithId.length && (
+                        {vdrsWithId && vdrsWithId.length ? (
                           <Box sx={{ pl: 2 }}>
                             {vdrsWithId.map((vdr, index) => (
                               <DndListItem
@@ -117,7 +117,7 @@ const CategoryPanel = memo(
                               />
                             ))}
                           </Box>
-                        )}
+                        ) : null}
                       </>
                     ) : (
                       <DndListItem key={item.template_node_id} item={item} />

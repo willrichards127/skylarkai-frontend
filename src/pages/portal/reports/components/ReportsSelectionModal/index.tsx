@@ -6,7 +6,7 @@ import { SLMStepPanel } from "./SLMStepPanel";
 import { ReportStepPanel } from "./ReportStepPanel";
 import { ISetup } from "../../../../../shared/models/interfaces";
 
-const steps = ["Select SLM", "Select Report"];
+const steps = ["Select Company/Sector", "Select Report"];
 
 export const ReportsSelectionModal = ({
   open,
@@ -18,19 +18,19 @@ export const ReportsSelectionModal = ({
   onActionPerformed: (setup: ISetup, report: any) => void;
 }) => {
   const [activeStep, setActiveStep] = useState<number>(0);
-  const [slm, setSlm] = useState<ISetup>();
+  const [unit, setUnit] = useState<any>();
 
-  const onSelectedSLM = useCallback((selectedSlm: ISetup) => {
-    setSlm(selectedSlm);
+  const onSelectedUnit = useCallback((selectedSlm: ISetup) => {
+    setUnit(selectedSlm);
     setActiveStep(1);
   }, []);
 
   const onSelectedReport = useCallback(
     (selectedReport: any) => {
-      onActionPerformed(slm!, selectedReport);
+      onActionPerformed(unit!, selectedReport);
       onClose();
     },
-    [slm, onActionPerformed, onClose]
+    [unit, onActionPerformed, onClose]
   );
 
   const onStepBack = useCallback(() => {
@@ -43,7 +43,7 @@ export const ReportsSelectionModal = ({
       onClose={onClose}
       header={
         <Box textAlign="center">
-          Select {activeStep === 0 ? "SLM" : "Report"}
+          Select {activeStep === 0 ? "Company/Sector" : "Report"}
         </Box>
       }
       footer={
@@ -73,12 +73,9 @@ export const ReportsSelectionModal = ({
           })}
         </Stepper>
       </Box>
-      {activeStep === 0 && <SLMStepPanel onSelectedSLM={onSelectedSLM} />}
+      {activeStep === 0 && <SLMStepPanel onSelectedUnit={onSelectedUnit} />}
       {activeStep === 1 && (
-        <ReportStepPanel
-          setupId={slm!.id!}
-          onSelectedReport={onSelectedReport}
-        />
+        <ReportStepPanel companyId={unit.id} onSelectedReport={onSelectedReport} />
       )}
     </XModal>
   );

@@ -1,18 +1,19 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { Box, TextField, Typography, CircularProgress } from "@mui/material";
-import { useGetReportsBySetupQuery } from "../../../../../redux/services/reportApi";
+import { useGetReportsQuery } from "../../../../../redux/services/reportApi";
 
 export const ReportStepPanel = ({
-  setupId,
+  companyId,
   onSelectedReport,
 }: {
-  setupId: number;
+  companyId: number;
   onSelectedReport: (report: any) => void;
 }) => {
   const [searchText, setSearchText] = useState<string>("");
 
-  const { isLoading, data: reports } = useGetReportsBySetupQuery({
-    setupId,
+  const { isLoading, data: reports } = useGetReportsQuery({
+    unitId: companyId,
+    viewMode: "active",
   });
 
   const onChangeSearchText = useCallback(

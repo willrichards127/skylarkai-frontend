@@ -1,18 +1,17 @@
 import { Box, TextField, Typography, CircularProgress } from "@mui/material";
-import { useGetSetupsQuery } from "../../../../../redux/services/setupApi";
+import { useGetUnitsQuery } from "../../../../../redux/services/setupApi";
 import React, { useCallback, useMemo, useState } from "react";
-import { ISetup } from "../../../../../shared/models/interfaces";
 
 export const SLMStepPanel = ({
-  onSelectedSLM,
+  onSelectedUnit,
 }: {
-  onSelectedSLM: (slm: ISetup) => void;
+  onSelectedUnit: (unit: any) => void;
 }) => {
   const [searchText, setSearchText] = useState<string>("");
-  const [selectedSlm, setSelectedSlm] = useState<ISetup | null>(null);
+  const [selectedSlm, setSelectedSlm] = useState<any>(null);
 
-  const { isLoading: loadingSlms, data: slms } = useGetSetupsQuery({
-    viewMode: "active",
+  const { isLoading: loadingSlms, data: units } = useGetUnitsQuery({
+    view_mode: "active",
   });
 
   const onChangeSearchText = useCallback(
@@ -23,19 +22,19 @@ export const SLMStepPanel = ({
   );
 
   const onSelectSLM = useCallback(
-    (slm: ISetup) => {
-      setSelectedSlm(slm);
-      onSelectedSLM(slm);
+    (unit: any) => {
+      setSelectedSlm(unit);
+      onSelectedUnit(unit);
     },
-    [onSelectedSLM]
+    [onSelectedUnit]
   );
 
-  const filteredSlms = useMemo(
+  const filteredUnits = useMemo(
     () =>
-      (slms || []).filter((slm) =>
-        slm.name!.toLowerCase().includes(searchText.toLocaleLowerCase())
+      (units || []).filter((unit) =>
+        unit.name!.toLowerCase().includes(searchText.toLocaleLowerCase())
       ),
-    [slms, searchText]
+    [units, searchText]
   );
 
   return (
@@ -64,10 +63,10 @@ export const SLMStepPanel = ({
             overflowY: "auto",
           }}
         >
-          {filteredSlms.length > 0 ? (
-            filteredSlms.map((slm) => (
+          {filteredUnits.length > 0 ? (
+            filteredUnits.map((unit) => (
               <Box
-                key={slm.id!}
+                key={unit.id!}
                 sx={{
                   p: 2,
                   bgcolor: "secondary.main",
@@ -78,17 +77,17 @@ export const SLMStepPanel = ({
                     filter: "brightness(1.25)",
                   },
                   filter:
-                    slm.id === selectedSlm?.id
+                    unit.id === selectedSlm?.id
                       ? "brightness(1.5)"
                       : "brightness(1)",
                 }}
-                onClick={() => onSelectSLM(slm)}
+                onClick={() => onSelectSLM(unit)}
               >
                 <Typography variant="h6" fontWeight="bold">
-                  {slm.name!}
+                  {unit.name!}
                 </Typography>
                 <Typography variant="body2">
-                  Company: {slm.description || slm.name}
+                  Type: {unit.type === 1 ? 'Company' : 'Sector'}
                 </Typography>
               </Box>
             ))
