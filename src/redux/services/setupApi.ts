@@ -169,12 +169,18 @@ export const setupApi = createApi({
     }),
     addUnit: builder.mutation<
       any,
-      { name: string; logo_file?: File; type?: number }
+      { name: string; description?: string; website?: string; logo_file?: File; type?: number }
     >({
-      async queryFn({ name, logo_file, type = 1 }, _, __, apiBaseQuery) {
+      async queryFn({ name, description, website, logo_file, type = 1 }, _, __, apiBaseQuery) {
         try {
           const formdata = new FormData();
           formdata.append("name", name);
+          if (description) {
+            formdata.append("description", description);
+          }
+          if (website) {
+            formdata.append("website", website);
+          }
           if (type) {
             formdata.append("type", type.toString());
           }

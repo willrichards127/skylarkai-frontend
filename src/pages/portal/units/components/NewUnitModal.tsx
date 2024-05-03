@@ -22,6 +22,7 @@ export const NewUnitModal = memo(
     const [form, setForm] = useState<{
       name: string;
       website?: string;
+      description?: string;
       logo_file?: File;
       logo?: string;
     }>({
@@ -167,6 +168,16 @@ export const NewUnitModal = memo(
                   sx={{ width: 400 }}
                 />
               )}
+              <TextField
+                size="small"
+                name="description"
+                multiline
+                rows={6}
+                label={`Description (Optional)`}
+                value={form.description}
+                onChange={onChange}
+                sx={{ width: 400, textTransform: "capitalize" }}
+              />
             </Stack>
           </Box>
         )}
