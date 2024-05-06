@@ -31,16 +31,13 @@ const UnitsPage = () => {
   }, []);
 
   const onCard = useCallback(
-    ({ id, name, logo }: { id: number; name: string; logo?: string }) => {
-      navigate(
-        `/portal/units/${id}/reports?unitName=${name}&type=${type}&logo=${logo}`
-      );
+    ({ id }: { id: number; name: string; logo?: string }) => {
+      navigate(`/portal/units/${id}/reports`);
     },
-    [navigate, type]
+    [navigate]
   );
 
   const onMoreItem = useCallback((unit: any, menuItemId: string) => {
-    console.log(unit, menuItemId);
     if (menuItemId === "edit") {
       unitRef.current = unit;
       showUnitModal(true);
