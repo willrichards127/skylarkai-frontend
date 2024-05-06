@@ -85,7 +85,7 @@ export const NewUnitModal = memo(
     useEffect(() => {
       if (isSuccessAdd || isSuccessUpdate) {
         toast.success(
-          `The new ${category} was ${
+          `The ${category} was ${
             isEdit ? "updated" : "added"
           } successfully.`
         );

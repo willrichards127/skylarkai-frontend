@@ -167,6 +167,11 @@ export const setupApi = createApi({
       keepUnusedDataFor: 0,
       providesTags: ["Unit"],
     }),
+    getUnit: builder.query<any, { unitId: number }>({
+      query: ({ unitId }) => `target_companies/${unitId}`,
+      keepUnusedDataFor: 0,
+      providesTags: ["Unit"],
+    }),
     addUnit: builder.mutation<
       any,
       {
@@ -291,6 +296,7 @@ export const {
   useUploadFilesMutation,
 
   useGetUnitsQuery,
+  useGetUnitQuery,
   useAddUnitMutation,
   useUpdateUnitMutation,
 } = setupApi;

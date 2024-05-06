@@ -1,6 +1,6 @@
 import { memo, useCallback, useMemo } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { Box, Grid, Typography } from "@mui/material";
+import { useNavigate, useParams } from "react-router-dom";
+import { Box, Grid } from "@mui/material";
 import {
   useDeleteReportMutation,
   useMarkReportMutation,
@@ -12,8 +12,6 @@ import { ReportCard } from "./ReportCard";
 export const ReportTabContainer = memo(
   ({ reports, viewMode }: { reports: any; viewMode: string }) => {
     const params = useParams();
-    const [searchParams] = useSearchParams();
-    const unitName = searchParams.get("unitName");
 
     const moreItems = useMemo(
       () => [
@@ -62,9 +60,6 @@ export const ReportTabContainer = memo(
 
     return (
       <Box sx={{ width: "100%" }}>
-        <Typography variant="h5" my={2}>
-          {unitName}
-        </Typography>
         <Grid container spacing={4}>
           {[...reports]
             .sort(
