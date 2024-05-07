@@ -19,7 +19,6 @@ const UnitPage = () => {
     { unitId: +unitId! },
     { skip: !unitId }
   );
-  console.log(unit, "unit===");
 
   return (
     <Box p={2}>
@@ -37,20 +36,33 @@ const UnitPage = () => {
             alignItems={"center"}
             width="100%"
           >
-            <Avatar
-              sx={{
-                width: 64,
-                height: 64,
-                bgcolor: colors.blue[500],
-                border: "2px solid white",
-              }}
-              src={`${import.meta.env.VITE_API_URL}api/static/avatar/${
-                unit!.logo
-              }`}
-              alt={unit!.name}
-            >
-              {unit!.name.substring(0, 1)}
-            </Avatar>
+            {unit!.logo ? (
+              <Avatar
+                sx={{
+                  width: 64,
+                  height: 64,
+                  bgcolor: colors.blue[500],
+                  border: "2px solid white",
+                }}
+                src={`${import.meta.env.VITE_API_URL}api/static/avatar/${
+                  unit!.logo
+                }`}
+                alt={unit!.name}
+              >
+                {unit!.name.substring(0, 1)}
+              </Avatar>
+            ) : (
+              <Avatar
+                sx={{
+                  width: 64,
+                  height: 64,
+                  bgcolor: colors.blue[500],
+                  border: "2px solid white",
+                }}
+              >
+                {unit!.name.substring(0, 1)}
+              </Avatar>
+            )}
             <Box>
               <Typography variant="h6" sx={{ whiteSpace: "nowrap" }}>
                 {unit!.name}
@@ -91,9 +103,7 @@ const UnitPage = () => {
                 {unit!.description || ""}
               </Typography>
             </Stack>
-            <Box mr="auto" />
           </Stack>
-
           <Layout
             unitId={+unitId}
             unitName={unit!.name}

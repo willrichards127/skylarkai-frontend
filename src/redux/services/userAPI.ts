@@ -11,16 +11,27 @@ export const userApi = createApi({
   }),
   tagTypes: ["Users"],
   endpoints: (builder) => ({
+    getPersonas: builder.query<any[], void>({
+      query: () => ({ url: "personas", method: "GET" }),
+    }),
+    getTenants: builder.query<any[], void>({
+      query: () => ({ url: "tenants", method: "GET" }),
+    }),
     getUsers: builder.query<IUser[], void>({
       query: () => ({ url: "users", method: "GET" }),
       keepUnusedDataFor: 0,
       providesTags: ["Users"],
     }),
-    updateUser: builder.mutation<void, any>({
-      query: (user) => ({
-        url: `users/${user.user_id}`,
-        method: "PUT",
-        data: user,
+    updateUser: builder.mutation<
+      void,
+      { user_id: number; user_status: number }
+    >({
+      query: ({ user_id, user_status }) => ({
+        url: `users/${user_id}/update_status`,
+        method: "POST",
+        data: {
+          user_status,
+        },
       }),
       invalidatesTags: ["Users"],
     }),
@@ -43,6 +54,8 @@ export const userApi = createApi({
 });
 
 export const {
+  useGetPersonasQuery,
+  useGetTenantsQuery,
   useGetUsersQuery,
   useUpdateUserMutation,
   useAddUserActivityMutation,

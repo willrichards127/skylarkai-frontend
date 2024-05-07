@@ -1,5 +1,5 @@
 import { memo, useCallback, useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Box, Grid } from "@mui/material";
 import {
   useDeleteReportMutation,
@@ -12,6 +12,9 @@ import { ReportCard } from "./ReportCard";
 export const ReportTabContainer = memo(
   ({ reports, viewMode }: { reports: any; viewMode: string }) => {
     const params = useParams();
+    const [searchParams] = useSearchParams();
+    const unitName = searchParams.get("unitName");
+    const type = searchParams.get("type");
 
     const moreItems = useMemo(
       () => [
@@ -22,11 +25,16 @@ export const ReportTabContainer = memo(
                 content: "Mark as active",
                 clickable: true,
               },
+              {
+                id: "delete",
+                content: "Delete",
+                clickable: true,
+              },
             ]
           : []),
         {
-          id: "delete",
-          content: "Delete",
+          id: "archive",
+          content: "Archive",
           clickable: true,
         },
       ],
@@ -39,7 +47,7 @@ export const ReportTabContainer = memo(
 
     const onMoreItem = useCallback(
       (cardId: string, menuItemId: string) => {
-        if (menuItemId === "delete") {
+        if (menuItemId === "delete" || menuItemId === "archive") {
           deleteReport({ reportId: +cardId, viewMode });
         } else if (menuItemId === "mark_as_active") {
           markReport({ reportId: +cardId });
@@ -52,10 +60,10 @@ export const ReportTabContainer = memo(
     const onCard = useCallback(
       (cardId: number, setupId: number, reportName: string) => {
         navigate(
-          `/portal/reports/${cardId}?unitId=${params.unitId}&reportName=${reportName}&setupId=${setupId}&viewMode=${viewMode}`
+          `/portal/reports/${cardId}?unitId=${params.unitId}&unitName=${unitName}&type=${type}&reportName=${reportName}&setupId=${setupId}&viewMode=${viewMode}`
         );
       },
-      [navigate, params, viewMode]
+      [navigate, params, unitName, type, viewMode]
     );
 
     return (

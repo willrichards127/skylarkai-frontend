@@ -1,6 +1,21 @@
 import { ICompany, ITopic } from "../../redux/interfaces";
 import { ITemplateItemPure } from "./interfaces";
 
+export const personaList = [
+  {
+    label: "Analyst",
+    value: 1,
+  },
+  {
+    label: "Partner",
+    value: 2,
+  },
+  {
+    label: "Target",
+    value: 3,
+  },
+];
+
 export const HeaderConfig = {
   mainToolbarHeight: 64,
   subToolbarHeight: 44,

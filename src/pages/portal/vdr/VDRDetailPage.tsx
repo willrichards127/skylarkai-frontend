@@ -84,10 +84,7 @@ export default function VDRDetailPage() {
               <ArrowBackIcon sx={{ fontSize: 20 }} />
             </IconButton>
             <Typography variant="h6">{data.name}</Typography>
-            <Box mr="auto" />
-            <Button variant="contained" sx={{ minWidth: 140 }}>
-              Send Email
-            </Button>
+            <Box mr="auto" />            
             <Button
               variant="contained"
               sx={{ minWidth: 140, mr: 2 }}

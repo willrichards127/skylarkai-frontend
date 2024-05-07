@@ -13,7 +13,7 @@ import {
 import { DocumentChip } from "./DocumentChip";
 import { FileViewModal } from "../pages/premium/components/sub-components/FileViewModal";
 
-const LIMIT_DOCS = 25165824;
+const LIMIT_DOCS = 125829120;
 
 export const formatBytes = (bytes: number, decimals = 2): string => {
   if (!+bytes) return "0 Bytes";

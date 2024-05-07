@@ -61,9 +61,10 @@ const CategoryPanel = memo(
               top: 8,
               right: 8,
             }}
+            size="small"
             onClick={onToggleDrawer}
           >
-            <KeyboardDoubleArrowRightIcon />
+            <KeyboardDoubleArrowRightIcon sx={{ fontSize: 20 }} />
           </IconButton>
         ) : (
           <Box
@@ -82,17 +83,17 @@ const CategoryPanel = memo(
                 color="primary"
                 onClick={onToggleDrawer}
                 sx={{ ml: "auto" }}
+                size="small"
               >
-                <KeyboardDoubleArrowLeftIcon />
+                <KeyboardDoubleArrowLeftIcon sx={{ fontSize: 20 }} />
               </IconButton>
             </Box>
             {categoryList.map(([label, items]) => (
-              <Box key={`category-${label}`} mb={1}>
+              <Box key={`category-${label}`} mb={0.5}>
                 <CollapsiblePanel
                   label={
                     <Typography
                       variant="body1"
-                      fontWeight="bold"
                       pl={2}
                       sx={{ textTransform: "uppercase" }}
                     >

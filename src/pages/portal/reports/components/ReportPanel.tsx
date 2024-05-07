@@ -17,7 +17,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import { ReportViewer } from "../templates/ReportViewer";
 import { ReportsSelectionModal } from "./ReportsSelectionModal";
 import { useGetSetupsQuery } from "../../../../redux/services/setupApi";
-import { ISetup } from "../../../../shared/models/interfaces";
 import { reportTabHeaderHeight } from "../../../../shared/models/constants";
 
 const ReportPanel = ({ reportId }: { reportId: string }) => {
@@ -37,9 +36,10 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
   const [reportsModal, showReportsModal] = useState<boolean>(false);
   const [reportTabs, setReportTabs] = useState<
     {
-      setup: ISetup;
+      setupId: number;
       reportId: number;
       reportName: string;
+      unitName: string;
     }[]
   >([]);
 
@@ -56,16 +56,17 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
     showReportsModal(true);
   }, []);
 
-  const onAddReport = useCallback((newSetup: ISetup, newReport: any) => {
+  const onAddReport = useCallback((unit: any, newReport: any) => {
     setReportTabs((prev) => {
       const reportIds = prev.map((item) => item.reportId);
       if (reportIds.includes(newReport.id)) return prev;
       return [
         ...prev,
         {
-          setup: newSetup,
+          setupId: newReport.graph_id,
           reportId: +newReport.id,
           reportName: newReport.report_metadata.reportname,
+          unitName: unit.name,
         },
       ];
     });
@@ -81,12 +82,13 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
     if (isLoading || !setups?.length) return;
     setReportTabs([
       {
-        setup: setups.find((item: ISetup) => item.id! === +setupId!)!,
+        setupId: +setupId!,
         reportId: +reportId!,
         reportName: reportName!,
+        unitName: unitName!,
       },
     ]);
-  }, [isLoading, setups, setupId, reportId, reportName]);
+  }, [isLoading, setups, setupId, unitName, reportId, reportName]);
 
   useEffect(() => {
     if (!reportTabs.length) return;
@@ -143,7 +145,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
                 label={
                   <Box sx={{ display: "flex", gap: 4, alignItems: "center" }}>
                     <Typography variant="body2">
-                      {reportTab.reportName}-{reportTab.setup.name}
+                      {reportTab.reportName}-{reportTab.unitName}
                     </Typography>
                     {reportTab.reportId !== +reportId && (
                       <CloseIcon
@@ -176,9 +178,10 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
           }}
         >
           <ReportViewer
-            setup={reportTab.setup}
+            setupId={reportTab.setupId}
             reportId={reportTab.reportId}
-            reportName={reportName!}
+            reportName={reportTab.reportName}
+            unitName={reportTab.unitName}
           />
         </Box>
       ))}

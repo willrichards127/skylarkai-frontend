@@ -2,6 +2,8 @@ import { useRef, useMemo } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { ColDef, CellClickedEvent } from "ag-grid-community";
 import { Box } from "@mui/material";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
 
 const AGTable = <T extends Record<string, any>>({
   columnDefs,

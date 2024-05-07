@@ -241,7 +241,6 @@ const WorkflowPanel = memo(
 
     const updateSetupWithLoadedData = useCallback(
       (loadedSetup: ISetup) => {
-        console.log(loadedSetup, "loadedSetup===");
         setupRef.current = {
           id: loadedSetup.id,
           name: loadedSetup.name,

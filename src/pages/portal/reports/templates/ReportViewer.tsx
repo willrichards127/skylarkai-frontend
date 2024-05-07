@@ -1,18 +1,19 @@
 import { memo } from "react";
 import { Box, CircularProgress } from "@mui/material";
 import { ReportTemplate } from "./ReportTemplate";
-import { ISetup } from "../../../../shared/models/interfaces";
 import { useGetReportQuery } from "../../../../redux/services/reportApi";
 
 export const ReportViewer = memo(
   ({
-    setup,
+    setupId,
     reportId,
     reportName,
+    unitName,
   }: {
-    setup: ISetup;
+    setupId: number;
     reportId: number;
     reportName: string;
+    unitName: string;
   }) => {
     const { isLoading: loadingReport, data: reportData } = useGetReportQuery({
       reportId,
@@ -30,7 +31,8 @@ export const ReportViewer = memo(
       <ReportTemplate
         reportId={reportId}
         reportName={reportName}
-        setup={setup}
+        setupId={setupId}
+        unitName={unitName}
         reportContent={reportData.content as string}
         analysisType="financial_diligence"
       />
