@@ -68,6 +68,7 @@ export default function VDRsPage() {
       {newVDRModal && (
         <NewVDRModal
           open={newVDRModal}
+          unitId={+params.unitId!}
           unitName={unitName!}
           onClose={() => showNewVDRModal(false)}
         />

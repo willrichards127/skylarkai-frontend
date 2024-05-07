@@ -14,9 +14,11 @@ import { useSaveVDRMutation } from "../../../../redux/services/vdrApi";
 export const NewVDRModal = memo(
   ({
     open,
+    unitId,
     unitName,
     onClose,
   }: {
+    unitId: number;
     unitName: string;
     open: boolean;
     onClose: () => void;
@@ -35,7 +37,7 @@ export const NewVDRModal = memo(
 
     useEffect(() => {
       if (isSuccess && data) {
-        navigate(`/portal/vdrs/${data.id}?unitName=${unitName}`);
+        navigate(`/portal/vdrs/${data.id}?unitId=${unitId}&unitName=${unitName}&type=companies`);
       }
     }, [navigate, isSuccess, data, unitName]);
 
