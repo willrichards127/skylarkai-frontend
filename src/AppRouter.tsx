@@ -58,7 +58,7 @@ function AppRouter() {
     if (!user || !token) {
       return "/login";
     } else {
-      if (user.tenant_id! <= 2 && user.user_role >= 4) {
+      if (user.user_role === 5) {
         // admin role: system, skylarkai admin
         return "/admin";
       } else if (user.user_role === 1) {
