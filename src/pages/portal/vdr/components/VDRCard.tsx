@@ -7,6 +7,7 @@ import {
   // Rating,
   Typography,
   LinearProgress,
+  Chip,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { XPopmenu } from "../../../../components/XPopmenu";
@@ -17,7 +18,6 @@ export const VDRCard = memo(
   ({
     name,
     files,
-    // status,
     moreItems,
     onMoreItem,
     onCard,
@@ -27,33 +27,41 @@ export const VDRCard = memo(
     onMoreItem?: (itemId: string) => void;
   } & IVDRDetail) => {
     const value = useMemo(
-      () => Math.ceil(files.reduce((prev, cur) => cur.ingested ? prev + 1 : prev, 0) / files.length * 100),
+      () =>
+        Math.ceil(
+          (files.reduce((prev, cur) => (cur.ingested ? prev + 1 : prev), 0) /
+            files.length) *
+            100
+        ),
       [files]
     );
-    // const label = useMemo(
-    //   () =>
-    //     !files.length
-    //       ? "Draft"
-    //       : status === 1
-    //       ? "Processing"
-    //       : status === 2
-    //       ? "Fail"
-    //       : status === 3
-    //       ? "Success"
-    //       : "Pending",
-    //   [files.length, status]
-    // );
-    // const color = useMemo(
-    //   () =>
-    //     label === "Draft"
-    //       ? "warning"
-    //       : label === "Success"
-    //       ? "primary"
-    //       : label === "Fail"
-    //       ? "error"
-    //       : "info",
-    //   [label]
-    // );
+
+    const status = useMemo(
+      () =>
+        files.reduce(
+          (prev, cur) => {
+            if (!cur.ingested_at) {
+              return {
+                ...prev,
+                pending: prev.pending + 1,
+              };
+            } else if (cur.ingested) {
+              return {
+                ...prev,
+                success: prev.success + 1,
+              };
+            } else {
+              return {
+                ...prev,
+                fail: prev.fail + 1,
+              };
+            }
+          },
+          { success: 0, fail: 0, pending: 0 }
+        ),
+      [files]
+    );
+
     return (
       <Card
         sx={{
@@ -80,7 +88,6 @@ export const VDRCard = memo(
             {/* <Typography variant="body2" gutterBottom>
               {updated || ""}
             </Typography> */}
-
             {!!moreItems?.length && (
               <XPopmenu
                 triggerEl={
@@ -95,8 +102,8 @@ export const VDRCard = memo(
             <Box
               sx={{
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
+                gap: 1,
+                flexDirection: "column",
               }}
             >
               <LinearProgress
@@ -105,6 +112,32 @@ export const VDRCard = memo(
                 value={value}
                 color="success"
               />
+              <Box display={"flex"} gap={"8px"}>
+                {status.success ? (
+                  <Chip
+                    size="small"
+                    label={`Success: ${status.success}`}
+                    color={"success"}
+                    variant="filled"
+                  />
+                ) : null}
+                {status.fail ? (
+                  <Chip
+                    size="small"
+                    label={`Fail: ${status.fail}`}
+                    color={"error"}
+                    variant="filled"
+                  />
+                ) : null}
+                {status.pending ? (
+                  <Chip
+                    size="small"
+                    label={`Pending: ${status.pending}`}
+                    color={"warning"}
+                    variant="filled"
+                  />
+                ) : null}
+              </Box>
               {/* <Chip
                 size="small"
                 label={label}

@@ -2,7 +2,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
 import axios from "axios";
-import { IUser, IUserAuth } from "../interfaces";
+import { IUserAuth, IUserRegister } from "../interfaces";
 import { removeStoreValue, saveStoreValue } from "../../shared/utils/storage";
 
 const initialState: IUserAuth = {
@@ -14,7 +14,7 @@ const initialState: IUserAuth = {
 
 export const registerAPI = createAsyncThunk(
   "users/register",
-  async (userData: IUser) => {
+  async (userData: IUserRegister) => {
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}register`,
