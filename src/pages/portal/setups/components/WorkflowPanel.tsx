@@ -268,7 +268,7 @@ const WorkflowPanel = memo(
     useEffect(() => {
       if (isLoadingSaveSetup || !savedData) return;
       if (isNew) {
-        navigate(`/portal/setups/${savedData.id}`);
+        navigate(`/portal/setups/${savedData.id}?unitId=${unitId}&unitName=${unitName}&type=companies`);
       } else {
         updateSetupWithLoadedData(savedData);
       }
