@@ -13,7 +13,7 @@ export interface IUser {
   user_id?: number;
   email: string;
   username: string;
-  user_role: number; // persona id
+  persona_id: number; // persona id
   tenant_id?: number;
   main_features?: IMainFeature[];
   company: string;
@@ -23,8 +23,6 @@ export interface IUser {
   status?: number;
   created_at?: string;
 }
-
-export type IUserRegister = Omit<IUser, "user_role"> & { persona_id: number };
 
 export interface IUserAuth {
   user?: IUser;

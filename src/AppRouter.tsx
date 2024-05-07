@@ -58,10 +58,10 @@ function AppRouter() {
     if (!user || !token) {
       return "/login";
     } else {
-      if (user.user_role === 5) {
+      if (user.persona_id === 5) {
         // admin role: system, skylarkai admin
         return "/admin";
-      } else if (user.user_role === 1) {
+      } else if (user.persona_id === 1) {
         // analyst role
         return "/portal/units?type=companies";
       }

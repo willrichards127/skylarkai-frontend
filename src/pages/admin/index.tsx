@@ -167,7 +167,7 @@ const AdminPage = () => {
             rowData={(users || []).map((user) => ({
               ...user,
               persona: (personas || []).find(
-                (persona) => persona.id === user.user_role
+                (persona) => persona.id === user.persona_id
               )?.name,
               tenant: (tenants || []).find(
                 (tenant) => tenant.id === user.tenant_id

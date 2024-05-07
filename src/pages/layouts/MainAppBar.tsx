@@ -83,7 +83,7 @@ export const MainAppBar = memo(() => {
     [navigate, dispatch, addActivity]
   );
 
-  const isAdmin = user!.user_role === 5; // admin
+  const isAdmin = user!.persona_id === 5; // admin
 
   return (
     <AppBar position="static" color="secondary" enableColorOnDark>
