@@ -116,6 +116,7 @@ export const Report = ({
           open={emailModal}
           onClose={() => showEmailModal(false)}
           element={ref.current!}
+          filename="Compare document report.pdf"
         />
       )}
       {citationData ? (

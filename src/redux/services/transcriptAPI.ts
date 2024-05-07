@@ -552,7 +552,12 @@ export const transcriptApi = createApi({
         llm?: string;
       }
     >({
-      async queryFn({ sentiments, filenames, llm = 'OpenAI' }, api, __, apiBaseQuery) {
+      async queryFn(
+        { sentiments, filenames, llm = "OpenAI" },
+        api,
+        __,
+        apiBaseQuery
+      ) {
         const graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
         try {
           const response: any = await apiBaseQuery({
@@ -913,11 +918,11 @@ export const transcriptApi = createApi({
     sendReportsViaEmails: builder.mutation<
       any,
       {
-        base64str: string;
+        base64str?: string;
         template: string;
         emails: string[];
-        subject?: string;
-        filename: string;
+        subject: string;
+        filename?: string;
       }
     >({
       async queryFn(
@@ -928,8 +933,12 @@ export const transcriptApi = createApi({
       ) {
         try {
           const formdata = new FormData();
-          formdata.append("file_content_base64", base64str);
-          formdata.append("filename", filename);
+          if (base64str) {
+            formdata.append("file_content_base64", base64str);
+          }
+          if (filename) {
+            formdata.append("file_name", filename);
+          }
           formdata.append("html_template", template);
           formdata.append("subject", subject);
           emails.forEach((email) => {

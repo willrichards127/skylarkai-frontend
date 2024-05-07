@@ -3,7 +3,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { VDRCard } from "./components/VDRCard";
 import { useCallback, useState } from "react";
 import { NewVDRModal } from "./components/NewVDRModal";
-// import { SendEmailModal } from "../../../components/modals/SendEmailModal";
+import { SendEmailModal } from "../../../components/modals/SendEmailModal";
 import { useGetVDRsQuery } from "../../../redux/services/vdrApi";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
@@ -14,11 +14,13 @@ export default function VDRsPage() {
   const unitName = searchParams.get("unitName");
   const type = searchParams.get("type");
 
-  // const [emailModal, showEmailModal] = useState<boolean>(false);
+  const [emailModal, showEmailModal] = useState<boolean>(false);
   const [newVDRModal, showNewVDRModal] = useState<boolean>(false);
   const { data, isLoading } = useGetVDRsQuery({ unitId: +params.unitId! });
 
-  const onShowEmailTemplate = useCallback(() => {}, []);
+  const onShowEmailTemplate = useCallback(() => {
+    showEmailModal(true);
+  }, []);
 
   return (
     <Box
@@ -83,13 +85,14 @@ export default function VDRsPage() {
           onClose={() => showNewVDRModal(false)}
         />
       )}
-      {/* {emailModal && (
+      {emailModal && (
         <SendEmailModal
           open={emailModal}
+          initialTitle="We need following documents"
+          initialContent="Hello there, I would required following documents:"
           onClose={() => showEmailModal(false)}
-          element={ref.current!}
         />
-      )} */}
+      )}
     </Box>
   );
 }
