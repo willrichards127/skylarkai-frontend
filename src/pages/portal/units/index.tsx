@@ -71,7 +71,7 @@ const UnitsPage = () => {
         }}
       >
         {isLoading ? (
-          <Box p={2}>
+          <Box sx={{ p: 2, width: "100%", textAlign: "center" }}>
             <CircularProgress />
           </Box>
         ) : (

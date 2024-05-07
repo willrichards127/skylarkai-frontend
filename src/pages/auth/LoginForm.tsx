@@ -52,7 +52,7 @@ const LoginForm = memo(() => {
 
   useEffect(() => {
     if (isLoggedIn) {
-      if (user.tenant_id! <= 2 && user.persona_id >= 4) {
+      if (user.persona_id === 5) {
         // admin role: system, skylarkai admin
         navigate("/admin");
       } else {
