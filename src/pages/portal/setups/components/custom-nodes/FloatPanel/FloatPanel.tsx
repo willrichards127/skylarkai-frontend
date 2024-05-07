@@ -1,4 +1,5 @@
 import React, { memo, useRef, useCallback, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Box, IconButton, CircularProgress, colors } from "@mui/material";
 import { toast } from "react-toastify";
 import { useReactFlow } from "reactflow";
@@ -95,6 +96,8 @@ const FloatPanel = memo(
     onItem: (itemId: string) => void;
     onClose: () => void;
   }) => {
+    const [searchParams] = useSearchParams();
+    const unitName = searchParams.get("unitName");
     const printRef = useRef();
     const { getNodes, setNodes } = useReactFlow();
     const [customQuery, { isLoading }] = useCustomQueryMutation();
@@ -121,12 +124,13 @@ const FloatPanel = memo(
         toast.warn("There is no ingested file. Please run the graph first.");
         return;
       }
+
       const answerResponse = await customQuery({
         graph_id: nodeContent.setupId!,
         filenames: skyDBNode.data.properties.files.map(
           ({ file_name }: { file_name: string }) => removeExtension(file_name)
         ),
-        company_name: inputNode.data.unitName,
+        company_name: unitName!,
         question: inputNode.data.properties.text,
         analysis_type: "financial_diligence",
         llm: llmNode.data.properties?.model || "OpenAI",
@@ -149,7 +153,7 @@ const FloatPanel = memo(
         )
       );
       setFetchTime(fetchDurationInSeconds);
-    }, [customQuery, getNodes, setNodes, nodeContent]);
+    }, [customQuery, getNodes, setNodes, unitName, nodeContent]);
 
     const onExport = useCallback(() => {
       showExportModal(true);

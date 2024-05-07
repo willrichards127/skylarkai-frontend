@@ -13,14 +13,14 @@ export interface IUser {
   user_id?: number;
   email: string;
   username: string;
-  user_role?: number; // persona id
+  persona_id: number; // persona id
+  tenant_id?: number;
   main_features?: IMainFeature[];
   company: string;
   company_website?: string;
   phone?: string;
   password?: string;
-  is_active?: boolean;
-  user_categorization_id?: number;
+  status?: number;
   created_at?: string;
 }
 export interface IUserAuth {

@@ -2,13 +2,11 @@
 import { memo, useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  registerAPI,
-  currentUser,
-} from "../../redux/features/authSlice";
-import { Box, Typography, Stack, TextField } from "@mui/material";
+import { registerAPI, currentUser } from "../../redux/features/authSlice";
+import { Box, Typography, Stack, TextField, MenuItem } from "@mui/material";
 import { LeftArrowDecorator, RightArrowDecorator } from "../../components/Svgs";
 import { NeutralButton } from "../../components/buttons/NeutralButton";
+import { personaList } from "../../shared/models/constants";
 
 const RegisterForm = memo(() => {
   const { loading, user } = useSelector(currentUser);
@@ -21,6 +19,7 @@ const RegisterForm = memo(() => {
     subscription_id?: number;
     company: string;
     company_website?: string;
+    persona_id: number;
   }>({
     email: "",
     username: "",
@@ -28,6 +27,7 @@ const RegisterForm = memo(() => {
     password: "",
     company: "",
     company_website: "",
+    persona_id: 1,
   });
 
   const onChangeValues = useCallback(
@@ -140,7 +140,23 @@ const RegisterForm = memo(() => {
                     onChange={onChangeValues}
                     autoComplete="nope"
                   />
-                </Stack>                
+                </Stack>
+                <Stack spacing={2} direction="row">
+                  <TextField
+                    select
+                    label="Select Persona"
+                    name="persona_id"
+                    value={form.persona_id}
+                    onChange={onChangeValues}
+                    sx={{ width: "49%" }}
+                  >
+                    {personaList.map((persona) => (
+                      <MenuItem key={persona.value} value={persona.value}>
+                        {persona.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Stack>
               </Stack>
               <Box textAlign="center">
                 <NeutralButton

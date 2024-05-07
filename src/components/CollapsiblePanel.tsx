@@ -24,7 +24,7 @@ export const CollapsiblePanel = memo(
         <Box
           onClick={onClick}
           sx={{
-            height: 36,
+            height: 32,
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -40,7 +40,7 @@ export const CollapsiblePanel = memo(
             sx={{
               background: "rgba(0, 0, 0, 0.2)",
               padding: "9px 0px 9px 12px",
-              borderRadius: "12px",
+              borderRadius: "4px",
             }}
           >
             {children ? (

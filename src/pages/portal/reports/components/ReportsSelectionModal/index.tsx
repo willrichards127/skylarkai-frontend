@@ -2,9 +2,8 @@
 import { useCallback, useState } from "react";
 import { Box, Button, Stepper, Step, StepLabel } from "@mui/material";
 import { XModal } from "../../../../../components/XModal";
-import { SLMStepPanel } from "./SLMStepPanel";
+import { UnitStepPanel } from "./UnitStepPanel";
 import { ReportStepPanel } from "./ReportStepPanel";
-import { ISetup } from "../../../../../shared/models/interfaces";
 
 const steps = ["Select Company/Sector", "Select Report"];
 
@@ -15,13 +14,13 @@ export const ReportsSelectionModal = ({
 }: {
   open: boolean;
   onClose: () => void;
-  onActionPerformed: (setup: ISetup, report: any) => void;
+  onActionPerformed: (unit: any, report: any) => void;
 }) => {
   const [activeStep, setActiveStep] = useState<number>(0);
   const [unit, setUnit] = useState<any>();
 
-  const onSelectedUnit = useCallback((selectedSlm: ISetup) => {
-    setUnit(selectedSlm);
+  const onSelectedUnit = useCallback((selectedUnit: any) => {
+    setUnit(selectedUnit);
     setActiveStep(1);
   }, []);
 
@@ -73,9 +72,12 @@ export const ReportsSelectionModal = ({
           })}
         </Stepper>
       </Box>
-      {activeStep === 0 && <SLMStepPanel onSelectedUnit={onSelectedUnit} />}
-      {activeStep === 1 && (
-        <ReportStepPanel companyId={unit.id} onSelectedReport={onSelectedReport} />
+      {activeStep === 0 && <UnitStepPanel onSelectedUnit={onSelectedUnit} />}
+      {activeStep === 1 && !!unit && (
+        <ReportStepPanel
+          companyId={unit.id}
+          onSelectedReport={onSelectedReport}
+        />
       )}
     </XModal>
   );

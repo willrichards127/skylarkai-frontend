@@ -81,13 +81,23 @@ export const verifyEmailAPI = createAsyncThunk(
   async ({ token }: { token: string }) => {
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}verify_register_email?token=${token}`,
+        `${import.meta.env.VITE_API_URL}verify_register_email?token=${token}`
+      );
+      // get system graph id
+      const responseSystemGraph = await axios.get(
+        `${import.meta.env.VITE_API_URL}system_graph_id`,
         {
-          token,
+          headers: {
+            Authorization: `Bearer ${response.data.token}`,
+            "Content-Type": "application/json",
+          },
         }
       );
 
-      return response.data;
+      return {
+        ...response.data,
+        sys_graph_id: responseSystemGraph.data,
+      };
     } catch (e) {
       return {
         error:
@@ -150,15 +160,21 @@ export const userAuthSlice = createSlice({
           errorHandler(state, payload.error);
           return;
         }
-        if (!payload.is_active) {
+        if (payload.status === 3) {
           errorHandler(state, "This user registeration is under the review.");
+          return;
+        }
+        if (payload.status === 2) {
+          errorHandler(state, "This user registeration is rejected.");
           return;
         }
         state.user = {
           ...payload,
-          main_features: (payload.main_features || []).filter((item: any) => item.id < 7 && item.id !== 2) // remove 7, 8 features now
+          main_features: (payload.main_features || []).filter(
+            (item: any) => item.id < 7 && item.id !== 2
+          ), // remove 7, 8 features now
         };
-        
+
         state.token = payload.token;
         state.sys_graph_id = payload.sys_graph_id;
         saveStoreValue("user-info", state.user);
@@ -168,8 +184,35 @@ export const userAuthSlice = createSlice({
       builder.addCase(verifyEmailAPI.pending, (state) => {
         state.loading = true;
       }),
-      builder.addCase(verifyEmailAPI.fulfilled, (state) => {
+      builder.addCase(verifyEmailAPI.fulfilled, (state, { payload }) => {
         state.loading = false;
+        if (payload.error) {
+          if (payload.error === "This user is already logged in.") {
+            state.error = true;
+          }
+          errorHandler(state, payload.error);
+          return;
+        }
+        if (payload.status === 3) {
+          errorHandler(state, "This user registeration is under the review.");
+          return;
+        }
+        if (payload.status === 2) {
+          errorHandler(state, "This user registeration is rejected.");
+          return;
+        }
+        state.user = {
+          ...payload,
+          main_features: (payload.main_features || []).filter(
+            (item: any) => item.id < 7 && item.id !== 2
+          ), // remove 7, 8 features now
+        };
+
+        state.token = payload.token;
+        state.sys_graph_id = payload.sys_graph_id;
+        saveStoreValue("user-info", state.user);
+        saveStoreValue("token", payload.token);
+        saveStoreValue("sys_graph_id", payload.sys_graph_id);
       });
   },
 });

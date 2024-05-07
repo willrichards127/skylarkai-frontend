@@ -20,7 +20,7 @@ const LoginForm = memo(() => {
   const [clearActivities] = useClearUserActivitiesMutation();
 
   const { loading, user, error } = useSelector(currentUser);
-  
+
   const dispatch = useDispatch();
   const [form, setForm] = useState<{
     email: string;
@@ -52,10 +52,9 @@ const LoginForm = memo(() => {
 
   useEffect(() => {
     if (isLoggedIn) {
-      if (user.user_role === 4) { // admin role
+      if (user.tenant_id! <= 2 && user.persona_id >= 4) {
+        // admin role: system, skylarkai admin
         navigate("/admin");
-      } else if(user.user_role == 2) {
-        navigate("/portal/units?type=companies")
       } else {
         navigate("/welcome");
       }

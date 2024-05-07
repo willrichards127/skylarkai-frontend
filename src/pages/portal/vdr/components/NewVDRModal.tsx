@@ -1,12 +1,6 @@
 import { memo, useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  CircularProgress,
-} from "@mui/material";
+import { Box, Button, TextField, CircularProgress } from "@mui/material";
 
 import { XModal } from "../../../../components/XModal";
 import { useSaveVDRMutation } from "../../../../redux/services/vdrApi";
@@ -15,10 +9,12 @@ export const NewVDRModal = memo(
   ({
     open,
     unitId,
+    type,
     unitName,
     onClose,
   }: {
-    unitId: number;
+    unitId: string;
+    type: string;
     unitName: string;
     open: boolean;
     onClose: () => void;
@@ -37,15 +33,17 @@ export const NewVDRModal = memo(
 
     useEffect(() => {
       if (isSuccess && data) {
-        navigate(`/portal/vdrs/${data.id}?unitId=${unitId}&unitName=${unitName}&type=companies`);
+        navigate(
+          `/portal/vdrs/${data.id}?unitId=${unitId}&unitName=${unitName}&type=${type}`
+        );
       }
-    }, [navigate, isSuccess, data, unitName]);
+    }, [navigate, isSuccess, data, unitId, unitName, type]);
 
     return (
       <XModal
         open={open}
         onClose={onClose}
-        size="md"
+        size="sm"
         header="New Virtual Data Room"
         footer={
           <Box
@@ -56,11 +54,9 @@ export const NewVDRModal = memo(
               borderRadius: 2,
               bgcolor: "secondary.main",
               alignItems: "center",
+              justifyContent: "flex-end",
             }}
           >
-            <Typography variant="h6" fontWeight="bold" mr="auto">
-              Create New Virtual Data Room
-            </Typography>
             <Button
               variant="contained"
               sx={{ minWidth: 120 }}

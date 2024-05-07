@@ -26,12 +26,13 @@ const SetupsContainer = memo(({ viewMode }: { viewMode: string }) => {
               clickable: true,
             },
           ]
-        : []),
-      {
-        id: "delete",
-        content: "Delete",
-        clickable: true,
-      },
+        : [
+            {
+              id: "archive",
+              content: "Archive",
+              clickable: true,
+            },
+          ]),
     ],
     [viewMode]
   );
@@ -46,7 +47,7 @@ const SetupsContainer = memo(({ viewMode }: { viewMode: string }) => {
 
   const onMoreItem = useCallback(
     async (setupId: string, menuItemId: string) => {
-      if (menuItemId === "delete") {
+      if (menuItemId === "archive") {
         await deleteSetup({
           setupId,
         });

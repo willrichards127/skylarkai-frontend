@@ -31,10 +31,10 @@ const UnitsPage = () => {
   }, []);
 
   const onCard = useCallback(
-    ({ id }: { id: number; name: string; logo?: string }) => {
-      navigate(`/portal/units/${id}/reports`);
+    ({ id, name }: { id: number; name: string; logo?: string }) => {
+      navigate(`/portal/units/${id}/reports?unitName=${name}&type=${type}`);
     },
-    [navigate]
+    [navigate, type]
   );
 
   const onMoreItem = useCallback((unit: any, menuItemId: string) => {

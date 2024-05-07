@@ -18,7 +18,6 @@ import {
   IDNDContainer,
   IDNDItem,
   IReportItemValue,
-  ISetup,
 } from "../../../../shared/models/interfaces";
 import { Container } from "../components/DND/Container";
 import {
@@ -36,13 +35,15 @@ import { REPORTS_DICT } from "../../../../shared/models/constants";
 export const ReportTemplate = ({
   reportId,
   reportName,
-  setup,
+  setupId,
+  unitName,
   reportContent,
   analysisType,
 }: {
   reportId: number;
   reportName: string;
-  setup: ISetup;
+  setupId: number;
+  unitName: string;
   reportContent: string;
   analysisType: string;
 }) => {
@@ -290,8 +291,8 @@ export const ReportTemplate = ({
   const onRerunReport = async () => {
     if (uploadedFiles && uploadedFiles["file"]) {
       await ingestFiles({
-        setupId: setup.id!,
-        companyName: setup.description || setup.name!,
+        setupId,
+        companyName: unitName,
         analysisType: "financial_diligence",
         files: uploadedFiles["file"],
       });
@@ -299,7 +300,7 @@ export const ReportTemplate = ({
 
     regenerateReport({
       reportId,
-      setupId: setup.id!,
+      setupId,
       queryType: reportName, // reportType!,
       template: REPORTS_DICT[reportName!].template,
     });
@@ -380,8 +381,8 @@ export const ReportTemplate = ({
         }
         rightPanel={
           <ChatPanel
-            graph_id={setup.id!}
-            companyName={setup.description || setup.name!}
+            graph_id={setupId}
+            companyName={unitName}
             analysis_type={analysisType}
             onAddToReport={onAddToReport}
             filenames={[]}
@@ -395,7 +396,7 @@ export const ReportTemplate = ({
           onClose={() => setCitationData(undefined)}
           data={{
             ...citationData,
-            graph_id: setup.id!,
+            graph_id: setupId!,
             analysis_type: "financial_diligence",
           }}
         />

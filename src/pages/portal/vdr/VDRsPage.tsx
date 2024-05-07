@@ -24,12 +24,14 @@ export default function VDRsPage() {
         sx={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
+          gap: 2,
         }}
       >
         <Typography variant="h6" fontWeight="bold">
           Virtual Data Rooms
         </Typography>
+        <Box mr="auto" />
+        <Button variant="contained">Send Email</Button>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
@@ -68,7 +70,8 @@ export default function VDRsPage() {
       {newVDRModal && (
         <NewVDRModal
           open={newVDRModal}
-          unitId={+params.unitId!}
+          unitId={params.unitId!}
+          type={type!}
           unitName={unitName!}
           onClose={() => showNewVDRModal(false)}
         />

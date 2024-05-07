@@ -14,8 +14,8 @@ import { IMenuItem } from "../../../../shared/models/interfaces";
 
 export const UnitCard = memo(
   ({
-    width = 300,
-    height = 160,
+    width = 340,
+    height = 80,
     logo,
     name,
     created_at,
@@ -55,17 +55,27 @@ export const UnitCard = memo(
             position: "relative",
           }}
         >
-          <Box height="100%" p={2}>
-            <Box p={1}>
-              <Avatar
-                sx={{ width: 48, height: 48, bgcolor: colors.blue[500] }}
-                src={`${import.meta.env.VITE_API_URL}api/static/avatar/${logo}`}
-                alt={name}
-              >
-                {name!.substring(0, 1)}
-              </Avatar>
-            </Box>
+          <Box height="100%" p={1}>
             <CardHeader
+              avatar={
+                logo ? (
+                  <Avatar
+                    sx={{ width: 48, height: 48, bgcolor: colors.blue[500] }}
+                    src={`${
+                      import.meta.env.VITE_API_URL
+                    }api/static/avatar/${logo}`}
+                    alt={name}
+                  >
+                    {name!.substring(0, 1)}
+                  </Avatar>
+                ) : (
+                  <Avatar
+                    sx={{ width: 48, height: 48, bgcolor: colors.blue[500] }}
+                  >
+                    {name!.substring(0, 1)}
+                  </Avatar>
+                )
+              }
               title={
                 <Box
                   sx={{
@@ -85,6 +95,7 @@ export const UnitCard = memo(
                   {new Date(created_at || "").toLocaleString()}
                 </Box>
               }
+              sx={{ p: 1 }}
             />
           </Box>
         </CardActionArea>

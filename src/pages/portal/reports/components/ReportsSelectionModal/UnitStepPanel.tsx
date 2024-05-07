@@ -1,16 +1,16 @@
+import React, { useCallback, useMemo, useState } from "react";
 import { Box, TextField, Typography, CircularProgress } from "@mui/material";
 import { useGetUnitsQuery } from "../../../../../redux/services/setupApi";
-import React, { useCallback, useMemo, useState } from "react";
 
-export const SLMStepPanel = ({
+export const UnitStepPanel = ({
   onSelectedUnit,
 }: {
   onSelectedUnit: (unit: any) => void;
 }) => {
   const [searchText, setSearchText] = useState<string>("");
-  const [selectedSlm, setSelectedSlm] = useState<any>(null);
+  const [selectedUnit, setSelectedUnit] = useState<any>(null);
 
-  const { isLoading: loadingSlms, data: units } = useGetUnitsQuery({
+  const { isLoading: loadingUnits, data: units } = useGetUnitsQuery({
     view_mode: "active",
   });
 
@@ -21,9 +21,9 @@ export const SLMStepPanel = ({
     []
   );
 
-  const onSelectSLM = useCallback(
+  const onSelectUnit = useCallback(
     (unit: any) => {
-      setSelectedSlm(unit);
+      setSelectedUnit(unit);
       onSelectedUnit(unit);
     },
     [onSelectedUnit]
@@ -45,9 +45,9 @@ export const SLMStepPanel = ({
         size="small"
         sx={{ minWidth: 480 }}
         label={"Search"}
-        disabled={loadingSlms}
+        disabled={loadingUnits}
       />
-      {loadingSlms ? (
+      {loadingUnits ? (
         <Box sx={{ textAlign: "center", p: 4 }}>
           <CircularProgress />
         </Box>
@@ -77,17 +77,17 @@ export const SLMStepPanel = ({
                     filter: "brightness(1.25)",
                   },
                   filter:
-                    unit.id === selectedSlm?.id
+                    unit.id === selectedUnit?.id
                       ? "brightness(1.5)"
                       : "brightness(1)",
                 }}
-                onClick={() => onSelectSLM(unit)}
+                onClick={() => onSelectUnit(unit)}
               >
                 <Typography variant="h6" fontWeight="bold">
                   {unit.name!}
                 </Typography>
                 <Typography variant="body2">
-                  Type: {unit.type === 1 ? 'Company' : 'Sector'}
+                  Type: {unit.type === 1 ? "Company" : "Sector"}
                 </Typography>
               </Box>
             ))
