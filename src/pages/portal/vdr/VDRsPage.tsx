@@ -1,8 +1,9 @@
 import { Box, Button, CircularProgress, Grid, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { VDRCard } from "./components/VDRCard";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { NewVDRModal } from "./components/NewVDRModal";
+// import { SendEmailModal } from "../../../components/modals/SendEmailModal";
 import { useGetVDRsQuery } from "../../../redux/services/vdrApi";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
@@ -13,8 +14,11 @@ export default function VDRsPage() {
   const unitName = searchParams.get("unitName");
   const type = searchParams.get("type");
 
+  // const [emailModal, showEmailModal] = useState<boolean>(false);
   const [newVDRModal, showNewVDRModal] = useState<boolean>(false);
   const { data, isLoading } = useGetVDRsQuery({ unitId: +params.unitId! });
+
+  const onShowEmailTemplate = useCallback(() => {}, []);
 
   return (
     <Box
@@ -25,13 +29,16 @@ export default function VDRsPage() {
           display: "flex",
           alignItems: "center",
           gap: 2,
+          mb: 2,
         }}
       >
         <Typography variant="h6" fontWeight="bold">
           Virtual Data Rooms
         </Typography>
         <Box mr="auto" />
-        <Button variant="contained">Send Email</Button>
+        <Button variant="contained" onClick={onShowEmailTemplate}>
+          Send Email
+        </Button>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
@@ -76,6 +83,13 @@ export default function VDRsPage() {
           onClose={() => showNewVDRModal(false)}
         />
       )}
+      {/* {emailModal && (
+        <SendEmailModal
+          open={emailModal}
+          onClose={() => showEmailModal(false)}
+          element={ref.current!}
+        />
+      )} */}
     </Box>
   );
 }
