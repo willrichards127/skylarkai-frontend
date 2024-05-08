@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { lazy, Suspense, useCallback, useEffect } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo } from "react";
 import {
   createBrowserRouter,
-  redirect,
+  Navigate,
   RouterProvider,
   useRouteError,
 } from "react-router-dom";
@@ -53,9 +53,21 @@ const ErrorBoundary = () => {
 
 function AppRouter() {
   const { user, token } = useSelector(currentUser);
-  if (!user || !token) {
-    redirect("/login");
-  }
+
+  const redirectPath = useMemo(() => {
+    if (!user || !token) {
+      return "/login";
+    } else {
+      if (user.persona_id === 5) {
+        // admin role: system, skylarkai admin
+        return "/admin";
+      } else if (user.persona_id === 1) {
+        // analyst role
+        return "/portal/units?type=companies";
+      }
+      return "/welcome";
+    }
+  }, [user, token]);
 
   const [addActivity] = useAddUserActivityMutation();
 
@@ -87,10 +99,8 @@ function AppRouter() {
             path: "*",
             element: <>No matched.</>,
           },
-          {
-            path: "/",
-            element: <LoginForm />,
-            errorElement: <ErrorBoundary />,
+          {path: "/",
+            element: <Navigate to={redirectPath} />
           },
           {
             path: "/login",

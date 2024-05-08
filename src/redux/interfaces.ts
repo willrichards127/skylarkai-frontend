@@ -23,6 +23,7 @@ export interface IUser {
   status?: number;
   created_at?: string;
 }
+
 export interface IUserAuth {
   user?: IUser;
   sys_graph_id?: number;

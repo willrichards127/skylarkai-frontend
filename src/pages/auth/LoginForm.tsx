@@ -52,14 +52,9 @@ const LoginForm = memo(() => {
 
   useEffect(() => {
     if (isLoggedIn) {
-      if (user.persona_id === 5) {
-        // admin role: system, skylarkai admin
-        navigate("/admin");
-      } else {
-        navigate("/welcome");
-      }
+      navigate("/");
     }
-  }, [navigate, isLoggedIn, user]);
+  }, [navigate, isLoggedIn]);
 
   useEffect(() => {
     if (!token) return;
