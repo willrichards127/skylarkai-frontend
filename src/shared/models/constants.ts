@@ -54342,8 +54342,9 @@ export const ACCEPT_TEMPLATE_NODE_DICT: Record<string, string[]> = {
     "Webcrawler",
     "PitchBook",
   ],
-  Output: ["LLM", "GoogleSearch", "CustomAPI", "YahooFinance"],
+  Output: ["LLM", "GoogleSearch", "CustomAPI", "YahooFinance", "InvestmentCriteria"],
   GoogleSearch: ["Input"],
+
 };
 
 export const TASKS_DICT: Record<string, any> = {
