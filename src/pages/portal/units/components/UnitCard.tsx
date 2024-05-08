@@ -18,6 +18,7 @@ export const UnitCard = memo(
     height = 80,
     logo,
     name,
+    author,
     created_at,
     moreItems,
     onCard,
@@ -25,6 +26,7 @@ export const UnitCard = memo(
   }: {
     logo?: string;
     name: string;
+    author?: string;
     width?: number;
     height?: number;
     created_at: string;
@@ -34,7 +36,12 @@ export const UnitCard = memo(
   }) => {
     return (
       <Card
-        sx={{ width, height, bgcolor: "secondary.main", position: "relative" }}
+        sx={{
+          width,
+          minHeight: height,
+          bgcolor: "secondary.main",
+          position: "relative",
+        }}
       >
         <Box sx={{ position: "absolute", right: 4, top: 4 }}>
           <XPopmenu
@@ -91,8 +98,9 @@ export const UnitCard = memo(
                 </Box>
               }
               subheader={
-                <Box fontSize={14}>
-                  {new Date(created_at || "").toLocaleString()}
+                <Box>
+                  {author && <Box fontSize={13} fontWeight="bold">Analyst: {author}</Box>}
+                  <Box fontSize={12}>{new Date(created_at || "").toLocaleString()}</Box>
                 </Box>
               }
               sx={{ p: 1 }}

@@ -413,6 +413,7 @@ export const ReportTemplate = ({
           open={emailModal}
           onClose={() => showEmailModal(false)}
           element={printRef.current!}
+          filename={`${reportName}.pdf`}
         />
       )}
     </>

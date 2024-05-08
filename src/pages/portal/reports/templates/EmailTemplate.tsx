@@ -1,20 +1,9 @@
-import { useCallback, useRef, useState, memo } from "react";
-import {
-  Stack,
-  Breadcrumbs,
-  Box,
-  IconButton,
-  TextField,
-  Typography,
-  Button,
-} from "@mui/material";
+import { useCallback, useRef, useState, useEffect, memo } from "react";
+import { Stack, Box, TextField, Typography, Button } from "@mui/material";
 import { Editor } from "@tinymce/tinymce-react";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
-import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { ConfirmModal } from "../../../../components/modals/ConfirmModal";
-// import { useGetSetupsQuery } from "../../../../redux/services/setupApi";
 import { useSendReportsViaEmailsMutation } from "../../../../redux/services/transcriptAPI";
 import { getPdfInBase64 } from "../../../../shared/utils/pdf-generator";
 
@@ -53,21 +42,25 @@ export const EmailTemplate = memo(
   ({
     prefix,
     element,
+    filename,
+    initialTitle,
+    initialContent,
     onClose,
   }: {
-    element: HTMLDivElement;
+    element?: HTMLDivElement;
     prefix?: string;
+    filename?: string;
+    initialTitle?: string;
+    initialContent?: string;
     onClose: () => void;
   }) => {
     const editorRef = useRef<any>(null);
     const iframeRef = useRef<HTMLIFrameElement>(null);
-    // const { data: companies } = useGetSetupsQuery();
     const [sendEmails, { isLoading, isSuccess }] =
       useSendReportsViaEmailsMutation();
 
     const [confirmModal, showConfirmModal] = useState<boolean>(false);
     const [form, setForm] = useState<{
-      // company: string;
       emails: string;
       title: string;
       content: string;
@@ -82,19 +75,14 @@ export const EmailTemplate = memo(
 
     const onSend = useCallback(async () => {
       const container = document.createElement("div");
-      container.appendChild(element.cloneNode(true));
-      const removeItems = container.querySelectorAll(
-        ".suggestions, .topic, .loading, .no-print"
-      );
-      for (const item of removeItems) {
-        item.remove();
-      }
+
       // replace images for following email template
       // ref: https://www.twilio.com/en-us/blog/send-emails-embedded-gifs-images-sendgrid-python
       const iframeHtml =
         iframeRef.current!.contentWindow!.document.documentElement;
       const iframeContainer = document.createElement("div");
       iframeContainer.appendChild(iframeHtml.cloneNode(true));
+
       const logoEl: HTMLImageElement =
         iframeContainer.querySelector(".skylark_logo")!;
       logoEl!.src = "_cid:skylark_logo";
@@ -108,50 +96,55 @@ export const EmailTemplate = memo(
         iframeContainer.querySelector(".linkedin")!;
       linkedinEl!.src = "_cid:linkedin";
 
-      const base64str = await getPdfInBase64(
-        (prefix || "") + container.innerHTML,
-        "Skylark"
-      );
-      sendEmails({
-        subject: form.title,
-        base64str,
-        filename: "investment memo report.pdf",
-        template: iframeContainer.outerHTML,
-        emails: form.emails.split(",").map((email) => email.trim()),
-      });
+      if (element) {
+        container.appendChild(element.cloneNode(true));
+        const removeItems = container.querySelectorAll(
+          ".suggestions, .topic, .loading, .no-print"
+        );
+        for (const item of removeItems) {
+          item.remove();
+        }
+        const base64str = await getPdfInBase64(
+          (prefix || "") + container.innerHTML,
+          "Skylark"
+        );
+        sendEmails({
+          subject: form.title,
+          base64str,
+          filename: filename || "Report.pdf",
+          template: iframeContainer.outerHTML,
+          emails: form.emails.split(",").map((email) => email.trim()),
+        });
+      } else {
+        sendEmails({
+          subject: form.title,
+          template: iframeContainer.outerHTML,
+          emails: form.emails.split(",").map((email) => email.trim()),
+        });
+      }
+
       showConfirmModal(true);
-    }, [form, element, prefix, sendEmails]);
+    }, [form, filename, element, prefix, sendEmails]);
+
+    useEffect(() => {
+      if (initialTitle || initialContent) {
+        setForm((prev) => ({
+          ...prev,
+          ...(!!initialTitle && { title: initialTitle }),
+          ...(!!initialContent && { content: initialContent }),
+        }));
+      }
+    }, [initialTitle, initialContent]);
 
     return (
-      <Stack
-        spacing={2}
-        sx={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          bgcolor: "black",
-          p: 4,
-          zIndex: 999,
-        }}
-      >
+      <Stack spacing={2}>
         <Box sx={{ width: "100%" }}>
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <IconButton size="small" onClick={onClose} sx={{ mr: 1 }}>
-              <ArrowBackIcon sx={{ fontSize: 18 }} />
-            </IconButton>
-            <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
-              <Typography color="text.primary">Email Template</Typography>
-            </Breadcrumbs>
-          </Box>
           <Stack spacing={2} direction="row">
             <Stack spacing={2} width="100%">
-              <Typography variant="h6" fontWeight="bold">
-                Send Email(s)
+              <Typography variant="body2" fontWeight="bold">
+                Email(s)
               </Typography>
               <TextField
-                label="Emails"
                 name="emails"
                 fullWidth
                 value={form.emails}
@@ -160,29 +153,10 @@ export const EmailTemplate = memo(
                 helperText="You can input several emails by adding comma(,)."
                 sx={{ "& .MuiInputBase-root": { width: 540 } }}
               />
-              {/* <TextField
-                select
-                size="small"
-                name="company"
-                label="Target Company"
-                value={form.company}
-                onChange={onChange}
-                SelectProps={{
-                  native: true,
-                }}
-                sx={{ "& .MuiInputBase-root": { width: 540 } }}
-              >
-                {(companies || []).map((company) => (
-                  <option key={company.id!} value={company.id!}>
-                    {company.name!}
-                  </option>
-                ))}
-              </TextField> */}
-              <Typography variant="body1" fontWeight="bold">
-                Create Email
+              <Typography variant="body2" fontWeight="bold">
+                Email Title
               </Typography>
               <TextField
-                label="Email Title"
                 name="title"
                 size="small"
                 value={form.title}
@@ -210,7 +184,7 @@ export const EmailTemplate = memo(
               />
             </Stack>
             <Stack spacing={2} width="100%">
-              <Typography variant="h6" fontWeight="bold">
+              <Typography variant="body2" fontWeight="bold">
                 Preview
               </Typography>
               <Box sx={{ flex: 1, bgcolor: "white", color: "black" }}>
@@ -229,10 +203,15 @@ export const EmailTemplate = memo(
               </Box>
             </Stack>
           </Stack>
-          <Box textAlign="right" pt={1}>
+          <Box
+            sx={{ display: "flex", gap: 2, justifyContent: "flex-end", pt: 2 }}
+          >
+            <Button variant="outlined" onClick={onClose} sx={{ minWidth: 100 }}>
+              Close
+            </Button>
             <Button
               variant="contained"
-              disabled={!form.title || !form.content} // !form.company ||
+              disabled={!form.title || !form.content || !form.emails.length}
               onClick={onSend}
             >
               Send Email
@@ -256,7 +235,7 @@ export const EmailTemplate = memo(
               title={
                 isSuccess ? "Email has been sent." : "Failed to send the email."
               }
-              desc="Click close to go back to the report."
+              desc="Click close to go back."
               onClose={() => showConfirmModal(false)}
             />
           )}

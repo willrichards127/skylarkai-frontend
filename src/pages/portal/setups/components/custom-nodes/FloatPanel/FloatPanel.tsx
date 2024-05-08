@@ -38,6 +38,7 @@ import { YoutubuNode } from "../nodes/dataloaders/YoutubuNode";
 import { GoogleDriveNode } from "../nodes/dataloaders/GoogleDriveNode";
 import { DataSearchNode } from "../nodes/dataloaders/DataSearchNode";
 import { SkylarkDBNode } from "../nodes/vectors/SkylarkDBNode";
+import { InvestmentCriteriaNode } from "../nodes/inputs/InvestmentCriteriaNode";
 import {
   parseCitation,
   removeExtension,
@@ -82,6 +83,7 @@ const ComponentDict: Record<
   GoogleDrive: GoogleDriveNode,
   DataSearch: DataSearchNode,
   VDD: VDDNode,
+  InvestmentCriteria: InvestmentCriteriaNode,
 };
 
 const FloatPanel = memo(

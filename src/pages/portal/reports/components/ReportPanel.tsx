@@ -17,7 +17,10 @@ import CloseIcon from "@mui/icons-material/Close";
 import { ReportViewer } from "../templates/ReportViewer";
 import { ReportsSelectionModal } from "./ReportsSelectionModal";
 import { useGetSetupsQuery } from "../../../../redux/services/setupApi";
-import { reportTabHeaderHeight } from "../../../../shared/models/constants";
+import {
+  reportBottomHeight,
+  reportTabHeaderHeight,
+} from "../../../../shared/models/constants";
 
 const ReportPanel = ({ reportId }: { reportId: string }) => {
   const navigate = useNavigate();
@@ -164,16 +167,24 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
           size="small"
           startIcon={<AddIcon />}
           onClick={onShowReportsModal}
+          sx={{minWidth: 110}}
         >
           Add Report
         </Button>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, width: '100%', justifyContent: 'flex-end' }}>
+          <Button variant="contained" sx={{ minWidth: 140 }}>
+            Invite Collaborater
+          </Button>
+        </Box>
       </Stack>
       {reportTabs.map((reportTab) => (
         <Box
           key={reportTab.reportId}
           sx={{
             width: "100%",
-            height: `calc(100% - ${reportTabHeaderHeight}px)`,
+            height: `calc(100% - ${
+              reportTabHeaderHeight + reportBottomHeight
+            }px)`,
             display: reportTab.reportId === selectedReport ? "block" : "none",
           }}
         >
@@ -185,6 +196,21 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
           />
         </Box>
       ))}
+      <Box
+        sx={{
+          height: reportBottomHeight,
+          width: "100%",
+          bgcolor: "black",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-end",
+          px: 1,
+        }}
+      >
+        <Button variant="contained" sx={{ minWidth: 140 }}>
+          Send For Review
+        </Button>
+      </Box>
       {reportsModal && (
         <ReportsSelectionModal
           open={reportsModal}

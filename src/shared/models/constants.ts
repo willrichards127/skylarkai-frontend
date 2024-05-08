@@ -26,6 +26,7 @@ export const helpNavWidth = 400;
 export const leftNavWidth = 300;
 export const chatboxWidth = 480;
 export const reportTabHeaderHeight = 49;
+export const reportBottomHeight = 48;
 export const reportDrawerWidth = 300;
 
 export const topicDict = {
@@ -54342,8 +54343,9 @@ export const ACCEPT_TEMPLATE_NODE_DICT: Record<string, string[]> = {
     "Webcrawler",
     "PitchBook",
   ],
-  Output: ["LLM", "GoogleSearch", "CustomAPI", "YahooFinance"],
+  Output: ["LLM", "GoogleSearch", "CustomAPI", "YahooFinance", "InvestmentCriteria"],
   GoogleSearch: ["Input"],
+
 };
 
 export const TASKS_DICT: Record<string, any> = {

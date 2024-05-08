@@ -1,5 +1,6 @@
 import { useCallback, useState, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import {
   Box,
   Stack,
@@ -10,17 +11,21 @@ import {
 } from "@mui/material";
 import ApartmentIcon from "@mui/icons-material/Apartment";
 import BusinessCenterIcon from "@mui/icons-material/BusinessCenter";
+import { currentUser } from "../../../redux/features/authSlice";
 import { NewUnitModal } from "./components/NewUnitModal";
 import { UnitCard } from "./components/UnitCard";
 import { useGetUnitsQuery } from "../../../redux/services/setupApi";
 
 const UnitsPage = () => {
   const navigate = useNavigate();
+  const { user } = useSelector(currentUser);
+
   const unitRef = useRef<any>();
   const [searchParams] = useSearchParams();
   const type = searchParams.get("type");
 
   const { isLoading, data: units } = useGetUnitsQuery({
+    isPartner: user!.persona_id === 2,
     type: type === "companies" ? 1 : 2,
   });
 
@@ -31,8 +36,20 @@ const UnitsPage = () => {
   }, []);
 
   const onCard = useCallback(
-    ({ id, name }: { id: number; name: string; logo?: string }) => {
-      navigate(`/portal/units/${id}/reports?unitName=${name}&type=${type}`);
+    ({
+      id,
+      name,
+      username,
+    }: {
+      id: number;
+      name: string;
+      username?: string;
+    }) => {
+      navigate(
+        `/portal/units/${id}/reports?unitName=${name}&type=${type}${
+          username ? "&analyst=" + username : ""
+        }`
+      );
     },
     [navigate, type]
   );
@@ -89,6 +106,7 @@ const UnitsPage = () => {
                   name={unit.name}
                   created_at={unit.created_at}
                   logo={unit.logo}
+                  author={unit.username}
                   onCard={() => onCard(unit)}
                   onMoreItem={(menuItemId) => onMoreItem(unit, menuItemId)}
                   moreItems={[
