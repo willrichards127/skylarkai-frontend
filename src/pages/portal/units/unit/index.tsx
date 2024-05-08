@@ -1,4 +1,4 @@
-import { Outlet, useParams } from "react-router-dom";
+import { Outlet, useParams, useSearchParams } from "react-router-dom";
 import {
   colors,
   Backdrop,
@@ -14,6 +14,8 @@ import { useGetUnitQuery } from "../../../../redux/services/setupApi";
 
 const UnitPage = () => {
   const unitId = useParams<{ unitId: string }>().unitId!;
+  const [searchParams] = useSearchParams();
+  const analyst = searchParams.get("analyst");
 
   const { isLoading, data: unit } = useGetUnitQuery(
     { unitId: +unitId! },
@@ -67,6 +69,15 @@ const UnitPage = () => {
               <Typography variant="h6" sx={{ whiteSpace: "nowrap" }}>
                 {unit!.name}
               </Typography>
+              {!!analyst && (
+                <Typography
+                  variant="subtitle2"
+                  fontSize={13}
+                  sx={{ whiteSpace: "nowrap" }}
+                >
+                  Analyst: {analyst}
+                </Typography>
+              )}
               <Typography
                 variant="subtitle2"
                 color="grey"

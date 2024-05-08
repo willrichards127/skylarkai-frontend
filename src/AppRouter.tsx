@@ -64,6 +64,9 @@ function AppRouter() {
       } else if (user.persona_id === 1) {
         // analyst role
         return "/portal/units?type=companies";
+      } else if (user.persona_id ===2) {
+        // partner role
+        return "/dashboard";
       }
       return "/welcome";
     }
