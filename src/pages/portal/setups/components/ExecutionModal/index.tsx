@@ -178,8 +178,8 @@ export const ExecutionModal = memo(
                 report: {
                   title: templateData.title,
                   data: items,
-                  default_llm: updatedSetup.nodes[openAINodeIndex].properties?.model,
-                  recursion: updatedSetup.nodes[openAINodeIndex].properties?.recursion,
+                  default_llm: updatedSetup.nodes[openAINodeIndex].properties?.model || "OpenAI",
+                  recursion: updatedSetup.nodes[openAINodeIndex].properties?.recursion || 5,
                 },
               }).unwrap();
             }
