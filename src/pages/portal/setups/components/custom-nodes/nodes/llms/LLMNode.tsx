@@ -20,6 +20,7 @@ export const LLMNode = memo(
               node.data = {
                 ...node.data,
                 properties: {
+                  ...node.data.properties,
                   [field]: newValue,
                 },
               };
