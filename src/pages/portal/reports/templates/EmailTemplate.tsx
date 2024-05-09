@@ -3,6 +3,7 @@ import { Stack, Box, TextField, Typography, Button } from "@mui/material";
 import { Editor } from "@tinymce/tinymce-react";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import { EmailSearchInput } from "../../../../components/EmailSearchInput";
 import { ConfirmModal } from "../../../../components/modals/ConfirmModal";
 import { useSendReportsViaEmailsMutation } from "../../../../redux/services/transcriptAPI";
 import { getPdfInBase64 } from "../../../../shared/utils/pdf-generator";
@@ -144,14 +145,11 @@ export const EmailTemplate = memo(
               <Typography variant="body2" fontWeight="bold">
                 Email(s)
               </Typography>
-              <TextField
-                name="emails"
-                fullWidth
+              <EmailSearchInput
                 value={form.emails}
-                onChange={onChange}
-                size="small"
-                helperText="You can input several emails by adding comma(,)."
-                sx={{ "& .MuiInputBase-root": { width: 540 } }}
+                onChanged={(value) =>
+                  setForm((prev) => ({ ...prev, emails: value }))
+                }
               />
               <Typography variant="body2" fontWeight="bold">
                 Email Title

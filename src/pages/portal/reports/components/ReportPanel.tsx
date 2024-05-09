@@ -16,6 +16,7 @@ import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import { ReportViewer } from "../templates/ReportViewer";
 import { ReportsSelectionModal } from "./ReportsSelectionModal";
+import { InviteCollaboraterModal } from "./InviteCollaboraterModal";
 import { useGetSetupsQuery } from "../../../../redux/services/setupApi";
 import {
   reportBottomHeight,
@@ -37,6 +38,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
   });
 
   const [reportsModal, showReportsModal] = useState<boolean>(false);
+  const [inviteModal, showInviteModal] = useState<boolean>(false);
   const [reportTabs, setReportTabs] = useState<
     {
       setupId: number;
@@ -79,6 +81,10 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
     setReportTabs((prev) =>
       prev.filter((item) => item.reportId !== closeReportId)
     );
+  }, []);
+
+  const onInvite = useCallback(() => {
+    showInviteModal(true);
   }, []);
 
   useEffect(() => {
@@ -167,12 +173,20 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
           size="small"
           startIcon={<AddIcon />}
           onClick={onShowReportsModal}
-          sx={{minWidth: 110}}
+          sx={{ minWidth: 110 }}
         >
           Add Report
         </Button>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, width: '100%', justifyContent: 'flex-end' }}>
-          <Button variant="contained" sx={{ minWidth: 140 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            width: "100%",
+            justifyContent: "flex-end",
+          }}
+        >
+          <Button variant="contained" sx={{ minWidth: 140 }} onClick={onInvite}>
             Invite Collaborater
           </Button>
         </Box>
@@ -216,6 +230,13 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
           open={reportsModal}
           onClose={() => showReportsModal(false)}
           onActionPerformed={onAddReport}
+        />
+      )}
+      {inviteModal && (
+        <InviteCollaboraterModal
+          open={inviteModal}
+          onClose={() => showInviteModal(false)}
+          onActionPerformed={() => {}}
         />
       )}
     </Box>

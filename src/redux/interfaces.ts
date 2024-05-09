@@ -10,7 +10,7 @@ export interface IMainFeature {
   img_url: string;
 }
 export interface IUser {
-  user_id?: number;
+  id?: number;
   email: string;
   username: string;
   persona_id: number; // persona id

@@ -25,10 +25,10 @@ const AdminPage = () => {
   const onAction = useCallback(
     (row: Record<string, any>, actionType: string) => {
       if (actionType === "Approve") {
-        updateUserStatus({ user_id: row.id, user_status: 1 });
+        updateUserStatus({ id: row.id, user_status: 1 });
       } else {
         // Decline
-        updateUserStatus({ user_id: row.id, user_status: 2 });
+        updateUserStatus({ id: row.id, user_status: 2 });
       }
     },
     [updateUserStatus]
@@ -127,7 +127,7 @@ const AdminPage = () => {
                 size="small"
                 variant="contained"
                 color={params.data.status === 1 ? "warning" : "info"}
-                disabled={user!.user_id === params.data.id}
+                disabled={user!.id === params.data.id}
                 onClick={() =>
                   onAction(
                     params.data as Record<string, any>,

@@ -6,13 +6,13 @@ import { XChip } from "../../../../../components/XChip";
 import { XAccordions } from "../../../../../components/XAccordion";
 import { ITemplateNode } from "../../../../../shared/models/interfaces";
 
-const criterias = [{}];
+// const criterias = [{}];
 
 export const CriteriaModal = memo(
   ({
     open,
     nodeId,
-    nodeContent,
+    // nodeContent,
     onClose,
   }: {
     open: boolean;

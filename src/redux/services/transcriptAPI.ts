@@ -326,7 +326,7 @@ export const transcriptApi = createApi({
             method: "POST",
             data: {
               graph_id,
-              user_id: user.user_id,
+              user_id: user.id,
               question_text,
               user_feedback,
               system_feedback,
