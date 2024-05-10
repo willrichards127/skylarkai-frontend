@@ -152,6 +152,25 @@ export const setupApi = createApi({
         };
       },
     }),
+    generateJsonTemplate: builder.mutation<
+      any,
+      {
+        setupId: number;
+        file: File;
+      }
+    >({
+      query: ({ file, setupId }) => {
+        const formData = new FormData();
+        formData.append("analysis_type", "template");
+
+        formData.append("file", file);
+        return {
+          url: `generate_jsontemplate?graph_id=${setupId}&llm=Anthropic`,
+          method: "POST",
+          body: formData,
+        };
+      },
+    }),
     uploadFiles: builder.mutation<void, { setupId: number; files: any }>({
       query: ({ setupId, files }) => {
         return {
@@ -304,4 +323,5 @@ export const {
   useGetUnitQuery,
   useAddUnitMutation,
   useUpdateUnitMutation,
+  useGenerateJsonTemplateMutation,
 } = setupApi;

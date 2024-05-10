@@ -8,6 +8,7 @@ import { useDropzone } from "react-dropzone";
 import { ITemplateNode } from "../../../../../../../shared/models/interfaces";
 import { TemplateViewModal } from "../../../../../../../components/modals/TemplateViewModal";
 import { convertJSON } from "../../../../../../../components/TemplateView/utils";
+import { useGenerateJsonTemplateMutation } from "../../../../../../../redux/services/setupApi";
 
 const templates = [
   {
@@ -29,7 +30,7 @@ export const DocTemplateNode = memo(
           : undefined,
       [nodeContent]
     );
-
+    const [generateJsonTemplate] = useGenerateJsonTemplateMutation();
     const [showModal, setShowModal] = useState<boolean>(false);
 
     const { setNodes } = useReactFlow();
@@ -72,32 +73,15 @@ export const DocTemplateNode = memo(
     );
 
     const onDrop = useCallback(
-      (acceptedFiles: any) => {
-        const reader = new FileReader();
-
-        reader.onabort = () => console.log("file reading was aborted");
-        reader.onerror = () => console.log("file reading has failed");
-        reader.onload = async () => {
-          setNodes((prev) =>
-            prev.map((node) => {
-              if (node.id === nodeId) {
-                node.data = {
-                  ...node.data,
-                  properties: {
-                    ...node.data.properties,
-                    text: reader.result,
-                    file: acceptedFiles[0].name,
-                  },
-                };
-              }
-
-              return node;
-            })
-          );
-        };
-        reader.readAsText(acceptedFiles[0]);
+      async (acceptedFiles: any) => {
+        const templateData = await generateJsonTemplate({
+          file: acceptedFiles[0],
+          setupId: 23,
+        }).unwrap();
+        // console.log("=================", templateData.template[0])
+        updateNode("text", JSON.stringify(templateData.template[0]));
       },
-      [setNodes, nodeId]
+      [setNodes, nodeId, updateNode, generateJsonTemplate]
     );
 
     const { getRootProps, getInputProps } = useDropzone({

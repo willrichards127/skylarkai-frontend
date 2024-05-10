@@ -16,6 +16,7 @@ import { DocumentChip } from "../../../components/DocumentChip";
 import { FileViewModal } from "../../premium/components/sub-components/FileViewModal";
 import { useIngestFilesMutation } from "../../../redux/services/setupApi";
 import { getDate } from "../../../shared/utils/parse";
+import { useNotification } from "../../../shared/socket/NotificationProvider";
 
 export default function VDRDetailPage() {
   const vdrId = useParams<{ vdrId: string }>().vdrId!;
@@ -25,6 +26,7 @@ export default function VDRDetailPage() {
   const unitName = searchParams.get("unitName");
   const type = searchParams.get("type");
 
+  const { newIngesting } = useNotification();
   const { data, isLoading, refetch } = useGetVDRQuery({ vdrId: +vdrId });
   const [ingestFiles] = useIngestFilesMutation();
 
@@ -32,9 +34,10 @@ export default function VDRDetailPage() {
   const [viewFile, setViewFile] = useState<File>();
 
   useEffect(() => {
-    const p = setInterval(() => refetch(), 1000 * 60 * 1);
-    return () => clearInterval(p);
-  }, []);
+    if (newIngesting) {
+      refetch();
+    }
+  }, [newIngesting]);
 
   const onCompanyFilesUploaded = (files: File[]) => {
     setSelectedFiles(files);
