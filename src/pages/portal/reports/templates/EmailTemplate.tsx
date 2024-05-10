@@ -46,6 +46,7 @@ export const EmailTemplate = memo(
     filename,
     initialTitle,
     initialContent,
+    onActionPerformed,
     onClose,
   }: {
     element?: HTMLDivElement;
@@ -54,6 +55,7 @@ export const EmailTemplate = memo(
     initialTitle?: string;
     initialContent?: string;
     onClose: () => void;
+    onActionPerformed?: () => void;
   }) => {
     const editorRef = useRef<any>(null);
     const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -75,6 +77,7 @@ export const EmailTemplate = memo(
     );
 
     const onSend = useCallback(async () => {
+      if (onActionPerformed) onActionPerformed();
       const container = document.createElement("div");
 
       // replace images for following email template
@@ -125,7 +128,7 @@ export const EmailTemplate = memo(
       }
 
       showConfirmModal(true);
-    }, [form, filename, element, prefix, sendEmails]);
+    }, [form, filename, element, prefix, onActionPerformed, sendEmails]);
 
     useEffect(() => {
       if (initialTitle || initialContent) {

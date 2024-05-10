@@ -89,7 +89,7 @@ export default function VDRsPage() {
         <SendEmailModal
           open={emailModal}
           initialTitle="We need following documents"
-          initialContent="Hello there, I would required following documents:"
+          initialContent="Hello there, I would require following documents:"
           onClose={() => showEmailModal(false)}
         />
       )}

@@ -226,7 +226,18 @@ export const reportApi = createApi({
         method: "PUT",
       }),
     }),
-
+    updateReportReviewStatus: builder.mutation<
+      any,
+      { reportId: number; review_status: number }
+    >({
+      query: ({ reportId, review_status }) => ({
+        url: `reports/${reportId}/update_review_status`,
+        method: "PUT",
+        body: {
+          review_status,
+        },
+      }),
+    }),
     deleteReport: builder.mutation<any, { reportId: number; viewMode: string }>(
       {
         query: ({ reportId }) => ({
@@ -237,10 +248,12 @@ export const reportApi = createApi({
       }
     ),
     getReportsByTenant: builder.query<any, { viewMode?: string }>({
-      async queryFn({ viewMode = "active" }, __, ___, apiBaseQuery) {
+      async queryFn({ viewMode }, __, ___, apiBaseQuery) {
         try {
           const reportsReponse = await apiBaseQuery({
-            url: `reports_tenant?view_mode=${viewMode}`,
+            url: viewMode
+              ? `reports_tenant?view_mode=${viewMode}`
+              : "reports_tenant",
           });
 
           if (reportsReponse.error) {
@@ -257,27 +270,29 @@ export const reportApi = createApi({
       keepUnusedDataFor: 0,
       providesTags: ["Report"],
     }),
-    getReportsByUnit: builder.query<any, { unitId: number; viewMode?: string }>({
-      async queryFn({ unitId, viewMode = "active" }, __, ___, apiBaseQuery) {
-        try {
-          const reportsReponse = await apiBaseQuery({
-            url: `reports/company/${unitId}?view_mode=${viewMode}`,
-          });
+    getReportsByUnit: builder.query<any, { unitId: number; viewMode?: string }>(
+      {
+        async queryFn({ unitId, viewMode = "active" }, __, ___, apiBaseQuery) {
+          try {
+            const reportsReponse = await apiBaseQuery({
+              url: `reports/company/${unitId}?view_mode=${viewMode}`,
+            });
 
-          if (reportsReponse.error) {
-            throw reportsReponse.error;
+            if (reportsReponse.error) {
+              throw reportsReponse.error;
+            }
+
+            return {
+              data: reportsReponse.data,
+            };
+          } catch (err) {
+            return handleCatchError(err);
           }
-
-          return {
-            data: reportsReponse.data,
-          };
-        } catch (err) {
-          return handleCatchError(err);
-        }
-      },
-      keepUnusedDataFor: 0,
-      providesTags: ["Report"],
-    }),
+        },
+        keepUnusedDataFor: 0,
+        providesTags: ["Report"],
+      }
+    ),
     getReportsBySetup: builder.query<
       any,
       { viewMode?: string; setupId?: number }
@@ -417,5 +432,6 @@ export const {
   useGetChatHistoryQuery,
   useUpdateReportMutation,
   useMarkReportMutation,
+  useUpdateReportReviewStatusMutation,
   useExecuteReportBackgroundMutation,
 } = reportApi;

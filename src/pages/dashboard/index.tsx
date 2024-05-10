@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   colors,
   Box,
+  // Grid,
   Stack,
   Typography,
   Autocomplete,
@@ -21,16 +22,28 @@ import { getUniques } from "../../shared/utils/basic";
 
 const reviewStatusDict: Record<number, any> = {
   0: {
-    label: "Requested",
-    color: colors.red[500],
+    label: "Generated",
+    color: colors.blue[500],
   },
   1: {
-    label: "Reviewed",
-    color: colors.green[500],
+    label: "Running",
+    color: colors.orange[500],
   },
   2: {
-    label: "Need to update",
-    color: colors.orange[500],
+    label: "Review Requested",
+    color: colors.pink[500],
+  },
+  3: {
+    label: "Change Requested",
+    color: colors.amber[500],
+  },
+  4: {
+    label: "Finalized",
+    color: colors.green[500],
+  },
+  5: {
+    label: "Failed to generate",
+    color: colors.red[500],
   },
 };
 
@@ -118,7 +131,7 @@ const DashboardPage = () => {
   const { isLoading: loadingPersonas, data: personas } = useGetPersonasQuery();
   const { isLoading: loadingReports, data: reports } =
     useGetReportsByTenantQuery(
-      { viewMode: "active" },
+      {},
       {
         skip: loadingPersonas,
       }
@@ -277,7 +290,7 @@ const DashboardPage = () => {
           }}
         >
           <Typography variant="h5" fontWeight="bold">
-            Dashboard
+            Anaylst Configured Reports
           </Typography>
           <Box mr="auto" />
           <Autocomplete
@@ -332,15 +345,12 @@ const DashboardPage = () => {
             ))}
           </TextField>
         </Box>
-        <Typography variant="body1" fontWeight="bold" gutterBottom>
-          Generated Reports
-        </Typography>
         {loadingReports || loadingPersonas ? (
           <Box p={4}>
             <CircularProgress />
           </Box>
         ) : (
-          <Box height={740}>
+          <Box height={720}>
             <AGTable columnDefs={columnDefs} rowData={filteredReports} />
           </Box>
         )}
