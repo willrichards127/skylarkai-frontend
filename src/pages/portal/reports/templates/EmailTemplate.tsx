@@ -77,6 +77,9 @@ export const EmailTemplate = memo(
     );
 
     const onSend = useCallback(async () => {
+      const emailAddresses = form.emails
+        .split(",")
+        .map((email) => email.trim());
       if (onActionPerformed) onActionPerformed();
       const container = document.createElement("div");
 
@@ -117,13 +120,13 @@ export const EmailTemplate = memo(
           base64str,
           filename: filename || "Report.pdf",
           template: iframeContainer.outerHTML,
-          emails: form.emails.split(",").map((email) => email.trim()),
+          emails: emailAddresses,
         });
       } else {
         sendEmails({
           subject: form.title,
           template: iframeContainer.outerHTML,
-          emails: form.emails.split(",").map((email) => email.trim()),
+          emails: emailAddresses,
         });
       }
 

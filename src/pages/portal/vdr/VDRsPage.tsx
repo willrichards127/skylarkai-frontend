@@ -1,9 +1,10 @@
-import { Box, Button, CircularProgress, Grid, Typography } from "@mui/material";
+import { Box, Button, CircularProgress } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { VDRCard } from "./components/VDRCard";
 import { useCallback, useState } from "react";
 import { NewVDRModal } from "./components/NewVDRModal";
 import { SendEmailModal } from "../../../components/modals/SendEmailModal";
+import TabContainer from "../../../components/TabContainer";
 import { useGetVDRsQuery } from "../../../redux/services/vdrApi";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
@@ -14,6 +15,7 @@ export default function VDRsPage() {
   const unitName = searchParams.get("unitName");
   const type = searchParams.get("type");
 
+  const [viewMode, setViewMode] = useState<string>("active");
   const [emailModal, showEmailModal] = useState<boolean>(false);
   const [newVDRModal, showNewVDRModal] = useState<boolean>(false);
   const { data, isLoading } = useGetVDRsQuery({ unitId: +params.unitId! });
@@ -22,60 +24,48 @@ export default function VDRsPage() {
     showEmailModal(true);
   }, []);
 
+  const onSwitchViewMode = useCallback((mode: string) => {
+    setViewMode(mode);
+  }, []);
+
   return (
-    <Box
-      sx={{ display: "flex", flexDirection: "column", height: "100%", p: 2 }}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 2,
-          mb: 2,
-        }}
-      >
-        <Typography variant="h6" fontWeight="bold">
-          Virtual Data Rooms
-        </Typography>
-        <Box mr="auto" />
-        <Button variant="contained" onClick={onShowEmailTemplate}>
-          Send Email
-        </Button>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => showNewVDRModal(true)}
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      {isLoading ? (
+        <Box textAlign="center" p={4}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <TabContainer
+          viewMode={viewMode}
+          onSwitchViewMode={onSwitchViewMode}
+          suffixActionRenderer={
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <Button variant="contained" onClick={onShowEmailTemplate}>
+                Send Email
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => showNewVDRModal(true)}
+              >
+                Add VDR
+              </Button>
+            </Box>
+          }
         >
-          Add VDR
-        </Button>
-      </Box>
-      <Box
-        sx={{
-          height: "calc(100% - 64px)",
-        }}
-      >
-        {isLoading ? (
-          <Box textAlign="center" p={4}>
-            <CircularProgress />
-          </Box>
-        ) : data ? (
-          <Grid container spacing={4}>
-            {data.map((vdr) => (
-              <Grid key={vdr.id} item xs={12} sm={6} md={4} lg={3}>
-                <VDRCard
-                  key={vdr.id}
-                  {...vdr}
-                  onCard={() =>
-                    navigate(
-                      `/portal/vdrs/${vdr.id}?unitId=${params.unitId}&unitName=${unitName}&type=${type}`
-                    )
-                  }
-                />
-              </Grid>
-            ))}
-          </Grid>
-        ) : null}
-      </Box>
+          {(data || []).map((vdr) => (
+            <VDRCard
+              key={vdr.id}
+              {...vdr}
+              onCard={() =>
+                navigate(
+                  `/portal/vdrs/${vdr.id}?unitId=${params.unitId}&unitName=${unitName}&type=${type}`
+                )
+              }
+            />
+          ))}
+        </TabContainer>
+      )}
       {newVDRModal && (
         <NewVDRModal
           open={newVDRModal}

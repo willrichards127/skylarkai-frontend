@@ -158,7 +158,6 @@ export const reportApi = createApi({
         }
       },
     }),
-
     reGenerateReport: builder.mutation<
       any,
       { reportId: number; setupId: number; queryType: string; template: string }
@@ -433,5 +432,5 @@ export const {
   useUpdateReportMutation,
   useMarkReportMutation,
   useUpdateReportReviewStatusMutation,
-  useExecuteReportBackgroundMutation,
+  useExecuteReportBackgroundMutation
 } = reportApi;

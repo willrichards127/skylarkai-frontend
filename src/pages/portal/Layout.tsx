@@ -41,6 +41,9 @@ export const Layout = ({
           "&.MuiTabs-root": {
             height: 56,
           },
+          "& .MuiButtonBase-root": {
+            minHeight: 56,
+          },
         }}
       >
         <Tab

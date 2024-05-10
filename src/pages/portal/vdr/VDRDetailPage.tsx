@@ -90,7 +90,7 @@ export default function VDRDetailPage() {
               sx={{ minWidth: 140, mr: 2 }}
               onClick={onIngestFiles}
             >
-              Ingest File
+              Ingest Files
             </Button>
           </Box>
           <Box sx={{ p: 2 }}>

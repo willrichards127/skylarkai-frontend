@@ -70,6 +70,7 @@ export const VDRCard = memo(
           borderRadius: 2,
           display: "flex",
           alignItems: "center",
+          width: 360
         }}
       >
         <CardActionArea

@@ -116,9 +116,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
           initialTitle: "Review Required",
           initialContent: `
             <p>Hello there, I would require review for this report:</p>
-            <a href="${
-              import.meta.env.VITE_API_URL
-            }portal/reports/${reportId}?unitId=${unitId}&unitName=${unitName}&type=${type}&reportName=${reportName}&setupId=${setupId}" target="_blank">${reportName}</a>
+            <a href='report_link:${reportId}?unitId=${unitId}&unitName=${unitName}&type=${type}&reportName=${reportName}&setupId=${setupId}' target="_blank">${reportName}</a>
           `,
         };
       } else if (reason === "finalize") {
@@ -135,9 +133,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
           initialTitle: "Need to Change",
           initialContent: `
             <p>Hello there, this report is needed to be changed:</p>
-            <a href="${
-              import.meta.env.VITE_API_URL
-            }portal/reports/${reportId}?unitId=${unitId}&unitName=${unitName}&type=${type}&reportName=${reportName}&setupId=${setupId}" target="_blank">${reportName}</a>
+            <a href='report_link:${reportId}?unitId=${unitId}&unitName=${unitName}&type=${type}&reportName=${reportName}&setupId=${setupId}' target="_blank">${reportName}</a>
           `,
         };
       }

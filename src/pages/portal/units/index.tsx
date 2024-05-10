@@ -1,10 +1,9 @@
-import { useCallback, useState, useRef } from "react";
+import { useCallback, useState, useRef, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
   Box,
   Stack,
-  Divider,
   Button,
   Typography,
   CircularProgress,
@@ -14,6 +13,7 @@ import BusinessCenterIcon from "@mui/icons-material/BusinessCenter";
 import { currentUser } from "../../../redux/features/authSlice";
 import { NewUnitModal } from "./components/NewUnitModal";
 import { UnitCard } from "./components/UnitCard";
+import TabContainer from "../../../components/TabContainer";
 import { useGetUnitsQuery } from "../../../redux/services/setupApi";
 
 const UnitsPage = () => {
@@ -29,6 +29,7 @@ const UnitsPage = () => {
     type: type === "companies" ? 1 : 2,
   });
 
+  const [viewMode, setViewMode] = useState<string>("active");
   const [unitModal, showUnitModal] = useState<boolean>(false);
 
   const onAddUnit = useCallback(() => {
@@ -54,6 +55,10 @@ const UnitsPage = () => {
     [navigate, type]
   );
 
+  const onSwitchViewMode = useCallback((viewMode: string) => {
+    setViewMode(viewMode);
+  }, []);
+
   const onMoreItem = useCallback((unit: any, menuItemId: string) => {
     if (menuItemId === "edit") {
       unitRef.current = unit;
@@ -61,82 +66,65 @@ const UnitsPage = () => {
     }
   }, []);
 
+  useEffect(() => {
+    setViewMode("active");
+  }, [type]);
+
   return (
-    <Stack spacing={2} p={2} height="100%">
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Stack spacing={2} direction="row" alignItems="center">
-          {type === "companies" ? <ApartmentIcon /> : <BusinessCenterIcon />}
-          <Typography variant="h5" textTransform="capitalize">
-            {type}
-          </Typography>
-        </Stack>
-        <Button variant="contained" onClick={onAddUnit}>
-          + Add {type === "companies" ? "Company" : "Sector"}
-        </Button>
-      </Box>
-      <Divider />
-      <Box
-        sx={{
-          height: "calc(100% - 60px)",
-          overflowY: "auto",
-        }}
-      >
-        {isLoading ? (
-          <Box sx={{ p: 2, width: "100%", textAlign: "center" }}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          <Box
-            sx={{
-              display: "flex",
-              gap: 4,
-              flexWrap: "wrap",
-            }}
-          >
-            {units?.length ? (
-              units.map((unit) => (
-                <UnitCard
-                  key={unit.id}
-                  name={unit.name}
-                  created_at={unit.created_at}
-                  logo={unit.logo}
-                  author={unit.username}
-                  onCard={() => onCard(unit)}
-                  onMoreItem={(menuItemId) => onMoreItem(unit, menuItemId)}
-                  moreItems={[
-                    {
-                      id: "edit",
-                      content: "Edit",
-                      clickable: true,
-                    },
-                    {
-                      id: "delete",
-                      content: "Delete",
-                      clickable: true,
-                    },
-                  ]}
-                />
-              ))
-            ) : (
-              <Box
-                textAlign="center"
-                p={2}
-                color="grey"
-                fontSize={13}
-                width="100%"
-              >
-                No available {type}
-              </Box>
-            )}
-          </Box>
-        )}
-      </Box>
+    <Stack spacing={2} p={2}>
+      {isLoading ? (
+        <Box sx={{ p: 2, width: "100%", textAlign: "center" }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <TabContainer
+          hasDivider
+          headerHeight={90}
+          viewMode={viewMode}
+          onSwitchViewMode={onSwitchViewMode}
+          prefixActionRenderer={
+            <Stack spacing={2} direction="row" alignItems="center">
+              {type === "companies" ? (
+                <ApartmentIcon />
+              ) : (
+                <BusinessCenterIcon />
+              )}
+              <Typography variant="h5" textTransform="capitalize">
+                {type}
+              </Typography>
+            </Stack>
+          }
+          suffixActionRenderer={
+            <Button variant="contained" onClick={onAddUnit}>
+              + Add {type === "companies" ? "Company" : "Sector"}
+            </Button>
+          }
+        >
+          {(units || []).map((unit) => (
+            <UnitCard
+              key={unit.id}
+              name={unit.name}
+              created_at={unit.created_at}
+              logo={unit.logo}
+              author={unit.username}
+              onCard={() => onCard(unit)}
+              onMoreItem={(menuItemId) => onMoreItem(unit, menuItemId)}
+              moreItems={[
+                {
+                  id: "edit",
+                  content: "Edit",
+                  clickable: true,
+                },
+                {
+                  id: "archive",
+                  content: "Archive",
+                  clickable: true,
+                },
+              ]}
+            />
+          ))}
+        </TabContainer>
+      )}
       {unitModal && (
         <NewUnitModal
           open={unitModal}

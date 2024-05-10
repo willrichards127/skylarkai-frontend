@@ -55,6 +55,8 @@ function AppRouter() {
   const { user, token } = useSelector(currentUser);
 
   const redirectPath = useMemo(() => {
+    // check report page link includes token so that the user can redirect to report page
+
     if (!user || !token) {
       return "/login";
     } else {
