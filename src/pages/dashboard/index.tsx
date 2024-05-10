@@ -1,550 +1,350 @@
+import { useCallback, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   colors,
   Box,
-  Button,
-  Grid,
-  TextField,
+  Stack,
   Typography,
-  InputAdornment,
+  Autocomplete,
+  TextField,
   Chip,
+  Button,
+  CircularProgress,
+  MenuItem,
 } from "@mui/material";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import CircleIcon from "@mui/icons-material/Circle";
-import HourglassTopIcon from "@mui/icons-material/HourglassTop";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import BorderColorIcon from "@mui/icons-material/BorderColor";
-import ApexChart from "react-apexcharts";
+import moment from "moment";
+import { ColDef } from "ag-grid-community";
+import AGTable from "../../components/agTable/AGTable";
+import { useGetPersonasQuery } from "../../redux/services/userAPI";
+import { useGetReportsByTenantQuery } from "../../redux/services/reportApi";
+import { getUniques } from "../../shared/utils/basic";
 
-const chartColors = [
-  "#008FFB",
-  "#00E396",
-  "#FEB019",
-  "#FF4560",
-  "#775DD0",
-  "#3F51B5",
-  "#03A9F4",
-  "#4CAF50",
-  "#F9CE1D",
-  "#FF9800",
-];
-
-const statusColorDict: Record<string, any> = {
-  "0": {
-    color: "warning",
-    label: "In Progress",
-    icon: <HourglassTopIcon />,
+const reviewStatusDict: Record<number, any> = {
+  0: {
+    label: "Requested",
+    color: colors.red[500],
   },
-  "1": {
-    color: "success",
-    label: "Completed",
-    icon: <CheckCircleOutlineIcon />,
+  1: {
+    label: "Reviewed",
+    color: colors.green[500],
   },
-  "2": {
-    color: "info",
-    label: "Draft",
-    icon: <BorderColorIcon />,
+  2: {
+    label: "Need to update",
+    color: colors.orange[500],
   },
 };
 
-const targetCompanies = [
+const personaDict: Record<number, any> = {
+  1: {
+    name: "Analyst",
+    color: colors.green[500],
+  },
+  2: {
+    name: "Partner",
+    color: colors.pink[500],
+  },
+  3: {
+    name: "Target",
+    color: colors.brown[500],
+  },
+  5: {
+    name: "Admin",
+    color: colors.blue[500],
+  },
+};
+
+const durations = [
   {
-    id: "card_1",
-    name: "Baxter",
-    logo: "/companies/baxter.png",
+    label: "Today",
+    value: 0,
   },
   {
-    id: "card_2",
-    name: "J & J",
-    logo: "/companies/jj.png",
+    label: "Yesterday",
+    value: 1,
   },
   {
-    id: "card_3",
-    name: "United Technologies",
-    logo: "/companies/united_tech.png",
+    label: "Last 7 Days",
+    value: 7,
   },
   {
-    id: "card_4",
-    name: "Carrier",
-    logo: "/companies/carrier.png",
+    label: "Last 30 Days",
+    value: 30,
+  },
+  {
+    label: "Last 60 Days",
+    value: 60,
+  },
+  {
+    label: "Last 90 Days",
+    value: 90,
   },
 ];
 
-const companyData = [
-  {
-    status: "New Company",
-    count: 4,
-  },
-  {
-    status: "Active Company",
-    count: 8,
-  },
-  {
-    status: "Inactive Company",
-    count: 2,
-  },
-];
-
-const reportIssueData = [
-  {
-    status: "New Report",
-    count: 12,
-  },
-  {
-    status: "Resolved",
-    count: 7,
-  },
-  {
-    status: "In progress",
-    count: 1,
-  },
-];
-
-const supportTickets = [
-  {
-    id: "baxter0001",
-    status: 1, // 1: created, 2: resolved, 3: in progress
-    name: "Ticket Name 1",
-    created_at: "23 Jun, 2023, 10:12 AM",
-    created_by: "Baxter",
-  },
-  {
-    id: "baxter0002",
-    status: 2,
-    name: "Ticket Name 2",
-    created_at: "23 Jun, 2023, 10:12 AM",
-    created_by: "Baxter",
-  },
-  {
-    id: "baxter0003",
-    status: 1,
-    name: "Ticket Name 3",
-    created_at: "23 Jun, 2023, 10:12 AM",
-    created_by: "Baxter",
-  },
-  {
-    id: "baxter0004",
-    status: 1,
-    name: "Ticket Name 4",
-    created_at: "23 Jun, 2023, 10:12 AM",
-    created_by: "Baxter",
-  },
-  {
-    id: "baxter0005",
-    status: 3,
-    name: "Ticket Name 5",
-    created_at: "23 Jun, 2023, 10:12 AM",
-    created_by: "Baxter",
-  },
-  {
-    id: "baxter0006",
-    status: 2,
-    name: "Ticket Name 6",
-    created_at: "23 Jun, 2023, 10:12 AM",
-    created_by: "Baxter",
-  },
-];
-
-const records = [
-  {
-    work_order_id: "BAX1134",
-    target_company: "Baxter",
-    report_name: "Commercial Due Diligence Report",
-    sub_report_name: "Market Analysis",
-    logo: "/companies/baxter.png",
-    status: "0", // 0: in progress, 1: completed, 2: inactive
-    created_at: "Nov 11, 2023",
-  },
-  {
-    work_order_id: "BAX11345",
-    target_company: "Baxter",
-    report_name: "Commercial Due Diligence Report",
-    sub_report_name: "Market Analysis",
-    logo: "/companies/baxter.png",
-    status: "0",
-    created_at: "Nov 09, 2023",
-  },
-  {
-    work_order_id: "BAX11336",
-    target_company: "Baxter",
-    report_name: "Commercial Due Diligence Report",
-    sub_report_name: "Market Analysis",
-    logo: "/companies/baxter.png",
-    status: "1",
-    created_at: "Nov 08, 2023",
-  },
-  {
-    work_order_id: "BAX11338",
-    target_company: "Baxter",
-    report_name: "Commercial Due Diligence Report",
-    sub_report_name: "Market Analysis",
-    logo: "/companies/baxter.png",
-    status: "2",
-    created_at: "Nov 11, 2023",
-  },
-  {
-    work_order_id: "BAX11346",
-    target_company: "Baxter",
-    report_name: "Commercial Due Diligence Report",
-    sub_report_name: "Market Analysis",
-    logo: "/companies/baxter.png",
-    status: "1",
-    created_at: "Nov 08, 2023",
-  },
-  {
-    work_order_id: "BAX11358",
-    target_company: "Baxter",
-    report_name: "Commercial Due Diligence Report",
-    sub_report_name: "Market Analysis",
-    logo: "/companies/baxter.png",
-    status: "2",
-    created_at: "Nov 11, 2023",
-  },
-];
-
-const columns = [
-  // {
-  //   id: "work_order_id",
-  //   label: "Work Order ID",
-  // },
-  {
-    id: "target_company",
-    label: "Target Company",
-  },
-  {
-    id: "report_name",
-    label: "Report Name",
-  },
-  {
-    id: "sub_report_name",
-    label: "Sub-report Name",
-  },
-  {
-    id: "created_at",
-    label: "Created At",
-  },
-  {
-    id: "status",
-    label: "Status",
-  },
-  {
-    id: "action",
-    label: "Action",
-  },
-];
+const filtering = (
+  rows: any[],
+  filters: {
+    analyst: string;
+    target_company: string;
+    duration: number;
+  }
+) => {
+  let filtered = [...rows];
+  if (filters.analyst) {
+    filtered = filtered.filter((row) => row.username === filters.analyst);
+  }
+  if (filters.target_company) {
+    filtered = filtered.filter(
+      (row) => row.target_company === filters.target_company
+    );
+  }
+  filtered = filtered.filter(
+    (row) =>
+      moment(row.created_at) >= moment().subtract(filters.duration, "days")
+  );
+  return filtered;
+};
 
 const DashboardPage = () => {
-  return (
-    <Box sx={{ height: "100%", bgcolor: "secondary.dark", py: 4 }}>
-      <Box sx={{ display: "flex", alignItems: "center", p: 2 }}>
-        <Typography variant="h5">Dashboard Page</Typography>
-        <Box mr="auto" />
-        <TextField
-          select
-          size="small"
-          name="company"
-          label="Target Company"
-          // value={form.company}
-          // onChange={onChange}
-          SelectProps={{
-            native: true,
-          }}
-        >
-          {targetCompanies.map((company) => (
-            <option key={company.id} value={company.id}>
-              {company.name}
-            </option>
-          ))}
-        </TextField>
-        <TextField
-          size="small"
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <CalendarMonthIcon />
-              </InputAdornment>
-            ),
-          }}
-          defaultValue="Last week"
-          variant="outlined"
-          sx={{ ml: 2 }}
-        />
-      </Box>
-      <Box sx={{ p: 2, height: 'calc(100% - 40px)', overflowY: "auto" }}>
-        <Grid container spacing={2}>
-          <Grid item xs={8} sx={{ height: "100%" }}>
-            <Grid container spacing={2}>
-              <Grid item xs={6}>
-                <Box
-                  sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    bgcolor: "black",
-                  }}
-                >
-                  <Box fontWeight="bold">Target Company</Box>
-                  <ApexChart
-                    options={{
-                      colors: chartColors,
-                      theme: {
-                        mode: "dark",
-                      },
-                      chart: {
-                        animations: {
-                          enabled: false,
-                        },
-                        background: "transparent",
-                      },
-                      plotOptions: {
-                        pie: {
-                          donut: {
-                            labels: {
-                              show: true,
-                              name: {
-                                show: true,
-                                fontSize: "12",
-                              },
-                            },
-                          },
-                        },
-                      },
-                      labels: companyData.map((company) => company.status),
-                    }}
-                    series={companyData.map((company) => company.count)}
-                    type="donut"
-                    height="240px"
-                  />
-                </Box>
-              </Grid>
-              <Grid item xs={6}>
-                <Box sx={{ p: 2, borderRadius: 2, bgcolor: "black" }}>
-                  <Box fontWeight="bold">Report Issue</Box>
-                  <ApexChart
-                    options={{
-                      colors: chartColors,
-                      theme: {
-                        mode: "dark",
-                      },
-                      chart: {
-                        animations: {
-                          enabled: false,
-                        },
-                        background: "transparent",
-                      },
-                      plotOptions: {
-                        pie: {
-                          donut: {
-                            labels: {
-                              show: true,
-                              name: {
-                                show: true,
-                                fontSize: "12",
-                              },
-                            },
-                          },
-                        },
-                      },
-                      labels: reportIssueData.map((company) => company.status),
-                    }}
-                    series={reportIssueData.map((company) => company.count)}
-                    height="240px"
-                    type="donut"
-                  />
-                </Box>
-              </Grid>
-              <Grid item xs={6}>
-                <Box
-                  sx={{ p: 2, borderRadius: 2, bgcolor: "black", height: 260 }}
-                >
-                  <Box fontWeight="bold">Time Metrics</Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      gap: 2,
-                      justifyContent: "space-around",
-                      pt: 8,
-                    }}
-                  >
-                    <Box>
-                      <Box sx={{ fontSize: 16, fontWeight: "bold" }}>
-                        12 hrs
-                      </Box>
-                      <Box sx={{ color: "grey" }}>System Uptime</Box>
-                    </Box>
-                    <Box>
-                      <Box sx={{ fontSize: 16, fontWeight: "bold" }}>
-                        30 mins
-                      </Box>
-                      <Box sx={{ color: "grey" }}>System Downtime</Box>
-                    </Box>
-                  </Box>
-                </Box>
-              </Grid>
-              <Grid item xs={6}>
-                <Box
-                  sx={{ p: 2, borderRadius: 2, bgcolor: "black", height: 260 }}
-                >
-                  <Box fontWeight="bold" mb={2}>
-                    Target Company List
-                  </Box>
-                  <Box sx={{ height: 240, overflowY: "auto" }}>
-                    {targetCompanies.map((company) => (
-                      <Box
-                        key={company.id}
-                        sx={{
-                          display: "flex",
-                          gap: 2,
-                          alignItems: "center",
-                          py: 1,
-                        }}
-                      >
-                        <img
-                          src={company.logo}
-                          width={24}
-                          height={24}
-                          alt={company.name}
-                        />
-                        {company.name}
-                      </Box>
-                    ))}
-                  </Box>
-                </Box>
-              </Grid>
-            </Grid>
-          </Grid>
-          <Grid item xs={4} sx={{ height: "100%" }}>
-            <Box sx={{ p: 2, borderRadius: 2, bgcolor: "black", height: 570 }}>
-              <Box fontWeight="bold">Support Tickets</Box>
-              <Box sx={{ height: 480, overflowY: "auto", p: 2 }}>
-                {supportTickets.map((ticket) => (
-                  <Box
-                    key={ticket.id}
-                    sx={{
-                      display: "flex",
-                      gap: 2,
-                      alignItems: "center",
-                      py: 1,
-                      fontSize: 13,
-                    }}
-                  >
-                    <CircleIcon
-                      sx={{
-                        fontSize: 16,
-                        color:
-                          ticket.status === 1
-                            ? "red"
-                            : ticket.status === 2
-                            ? "green"
-                            : "blue",
-                      }}
-                    />
-                    <Box>{ticket.name}</Box>
-                    <Box>{ticket.created_at}</Box>
-                    <Box px={2}>{ticket.created_by}</Box>
-                  </Box>
-                ))}
-              </Box>
-            </Box>
-          </Grid>
-        </Grid>
-        <Box pt={4}>
-          <Box fontWeight="bold" mb={2}>
-            Generated Reports:
-          </Box>
+  const navigate = useNavigate();
+  const [filters, setFilters] = useState<{
+    analyst: string;
+    target_company: string;
+    duration: number;
+  }>({
+    analyst: "",
+    target_company: "",
+    duration: 7,
+  });
+  const { isLoading: loadingPersonas, data: personas } = useGetPersonasQuery();
+  const { isLoading: loadingReports, data: reports } =
+    useGetReportsByTenantQuery(
+      { viewMode: "active" },
+      {
+        skip: loadingPersonas,
+      }
+    );
+
+  const onAction = useCallback(
+    (row: Record<string, any>) => {
+      navigate(
+        `/portal/reports/${row.id}?unitId=${row.company_id}&unitName=${
+          row.target_company
+        }&type=${row.type === 1 ? "companies" : "sectors"}&reportName=${
+          row.report_name
+        }&setupId=${row.graph_id}&viewMode=active`
+      );
+    },
+    [navigate]
+  );
+
+  const columnDefs = useMemo<ColDef[]>(
+    () => [
+      { field: "id", headerName: "Report ID", maxWidth: 100 },
+      {
+        field: "report_name",
+        headerName: "Report Name",
+        minWidth: 240,
+        filter: "agTextColumnFilter",
+      },
+      {
+        field: "target_company",
+        headerName: "Target Company",
+        filter: "agTextColumnFilter",
+      },
+      {
+        field: "username",
+        headerName: "Reporter",
+        filter: "agTextColumnFilter",
+      },
+      {
+        field: "email",
+        headerName: "Email",
+        filter: "agTextColumnFilter",
+      },
+      {
+        field: "persona",
+        headerName: "Persona",
+        filter: "agTextColumnFilter",
+        cellRenderer: (params: any) => (
           <Box
-            component="table"
             sx={{
-              backgroundColor: "secondary.dark",
-              borderCollapse: "collapse",
-              width: "100%",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "42px",
             }}
           >
-            <thead>
-              <tr>
-                {columns.map((th) => (
-                  <Box
-                    key={th.id}
-                    component="th"
-                    sx={{
-                      fontSize: 14,
-                      color: "secondary.contrastText",
-                      bgcolor: "secondary.main",
-                      borderBottom: `1px solid ${colors.grey[800]}`,
-                      whiteSpace: "break-spaces",
-                      p: 2,
-                      textAlign: th.id === "target_company" ? "left" : "center",
-                    }}
-                  >
-                    {th.label}
-                  </Box>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {records.map((row, rowIndex) => (
-                <Box
-                  component="tr"
-                  key={`tr-${rowIndex}`}
-                  sx={{
-                    bgcolor: "black",
-                    "&:hover": {
-                      // bgcolor: colors.grey[600],
-                      cursor: "pointer",
-                    },
-                  }}
-                >
-                  {columns.map((col) => (
-                    <Box
-                      component="td"
-                      key={`td-${col.id}`}
-                      style={{
-                        fontSize: 14,
-                        padding: "12px 16px",
-                        textAlign: "center",
-                        whiteSpace: "break-spaces",
-                      }}
-                    >
-                      {col.id === "target_company" ? (
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 2,
-                          }}
-                        >
-                          <img
-                            src={(row as any)["logo"]}
-                            width={28}
-                            height={28}
-                            alt={(row as any)["logo"]}
-                          />
-                          {(row as any)[col.id]}
-                        </Box>
-                      ) : col.id === "status" ? (
-                        <Chip
-                          size="small"
-                          icon={statusColorDict[row[col.id]].icon}
-                          label={statusColorDict[row[col.id]].label}
-                          color={statusColorDict[row[col.id]].color}
-                          sx={{
-                            "&.MuiChip-root": { width: 120 },
-                            color: "white",
-                          }}
-                        />
-                      ) : col.id === "action" ? (
-                        <Box>
-                          <Button size="small">View</Button>
-                        </Box>
-                      ) : (
-                        (row as any)[col.id]
-                      )}
-                    </Box>
-                  ))}
-                </Box>
-              ))}
-            </tbody>
+            <Chip
+              size="small"
+              label={personaDict[params.data.persona_id].name}
+              sx={{
+                bgcolor: personaDict[params.data.persona_id].color,
+                "&.MuiChip-root": {
+                  borderRadius: 1,
+                  height: 20,
+                },
+              }}
+            />
           </Box>
+        ),
+      },
+      {
+        field: "review_status",
+        headerName: "Status",
+        filter: "agTextColumnFilter",
+        cellRenderer: (params: any) => (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "42px",
+            }}
+          >
+            <Chip
+              size="small"
+              label={reviewStatusDict[params.data.review_status].label}
+              sx={{
+                fontSize: 12,
+                "&.MuiChip-root": { width: 120 },
+                color: "white",
+                bgcolor: reviewStatusDict[params.data.review_status].color,
+              }}
+            />
+          </Box>
+        ),
+      },
+      {
+        field: "created_at",
+        headerName: "Created At",
+        filter: "agDateColumnFilter",
+        valueFormatter: (params: any) =>
+          new Date(params.value).toLocaleString(),
+      },
+      {
+        field: "actions",
+        headerName: "Actions",
+        cellRenderer: (params: any) => {
+          return (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "42px",
+              }}
+            >
+              {params.data.review_status !== 1 && (
+                <Button
+                  size="small"
+                  variant="contained"
+                  color={"info"}
+                  onClick={() => onAction(params.data as Record<string, any>)}
+                >
+                  View
+                </Button>
+              )}
+            </Box>
+          );
+        },
+      },
+    ],
+    [onAction]
+  );
+
+  const filteredReports = useMemo(() => {
+    if (!reports?.length) return [];
+    return filtering(
+      reports.map((report: any) => ({
+        ...report,
+        report_name: report.report_metadata.reportname,
+        persona: (personas || []).find(
+          (persona) => persona.id === report.persona_id
+        )?.name,
+      })),
+      filters
+    );
+  }, [reports, personas, filters]);
+
+  return (
+    <Box p={4}>
+      <Stack spacing={2}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+          }}
+        >
+          <Typography variant="h5" fontWeight="bold">
+            Dashboard
+          </Typography>
+          <Box mr="auto" />
+          <Autocomplete
+            options={getUniques(
+              filteredReports.map((report: any) => report.username)
+            )}
+            getOptionLabel={(option) => option}
+            value={filters.analyst}
+            onChange={(
+              _: React.SyntheticEvent<Element, Event>,
+              newValue: string | null
+            ) => setFilters((prev) => ({ ...prev, analyst: newValue || "" }))}
+            renderInput={(params) => (
+              <TextField {...params} size="small" label="Analyst" />
+            )}
+            sx={{ minWidth: 320 }}
+          />
+          <Autocomplete
+            options={getUniques(
+              filteredReports.map((report: any) => report.target_company)
+            )}
+            getOptionLabel={(option) => option}
+            value={filters.target_company}
+            onChange={(
+              _: React.SyntheticEvent<Element, Event>,
+              newValue: string | null
+            ) =>
+              setFilters((prev) => ({
+                ...prev,
+                target_company: newValue || "",
+              }))
+            }
+            renderInput={(params) => (
+              <TextField {...params} size="small" label="Target Company" />
+            )}
+            sx={{ minWidth: 320 }}
+          />
+          <TextField
+            size="small"
+            label="Select Date"
+            select
+            value={filters.duration}
+            onChange={(
+              e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+            ) => setFilters((prev) => ({ ...prev, duration: +e.target.value }))}
+            sx={{ minWidth: 320 }}
+          >
+            {durations.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </TextField>
         </Box>
-      </Box>
+        <Typography variant="body1" fontWeight="bold" gutterBottom>
+          Generated Reports
+        </Typography>
+        {loadingReports || loadingPersonas ? (
+          <Box p={4}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <Box height={740}>
+            <AGTable columnDefs={columnDefs} rowData={filteredReports} />
+          </Box>
+        )}
+      </Stack>
     </Box>
   );
 };

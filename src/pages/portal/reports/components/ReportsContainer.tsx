@@ -4,14 +4,14 @@ import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 // import { NewReportModal } from "./NewReportModal";
 import { ReportTabContainer } from "./ReportTabContainer";
-import { useGetReportsQuery } from "../../../../redux/services/reportApi";
+import { useGetReportsByUnitQuery } from "../../../../redux/services/reportApi";
 
 const ReportsContainer = memo(() => {
   const params = useParams();
 
   const [viewMode, setViewMode] = useState<string>("active");
   // const [newReportModal, showNewReportModal] = useState<boolean>(false);
-  const { isFetching: fetchingReports, data: reports } = useGetReportsQuery(
+  const { isFetching: fetchingReports, data: reports } = useGetReportsByUnitQuery(
     { unitId: +params.unitId!, viewMode }
   );
 

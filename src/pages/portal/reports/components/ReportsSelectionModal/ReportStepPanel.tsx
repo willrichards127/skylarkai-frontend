@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { Box, TextField, Typography, CircularProgress } from "@mui/material";
-import { useGetReportsQuery } from "../../../../../redux/services/reportApi";
+import { useGetReportsByUnitQuery } from "../../../../../redux/services/reportApi";
 
 export const ReportStepPanel = ({
   companyId,
@@ -11,7 +11,7 @@ export const ReportStepPanel = ({
 }) => {
   const [searchText, setSearchText] = useState<string>("");
 
-  const { isLoading, data: reports } = useGetReportsQuery({
+  const { isLoading, data: reports } = useGetReportsByUnitQuery({
     unitId: companyId,
     viewMode: "active",
   });

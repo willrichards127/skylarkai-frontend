@@ -236,8 +236,28 @@ export const reportApi = createApi({
         invalidatesTags: ["Report"],
       }
     ),
+    getReportsByTenant: builder.query<any, { viewMode?: string }>({
+      async queryFn({ viewMode = "active" }, __, ___, apiBaseQuery) {
+        try {
+          const reportsReponse = await apiBaseQuery({
+            url: `reports_tenant?view_mode=${viewMode}`,
+          });
 
-    getReports: builder.query<any, { unitId: number; viewMode?: string }>({
+          if (reportsReponse.error) {
+            throw reportsReponse.error;
+          }
+
+          return {
+            data: reportsReponse.data,
+          };
+        } catch (err) {
+          return handleCatchError(err);
+        }
+      },
+      keepUnusedDataFor: 0,
+      providesTags: ["Report"],
+    }),
+    getReportsByUnit: builder.query<any, { unitId: number; viewMode?: string }>({
       async queryFn({ unitId, viewMode = "active" }, __, ___, apiBaseQuery) {
         try {
           const reportsReponse = await apiBaseQuery({
@@ -386,9 +406,9 @@ export const {
   useGenerateReportMutation,
   useReGenerateReportMutation,
   useGenerateCustomReportMutation,
-  useGetReportsQuery,
+  useGetReportsByTenantQuery,
+  useGetReportsByUnitQuery,
   useGetReportsBySetupQuery,
-  useLazyGetReportsQuery,
   useGetReportQuery,
   useLazyGetReportQuery,
   useDeleteReportMutation,

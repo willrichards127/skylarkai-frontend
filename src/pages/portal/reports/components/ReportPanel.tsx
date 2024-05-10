@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   Box,
@@ -17,20 +18,25 @@ import CloseIcon from "@mui/icons-material/Close";
 import { ReportViewer } from "../templates/ReportViewer";
 import { ReportsSelectionModal } from "./ReportsSelectionModal";
 import { InviteCollaboraterModal } from "./InviteCollaboraterModal";
+import { ReviewSendModal } from "./ReviewSendModal";
 import { useGetSetupsQuery } from "../../../../redux/services/setupApi";
 import {
   reportBottomHeight,
   reportTabHeaderHeight,
 } from "../../../../shared/models/constants";
+import { currentUser } from "../../../../redux/features/authSlice";
 
 const ReportPanel = ({ reportId }: { reportId: string }) => {
   const navigate = useNavigate();
+  const { user } = useSelector(currentUser);
   const [searchParams] = useSearchParams();
   const setupId = searchParams.get("setupId");
   const unitId = searchParams.get("unitId");
   const unitName = searchParams.get("unitName");
   const type = searchParams.get("type");
   const reportName = searchParams.get("reportName");
+
+  const isPartner = user!.persona_id === 2;
 
   const { isLoading, data: setups } = useGetSetupsQuery({
     unitId: +unitId!,
@@ -39,6 +45,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
 
   const [reportsModal, showReportsModal] = useState<boolean>(false);
   const [inviteModal, showInviteModal] = useState<boolean>(false);
+  const [reviewModal, showReviewModal] = useState<boolean>(false);
   const [reportTabs, setReportTabs] = useState<
     {
       setupId: number;
@@ -85,6 +92,10 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
 
   const onInvite = useCallback(() => {
     showInviteModal(true);
+  }, []);
+
+  const onShowSendReviewModal = useCallback(() => {
+    showReviewModal(true);
   }, []);
 
   useEffect(() => {
@@ -221,8 +232,13 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
           px: 1,
         }}
       >
-        <Button variant="contained" sx={{ minWidth: 140 }}>
-          Send For Review
+        <Button
+          variant="contained"
+          sx={{ minWidth: 140 }}
+          color={isPartner ? "success" : "primary"}
+          onClick={onShowSendReviewModal}
+        >
+          {isPartner ? "Complete Review" : "Send For Review"}
         </Button>
       </Box>
       {reportsModal && (
@@ -236,6 +252,13 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
         <InviteCollaboraterModal
           open={inviteModal}
           onClose={() => showInviteModal(false)}
+          onActionPerformed={() => {}}
+        />
+      )}
+      {reviewModal && (
+        <ReviewSendModal
+          open={reviewModal}
+          onClose={() => showReviewModal(false)}
           onActionPerformed={() => {}}
         />
       )}

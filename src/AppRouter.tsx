@@ -64,7 +64,7 @@ function AppRouter() {
       } else if (user.persona_id === 1) {
         // analyst role
         return "/portal/units?type=companies";
-      } else if (user.persona_id ===2) {
+      } else if (user.persona_id === 2) {
         // partner role
         return "/dashboard";
       }
@@ -77,6 +77,8 @@ function AppRouter() {
   const onCloseTab = useCallback(() => {
     addActivity({ user_action_id: 2 });
   }, [addActivity]);
+
+  useEffect(() => {}, []);
 
   useEffect(() => {
     window.addEventListener("beforeunload", onCloseTab);
@@ -102,9 +104,7 @@ function AppRouter() {
             path: "*",
             element: <>No matched.</>,
           },
-          {path: "/",
-            element: <Navigate to={redirectPath} />
-          },
+          { path: "/", element: <Navigate to={redirectPath} /> },
           {
             path: "/login",
             element: <LoginForm />,
