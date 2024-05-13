@@ -1,4 +1,4 @@
-import { useCallback, useState, useMemo, useRef } from "react";
+import { useCallback, useState, useMemo, useEffect, useRef } from "react";
 import { Box, Button, CircularProgress } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { VDRCard } from "./components/VDRCard";
@@ -10,6 +10,7 @@ import {
   useSaveVDRMutation,
 } from "../../../redux/services/vdrApi";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useNotification } from "../../../shared/socket/NotificationProvider";
 
 export default function VDRsPage() {
   const params = useParams();
@@ -23,7 +24,7 @@ export default function VDRsPage() {
   const [viewMode, setViewMode] = useState<string>("active");
   const [emailModal, showEmailModal] = useState<boolean>(false);
   const [newVDRModal, showNewVDRModal] = useState<boolean>(false);
-  const { data, isLoading } = useGetVDRsQuery({
+  const { data, isLoading, refetch } = useGetVDRsQuery({
     unitId: +params.unitId!,
     view_mode: viewMode,
   });
@@ -49,6 +50,14 @@ export default function VDRsPage() {
     ],
     [viewMode]
   );
+  const { newIngesting } = useNotification();
+  
+
+  useEffect(() => {
+    if (newIngesting) {
+      refetch();
+    }
+  }, [newIngesting]);
 
   const onShowEmailTemplate = useCallback(() => {
     showEmailModal(true);

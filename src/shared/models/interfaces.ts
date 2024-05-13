@@ -173,4 +173,6 @@ export interface ITemplateItemPure
 export interface ITemplate {
   title: string;
   data: ITemplateItemPure[];
+  recursion?: number;
+  default_llm?: "OpenAI" | "Anthropic";
 }

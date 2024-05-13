@@ -166,16 +166,23 @@ export const ExecutionModal = memo(
           });
 
           if (isBackground) {
-            const res = await executionReport({
-              unitName,
-              setupId: setup.id!,
-              analysisType: "financial_diligence",
-              report: {
-                title: templateData.title,
-                data: items,
-              },
-            }).unwrap();
-            console.log(res);
+            const openAINodeIndex = updatedSetup.nodes.findIndex(
+              (node) => node.template_node_id == 7
+            );
+            if (openAINodeIndex > -1) {
+
+              await executionReport({
+                unitName,
+                setupId: setup.id!,
+                analysisType: "financial_diligence",
+                report: {
+                  title: templateData.title,
+                  data: items,
+                  default_llm: updatedSetup.nodes[openAINodeIndex].properties?.model || "OpenAI",
+                  recursion: updatedSetup.nodes[openAINodeIndex].properties?.recursion || 5,
+                },
+              }).unwrap();
+            }
           } else {
             setItems(items);
 
