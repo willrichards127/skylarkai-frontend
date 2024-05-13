@@ -253,15 +253,16 @@ export const setupApi = createApi({
       any,
       {
         id: number;
-        name: string;
+        name?: string;
         logo_file?: File;
         type?: number;
         website?: string;
+        is_active?: boolean;
         description?: string;
       }
     >({
       async queryFn(
-        { id, name, logo_file, website, description, type = 1 },
+        { id, name, logo_file, website, description, is_active, type = 1 },
         _,
         __,
         apiBaseQuery
@@ -282,6 +283,9 @@ export const setupApi = createApi({
           }
           if (logo_file) {
             formdata.append("logo_file", logo_file);
+          }
+          if (is_active !== undefined && is_active !== null) {
+            formdata.append("is_active", is_active.toString());
           }
 
           const response: any = await apiBaseQuery({

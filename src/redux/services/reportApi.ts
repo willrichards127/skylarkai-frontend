@@ -158,7 +158,6 @@ export const reportApi = createApi({
         }
       },
     }),
-
     reGenerateReport: builder.mutation<
       any,
       { reportId: number; setupId: number; queryType: string; template: string }
@@ -225,8 +224,21 @@ export const reportApi = createApi({
         url: `reports/${reportId}/marked`,
         method: "PUT",
       }),
+      invalidatesTags: ["Report"],
     }),
-
+    updateReportReviewStatus: builder.mutation<
+      any,
+      { reportId: number; review_status: number }
+    >({
+      query: ({ reportId, review_status }) => ({
+        url: `reports/${reportId}/update_review_status`,
+        method: "PUT",
+        body: {
+          review_status,
+        },
+      }),
+      invalidatesTags: ["Report"],
+    }),
     deleteReport: builder.mutation<any, { reportId: number; viewMode: string }>(
       {
         query: ({ reportId }) => ({
@@ -236,12 +248,13 @@ export const reportApi = createApi({
         invalidatesTags: ["Report"],
       }
     ),
-
-    getReports: builder.query<any, { unitId: number; viewMode?: string }>({
-      async queryFn({ unitId, viewMode = "active" }, __, ___, apiBaseQuery) {
+    getReportsByTenant: builder.query<any, { viewMode?: string }>({
+      async queryFn({ viewMode }, __, ___, apiBaseQuery) {
         try {
           const reportsReponse = await apiBaseQuery({
-            url: `reports/company/${unitId}?view_mode=${viewMode}`,
+            url: viewMode
+              ? `reports_tenant?view_mode=${viewMode}`
+              : "reports_tenant",
           });
 
           if (reportsReponse.error) {
@@ -258,6 +271,29 @@ export const reportApi = createApi({
       keepUnusedDataFor: 0,
       providesTags: ["Report"],
     }),
+    getReportsByUnit: builder.query<any, { unitId: number; viewMode?: string }>(
+      {
+        async queryFn({ unitId, viewMode = "active" }, __, ___, apiBaseQuery) {
+          try {
+            const reportsReponse = await apiBaseQuery({
+              url: `reports/company/${unitId}?view_mode=${viewMode}`,
+            });
+
+            if (reportsReponse.error) {
+              throw reportsReponse.error;
+            }
+
+            return {
+              data: reportsReponse.data,
+            };
+          } catch (err) {
+            return handleCatchError(err);
+          }
+        },
+        keepUnusedDataFor: 0,
+        providesTags: ["Report"],
+      }
+    ),
     getReportsBySetup: builder.query<
       any,
       { viewMode?: string; setupId?: number }
@@ -386,9 +422,9 @@ export const {
   useGenerateReportMutation,
   useReGenerateReportMutation,
   useGenerateCustomReportMutation,
-  useGetReportsQuery,
+  useGetReportsByTenantQuery,
+  useGetReportsByUnitQuery,
   useGetReportsBySetupQuery,
-  useLazyGetReportsQuery,
   useGetReportQuery,
   useLazyGetReportQuery,
   useDeleteReportMutation,
@@ -397,5 +433,6 @@ export const {
   useGetChatHistoryQuery,
   useUpdateReportMutation,
   useMarkReportMutation,
-  useExecuteReportBackgroundMutation,
+  useUpdateReportReviewStatusMutation,
+  useExecuteReportBackgroundMutation
 } = reportApi;

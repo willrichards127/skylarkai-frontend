@@ -1,16 +1,20 @@
 import React, { useCallback, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 import { Box, TextField, Typography, CircularProgress } from "@mui/material";
 import { useGetUnitsQuery } from "../../../../../redux/services/setupApi";
+import { currentUser } from "../../../../../redux/features/authSlice";
 
 export const UnitStepPanel = ({
   onSelectedUnit,
 }: {
   onSelectedUnit: (unit: any) => void;
 }) => {
+  const { user } = useSelector(currentUser);
   const [searchText, setSearchText] = useState<string>("");
   const [selectedUnit, setSelectedUnit] = useState<any>(null);
 
   const { isLoading: loadingUnits, data: units } = useGetUnitsQuery({
+    isPartner: user!.persona_id === 2,
     view_mode: "active",
   });
 

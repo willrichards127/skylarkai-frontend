@@ -12,7 +12,7 @@ export const authApi = createApi({
     registerUser: builder.mutation<
       {
         message: string;
-        user_id: number;
+        id: number;
         tenant_id: string;
         persona_id: number;
       },
@@ -30,7 +30,7 @@ export const authApi = createApi({
       }),
     }),
     loginUser: builder.mutation<
-      { token: string; user_id: number },
+      { token: string; id: number },
       { email: string; password: string }
     >({
       query: ({ email, password }) => ({
@@ -41,7 +41,7 @@ export const authApi = createApi({
           password,
         },
       }),
-      transformResponse: (response: { token: string; user_id: number }) => {
+      transformResponse: (response: { token: string; id: number }) => {
         saveStoreValue("token", response.token);
         return response;
       },

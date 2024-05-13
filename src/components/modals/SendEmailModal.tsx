@@ -7,6 +7,7 @@ export const SendEmailModal = memo(
   ({
     open,
     onClose,
+    onActionPerformed,
     prefix,
     element,
     filename,
@@ -20,6 +21,7 @@ export const SendEmailModal = memo(
     initialTitle?: string;
     initialContent?: string;
     onClose: () => void;
+    onActionPerformed?: () => void;
   }) => {
     return (
       <XModal
@@ -36,6 +38,7 @@ export const SendEmailModal = memo(
             initialTitle={initialTitle}
             initialContent={initialContent}
             onClose={onClose}
+            onActionPerformed={onActionPerformed}
           />
         </Box>
       </XModal>

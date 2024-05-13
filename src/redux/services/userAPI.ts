@@ -18,16 +18,16 @@ export const userApi = createApi({
       query: () => ({ url: "tenants", method: "GET" }),
     }),
     getUsers: builder.query<IUser[], void>({
-      query: () => ({ url: "users", method: "GET" }),
+      query: () => ({
+        url: "users",
+        method: "GET",
+      }),
       keepUnusedDataFor: 0,
       providesTags: ["Users"],
     }),
-    updateUser: builder.mutation<
-      void,
-      { user_id: number; user_status: number }
-    >({
-      query: ({ user_id, user_status }) => ({
-        url: `users/${user_id}/update_status`,
+    updateUser: builder.mutation<void, { id: number; user_status: number }>({
+      query: ({ id, user_status }) => ({
+        url: `users/${id}/update_status`,
         method: "POST",
         data: {
           user_status,

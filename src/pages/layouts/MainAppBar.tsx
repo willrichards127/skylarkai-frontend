@@ -84,6 +84,7 @@ export const MainAppBar = memo(() => {
   );
 
   const isAdmin = user!.persona_id === 5; // admin
+  const isPartner = user!.persona_id === 2;
 
   return (
     <AppBar position="static" color="secondary" enableColorOnDark>
@@ -144,25 +145,27 @@ export const MainAppBar = memo(() => {
               height: "100%",
             }}
           >
-            <Box
-              component={Link}
-              to="/dashboard"
-              sx={{
-                ml: 4,
-                color: "white",
-                textDecoration: "none",
-                fontSize: 14,
-                fontWeight: location.pathname.includes("/dashboard")
-                  ? "bold"
-                  : "normal",
-                opacity: location.pathname.includes("/dashboard") ? 1 : 0.3,
-              }}
-            >
-              <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-                <DashboardIcon />
-                Dashboard
+            {isPartner && (
+              <Box
+                component={Link}
+                to="/dashboard"
+                sx={{
+                  ml: 4,
+                  color: "white",
+                  textDecoration: "none",
+                  fontSize: 14,
+                  fontWeight: location.pathname.includes("/dashboard")
+                    ? "bold"
+                    : "normal",
+                  opacity: location.pathname.includes("/dashboard") ? 1 : 0.3,
+                }}
+              >
+                <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                  <DashboardIcon />
+                  Dashboard
+                </Box>
               </Box>
-            </Box>
+            )}
             <Box
               sx={{
                 ml: 4,

@@ -65,7 +65,6 @@ export const SelectDocuments = ({
   onNext: (args: ICustomInstance) => void;
   onGotoMain: () => void;
 }) => {
-  console.log('HEY===', instance)
   const { isLoading: loadingTransactions, data: dataTransactions } =
     useGetTransactionsQuery({
       company_name: instance.company_name,

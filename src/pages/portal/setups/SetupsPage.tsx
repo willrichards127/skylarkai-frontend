@@ -1,8 +1,14 @@
-import { Box, Typography, Button } from "@mui/material";
+import { useCallback, useState, useMemo } from "react";
+import { Box, CircularProgress, Button } from "@mui/material";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
-import SetupsContainer from "./components/SetupsContainer";
-import { useCallback, useState } from "react";
+import TabContainer from "../../../components/TabContainer";
+import { XCard } from "../../../components/XCard";
+import {
+  useGetSetupsQuery,
+  useDeleteSetupMutation,
+  useMarkSetupMutation,
+} from "../../../redux/services/setupApi";
 
 export default function SetupsPage() {
   const params = useParams();
@@ -13,50 +19,105 @@ export default function SetupsPage() {
 
   const [viewMode, setViewMode] = useState<string>("active");
 
-  const onSwitchView = useCallback(
-    (viewMode: string) => () => {
-      setViewMode(viewMode);
+  const moreItems = useMemo(
+    () => [
+      ...(viewMode === "archived"
+        ? [
+            {
+              id: "mark_as_active",
+              content: "Mark as active",
+              clickable: true,
+            },
+          ]
+        : [
+            {
+              id: "archive",
+              content: "Archive",
+              clickable: true,
+            },
+          ]),
+    ],
+    [viewMode]
+  );
+
+  const {
+    data: setups,
+    isLoading,
+    refetch,
+  } = useGetSetupsQuery({ unitId: +params.unitId!, viewMode });
+  const [deleteSetup] = useDeleteSetupMutation();
+  const [markdSetup] = useMarkSetupMutation();
+
+  const onSwitchViewMode = useCallback((viewMode: string) => {
+    setViewMode(viewMode);
+  }, []);
+
+  const onMoreItem = useCallback(
+    async (setupId: string, menuItemId: string) => {
+      if (menuItemId === "archive") {
+        await deleteSetup({
+          setupId,
+        });
+      } else if (menuItemId === "mark_as_active") {
+        await markdSetup({ setupId: +setupId });
+      }
+      await refetch();
     },
-    []
+    [refetch, markdSetup, deleteSetup]
+  );
+
+  const onCard = useCallback(
+    (setupId: string) => {
+      navigate(
+        `/portal/setups/${setupId}?unitId=${params.unitId}&unitName=${unitName}&type=${type}`
+      );
+    },
+    [navigate, params, unitName, type]
   );
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <Box sx={{ display: "flex", gap: 2, p: 2 }}>
-        <Typography variant="h6" fontWeight="bold">
-          Small Language Models
-        </Typography>
-        <Button
-          size="small"
-          variant={viewMode === "active" ? "contained" : "text"}
-          sx={{ ml: 4 }}
-          onClick={onSwitchView("active")}
-        >
-          Active
-        </Button>
-        <Button
-          size="small"
-          variant={viewMode === "archived" ? "contained" : "text"}
-          onClick={onSwitchView("archived")}
-        >
-          Archived
-        </Button>
-        <Box mr="auto" />
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() =>
-            navigate(
-              `/portal/setups/new?unitId=${params.unitId}&unitName=${unitName}&type=${type}`
-            )
+    <Box>
+      {isLoading ? (
+        <Box textAlign="center" p={4}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <TabContainer
+          viewMode={viewMode}
+          onSwitchViewMode={onSwitchViewMode}
+          suffixActionRenderer={
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() =>
+                navigate(
+                  `/portal/setups/new?unitId=${params.unitId}&unitName=${unitName}&type=${type}`
+                )
+              }
+              sx={{ ml: "auto" }}
+            >
+              New SLM
+            </Button>
           }
-          sx={{ ml: "auto" }}
         >
-          New SLM
-        </Button>
-      </Box>
-
-      <SetupsContainer viewMode={viewMode} />
+          {(setups || []).map((setup) => (
+            <XCard
+              key={setup.id}
+              id={setup.id!.toString()}
+              label={setup.name!}
+              thumbnail="/tool1.png"
+              height={140}
+              thumbnailHeight={80}
+              hasThumbnail
+              moreItems={moreItems}
+              onMoreItem={(menuItemId) =>
+                onMoreItem(setup.id!.toString(), menuItemId)
+              }
+              onCard={() => onCard(setup.id!.toString())}
+            />
+          ))}
+        </TabContainer>
+      )}
     </Box>
   );
 }

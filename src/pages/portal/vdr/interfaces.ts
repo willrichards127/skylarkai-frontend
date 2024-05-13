@@ -1,6 +1,7 @@
 export interface IVDR {
   id: number;
-  name: string;
+  name?: string;
+  is_active?: string;
 }
 
 export interface IVDRFile {
