@@ -30,6 +30,7 @@ export interface IUserAuth {
   token?: string;
   loading?: boolean;
   error?: boolean; // only for clear activities
+  redirect: string | null;
 }
 
 export interface ITranscript {

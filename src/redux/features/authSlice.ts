@@ -10,6 +10,7 @@ const initialState: IUserAuth = {
   token: undefined,
   loading: false,
   error: undefined,
+  redirect: null
 };
 
 export const registerAPI = createAsyncThunk(
@@ -76,12 +77,12 @@ export const subscriptionAPI = createAsyncThunk("subscriptions", async () => {
   return response.data;
 });
 
-export const verifyEmailAPI = createAsyncThunk(
-  "verify_registered_email",
-  async ({ token }: { token: string }) => {
+export const verifyTokenAPI = createAsyncThunk(
+  "verify_token",
+  async ({ token, redirect }: { token: string; redirect: string | null }) => {
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}verify_register_email?token=${token}`
+        `${import.meta.env.VITE_API_URL}verify_token?token=${token}`,
       );
       // get system graph id
       const responseSystemGraph = await axios.get(
@@ -96,6 +97,7 @@ export const verifyEmailAPI = createAsyncThunk(
 
       return {
         ...response.data,
+        redirect,
         sys_graph_id: responseSystemGraph.data,
       };
     } catch (e) {
@@ -181,10 +183,10 @@ export const userAuthSlice = createSlice({
         saveStoreValue("token", payload.token);
         saveStoreValue("sys_graph_id", payload.sys_graph_id);
       }),
-      builder.addCase(verifyEmailAPI.pending, (state) => {
+      builder.addCase(verifyTokenAPI.pending, (state) => {
         state.loading = true;
       }),
-      builder.addCase(verifyEmailAPI.fulfilled, (state, { payload }) => {
+      builder.addCase(verifyTokenAPI.fulfilled, (state, { payload }) => {
         state.loading = false;
         if (payload.error) {
           if (payload.error === "This user is already logged in.") {
@@ -210,6 +212,7 @@ export const userAuthSlice = createSlice({
 
         state.token = payload.token;
         state.sys_graph_id = payload.sys_graph_id;
+        state.redirect = payload.redirect || null;
         saveStoreValue("user-info", state.user);
         saveStoreValue("token", payload.token);
         saveStoreValue("sys_graph_id", payload.sys_graph_id);

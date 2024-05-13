@@ -113,7 +113,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
       if (reason === "send_review") {
         emailRef.current = {
           reason,
-          initialTitle: "Review Required",
+          initialTitle: "Review Required(Partner Only)",
           initialContent: `
             <p>Hello there, I would require review for this report:</p>
             <a href='report_link:${reportId}?unitId=${unitId}&unitName=${unitName}&type=${type}&reportName=${reportName}&setupId=${setupId}' target="_blank">${reportName}</a>
@@ -130,7 +130,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
       } else if (reason === "need_change") {
         emailRef.current = {
           reason,
-          initialTitle: "Need to Change",
+          initialTitle: "Need to Change(Analyst Only)",
           initialContent: `
             <p>Hello there, this report is needed to be changed:</p>
             <a href='report_link:${reportId}?unitId=${unitId}&unitName=${unitName}&type=${type}&reportName=${reportName}&setupId=${setupId}' target="_blank">${reportName}</a>
@@ -273,7 +273,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
                 sx={{ minWidth: 140 }}
                 onClick={onInvite}
               >
-                Invite Collaborater
+                Invite Collaborator
               </Button>
             </Box>
           )}

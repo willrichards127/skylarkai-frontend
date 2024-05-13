@@ -41,18 +41,14 @@ const ReportsContainer = memo(() => {
               content: "Mark as active",
               clickable: true,
             },
+          ]
+        : [
             {
-              id: "delete",
-              content: "Delete",
+              id: "archive",
+              content: "Archive",
               clickable: true,
             },
-          ]
-        : []),
-      {
-        id: "archive",
-        content: "Archive",
-        clickable: true,
-      },
+          ]),
     ],
     [viewMode]
   );

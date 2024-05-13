@@ -224,6 +224,7 @@ export const reportApi = createApi({
         url: `reports/${reportId}/marked`,
         method: "PUT",
       }),
+      invalidatesTags: ["Report"],
     }),
     updateReportReviewStatus: builder.mutation<
       any,
@@ -236,6 +237,7 @@ export const reportApi = createApi({
           review_status,
         },
       }),
+      invalidatesTags: ["Report"],
     }),
     deleteReport: builder.mutation<any, { reportId: number; viewMode: string }>(
       {

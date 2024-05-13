@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef, useEffect } from "react";
+import { useCallback, useState, useRef, useEffect, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
@@ -14,7 +14,10 @@ import { currentUser } from "../../../redux/features/authSlice";
 import { NewUnitModal } from "./components/NewUnitModal";
 import { UnitCard } from "./components/UnitCard";
 import TabContainer from "../../../components/TabContainer";
-import { useGetUnitsQuery } from "../../../redux/services/setupApi";
+import {
+  useGetUnitsQuery,
+  useUpdateUnitMutation,
+} from "../../../redux/services/setupApi";
 
 const UnitsPage = () => {
   const navigate = useNavigate();
@@ -24,13 +27,37 @@ const UnitsPage = () => {
   const [searchParams] = useSearchParams();
   const type = searchParams.get("type");
 
+  const [viewMode, setViewMode] = useState<string>("active");
+  const [unitModal, showUnitModal] = useState<boolean>(false);
+
   const { isLoading, data: units } = useGetUnitsQuery({
     isPartner: user!.persona_id === 2,
     type: type === "companies" ? 1 : 2,
+    view_mode: viewMode,
   });
 
-  const [viewMode, setViewMode] = useState<string>("active");
-  const [unitModal, showUnitModal] = useState<boolean>(false);
+  const [updateUnit, { isLoading: loadingUpdate }] = useUpdateUnitMutation();
+
+  const moreItems = useMemo(
+    () => [
+      ...(viewMode === "archived"
+        ? [
+            {
+              id: "mark_as_active",
+              content: "Mark as active",
+              clickable: true,
+            },
+          ]
+        : [
+            {
+              id: "archive",
+              content: "Archive",
+              clickable: true,
+            },
+          ]),
+    ],
+    [viewMode]
+  );
 
   const onAddUnit = useCallback(() => {
     showUnitModal(true);
@@ -63,8 +90,12 @@ const UnitsPage = () => {
     if (menuItemId === "edit") {
       unitRef.current = unit;
       showUnitModal(true);
+    } else if (menuItemId === "archive") {
+      updateUnit({id: unit.id, is_active: false})
+    } else if (menuItemId === "mark_as_active") {
+      updateUnit({id: unit.id, is_active: true})
     }
-  }, []);
+  }, [updateUnit]);
 
   useEffect(() => {
     setViewMode("active");
@@ -72,7 +103,7 @@ const UnitsPage = () => {
 
   return (
     <Stack spacing={2} p={2}>
-      {isLoading ? (
+      {isLoading || loadingUpdate ? (
         <Box sx={{ p: 2, width: "100%", textAlign: "center" }}>
           <CircularProgress />
         </Box>
@@ -109,18 +140,7 @@ const UnitsPage = () => {
               author={unit.username}
               onCard={() => onCard(unit)}
               onMoreItem={(menuItemId) => onMoreItem(unit, menuItemId)}
-              moreItems={[
-                {
-                  id: "edit",
-                  content: "Edit",
-                  clickable: true,
-                },
-                {
-                  id: "archive",
-                  content: "Archive",
-                  clickable: true,
-                },
-              ]}
+              moreItems={moreItems}
             />
           ))}
         </TabContainer>

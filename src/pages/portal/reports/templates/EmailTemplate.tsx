@@ -118,7 +118,7 @@ export const EmailTemplate = memo(
         sendEmails({
           subject: form.title,
           base64str,
-          filename: filename || "Report.pdf",
+          file_name: filename || "Report.pdf",
           template: iframeContainer.outerHTML,
           emails: emailAddresses,
         });

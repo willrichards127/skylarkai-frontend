@@ -922,11 +922,11 @@ export const transcriptApi = createApi({
         template: string;
         emails: string[];
         subject: string;
-        filename?: string;
+        file_name?: string;
       }
     >({
       async queryFn(
-        { base64str, template, emails, filename, subject = "Report" },
+        { base64str, template, emails, file_name, subject = "Report" },
         _,
         __,
         apiBaseQuery
@@ -936,8 +936,8 @@ export const transcriptApi = createApi({
           if (base64str) {
             formdata.append("file_content_base64", base64str);
           }
-          if (filename) {
-            formdata.append("file_name", filename);
+          if (file_name) {
+            formdata.append("file_name", file_name);
           }
           formdata.append("html_template", template);
           formdata.append("subject", subject);

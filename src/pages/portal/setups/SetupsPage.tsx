@@ -48,12 +48,9 @@ export default function SetupsPage() {
   const [deleteSetup] = useDeleteSetupMutation();
   const [markdSetup] = useMarkSetupMutation();
 
-  const onSwitchViewMode = useCallback(
-    (viewMode: string) => () => {
-      setViewMode(viewMode);
-    },
-    []
-  );
+  const onSwitchViewMode = useCallback((viewMode: string) => {
+    setViewMode(viewMode);
+  }, []);
 
   const onMoreItem = useCallback(
     async (setupId: string, menuItemId: string) => {

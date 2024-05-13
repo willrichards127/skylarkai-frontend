@@ -70,9 +70,22 @@ export const VDRCard = memo(
           borderRadius: 2,
           display: "flex",
           alignItems: "center",
-          width: 360
+          width: 360,
         }}
       >
+        <Box sx={{ position: "absolute", right: 4, top: 4 }}>
+          {!!moreItems?.length && (
+            <XPopmenu
+              triggerEl={
+                <IconButton size="small" sx={{ zIndex: 999 }}>
+                  <MoreVertIcon />
+                </IconButton>
+              }
+              items={moreItems}
+              onItem={(id) => (onMoreItem ? onMoreItem(id) : null)}
+            />
+          )}
+        </Box>
         <CardActionArea
           onClick={onCard}
           sx={{
@@ -89,17 +102,6 @@ export const VDRCard = memo(
             {/* <Typography variant="body2" gutterBottom>
               {updated || ""}
             </Typography> */}
-            {!!moreItems?.length && (
-              <XPopmenu
-                triggerEl={
-                  <IconButton>
-                    <MoreVertIcon />
-                  </IconButton>
-                }
-                items={moreItems}
-                onItem={(id) => (onMoreItem ? onMoreItem(id) : null)}
-              />
-            )}
             <Box
               sx={{
                 display: "flex",

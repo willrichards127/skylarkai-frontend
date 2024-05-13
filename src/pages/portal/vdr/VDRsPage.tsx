@@ -1,11 +1,14 @@
+import { useCallback, useState, useMemo, useRef } from "react";
 import { Box, Button, CircularProgress } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { VDRCard } from "./components/VDRCard";
-import { useCallback, useState } from "react";
 import { NewVDRModal } from "./components/NewVDRModal";
 import { SendEmailModal } from "../../../components/modals/SendEmailModal";
 import TabContainer from "../../../components/TabContainer";
-import { useGetVDRsQuery } from "../../../redux/services/vdrApi";
+import {
+  useGetVDRsQuery,
+  useSaveVDRMutation,
+} from "../../../redux/services/vdrApi";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 export default function VDRsPage() {
@@ -15,10 +18,37 @@ export default function VDRsPage() {
   const unitName = searchParams.get("unitName");
   const type = searchParams.get("type");
 
+  const vdrRef = useRef<any>();
+
   const [viewMode, setViewMode] = useState<string>("active");
   const [emailModal, showEmailModal] = useState<boolean>(false);
   const [newVDRModal, showNewVDRModal] = useState<boolean>(false);
-  const { data, isLoading } = useGetVDRsQuery({ unitId: +params.unitId! });
+  const { data, isLoading } = useGetVDRsQuery({
+    unitId: +params.unitId!,
+    view_mode: viewMode,
+  });
+  const [updateVDR] = useSaveVDRMutation();
+
+  const moreItems = useMemo(
+    () => [
+      ...(viewMode === "archived"
+        ? [
+            {
+              id: "mark_as_active",
+              content: "Mark as active",
+              clickable: true,
+            },
+          ]
+        : [
+            {
+              id: "archive",
+              content: "Archive",
+              clickable: true,
+            },
+          ]),
+    ],
+    [viewMode]
+  );
 
   const onShowEmailTemplate = useCallback(() => {
     showEmailModal(true);
@@ -27,6 +57,28 @@ export default function VDRsPage() {
   const onSwitchViewMode = useCallback((mode: string) => {
     setViewMode(mode);
   }, []);
+
+  const onMoreItem = useCallback(
+    (vdr: any, menuItemId: string) => {
+      if (menuItemId === "edit") {
+        vdrRef.current = vdr;
+        showNewVDRModal(true);
+      } else if (menuItemId === "archive") {
+        updateVDR({
+          unitId: +params.unitId!,
+          vdrId: vdr.id,
+          data: { is_active: "false" },
+        });
+      } else if (menuItemId === "mark_as_active") {
+        updateVDR({
+          unitId: +params.unitId!,
+          vdrId: vdr.id,
+          data: { is_active: "true" },
+        });
+      }
+    },
+    [params.unitId, updateVDR]
+  );
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -62,17 +114,23 @@ export default function VDRsPage() {
                   `/portal/vdrs/${vdr.id}?unitId=${params.unitId}&unitName=${unitName}&type=${type}`
                 )
               }
+              moreItems={moreItems}
+              onMoreItem={(menuItemId) => onMoreItem(vdr, menuItemId)}
             />
           ))}
         </TabContainer>
       )}
       {newVDRModal && (
         <NewVDRModal
+          initialVDR={vdrRef.current}
           open={newVDRModal}
           unitId={params.unitId!}
           type={type!}
           unitName={unitName!}
-          onClose={() => showNewVDRModal(false)}
+          onClose={() => {
+            vdrRef.current = null;
+            showNewVDRModal(false);
+          }}
         />
       )}
       {emailModal && (

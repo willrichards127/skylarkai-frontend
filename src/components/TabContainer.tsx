@@ -53,7 +53,23 @@ const TabContainer = ({
           overflowY: "auto",
         }}
       >
-        <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>{children}</Box>
+        <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+          {(children as any)?.length ? (
+            children
+          ) : (
+            <Box
+              sx={{
+                width: "100%",
+                fontSize: 12,
+                color: "grey",
+                textAlign: "center",
+                p: 2,
+              }}
+            >
+              No Data Available.
+            </Box>
+          )}
+        </Box>
       </Box>
     </Box>
   );

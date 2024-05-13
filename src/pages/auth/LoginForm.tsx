@@ -1,21 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { memo, useCallback, useState, useEffect } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { Box, Typography, Stack, TextField, Button } from "@mui/material";
 import { LeftArrowDecorator, RightArrowDecorator } from "../../components/Svgs";
 import { NeutralButton } from "../../components/buttons/NeutralButton";
-import {
-  currentUser,
-  loginAPI,
-  verifyEmailAPI,
-} from "../../redux/features/authSlice";
+import { currentUser, loginAPI } from "../../redux/features/authSlice";
 import { useClearUserActivitiesMutation } from "../../redux/services/userAPI";
 
 const LoginForm = memo(() => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get("token");
 
   const [clearActivities] = useClearUserActivitiesMutation();
 
@@ -55,14 +49,6 @@ const LoginForm = memo(() => {
       navigate("/");
     }
   }, [navigate, isLoggedIn]);
-
-  useEffect(() => {
-    if (!token) return;
-    const verifyRegisteredEmail = async () => {
-      await dispatch(verifyEmailAPI({ token }) as any);
-    };
-    verifyRegisteredEmail();
-  }, [token, dispatch]);
 
   return (
     <Box
