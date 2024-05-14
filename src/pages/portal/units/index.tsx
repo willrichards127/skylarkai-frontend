@@ -39,24 +39,27 @@ const UnitsPage = () => {
   const [updateUnit, { isLoading: loadingUpdate }] = useUpdateUnitMutation();
 
   const moreItems = useMemo(
-    () => [
-      ...(viewMode === "archived"
-        ? [
-            {
-              id: "mark_as_active",
-              content: "Mark as active",
-              clickable: true,
-            },
-          ]
+    () =>
+      user!.persona_id === 2
+        ? []
         : [
-            {
-              id: "archive",
-              content: "Archive",
-              clickable: true,
-            },
-          ]),
-    ],
-    [viewMode]
+            ...(viewMode === "archived"
+              ? [
+                  {
+                    id: "mark_as_active",
+                    content: "Mark as active",
+                    clickable: true,
+                  },
+                ]
+              : [
+                  {
+                    id: "archive",
+                    content: "Archive",
+                    clickable: true,
+                  },
+                ]),
+          ],
+    [viewMode, user]
   );
 
   const onAddUnit = useCallback(() => {
@@ -86,16 +89,19 @@ const UnitsPage = () => {
     setViewMode(viewMode);
   }, []);
 
-  const onMoreItem = useCallback((unit: any, menuItemId: string) => {
-    if (menuItemId === "edit") {
-      unitRef.current = unit;
-      showUnitModal(true);
-    } else if (menuItemId === "archive") {
-      updateUnit({id: unit.id, is_active: false})
-    } else if (menuItemId === "mark_as_active") {
-      updateUnit({id: unit.id, is_active: true})
-    }
-  }, [updateUnit]);
+  const onMoreItem = useCallback(
+    (unit: any, menuItemId: string) => {
+      if (menuItemId === "edit") {
+        unitRef.current = unit;
+        showUnitModal(true);
+      } else if (menuItemId === "archive") {
+        updateUnit({ id: unit.id, is_active: false });
+      } else if (menuItemId === "mark_as_active") {
+        updateUnit({ id: unit.id, is_active: true });
+      }
+    },
+    [updateUnit]
+  );
 
   useEffect(() => {
     setViewMode("active");

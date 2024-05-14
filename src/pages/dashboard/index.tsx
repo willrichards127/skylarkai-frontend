@@ -20,13 +20,13 @@ import { useGetPersonasQuery } from "../../redux/services/userAPI";
 import { useGetReportsByTenantQuery } from "../../redux/services/reportApi";
 import { getUniques } from "../../shared/utils/basic";
 
-const reviewStatusDict: Record<number, any> = {
+export const reviewStatusDict: Record<number, any> = {
   0: {
     label: "Generated",
     color: colors.blue[500],
   },
   1: {
-    label: "Running",
+    label: "Executing",
     color: colors.orange[500],
   },
   2: {

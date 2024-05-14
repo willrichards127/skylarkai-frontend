@@ -32,7 +32,7 @@ export const ReportStepPanel = ({
 
   const filteredReports = useMemo(
     () =>
-      (reports || []).filter((report: any) =>
+      (reports?.reports || []).filter((report: any) =>
         report.report_metadata
           .reportname!.toLowerCase()
           .includes(searchText.toLocaleLowerCase())
