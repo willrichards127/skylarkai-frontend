@@ -45,7 +45,7 @@ export const XPopmenu = memo(
 
     const open = !!anchorEl;
 
-    return (
+    return items.length > 0 ? (
       <>
         {cloneEl}
         <Menu
@@ -62,7 +62,7 @@ export const XPopmenu = memo(
           }}
           sx={{
             "& .MuiList-root": {
-              padding: 0
+              padding: 0,
             },
             "& .MuiPaper-root": {
               borderRadius: 2,
@@ -74,7 +74,7 @@ export const XPopmenu = memo(
         >
           {items.map((item, index) =>
             item.id === "divider" ? (
-              <Divider key={item.id + index} style={{margin: 0}} />
+              <Divider key={item.id + index} style={{ margin: 0 }} />
             ) : (
               <MenuItem
                 key={item.id}
@@ -89,6 +89,8 @@ export const XPopmenu = memo(
           )}
         </Menu>
       </>
+    ) : (
+      <></>
     );
   }
 );
