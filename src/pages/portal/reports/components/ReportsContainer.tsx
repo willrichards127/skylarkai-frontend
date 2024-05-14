@@ -1,23 +1,32 @@
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 // import { NewReportModal } from "./NewReportModal";
 import { ReportTabContainer } from "./ReportTabContainer";
 import { useGetReportsQuery } from "../../../../redux/services/reportApi";
+import { useNotification } from "../../../../shared/socket/NotificationProvider";
 
 const ReportsContainer = memo(() => {
   const params = useParams();
 
+  const { newReporting } = useNotification();
   const [viewMode, setViewMode] = useState<string>("active");
   // const [newReportModal, showNewReportModal] = useState<boolean>(false);
-  const { isFetching: fetchingReports, data: reports } = useGetReportsQuery(
-    { unitId: +params.unitId!, viewMode }
-  );
+  const { isFetching: fetchingReports, data: reports, refetch } = useGetReportsQuery({
+    unitId: +params.unitId!,
+    viewMode,
+  });
 
   // const onNewReportModal = useCallback(() => {
   //   showNewReportModal(true);
   // }, []);
+
+  useEffect(() => {
+    if (newReporting) {
+      refetch();
+    }
+  }, [newReporting]);
 
   const onSwitchView = useCallback(
     (viewMode: string) => () => {
@@ -77,9 +86,9 @@ const ReportsContainer = memo(() => {
               flexWrap: "wrap",
             }}
           >
-            {!!reports?.length && (
+            {reports.reports.length || reports.executing ? (
               <ReportTabContainer reports={reports} viewMode={viewMode} />
-            )}
+            ) : null}
           </Box>
           {/* {newReportModal && (
             <NewReportModal

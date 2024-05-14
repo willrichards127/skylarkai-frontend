@@ -7,6 +7,7 @@ import {
   CardMedia,
   Avatar,
   CardActionArea,
+  Chip,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { XPopmenu } from "../../../../components/XPopmenu";
@@ -23,6 +24,7 @@ export const ReportCard = memo(
     width,
     height,
     moreItems,
+    executing,
     onMoreItem,
     onCard,
   }: {
@@ -31,6 +33,7 @@ export const ReportCard = memo(
     height?: number;
     hasThumbnail?: boolean;
     moreItems?: IMenuItem[];
+    executing?: boolean;
     onCard?: () => void;
     onMoreItem?: (itemId: string) => void;
   } & ICard) => {
@@ -58,6 +61,7 @@ export const ReportCard = memo(
               onItem={(id) => (onMoreItem ? onMoreItem(id) : null)}
             />
           )}
+          {executing ? <Chip label="Executing" color="info" size="small"/> : null}
         </Box>
         <CardActionArea
           onClick={onCard}

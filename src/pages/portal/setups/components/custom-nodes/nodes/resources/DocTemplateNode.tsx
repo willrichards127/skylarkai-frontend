@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useMemo, useState } from "react";
-import { Box, Button, TextField } from "@mui/material";
+import { Box, Button, CircularProgress, TextField } from "@mui/material";
 // import update from "immutability-helper";
 
 import { Handlers } from "../../Handlers";
@@ -9,6 +9,7 @@ import { ITemplateNode } from "../../../../../../../shared/models/interfaces";
 import { TemplateViewModal } from "../../../../../../../components/modals/TemplateViewModal";
 import { convertJSON } from "../../../../../../../components/TemplateView/utils";
 import { useGenerateJsonTemplateMutation } from "../../../../../../../redux/services/setupApi";
+import { useParams } from "react-router-dom";
 
 const templates = [
   {
@@ -30,10 +31,12 @@ export const DocTemplateNode = memo(
           : undefined,
       [nodeContent]
     );
-    const [generateJsonTemplate] = useGenerateJsonTemplateMutation();
+    const [generateJsonTemplate, { isLoading }] =
+      useGenerateJsonTemplateMutation();
     const [showModal, setShowModal] = useState<boolean>(false);
 
-    const { setNodes } = useReactFlow();
+    const { getNodes, setNodes } = useReactFlow();
+    const params = useParams();
 
     const updateNode = useCallback(
       (key: string, value: string) => {
@@ -74,12 +77,24 @@ export const DocTemplateNode = memo(
 
     const onDrop = useCallback(
       async (acceptedFiles: any) => {
-        const templateData = await generateJsonTemplate({
-          file: acceptedFiles[0],
-          setupId: 23,
-        }).unwrap();
-        // console.log("=================", templateData.template[0])
-        updateNode("text", JSON.stringify(templateData.template[0]));
+        let llm: string = "Anthropic";
+        const nodes = getNodes();
+        const llmNode = nodes.find((node) => node.data.name === "LLM");
+        if (llmNode) {
+          llm = llmNode.data.properties?.model || "OpenAI";
+        }
+
+        const setupId = params.setupId;
+
+        if (setupId) {
+          const templateData = await generateJsonTemplate({
+            file: acceptedFiles[0],
+            setupId: +setupId,
+            llm,
+          }).unwrap();
+
+          updateNode("text", JSON.stringify(templateData.template[0]));
+        }
       },
       [setNodes, nodeId, updateNode, generateJsonTemplate]
     );
@@ -93,7 +108,11 @@ export const DocTemplateNode = memo(
       <Box position="relative">
         <Handlers nodeId={nodeId} handlerType="source" />
         <Box sx={{ display: "flex", flexDirection: "column" }}>
-          {nodeContent.properties?.template_type === "text" ? (
+          {isLoading ? (
+            <Box sx={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+              <CircularProgress />
+            </Box>
+          ) : nodeContent.properties?.template_type === "text" ? (
             <>
               <Box
                 mb={0.5}
@@ -184,6 +203,7 @@ export const DocTemplateNode = memo(
               setShowModal(false);
             }}
             data={data}
+            isEditMode
           />
         ) : null}
       </Box>

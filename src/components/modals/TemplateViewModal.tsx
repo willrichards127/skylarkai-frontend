@@ -13,10 +13,12 @@ export const TemplateViewModal = memo(
     open,
     onClose,
     data,
+    isEditMode,
   }: {
     open: boolean;
     onClose: (data?: ITemplate) => void;
     data: ITemplate;
+    isEditMode?: boolean;
   }) => {
     const [title, setTitle] = useState<string>(data.title);
     const [items, setItems] = useState<ITemplateItem[]>(
@@ -43,18 +45,20 @@ export const TemplateViewModal = memo(
         size="md"
       >
         <Box paddingTop={1}>
-          <TextField
-            fullWidth
-            placeholder="Enter report name"
-            label="Report name"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
+          {isEditMode && (
+            <TextField
+              fullWidth
+              placeholder="Enter report name"
+              label="Report name"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          )}
           <Box maxHeight={400} overflow={"auto"} marginTop={1}>
             <Templateview
               data={items}
               onChangeData={setItems}
-              isEditMode={true}
+              isEditMode={isEditMode}
             />
           </Box>
         </Box>

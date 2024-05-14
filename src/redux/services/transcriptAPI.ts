@@ -857,7 +857,7 @@ export const transcriptApi = createApi({
       }),
     }),
     getTaskStatus: builder.query<
-      { status: string; file_names?: string[] },
+      { state: string; status: string; result: any },
       { task_id: string }
     >({
       query: ({ task_id }) => ({

@@ -157,15 +157,16 @@ export const setupApi = createApi({
       {
         setupId: number;
         file: File;
+        llm: string;
       }
     >({
-      query: ({ file, setupId }) => {
+      query: ({ file, setupId, llm }) => {
         const formData = new FormData();
         formData.append("analysis_type", "template");
 
         formData.append("file", file);
         return {
-          url: `generate_jsontemplate?graph_id=${setupId}&llm=Anthropic`,
+          url: `generate_jsontemplate?graph_id=${setupId}&llm=${llm}`,
           method: "POST",
           body: formData,
         };
