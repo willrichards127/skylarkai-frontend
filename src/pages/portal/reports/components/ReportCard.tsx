@@ -8,13 +8,16 @@ import {
   Avatar,
   CardActionArea,
   Chip,
+  Typography,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { XPopmenu } from "../../../../components/XPopmenu";
 import { ICard, IMenuItem } from "../../../../shared/models/interfaces";
+import { reviewStatusDict } from "../../../dashboard";
 
 export const ReportCard = memo(
   ({
+    reviewStatus,
     thumbnail,
     thumbnailHeight = 110,
     hasThumbnail = false,
@@ -28,6 +31,7 @@ export const ReportCard = memo(
     onMoreItem,
     onCard,
   }: {
+    reviewStatus?: number;
     thumbnailHeight?: number;
     width?: number;
     height?: number;
@@ -61,7 +65,6 @@ export const ReportCard = memo(
               onItem={(id) => (onMoreItem ? onMoreItem(id) : null)}
             />
           )}
-          {executing ? <Chip label="Executing" color="info" size="small"/> : null}
         </Box>
         <CardActionArea
           onClick={onCard}
@@ -87,7 +90,33 @@ export const ReportCard = memo(
               }
               title={label}
               titleTypographyProps={{ fontSize: 16, fontWeight: "500" }}
-              subheader={updatedAt || ""}
+              subheader={
+                <Box>
+                  <Typography variant="body2" fontSize={12} gutterBottom>
+                    {updatedAt || ""}
+                  </Typography>
+                  {reviewStatus !== undefined && reviewStatus !== null && (
+                    <Chip
+                      size="small"
+                      label={reviewStatusDict[reviewStatus].label}
+                      sx={{
+                        fontSize: 12,
+                        "&.MuiChip-root": { width: 120 },
+                        color: "white",
+                        bgcolor: reviewStatusDict[reviewStatus].color,
+                      }}
+                    />
+                  )}
+                  {executing ? (
+                    <Chip
+                      label="Executing"
+                      color="warning"
+                      size="small"
+                      sx={{ color: "white" }}
+                    />
+                  ) : null}
+                </Box>
+              }
             />
           </Box>
         </CardActionArea>

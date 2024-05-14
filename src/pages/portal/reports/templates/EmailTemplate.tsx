@@ -240,7 +240,10 @@ export const EmailTemplate = memo(
                 isSuccess ? "Email has been sent." : "Failed to send the email."
               }
               desc="Click close to go back."
-              onClose={() => showConfirmModal(false)}
+              onClose={() => {
+                showConfirmModal(false);
+                onClose();
+              }}
             />
           )}
         </Box>

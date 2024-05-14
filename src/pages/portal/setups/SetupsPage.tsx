@@ -9,8 +9,11 @@ import {
   useDeleteSetupMutation,
   useMarkSetupMutation,
 } from "../../../redux/services/setupApi";
+import { useSelector } from "react-redux";
+import { currentUser } from "../../../redux/features/authSlice";
 
 export default function SetupsPage() {
+  const { user } = useSelector(currentUser);
   const params = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -20,24 +23,27 @@ export default function SetupsPage() {
   const [viewMode, setViewMode] = useState<string>("active");
 
   const moreItems = useMemo(
-    () => [
-      ...(viewMode === "archived"
-        ? [
-            {
-              id: "mark_as_active",
-              content: "Mark as active",
-              clickable: true,
-            },
-          ]
+    () =>
+      user!.persona_id === 2
+        ? []
         : [
-            {
-              id: "archive",
-              content: "Archive",
-              clickable: true,
-            },
-          ]),
-    ],
-    [viewMode]
+            ...(viewMode === "archived"
+              ? [
+                  {
+                    id: "mark_as_active",
+                    content: "Mark as active",
+                    clickable: true,
+                  },
+                ]
+              : [
+                  {
+                    id: "archive",
+                    content: "Archive",
+                    clickable: true,
+                  },
+                ]),
+          ],
+    [viewMode, user]
   );
 
   const {

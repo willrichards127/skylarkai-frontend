@@ -1,5 +1,7 @@
 import { memo, useCallback, useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { currentUser } from "../../../../redux/features/authSlice";
 import { Box, Button, CircularProgress } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 // import { NewReportModal } from "./NewReportModal";
@@ -17,6 +19,7 @@ import { useLazyGetTaskStatusQuery } from "../../../../redux/services/transcript
 import { TemplateViewModal } from "../../../../components/modals/TemplateViewModal";
 
 const ReportsContainer = memo(() => {
+  const { user } = useSelector(currentUser);
   const params = useParams();
   const [searchParams] = useSearchParams();
   const unitName = searchParams.get("unitName");
@@ -47,24 +50,27 @@ const ReportsContainer = memo(() => {
   }, [newReporting]);
 
   const moreItems = useMemo(
-    () => [
-      ...(viewMode === "archived"
-        ? [
-            {
-              id: "mark_as_active",
-              content: "Mark as active",
-              clickable: true,
-            },
-          ]
+    () =>
+      user!.persona_id === 2
+        ? []
         : [
-            {
-              id: "archive",
-              content: "Archive",
-              clickable: true,
-            },
-          ]),
-    ],
-    [viewMode]
+            ...(viewMode === "archived"
+              ? [
+                  {
+                    id: "mark_as_active",
+                    content: "Mark as active",
+                    clickable: true,
+                  },
+                ]
+              : [
+                  {
+                    id: "archive",
+                    content: "Archive",
+                    clickable: true,
+                  },
+                ]),
+          ],
+    [viewMode, user]
   );
 
   const onSwitchViewMode = useCallback((mode: string) => {
@@ -141,6 +147,7 @@ const ReportsContainer = memo(() => {
               <ReportCard
                 key={`generated-${card.id}`}
                 id={card.id}
+                reviewStatus={card.review_status}
                 label={
                   REPORTS_DICT[card.report_metadata.reportname]?.label ||
                   card.report_metadata.reportname
@@ -171,6 +178,7 @@ const ReportsContainer = memo(() => {
                 executing
                 key={`executing-${card.task_id}`}
                 id={card.task_id}
+                reviewStatus={card.review_status}
                 label={
                   REPORTS_DICT[card.data["report_data"]["title"]]?.label ||
                   card.data["report_data"]["title"]
