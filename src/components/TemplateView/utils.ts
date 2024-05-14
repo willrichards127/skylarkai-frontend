@@ -144,5 +144,24 @@ export const revertItems = (
   return result[0].children!;
 };
 
+export const selectAll = (
+  elements: ITemplateItem[],
+  checked: boolean
+): ITemplateItem[] => {
+  return elements.map((element) => {
+    if (element.children) {
+      element.children = selectAll(element.children, checked);
+    }
+
+    if (checked) {
+      delete element["isUnChecked"];
+      return element;
+    } else {
+      element.isUnChecked = true;
+      return element;
+    }
+  });
+};
+
 export const cx = (...classNames: Array<string | undefined | false>) =>
   classNames.filter((cn) => !!cn).join(" ");

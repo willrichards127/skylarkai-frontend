@@ -6,6 +6,7 @@ import { ITemplate, ITemplateItem } from "../../shared/models/interfaces";
 import {
   addIdtoTemplateJson,
   removeIdTemplateJson,
+  selectAll,
 } from "../TemplateView/utils";
 
 export const TemplateViewModal = memo(
@@ -31,7 +32,32 @@ export const TemplateViewModal = memo(
         onClose={() => onClose()}
         header={<Box textAlign="center">Template View</Box>}
         footer={
-          <Box display="flex" justifyContent="end" width="100%" px={1}>
+          <Box
+            display="flex"
+            justifyContent={isEditMode ? "space-between" : "end"}
+            width="100%"
+            px={1}
+          >
+            {isEditMode && (
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    setItems((prev) => selectAll(prev, true));
+                  }}
+                >
+                  Select All
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    setItems((prev) => selectAll(prev, false));
+                  }}
+                >
+                  Deselect All
+                </Button>
+              </Box>
+            )}
             <Button
               variant="contained"
               onClick={() => {
