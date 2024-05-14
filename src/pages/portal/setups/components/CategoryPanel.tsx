@@ -43,7 +43,7 @@ const CategoryPanel = memo(
     ): ITemplateNode => {
       return {
         ...node,
-        label: vdr.name,
+        label: vdr.name!,
         properties: {
           vdrId: vdr.id,
           files: vdr.files,

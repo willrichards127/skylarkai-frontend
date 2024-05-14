@@ -10,9 +10,13 @@ export const vdrApi = createApi({
   baseQuery,
   tagTypes: ["VDR"],
   endpoints: (builder) => ({
-    getVDRs: builder.query<IVDRDetail[], { unitId: number }>({
-      query: ({ unitId }) => `vdrs/company/${unitId}`,
+    getVDRs: builder.query<
+      IVDRDetail[],
+      { unitId: number; view_mode?: string }
+    >({
+      query: ({ unitId, view_mode = "active" }) => `vdrs/company/${unitId}?view_mode=${view_mode}`,
       keepUnusedDataFor: 0,
+      providesTags: ["VDR"],
     }),
     getVDR: builder.query<IVDRDetail, { vdrId: number }>({
       query: ({ vdrId }) => `vdrs/${vdrId}`,
@@ -29,11 +33,13 @@ export const vdrApi = createApi({
           body: data,
         };
       },
+      invalidatesTags: ["VDR"],
     }),
     deleteSetup: builder.mutation<void, { vdrId: number }>({
       query: ({ vdrId }) => ({
         url: `vdrs/${vdrId}`,
         method: "DELETE",
+        invalidatesTags: ["VDR"],
       }),
     }),
     convertToGraph: builder.mutation<

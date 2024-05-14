@@ -23,7 +23,7 @@ const UnitPage = () => {
   );
 
   return (
-    <Box p={2}>
+    <Box p={2} height="100%">
       <Backdrop
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={isLoading}

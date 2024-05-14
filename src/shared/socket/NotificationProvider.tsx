@@ -36,7 +36,7 @@ export const NotificationProvider = ({
   const socketUrl = useMemo(() => {
     if (user && token) {
       return `${import.meta.env.VITE_WEBSOCKET_URL}ws/${
-        user.user_id
+        user.id
       }?token=${token}`;
     }
   }, [user, token]);

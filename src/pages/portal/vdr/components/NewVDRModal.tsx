@@ -4,15 +4,18 @@ import { Box, Button, TextField, CircularProgress } from "@mui/material";
 
 import { XModal } from "../../../../components/XModal";
 import { useSaveVDRMutation } from "../../../../redux/services/vdrApi";
+import { IVDR } from "../interfaces";
 
 export const NewVDRModal = memo(
   ({
+    initialVDR,
     open,
     unitId,
     type,
     unitName,
     onClose,
   }: {
+    initialVDR?: IVDR;
     unitId: string;
     type: string;
     unitName: string;
@@ -38,6 +41,11 @@ export const NewVDRModal = memo(
         );
       }
     }, [navigate, isSuccess, data, unitId, unitName, type]);
+
+    useEffect(() => {
+      if (!initialVDR) return;
+      setName(initialVDR.name!);
+    }, [initialVDR]);
 
     return (
       <XModal

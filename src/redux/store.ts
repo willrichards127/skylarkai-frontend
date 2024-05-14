@@ -19,6 +19,7 @@ export const store = configureStore({
       user: loadStoreValue("user-info"),
       token: loadStoreValue("token"),
       sys_graph_id: loadStoreValue("sys_graph_id"),
+      redirect: null
     },
   },
   reducer: {

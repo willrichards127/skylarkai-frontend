@@ -36,9 +36,9 @@ export const ChatPanel = memo(
   }) => {
     const ref = useRef<HTMLDivElement>();
 
-    const [llm, setLlm] = useState<
-      "SkyEngine 1" | "SkyEngine 2" | "SkyEngine 3" | "SkyEngine 4"
-    >("SkyEngine 1");
+    const [llm, setLlm] = useState<"OpenAI" | "Anthropic" | "BOTH" | "Gemini">(
+      "OpenAI"
+    );
     const [recursion, setRecursion] = useState<number>(2);
     const [emailModal, showEmailModal] = useState<boolean>(false);
     const [chatHistory, setChatHistory] = useState<IChat[]>([]);
@@ -57,14 +57,7 @@ export const ChatPanel = memo(
           analysis_type,
           recursion,
           company_name: companyName,
-          llm:
-            llm === "SkyEngine 1"
-              ? "OpenAI"
-              : llm === "SkyEngine 2"
-              ? "Anthropic"
-              : llm === "SkyEngine 3"
-              ? "BOTH"
-              : "Gemini",
+          llm,
         }).unwrap();
         if (response) {
           setChatHistory((prev) => [
@@ -161,13 +154,11 @@ export const ChatPanel = memo(
                 },
               }}
             >
-              {["SkyEngine 1", "SkyEngine 2", "SkyEngine 3", "SkyEngine 4"].map(
-                (item) => (
-                  <option key={item} value={item}>
-                    {item}
-                  </option>
-                )
-              )}
+              {["OpenAI", "Anthropic", "BOTH", "Gemini"].map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
             </TextField>
             <TextField
               size="small"
