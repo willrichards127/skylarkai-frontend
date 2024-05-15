@@ -163,5 +163,37 @@ export const selectAll = (
   });
 };
 
+export const updateStatus = (
+  elements: ITemplateItem[],
+  status: number[],
+  depth: number = 0,
+  offset: number = 0
+) => {
+  return elements.map((element, index: number) => {
+    if (element.children) {
+      element.children = updateStatus(
+        element.children,
+        status,
+        depth + 1,
+        status[depth] - index
+      );
+    } else {
+      if (offset > 0) {
+        element.isSuccess = true;
+      } else if (offset === 0) {
+        if (index < status[depth]) {
+          element.isSuccess = true;
+        } else if (index === status[depth]) {
+          element.isLoading = true;
+        } else {
+          delete element["isSuccess"];
+          delete element["isLoading"];
+        }
+      }
+    }
+    return element;
+  });
+};
+
 export const cx = (...classNames: Array<string | undefined | false>) =>
   classNames.filter((cn) => !!cn).join(" ");

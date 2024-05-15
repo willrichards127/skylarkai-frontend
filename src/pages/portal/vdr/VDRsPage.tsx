@@ -56,13 +56,13 @@ export default function VDRsPage() {
           ],
     [viewMode, user]
   );
-  const { newIngesting } = useNotification();
+  const { lastNotification } = useNotification();
 
   useEffect(() => {
-    if (newIngesting) {
+    if (lastNotification && lastNotification.event_type === "ingest_completed") {
       refetch();
     }
-  }, [newIngesting]);
+  }, [lastNotification]);
 
   const onShowEmailTemplate = useCallback(() => {
     showEmailModal(true);

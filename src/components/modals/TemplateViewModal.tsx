@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { Box, Button, TextField } from "@mui/material";
 import { XModal } from "../XModal";
 import Templateview from "../TemplateView";
@@ -7,6 +7,7 @@ import {
   addIdtoTemplateJson,
   removeIdTemplateJson,
   selectAll,
+  updateStatus,
 } from "../TemplateView/utils";
 
 export const TemplateViewModal = memo(
@@ -15,16 +16,24 @@ export const TemplateViewModal = memo(
     onClose,
     data,
     isEditMode,
+    status,
   }: {
     open: boolean;
     onClose: (data?: ITemplate) => void;
     data: ITemplate;
     isEditMode?: boolean;
+    status?: number[];
   }) => {
     const [title, setTitle] = useState<string>(data.title);
     const [items, setItems] = useState<ITemplateItem[]>(
       addIdtoTemplateJson(data.data)
     );
+
+    useEffect(() => {
+      if (status) {
+        setItems((prev) => updateStatus(prev, status));
+      }
+    }, [status]);
 
     return (
       <XModal
@@ -32,13 +41,13 @@ export const TemplateViewModal = memo(
         onClose={() => onClose()}
         header={<Box textAlign="center">Template View</Box>}
         footer={
-          <Box
-            display="flex"
-            justifyContent={isEditMode ? "space-between" : "end"}
-            width="100%"
-            px={1}
-          >
-            {isEditMode && (
+          isEditMode && (
+            <Box
+              display="flex"
+              justifyContent={isEditMode ? "space-between" : "end"}
+              width="100%"
+              px={1}
+            >
               <Box sx={{ display: "flex", gap: 2 }}>
                 <Button
                   variant="contained"
@@ -57,16 +66,16 @@ export const TemplateViewModal = memo(
                   Deselect All
                 </Button>
               </Box>
-            )}
-            <Button
-              variant="contained"
-              onClick={() => {
-                onClose({ title, data: removeIdTemplateJson(items) });
-              }}
-            >
-              Save
-            </Button>
-          </Box>
+              <Button
+                variant="contained"
+                onClick={() => {
+                  onClose({ title, data: removeIdTemplateJson(items) });
+                }}
+              >
+                Save
+              </Button>
+            </Box>
+          )
         }
         size="md"
       >

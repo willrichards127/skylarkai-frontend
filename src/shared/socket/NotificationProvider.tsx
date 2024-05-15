@@ -13,15 +13,12 @@ import { NotificationData } from "./interface";
 export type SocketContextProps = {
   notifications: NotificationData[];
   sendMessage: () => void;
-  newIngesting: boolean;
-  newReporting: boolean;
+  lastNotification?: NotificationData;
 };
 
 const SocketContext = React.createContext<SocketContextProps>({
   notifications: [],
   sendMessage: () => {},
-  newIngesting: false,
-  newReporting: false,
 });
 
 export const NotificationProvider = ({
@@ -42,21 +39,8 @@ export const NotificationProvider = ({
   }, [user, token]);
 
   const [messages, setMesssages] = useState<NotificationData[]>([]);
-
-  const newIngesting = useMemo(
-    () =>
-      messages.some(
-        (message) =>
-          !message.marked && message.event_type === "ingest_completed"
-      ),
-    [messages]
-  );
-  const newReporting = useMemo(
-    () =>
-      messages.some(
-        (message) =>
-          !message.marked && message.event_type === "report_completed"
-      ),
+  const lastNotification = useMemo(
+    () => (messages.length ? messages[messages.length - 1] : undefined),
     [messages]
   );
 
@@ -121,8 +105,7 @@ export const NotificationProvider = ({
       value={{
         notifications: messages,
         sendMessage,
-        newIngesting,
-        newReporting,
+        lastNotification,
       }}
     >
       {children}

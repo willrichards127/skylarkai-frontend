@@ -395,15 +395,15 @@ const Templateview = ({
                   <Typography>
                     {counts.successCount}/{counts.totalCount}
                   </Typography>
-                ) : item.data.isLoading ? (
-                  <Box>
-                    <CircularProgress size={16} />
-                  </Box>
                 ) : item.data.isSuccess ? (
                   <Box>
                     <CheckCircleIcon
                       sx={{ color: "success.main", fontSize: 18 }}
                     />
+                  </Box>
+                ) : item.data.isLoading ? (
+                  <Box>
+                    <CircularProgress size={16} />
                   </Box>
                 ) : null}
               </div>
