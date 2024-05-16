@@ -109,12 +109,14 @@ export const VDRCard = memo(
                 flexDirection: "column",
               }}
             >
-              <LinearProgress
-                sx={{ width: "100%" }}
-                variant="determinate"
-                value={value}
-                color="success"
-              />
+              <Box sx={{ width: "100%", color: "gray" }}>
+                <LinearProgress
+                  sx={{ width: "100%" }}
+                  variant="determinate"
+                  value={value}
+                  color={files.length ? "success" : "inherit"}
+                />
+              </Box>
               <Box display={"flex"} gap={"8px"}>
                 {status.success ? (
                   <Chip

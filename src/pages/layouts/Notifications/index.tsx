@@ -49,6 +49,7 @@ export const Notifications = () => {
           "& .MuiList-root": {
             padding: 0,
             maxWidth: 320,
+            maxHeight: 360,
           },
           "& .MuiPaper-root": {
             borderRadius: 2,

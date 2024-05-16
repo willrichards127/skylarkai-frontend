@@ -26,7 +26,7 @@ export default function VDRDetailPage() {
   const unitName = searchParams.get("unitName");
   const type = searchParams.get("type");
 
-  const { newIngesting } = useNotification();
+  const { lastNotification } = useNotification();
   const { data, isLoading, refetch } = useGetVDRQuery({ vdrId: +vdrId });
   const [ingestFiles] = useIngestFilesMutation();
 
@@ -34,10 +34,13 @@ export default function VDRDetailPage() {
   const [viewFile, setViewFile] = useState<File>();
 
   useEffect(() => {
-    if (newIngesting) {
+    if (
+      lastNotification &&
+      lastNotification.event_type === "ingest_completed"
+    ) {
       refetch();
     }
-  }, [newIngesting]);
+  }, [lastNotification]);
 
   const onCompanyFilesUploaded = (files: File[]) => {
     setSelectedFiles(files);
@@ -87,7 +90,7 @@ export default function VDRDetailPage() {
               <ArrowBackIcon sx={{ fontSize: 20 }} />
             </IconButton>
             <Typography variant="h6">{data.name}</Typography>
-            <Box mr="auto" />            
+            <Box mr="auto" />
             <Button
               variant="contained"
               sx={{ minWidth: 140, mr: 2 }}
@@ -103,6 +106,7 @@ export default function VDRDetailPage() {
               </Typography>
               <Box mb={1}>
                 <FileUploader
+                  initialFiles={selectedFiles}
                   onUploadCompleted={onCompanyFilesUploaded}
                   cloud
                 />

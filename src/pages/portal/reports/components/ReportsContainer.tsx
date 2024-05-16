@@ -26,28 +26,62 @@ const ReportsContainer = memo(() => {
   const type = searchParams.get("type");
   const navigate = useNavigate();
 
-  const { newReporting } = useNotification();
+  const { lastNotification } = useNotification();
   const [viewMode, setViewMode] = useState<string>("active");
   const [selectedExecute, setSelectedExecute] = useState<any>(null);
+  const [executingStatus, setExecutingStatus] = useState<number[]>();
   // const [newReportModal, showNewReportModal] = useState<boolean>(false);
   const {
     isFetching: fetchingReports,
     data: reports,
-    refetch,
+    refetch: refetchReports,
   } = useGetReportsByUnitQuery({ unitId: +params.unitId!, viewMode });
 
   const [deleteReport] = useDeleteReportMutation();
   const [markReport] = useMarkReportMutation();
-  const [getTaskStatus] = useLazyGetTaskStatusQuery();
+  const [getTaskStatus, { currentData: statusData, isSuccess }] =
+    useLazyGetTaskStatusQuery();
   // const onNewReportModal = useCallback(() => {
   //   showNewReportModal(true);
   // }, []);
 
   useEffect(() => {
-    if (newReporting) {
-      refetch();
+    if (
+      lastNotification &&
+      lastNotification.event_type === "report_completed"
+    ) {
+      refetchReports();
     }
-  }, [newReporting]);
+  }, [lastNotification]);
+
+  // useEffect(() => {
+  //   if (
+  //     lastNotification &&
+  //     lastNotification.event_type === "report_completed" &&
+  //     selectedExecute
+  //   ) {
+  //     getTaskStatus({ task_id: selectedExecute.task_id });
+  //   }
+  // }, [lastNotification, selectedExecute]);
+
+  useEffect(() => {
+    if (isSuccess && statusData) {
+      const sections = statusData.result?.base_query?.sections;
+      if (sections) {
+        const curStatus = sections.reduce(
+          (prev: number[], cur: any, index: number) => {
+            if (cur.summary_result) {
+              return prev;
+            } else {
+              return [index, cur.sub_query_results.length];
+            }
+          },
+          []
+        );
+        setExecutingStatus(curStatus);
+      }
+    }
+  }, [statusData, isSuccess]);
 
   const moreItems = useMemo(
     () =>
@@ -96,15 +130,15 @@ const ReportsContainer = memo(() => {
       executing: boolean = false
     ) => {
       if (executing) {
-        getTaskStatus({ task_id: id })
-          .unwrap()
-          .then((res) => {
-            console.log("=====", res);
-            const report = reports.executing.find((r: any) => r.task_id === id);
-            if (report) {
-              setSelectedExecute(report.data.report_data);
-            }
+        const report = reports.executing.find((r: any) => r.task_id === id);
+        if (report) {
+          setExecutingStatus(undefined);
+          setSelectedExecute({
+            task_id: id,
+            data: report.data.report_data,
           });
+          getTaskStatus({ task_id: id });
+        }
       } else {
         navigate(
           `/portal/reports/${id}?unitId=${params.unitId}&unitName=${unitName}&type=${type}&reportName=${reportName}&setupId=${setupId}&viewMode=${viewMode}`
@@ -199,7 +233,8 @@ const ReportsContainer = memo(() => {
             <TemplateViewModal
               open={!!selectedExecute}
               onClose={() => setSelectedExecute(null)}
-              data={selectedExecute}
+              data={selectedExecute.data}
+              status={executingStatus}
             />
           )}
         </TabContainer>
