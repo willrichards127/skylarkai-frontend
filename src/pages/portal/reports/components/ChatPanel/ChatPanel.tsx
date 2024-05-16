@@ -179,7 +179,11 @@ export const ChatPanel = memo(
             >
               {[1, 2, 3, 4, 5].map((item) => (
                 <option key={item} value={item}>
-                  Recursion {item}
+                  {item === 1
+                    ? "1 (Quickest Overview)"
+                    : item === 5
+                    ? "5 (In-Depth Insights)"
+                    : item}
                 </option>
               ))}
             </TextField>
