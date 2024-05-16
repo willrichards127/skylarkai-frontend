@@ -181,14 +181,9 @@ export const setupApi = createApi({
         };
       },
     }),
-    getUnits: builder.query<
-      any[],
-      { isPartner?: boolean; type?: number; view_mode?: string }
-    >({
-      query: ({ isPartner = false, type = 1, view_mode = "active" }) =>
-        `${
-          isPartner ? "target_companies_tenant" : "target_companies"
-        }?type=${type}&view_mode=${view_mode}`,
+    getUnits: builder.query<any[], { type?: number; view_mode?: string }>({
+      query: ({ type = 1, view_mode = "active" }) =>
+        `target_companies?type=${type}&view_mode=${view_mode}`,
       keepUnusedDataFor: 0,
       providesTags: ["Unit"],
     }),

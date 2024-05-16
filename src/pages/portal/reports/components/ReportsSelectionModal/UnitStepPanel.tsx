@@ -1,21 +1,25 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
-import { Box, TextField, Typography, CircularProgress } from "@mui/material";
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  CircularProgress,
+} from "@mui/material";
 import { useGetUnitsQuery } from "../../../../../redux/services/setupApi";
-import { currentUser } from "../../../../../redux/features/authSlice";
 
 export const UnitStepPanel = ({
   onSelectedUnit,
 }: {
   onSelectedUnit: (unit: any) => void;
 }) => {
-  const { user } = useSelector(currentUser);
   const [searchText, setSearchText] = useState<string>("");
+  const [type, setType] = useState<number>(1);
   const [selectedUnit, setSelectedUnit] = useState<any>(null);
 
   const { isLoading: loadingUnits, data: units } = useGetUnitsQuery({
-    isPartner: user!.persona_id === 2,
     view_mode: "active",
+    type,
   });
 
   const onChangeSearchText = useCallback(
@@ -43,14 +47,31 @@ export const UnitStepPanel = ({
 
   return (
     <>
-      <TextField
-        value={searchText}
-        onChange={onChangeSearchText}
-        size="small"
-        sx={{ minWidth: 480 }}
-        label={"Search"}
-        disabled={loadingUnits}
-      />
+      <Box sx={{ display: "flex", gap: 2 }}>
+        <TextField
+          value={searchText}
+          onChange={onChangeSearchText}
+          size="small"
+          sx={{ minWidth: 480 }}
+          label={"Search"}
+          disabled={loadingUnits}
+        />
+        <Box mr="auto" />
+        <Button
+          size="small"
+          variant={type === 1 ? "contained" : "text"}
+          onClick={() => setType(1)}
+        >
+          Companies
+        </Button>
+        <Button
+          size="small"
+          variant={type === 2 ? "contained" : "text"}
+          onClick={() => setType(2)}
+        >
+          Sectors
+        </Button>
+      </Box>
       {loadingUnits ? (
         <Box sx={{ textAlign: "center", p: 4 }}>
           <CircularProgress />

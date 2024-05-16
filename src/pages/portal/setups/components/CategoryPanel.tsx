@@ -51,6 +51,8 @@ const CategoryPanel = memo(
       };
     };
 
+    console.log(categoryList, "categoryList===");
+
     return (
       <Box sx={{ position: "relative", width: open ? 340 : 60 }}>
         {!open ? (
@@ -101,29 +103,31 @@ const CategoryPanel = memo(
                     </Typography>
                   }
                 >
-                  {items.map((item) =>
-                    item.template_node_id === 1 ? (
-                      <>
-                        <DndListItem
-                          key={`template-${item.template_node_id}`}
-                          item={item}
-                          draggable={false}
-                        />
-                        {vdrsWithId && vdrsWithId.length ? (
-                          <Box sx={{ pl: 2 }}>
-                            {vdrsWithId.map((vdr, index) => (
-                              <DndListItem
-                                key={`vdr-${item.template_node_id}-${index}`}
-                                item={convertToTemplateNode(item, vdr)}
-                              />
-                            ))}
-                          </Box>
-                        ) : null}
-                      </>
-                    ) : (
-                      <DndListItem key={item.template_node_id} item={item} />
-                    )
-                  )}
+                  {[...items]
+                    .sort((a, b) => a.template_node_id - b.template_node_id)
+                    .map((item) =>
+                      item.template_node_id === 1 ? (
+                        <>
+                          <DndListItem
+                            key={`template-${item.template_node_id}`}
+                            item={item}
+                            draggable={false}
+                          />
+                          {vdrsWithId && vdrsWithId.length ? (
+                            <Box sx={{ pl: 2 }}>
+                              {vdrsWithId.map((vdr, index) => (
+                                <DndListItem
+                                  key={`vdr-${item.template_node_id}-${index}`}
+                                  item={convertToTemplateNode(item, vdr)}
+                                />
+                              ))}
+                            </Box>
+                          ) : null}
+                        </>
+                      ) : (
+                        <DndListItem key={item.template_node_id} item={item} />
+                      )
+                    )}
                 </CollapsiblePanel>
               </Box>
             ))}

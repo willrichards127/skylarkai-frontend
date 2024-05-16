@@ -31,7 +31,6 @@ const UnitsPage = () => {
   const [unitModal, showUnitModal] = useState<boolean>(false);
 
   const { isLoading, data: units } = useGetUnitsQuery({
-    isPartner: user!.persona_id === 2,
     type: type === "companies" ? 1 : 2,
     view_mode: viewMode,
   });

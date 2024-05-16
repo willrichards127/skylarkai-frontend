@@ -197,6 +197,10 @@ function AppRouter() {
                     element: <ReportsPage />,
                   },
                   {
+                    path: "tearsheets",
+                    element: <ReportsPage />,
+                  },
+                  {
                     path: "setups",
                     element: <SetupsPage />,
                   },
