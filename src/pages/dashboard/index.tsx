@@ -268,13 +268,18 @@ const DashboardPage = () => {
   const filteredReports = useMemo(() => {
     if (!reports?.length) return [];
     return filtering(
-      reports.map((report: any) => ({
-        ...report,
-        report_name: report.report_metadata.reportname,
-        persona: (personas || []).find(
-          (persona) => persona.id === report.persona_id
-        )?.name,
-      })),
+      reports
+        .map((report: any) => ({
+          ...report,
+          report_name: report.report_metadata.reportname,
+          persona: (personas || []).find(
+            (persona) => persona.id === report.persona_id
+          )?.name,
+        }))
+        .sort(
+          (a: any, b: any) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        ),
       filters
     );
   }, [reports, personas, filters]);

@@ -8,9 +8,9 @@ export const isCSVFormat = (csvStr: string) => {
   const lines = replaced.split("\n").filter((line) => !!line.trim());
 
   // Check if each line has the same number of commas
-  const numColumns = lines[0].split(",").length;
+  const numColumns = lines[0].split(", ").length;
   for (let i = 1; i < lines.length; i++) {
-    const columns = lines[i].split(",");
+    const columns = lines[i].split(", ");
     if (columns.length !== numColumns) {
       return false;
     }
@@ -43,14 +43,25 @@ export const csvToMDTable = (csv: string) => {
 export const csvToHtmlTable = (csv: string) => {
   // remove all "
   const replaced = csv.replaceAll('"', "");
+  // reformat csv string
+  const lines = replaced.split("\n").filter((line) => !!line.trim());
+  const newFormat = lines
+    .map((line) =>
+      line
+        .split(", ")
+        .map((item) => item.replaceAll(",", ""))
+        .join(",")
+    )
+    .join("\n");
+
   // Split CSV into rows
   const rows = replaced.trim().split("\n");
 
   // Extract headers
-  const headers = rows[0].split(",");
+  const headers = rows[0].split(", ");
 
   // Generate table headers
-  let html = `<table data-csv="${replaced}"><thead><tr>`;
+  let html = `<table data-csv="${newFormat}"><thead><tr>`;
   headers.forEach((header) => {
     html += `<th>${header}</th>`;
   });
@@ -58,7 +69,7 @@ export const csvToHtmlTable = (csv: string) => {
 
   // Generate table rows
   for (let i = 1; i < rows.length; i++) {
-    const values = rows[i].split(",");
+    const values = rows[i].split(", ");
     html += "<tr>";
     values.forEach((value) => {
       html += `<td>${value}</td>`;
@@ -98,7 +109,7 @@ const cleanUp = (inputString: string, limitWordCount?: number) => {
     quote: string = "";
   try {
     const parsed = JSON.parse(result);
-    
+
     if (parsed.citation) {
       filename = parsed.citation["Document Title"];
       quote = parsed.citation["Direct Quote"];
@@ -121,7 +132,7 @@ const cleanUp = (inputString: string, limitWordCount?: number) => {
       : quote;
     return `[Link](#${filename}______${quote})`;
   } catch (e) {
-    console.log("parsing citation error.")
+    console.log("parsing citation error.");
     return "";
   }
 };
@@ -129,9 +140,11 @@ const cleanUp = (inputString: string, limitWordCount?: number) => {
 const replaceContentBetweenTripleBackticks = (str: string) => {
   const regex = /```([\s\S]*?)```/g;
   return str.replace(regex, (_: string, p1: string) => {
+    // if pl starts with csv
+    const replaced = p1.replace("csv", "");
     // p1 contains the text between triple backticks
-    if (isCSVFormat(p1)) {
-      return csvToHtmlTable(p1);
+    if (isCSVFormat(replaced)) {
+      return csvToHtmlTable(replaced);
     }
     return p1;
   });
@@ -144,7 +157,7 @@ export const parseCitation = (
 ) => {
   // convert ``` content to html table
   let content: string = replaceContentBetweenTripleBackticks(documentContent);
-  
+
   let startIndex = -1;
   let braceCount = 0;
 

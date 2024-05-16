@@ -2,8 +2,8 @@ import { memo, useCallback, useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { currentUser } from "../../../../redux/features/authSlice";
-import { Box, Button, CircularProgress } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import { Box, CircularProgress } from "@mui/material";
+// import AddIcon from "@mui/icons-material/Add";
 // import { NewReportModal } from "./NewReportModal";
 import { ReportCard } from "./ReportCard";
 import TabContainer from "../../../../components/TabContainer";
@@ -159,17 +159,17 @@ const ReportsContainer = memo(() => {
           headerHeight={37}
           viewMode={viewMode}
           onSwitchViewMode={onSwitchViewMode}
-          suffixActionRenderer={
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              // onClick={onNewReportModal}
-              disabled
-              sx={{ ml: "auto" }}
-            >
-              New Report
-            </Button>
-          }
+          // suffixActionRenderer={
+          //   <Button
+          //     variant="contained"
+          //     startIcon={<AddIcon />}
+          //     // onClick={onNewReportModal}
+          //     disabled
+          //     sx={{ ml: "auto" }}
+          //   >
+          //     New Report
+          //   </Button>
+          // }
         >
           {[...reports.reports]
             .sort(
