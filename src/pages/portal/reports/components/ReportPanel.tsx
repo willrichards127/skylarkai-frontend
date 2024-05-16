@@ -254,7 +254,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
           onClick={onShowReportsModal}
           sx={{ minWidth: 110 }}
         >
-          Add Report
+          Add GPT
         </Button>
         {/* Can invite collaborator for the current report */}
         {selectedReport === +reportId &&
