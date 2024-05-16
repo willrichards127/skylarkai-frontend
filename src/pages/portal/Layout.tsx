@@ -2,6 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Box, Tab, Tabs } from "@mui/material";
 import CloudSyncIcon from "@mui/icons-material/CloudSync";
+import ListAltIcon from "@mui/icons-material/ListAlt";
 import { AnalysisIcon, ToolsIcon } from "../../components/Svgs";
 
 export const Layout = ({
@@ -19,6 +20,7 @@ export const Layout = ({
   const selectedTab = useMemo(() => {
     if (!location.pathname) return "reports";
     if (location.pathname.includes("reports")) return "reports";
+    if (location.pathname.includes("tearsheets")) return "tearsheets";
     if (location.pathname.includes("vdrs")) return "vdrs";
     return "setups";
   }, [location.pathname]);
@@ -50,6 +52,12 @@ export const Layout = ({
           icon={<AnalysisIcon />}
           label={<Box ml={2}>Reports</Box>}
           value="reports"
+          iconPosition="start"
+        />
+        <Tab
+          icon={<ListAltIcon sx={{ color: "white" }} />}
+          label={<Box ml={2}>Tear Sheets</Box>}
+          value="tearsheets"
           iconPosition="start"
         />
         <Tab

@@ -1,181 +1,155 @@
-import { useCallback, useEffect, useMemo } from "react";
-import { useSelector } from "react-redux";
-import { Box, Typography, Chip, Button, CircularProgress } from "@mui/material";
-import AGTable from "../../../components/agTable/AGTable";
-import { currentUser } from "../../../redux/features/authSlice";
+import { useState, useCallback } from "react";
 import {
-  useGetPersonasQuery,
-  useGetTenantsQuery,
-  useGetUsersQuery,
-  useUpdateUserMutation,
-} from "../../../redux/services/userAPI";
-import { ColDef } from "ag-grid-community";
-import { toast } from "react-toastify";
+  // colors,
+  Box,
+  // Button,
+  GridSize,
+  Grid,
+  TextField,
+  Typography,
+  MenuItem,
+} from "@mui/material";
+
+const durations = [
+  {
+    label: "Today",
+    value: 0,
+  },
+  {
+    label: "Yesterday",
+    value: 1,
+  },
+  {
+    label: "Last 7 Days",
+    value: 7,
+  },
+  {
+    label: "Last 30 Days",
+    value: 30,
+  },
+  {
+    label: "Last 60 Days",
+    value: 60,
+  },
+  {
+    label: "Last 90 Days",
+    value: 90,
+  },
+];
+
+const GridItem = ({
+  xs,
+  sm,
+  md,
+  lg,
+  xl,
+  children,
+}: {
+  xs?: GridSize;
+  sm?: GridSize;
+  md?: GridSize;
+  lg?: GridSize;
+  xl?: GridSize;
+  children: React.ReactNode;
+}) => {
+  return (
+    <Grid item xs={xs} sm={sm} md={md} lg={lg} xl={xl}>
+      <Box sx={{ p: 2, borderRadius: 2, bgcolor: "black" }}>{children}</Box>
+    </Grid>
+  );
+};
 
 export const SystemManagement = () => {
-  const { user } = useSelector(currentUser);
-  const { isLoading: loadingPersonas, data: personas } = useGetPersonasQuery();
-  const { isLoading: loadingTenants, data: tenants } = useGetTenantsQuery();
-  const { isLoading: loadingUsers, data: users } = useGetUsersQuery(undefined, {
-    skip: loadingPersonas || loadingTenants,
-  });
+  const [duration, setDuration] = useState<number>(7);
 
-  const [updateUserStatus, { isSuccess }] = useUpdateUserMutation();
-
-  const onAction = useCallback(
-    (row: Record<string, any>, actionType: string) => {
-      if (actionType === "Approve") {
-        updateUserStatus({ id: row.id, user_status: 1 });
-      } else {
-        // Decline
-        updateUserStatus({ id: row.id, user_status: 2 });
-      }
-    },
-    [updateUserStatus]
+  const onChangeDuration = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setDuration(+e.target.value),
+    []
   );
-
-  const columnDefs = useMemo<ColDef[]>(
-    () => [
-      { field: "id", headerName: "User ID", maxWidth: 90 },
-      {
-        field: "username",
-        headerName: "Username",
-        align: "left",
-        filter: "agTextColumnFilter",
-      },
-      {
-        field: "email",
-        headerName: "Email",
-        align: "left",
-        filter: "agTextColumnFilter",
-      },
-      {
-        field: "phone",
-        headerName: "Phone",
-        align: "left",
-        filter: "agTextColumnFilter",
-      },
-      {
-        field: "tenant",
-        headerName: "Tenant",
-        filter: "agTextColumnFilter",
-      },
-      {
-        field: "persona",
-        headerName: "Persona",
-        filter: "agTextColumnFilter",
-      },
-      {
-        field: "status",
-        headerName: "Status",
-        filter: "agTextColumnFilter",
-        cellRenderer: (params: any) => (
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "42px",
-            }}
-          >
-            <Chip
-              size="small"
-              label={
-                params.data.status === 1
-                  ? "Approved"
-                  : params.data.status === 3
-                  ? "Requested"
-                  : "Rejected"
-              }
-              color={
-                params.data.status === 1
-                  ? "success"
-                  : params.data.status === 3
-                  ? "info"
-                  : "warning"
-              }
-              sx={{
-                fontSize: 12,
-                "&.MuiChip-root": { width: 120 },
-                color: "white",
-              }}
-            />
-          </Box>
-        ),
-      },
-      {
-        field: "created_at",
-        headerName: "Created At",
-        filter: "agDateColumnFilter",
-        valueFormatter: (params: any) =>
-          new Date(params.value).toLocaleString(),
-      },
-      {
-        field: "actions",
-        headerName: "Actions",
-        cellRenderer: (params: any) => {
-          return (
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                height: "42px",
-              }}
-            >
-              <Button
-                size="small"
-                variant="contained"
-                color={params.data.status === 1 ? "warning" : "info"}
-                disabled={user!.id === params.data.id}
-                onClick={() =>
-                  onAction(
-                    params.data as Record<string, any>,
-                    params.data.status === 1 ? "Decline" : "Approve"
-                  )
-                }
-              >
-                {params.data.status === 1 ? "Decline" : "Approve"}
-              </Button>
-            </Box>
-          );
-        },
-      },
-    ],
-    [user, onAction]
-  );
-
-  useEffect(() => {
-    if (isSuccess) {
-      toast.success("Updated the selected user's status successfully!");
-    }
-  }, [isSuccess]);
 
   return (
-    <Box p={4}>
-      <Typography variant="body1" fontWeight="bold" gutterBottom>
-        User Management
-      </Typography>
-      {loadingUsers || loadingPersonas || loadingTenants ? (
-        <Box p={4}>
-          <CircularProgress />
+    <Box sx={{ height: "100%", bgcolor: "secondary.dark" }}>
+      <Box sx={{ display: "flex", alignItems: "center", p: 2 }}>
+        <Box mr="auto" />
+        <TextField
+          size="small"
+          label="Select Duration"
+          select
+          value={duration}
+          onChange={onChangeDuration}
+          sx={{ minWidth: 320 }}
+        >
+          {durations.map((option) => (
+            <MenuItem key={option.value} value={option.value}>
+              {option.label}
+            </MenuItem>
+          ))}
+        </TextField>
+      </Box>
+      <Box sx={{ px: 2 }}>
+        <Grid container spacing={2}>
+          <GridItem xs={12} sm={6} md={6} lg={3}>
+            <Typography variant="body2">Total Companies</Typography>
+            <Typography variant="h4">8</Typography>
+          </GridItem>
+          <GridItem xs={12} sm={6} md={6} lg={3}>
+            <Typography variant="body2">Total Sectors</Typography>
+            <Typography variant="h4">8</Typography>
+          </GridItem>
+          <GridItem xs={12} sm={6} md={6} lg={2}>
+            <Typography variant="body2">Total Reports</Typography>
+            <Typography variant="h4">7</Typography>
+          </GridItem>
+          <GridItem xs={12} sm={6} md={6} lg={2}>
+            <Typography variant="body2">Total SLMs</Typography>
+            <Typography variant="h4">7</Typography>
+          </GridItem>
+          <GridItem xs={12} sm={6} md={6} lg={2}>
+            <Typography variant="body2">Total VDRs</Typography>
+            <Typography variant="h4">7</Typography>
+          </GridItem>
+          {/* <Grid item xs={4} sx={{ height: "100%" }}>
+            <Box sx={{ p: 2, borderRadius: 2, bgcolor: "black", height: 570 }}>
+              <Box fontWeight="bold">Support Tickets</Box>
+              <Box sx={{ height: 480, overflowY: "auto", p: 2 }}>
+                {supportTickets.map((ticket) => (
+                  <Box
+                    key={ticket.id}
+                    sx={{
+                      display: "flex",
+                      gap: 2,
+                      alignItems: "center",
+                      py: 1,
+                      fontSize: 13,
+                    }}
+                  >
+                    <CircleIcon
+                      sx={{
+                        fontSize: 16,
+                        color:
+                          ticket.status === 1
+                            ? "red"
+                            : ticket.status === 2
+                            ? "green"
+                            : "blue",
+                      }}
+                    />
+                    <Box>{ticket.name}</Box>
+                    <Box>{ticket.created_at}</Box>
+                    <Box px={2}>{ticket.created_by}</Box>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+          </Grid> */}
+        </Grid>
+        <Box pt={4}>
+          <Box fontWeight="bold" mb={2}>
+            Generated Reports:
+          </Box>
         </Box>
-      ) : (
-        <Box height={800}>
-          <AGTable
-            columnDefs={columnDefs}
-            rowData={(users || []).map((user) => ({
-              ...user,
-              persona: (personas || []).find(
-                (persona) => persona.id === user.persona_id
-              )?.name,
-              tenant: (tenants || []).find(
-                (tenant) => tenant.id === user.tenant_id
-              )?.name,
-            }))}
-          />
-        </Box>
-      )}
+      </Box>
     </Box>
   );
 };

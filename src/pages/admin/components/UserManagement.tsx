@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { Box, Typography, Chip, Button, CircularProgress } from "@mui/material";
+import { Box, Chip, Button, CircularProgress } from "@mui/material";
 import AGTable from "../../../components/agTable/AGTable";
 import { currentUser } from "../../../redux/features/authSlice";
 import {
@@ -152,10 +152,7 @@ export const UserManagement = () => {
   }, [isSuccess]);
 
   return (
-    <Box p={4}>
-      <Typography variant="body1" fontWeight="bold" gutterBottom>
-        User Management
-      </Typography>
+    <Box sx={{ bgcolor: "secondary.dark", p: 2 }}>
       {loadingUsers || loadingPersonas || loadingTenants ? (
         <Box p={4}>
           <CircularProgress />
