@@ -2,15 +2,15 @@ import { useCallback, useState } from "react";
 import {
   Box,
   Divider,
-  FormControlLabel,
-  Switch,
+  // FormControlLabel,
+  // Switch,
   IconButton,
   ButtonGroup,
   Stack,
 } from "@mui/material";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
 import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
-import RestartAltIcon from "@mui/icons-material/RestartAlt";
+// import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import PrintIcon from "@mui/icons-material/Print";
 import SaveIcon from "@mui/icons-material/Save";
 // import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
@@ -23,12 +23,12 @@ import { IDNDContainer } from "../../../../shared/models/interfaces";
 
 export const ReportDrawer = ({
   items,
-  isShowQuestion,
+  // isShowQuestion,
   uploadedFiles,
   onRemoveFiles,
-  onSwitchMode,
+  // onSwitchMode,
   onUploadedFiles,
-  onRerunReport,
+  // onRerunReport,
   onSave,
   // onDelete,
   onPrint,
@@ -87,9 +87,9 @@ export const ReportDrawer = ({
           </IconButton>
           <Divider sx={{ width: "100%" }} />
           <ButtonGroup orientation="vertical" sx={{ pt: 1 }}>
-            <IconButton onClick={onRerunReport} title="Re-run report">
+            {/* <IconButton onClick={onRerunReport} title="Re-run report">
               <RestartAltIcon color="primary" />
-            </IconButton>
+            </IconButton> */}
             <IconButton onClick={onSendEmail} title="Send report via email">
               <EmailIcon color="primary" />
             </IconButton>
@@ -114,9 +114,9 @@ export const ReportDrawer = ({
         >
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <ButtonGroup>
-              <IconButton onClick={onRerunReport} title="Re-run report">
+              {/* <IconButton onClick={onRerunReport} title="Re-run report">
                 <RestartAltIcon color="primary" />
-              </IconButton>
+              </IconButton> */}
               <IconButton onClick={onSendEmail} title="Send report via email">
                 <EmailIcon color="primary" />
               </IconButton>
@@ -138,7 +138,7 @@ export const ReportDrawer = ({
               <KeyboardDoubleArrowLeftIcon />
             </IconButton>
           </Box>
-          <Box py={1} textAlign="right">
+          {/* <Box py={1} textAlign="right">
             <FormControlLabel
               control={
                 <Switch
@@ -155,7 +155,7 @@ export const ReportDrawer = ({
               }
               labelPlacement="end"
             />
-          </Box>
+          </Box> */}
           <Divider />
           <Box sx={{ p: 2, height: 420, overflowY: "auto" }}>
             <IndexView items={items} />

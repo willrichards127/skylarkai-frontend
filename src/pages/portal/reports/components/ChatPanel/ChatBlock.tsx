@@ -7,6 +7,7 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import EmailIcon from "@mui/icons-material/Email";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import * as marked from "marked";
 import { DotSpinner } from "../../../../../components/DotSpinner";
 import { XIconButton } from "../../../../../components/buttons/XIconButton";
 import {
@@ -44,6 +45,7 @@ export const ChatBlock = ({
 
   const answer = useMemo(() => {
     if (isBot) {
+      console.log(marked.parse(chat.content as string), 'pased===')
       return parseCitation(chat.content as string); // limited words of each quote to 5
     }
   }, [isBot, chat.content]);
@@ -121,9 +123,7 @@ export const ChatBlock = ({
               return true;
             }}
             unwrapDisallowed={true}
-            components={{
-              pre: (props) => <p {...(props as any)} />,
-              code: (props) => <p {...(props as any)} />,
+            components={{              
               li: ({ ordered, ...props }: any) => (
                 <li style={{ marginLeft: 16 }} {...props} />
               ),

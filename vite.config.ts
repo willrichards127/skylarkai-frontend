@@ -6,6 +6,11 @@ import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/',
+  base: "/",
   plugins: [nodePolyfills(), react()],
+  server: {
+    hmr: {
+      overlay: false,
+    },
+  },
 });
