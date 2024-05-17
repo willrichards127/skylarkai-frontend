@@ -9,6 +9,7 @@ import {
   Typography,
   MenuItem,
 } from "@mui/material";
+// import { useGetUnitsQuery } from "../../../redux/services/setupApi";
 
 const durations = [
   {
@@ -59,8 +60,12 @@ const GridItem = ({
   );
 };
 
-export const SystemManagement = () => {
+export const SystemManagement = () => {  
   const [duration, setDuration] = useState<number>(7);
+
+  // const {isLoading, data} = useGetUnitsQuery({
+
+  // });
 
   const onChangeDuration = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>

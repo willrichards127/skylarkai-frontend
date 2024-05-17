@@ -873,36 +873,7 @@ export const transcriptApi = createApi({
       }),
       keepUnusedDataFor: 0,
       providesTags: ["FetchFileLog"],
-    }),
-    getIngestedFiles: builder.query<
-      any,
-      { graph_id?: number; analysis_type: string }
-    >({
-      async queryFn({ graph_id, analysis_type }, api, ___, apiBaseQuery) {
-        const system_graph_id = (api.getState() as any).userAuthSlice
-          .sys_graph_id;
-        const current_graph_id = graph_id || system_graph_id;
-        try {
-          const response = await apiBaseQuery({
-            method: "get",
-            url: `files/${current_graph_id}?analysis_type=${analysis_type}`,
-          });
-
-          return {
-            data: response.data,
-          };
-        } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              msg: "Error in analysis_type_queries API",
-            },
-          };
-        }
-      },
-      keepUnusedDataFor: 0,
-    }),
+    }),    
     updateFetchFileLog: builder.mutation<
       void,
       {
@@ -990,8 +961,6 @@ export const {
   useUpdateFeedbackMutation,
   // chatbot
   useCustomQueryMutation,
-  // get ingested files for graph
-  useGetIngestedFilesQuery,
 
   // fetch SEC filings or transcript files
   useFetchFilesMutation,

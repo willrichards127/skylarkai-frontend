@@ -412,6 +412,11 @@ export const reportApi = createApi({
         },
       }),
     }),
+    getIngestedFiles: builder.query<any, { setupId: number; analysis_type?: string; }>({
+      query: ({ setupId, analysis_type = 'financial_diligence' }) => ({
+        url: `files/${setupId}?analysis_type=${analysis_type}`,
+      }),
+    }),
   }),
 });
 
@@ -434,5 +439,6 @@ export const {
   useUpdateReportMutation,
   useMarkReportMutation,
   useUpdateReportReviewStatusMutation,
-  useExecuteReportBackgroundMutation
+  useExecuteReportBackgroundMutation,
+  useGetIngestedFilesQuery
 } = reportApi;
