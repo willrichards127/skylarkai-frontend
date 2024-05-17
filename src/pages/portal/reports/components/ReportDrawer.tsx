@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useRef } from "react";
 import {
   Box,
   Divider,
@@ -7,6 +7,7 @@ import {
   IconButton,
   ButtonGroup,
   Stack,
+  CircularProgress,
 } from "@mui/material";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
 import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
@@ -16,29 +17,33 @@ import SaveIcon from "@mui/icons-material/Save";
 // import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EmailIcon from "@mui/icons-material/Email";
 import { IndexView } from "../templates/IndexView";
-import { FileUploadModal } from "./FileUploadModal";
+// import { FileUploadModal } from "./FileUploadModal";
 import { DocumentChip } from "../../../../components/DocumentChip";
+import { CitationModal } from "../../../../components/modals/CitationModal";
 import { reportDrawerWidth } from "../../../../shared/models/constants";
 import { IDNDContainer } from "../../../../shared/models/interfaces";
+import { useGetIngestedFilesQuery } from "../../../../redux/services/reportApi";
 
 export const ReportDrawer = ({
+  setupId,
   items,
   // isShowQuestion,
-  uploadedFiles,
-  onRemoveFiles,
+  // uploadedFiles,
+  // onRemoveFiles,
   // onSwitchMode,
-  onUploadedFiles,
+  // onUploadedFiles,
   // onRerunReport,
   onSave,
   // onDelete,
   onPrint,
   onSendEmail,
 }: {
+  setupId: number;
   isShowQuestion?: boolean;
   items: IDNDContainer[];
   onSwitchMode: (showQuestion: boolean) => void;
   onRemoveFiles: (type: string, filename: string) => void;
-  onUploadedFiles: (type: string, files: File[]) => void;
+  // onUploadedFiles: (type: string, files: File[]) => void;
   onRerunReport: () => void;
   onPrint: () => void;
   // onDelete: () => void;
@@ -46,20 +51,27 @@ export const ReportDrawer = ({
   onSendEmail: () => void;
   uploadedFiles?: Record<string, File[]>;
 }) => {
-  const [open, setOpen] = useState(false);
-  const [fileUploadModal, showFileUploadModal] = useState<boolean>(false);
-  const [templateFileUploadModal, showTemplateFileUploadModal] =
-    useState<boolean>(false);
+  const fileRef = useRef<string>("");
+  const [open, setOpen] = useState<boolean>(false);
+  const [fileModal, showFileModal] = useState<boolean>(false);
+
+  // const [fileUploadModal, showFileUploadModal] = useState<boolean>(false);
+  // const [templateFileUploadModal, showTemplateFileUploadModal] =
+  //   useState<boolean>(false);
+
+  const { isLoading, data: files } = useGetIngestedFilesQuery(
+    { setupId },
+    { skip: !open }
+  );
+
   const onToggleDrawer = useCallback(() => {
     setOpen((prev) => !prev);
   }, []);
 
-  const onRemoveFile = useCallback(
-    (type: string, filename: string) => {
-      onRemoveFiles(type, filename);
-    },
-    [onRemoveFiles]
-  );
+  const onSelectFile = useCallback((fileName: string) => {
+    fileRef.current = fileName;
+    showFileModal(true);
+  }, []);
 
   return (
     <Box
@@ -138,33 +150,19 @@ export const ReportDrawer = ({
               <KeyboardDoubleArrowLeftIcon />
             </IconButton>
           </Box>
-          {/* <Box py={1} textAlign="right">
-            <FormControlLabel
-              control={
-                <Switch
-                  size="small"
-                  color="primary"
-                  checked={isShowQuestion}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    onSwitchMode(e.target.checked)
-                  }
-                />
-              }
-              label={
-                <small>{isShowQuestion ? "Show" : "Hide"} Questions</small>
-              }
-              labelPlacement="end"
-            />
-          </Box> */}
           <Divider />
           <Box sx={{ p: 2, height: 420, overflowY: "auto" }}>
             <IndexView items={items} />
           </Box>
           <Divider />
-          {!!uploadedFiles && !!Object.keys(uploadedFiles).length && (
+          {isLoading ? (
+            <Box sx={{ p: 2, textAlign: "center" }}>
+              <CircularProgress />
+            </Box>
+          ) : (
             <Box sx={{ p: 2 }}>
               <Box fontSize={12} fontWeight="bold" mb={0.5}>
-                Uploaded Files
+                Files
               </Box>
               <Stack
                 spacing={0.5}
@@ -173,24 +171,33 @@ export const ReportDrawer = ({
                   overflowY: "auto",
                 }}
               >
-                {Object.entries(uploadedFiles).map(([type, files]) =>
-                  files.map((file) => (
-                    <DocumentChip
-                      key={`${type}-${file.name}`}
-                      label={file.name}
-                      selected={false}
-                      deletable
-                      onClick={() => {}}
-                      onDelete={() => onRemoveFile(type, file.name)}
-                    />
-                  ))
-                )}
+                {(files || []).map(({ file_name }: { file_name: string }) => (
+                  <DocumentChip
+                    key={file_name}
+                    label={file_name}
+                    selected={false}
+                    onClick={() => onSelectFile(file_name)}
+                  />
+                ))}
               </Stack>
             </Box>
           )}
         </Box>
       )}
-      {fileUploadModal && (
+      {fileModal && fileRef.current && (
+        <CitationModal
+          open={!!fileModal}
+          onClose={() => showFileModal(false)}
+          title={`File View: ${fileRef.current}`}
+          data={{
+            filename: fileRef.current,
+            quote: "",
+            graph_id: setupId!,
+            analysis_type: "financial_diligence",
+          }}
+        />
+      )}
+      {/* {fileUploadModal && (
         <FileUploadModal
           title="Upload File"
           open={fileUploadModal}
@@ -205,7 +212,7 @@ export const ReportDrawer = ({
           onClose={() => showTemplateFileUploadModal(false)}
           onUpladedFile={(files) => onUploadedFiles("file", files)}
         />
-      )}
+      )} */}
     </Box>
   );
 };

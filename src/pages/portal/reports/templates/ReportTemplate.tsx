@@ -284,9 +284,9 @@ export const ReportTemplate = ({
     });
   }, [saveReport, reportId]);
 
-  const onUploadedFiles = useCallback((type: string, files: File[]) => {
-    setUploadedFiles((prev) => ({ ...prev, [type]: files }));
-  }, []);
+  // const onUploadedFiles = useCallback((type: string, files: File[]) => {
+  //   setUploadedFiles((prev) => ({ ...prev, [type]: files }));
+  // }, []);
 
   const onRerunReport = async () => {
     if (uploadedFiles && uploadedFiles["file"]) {
@@ -324,11 +324,12 @@ export const ReportTemplate = ({
             }}
           >
             <ReportDrawer
+              setupId={setupId}
               isShowQuestion={isShowQuestion}
               items={reportItems}
               onSwitchMode={(mode) => setIsShowQuestion(mode)}
               onRemoveFiles={onRemoveFiles}
-              onUploadedFiles={onUploadedFiles}
+              // onUploadedFiles={onUploadedFiles}
               onRerunReport={onRerunReport}
               onSave={onSaveReport}
               onPrint={onPrint}

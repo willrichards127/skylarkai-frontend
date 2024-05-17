@@ -7,10 +7,12 @@ import { downloadPdf } from "../../shared/utils/download";
 export const CitationModal = memo(
   ({
     open,
+    title,
     onClose,
     data,
   }: {
     open: boolean;
+    title?: string;
     onClose: () => void;
     data: {
       graph_id: number;
@@ -37,7 +39,7 @@ export const CitationModal = memo(
       <XModal
         open={open}
         onClose={onClose}
-        header={<Box textAlign="center">Citation</Box>}
+        header={<Box textAlign="center">{title || "Citation"}</Box>}
         size="md"
       >
         {file && (
