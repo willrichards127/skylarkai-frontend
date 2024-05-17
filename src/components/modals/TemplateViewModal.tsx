@@ -1,14 +1,19 @@
 import { memo, useEffect, useState } from "react";
-import { Box, Button, TextField } from "@mui/material";
+import ReactMarkdown from "react-markdown";
+import { Box, Button, TextField, colors } from "@mui/material";
 import { XModal } from "../XModal";
 import Templateview from "../TemplateView";
 import { ITemplate, ITemplateItem } from "../../shared/models/interfaces";
 import {
   addIdtoTemplateJson,
+  getIndexing,
   removeIdTemplateJson,
   selectAll,
   updateStatus,
 } from "../TemplateView/utils";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import { parseCitation } from "../../shared/utils/string";
 
 export const TemplateViewModal = memo(
   ({
@@ -22,18 +27,47 @@ export const TemplateViewModal = memo(
     onClose: (data?: ITemplate) => void;
     data: ITemplate;
     isEditMode?: boolean;
-    status?: number[];
+    status?: any;
   }) => {
     const [title, setTitle] = useState<string>(data.title);
     const [items, setItems] = useState<ITemplateItem[]>(
       addIdtoTemplateJson(data.data)
     );
 
+    const [answer, setAnswer] = useState<string>();
+
     useEffect(() => {
       if (status) {
-        setItems((prev) => updateStatus(prev, status));
+        const loadingStatus = status.reduce(
+          (prev: number[], cur: any, index: number) => {
+            if (cur.summary_result) {
+              return prev;
+            } else {
+              return [index, cur.sub_query_results.length];
+            }
+          },
+          []
+        );
+        setItems((prev) => updateStatus(prev, loadingStatus));
       }
     }, [status]);
+
+    const onItemSelected = (item: ITemplateItem) => {
+      const indexing = getIndexing(items, item);
+      if (item.isSuccess && indexing && status) {
+        let result: string | undefined;
+        if (indexing.length === 1) {
+          result = status[indexing[0]]["summary_result"];
+        } else if (indexing.length === 2) {
+          result =
+            status[indexing[0]]["sub_query_results"][indexing[1]]["answer"][
+              "answer"
+            ];
+        }
+
+        setAnswer(result);
+      }
+    };
 
     return (
       <XModal
@@ -94,8 +128,103 @@ export const TemplateViewModal = memo(
               data={items}
               onChangeData={setItems}
               isEditMode={isEditMode}
+              onItemSelected={onItemSelected}
             />
           </Box>
+          {answer ? (
+            <Box
+              sx={{
+                minHeight: 200,
+                maxHeight: 400,
+                overflowY: "auto",
+                border: "1px solid gray",
+                borderRadius: 2,
+                padding: 2,
+                mt: 2,
+              }}
+            >
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeRaw as any]}
+                allowElement={(element, _, parent) => {
+                  if (
+                    element.tagName === "p" &&
+                    (parent as any).tagName === "li"
+                  ) {
+                    return false;
+                  }
+                  if (
+                    element.tagName === "strong" &&
+                    (parent as any).tagName === "li"
+                  ) {
+                    return false;
+                  }
+                  return true;
+                }}
+                unwrapDisallowed={true}
+                components={{
+                  li: ({ ordered, ...props }: any) => (
+                    <li style={{ marginLeft: 16 }} {...props} />
+                  ),
+                  p: ({ ...props }: any) => (
+                    <p {...props} style={{ margin: "6px 0" }} />
+                  ),
+                  a: (props: any) => {
+                    if (props.href) {
+                      const splited = props.href.split("______");
+                      const filename = splited[0]
+                        .replaceAll("___", " ")
+                        .slice(1);
+                      const quote = splited[1].replaceAll("___", " ");
+                      return (
+                        <a
+                          {...props}
+                          className="no-print"
+                          style={{ color: "tomato" }}
+                          // onClick={() => onJumpTo({ filename, quote })}
+                          title={`${filename}.pdf:${quote}`}
+                        />
+                      );
+                    } else return <p {...props} />;
+                  },
+                  table: (props: any) => {
+                    return (
+                      <table
+                        {...props}
+                        style={{
+                          borderCollapse: "collapse",
+                          margin: "4px 2px",
+                          overflowX: "auto",
+                        }}
+                      />
+                    );
+                  },
+                  th: (props) => (
+                    <th
+                      {...props}
+                      style={{
+                        textAlign: "center",
+                        padding: "2px 4px",
+                        border: `1px solid ${colors.grey[500]}`,
+                      }}
+                    />
+                  ),
+                  td: (props) => (
+                    <td
+                      {...props}
+                      style={{
+                        textAlign: "center",
+                        padding: "4px 8px",
+                        border: `1px solid ${colors.grey[500]}`,
+                      }}
+                    />
+                  ),
+                }}
+              >
+                {parseCitation(answer)}
+              </ReactMarkdown>
+            </Box>
+          ) : null}
         </Box>
       </XModal>
     );

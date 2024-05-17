@@ -32,10 +32,12 @@ const Templateview = ({
   data,
   onChangeData,
   isEditMode,
+  onItemSelected,
 }: {
   data: ITemplateItem[];
   onChangeData?: (data: ITemplateItem[]) => void;
   isEditMode?: boolean;
+  onItemSelected?: (item: ITemplateItem) => void;
 }) => {
   const [items, setItems] = useState<
     Record<TreeItemIndex, TreeItem<TTreeData>>
@@ -314,6 +316,10 @@ const Templateview = ({
               context.isDraggingOver && "rct-tree-item-li-dragging-over",
               context.isSearchMatching && "rct-tree-item-li-search-match"
             )}
+            onClick={(e) => {
+              e.stopPropagation();
+              onItemSelected && onItemSelected(item.data as ITemplateItem)
+            }}
           >
             <div
               {...(context.itemContainerWithoutChildrenProps as any)}

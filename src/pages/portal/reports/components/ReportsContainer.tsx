@@ -29,7 +29,7 @@ const ReportsContainer = memo(() => {
   const { lastNotification } = useNotification();
   const [viewMode, setViewMode] = useState<string>("active");
   const [selectedExecute, setSelectedExecute] = useState<any>(null);
-  const [executingStatus, setExecutingStatus] = useState<number[]>();
+  const [executingStatus, setExecutingStatus] = useState<any>();
   // const [newReportModal, showNewReportModal] = useState<boolean>(false);
   const {
     isFetching: fetchingReports,
@@ -39,7 +39,7 @@ const ReportsContainer = memo(() => {
 
   const [deleteReport] = useDeleteReportMutation();
   const [markReport] = useMarkReportMutation();
-  const [getTaskStatus, { currentData: statusData, isSuccess }] =
+  const [getTaskStatus, { currentData: statusData, isSuccess, isFetching }] =
     useLazyGetTaskStatusQuery();
   // const onNewReportModal = useCallback(() => {
   //   showNewReportModal(true);
@@ -65,23 +65,17 @@ const ReportsContainer = memo(() => {
   // }, [lastNotification, selectedExecute]);
 
   useEffect(() => {
-    if (isSuccess && statusData) {
+    if (!isFetching && isSuccess && statusData) {
       const sections = statusData.result?.base_query?.sections;
-      if (sections) {
-        const curStatus = sections.reduce(
-          (prev: number[], cur: any, index: number) => {
-            if (cur.summary_result) {
-              return prev;
-            } else {
-              return [index, cur.sub_query_results.length];
-            }
-          },
-          []
-        );
-        setExecutingStatus(curStatus);
-      }
+      setExecutingStatus(sections);
     }
-  }, [statusData, isSuccess]);
+  }, [statusData, isSuccess, isFetching]);
+
+  useEffect(() => {
+    if (isFetching) {
+      setExecutingStatus(undefined);
+    }
+  }, [isFetching]);
 
   const moreItems = useMemo(
     () =>
@@ -132,7 +126,6 @@ const ReportsContainer = memo(() => {
       if (executing) {
         const report = reports.executing.find((r: any) => r.task_id === id);
         if (report) {
-          setExecutingStatus(undefined);
           setSelectedExecute({
             task_id: id,
             data: report.data.report_data,

@@ -195,5 +195,45 @@ export const updateStatus = (
   });
 };
 
+export const getIndexing = (
+  elements: ITemplateItem[],
+  target: ITemplateItem,
+  currentIndex: number[] = []
+): number[] | null => {
+  for (let i = 0; i < elements.length; i++) {
+    const element = elements[i];
+
+    currentIndex.push(i);
+    
+    if (element.index === target.index) {
+      return currentIndex;
+    } else if (element.children && element.children.length > 0) {
+      const result = getIndexing(element.children, target, [...currentIndex]);
+      if (result) {
+        return result;
+      }
+    }
+    
+    currentIndex.pop();
+  }
+
+  return null;
+};
+
+export const getElementByIndexing = (elements: ITemplateItem[], indexingArray: number[]): ITemplateItem | null => {
+  let currentArray = elements;
+  for (const index of indexingArray) {
+      if (index >= currentArray.length || index < 0) {
+          return null; // Index out of bounds
+      }
+      const element = currentArray[index];
+      if (!element) {
+          return null; // Element not found
+      }
+      currentArray = element.children || [];
+  }
+  return currentArray.length > 0 ? currentArray[0] : null;
+};
+
 export const cx = (...classNames: Array<string | undefined | false>) =>
   classNames.filter((cn) => !!cn).join(" ");
