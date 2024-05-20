@@ -271,12 +271,12 @@ export const reportApi = createApi({
       keepUnusedDataFor: 0,
       providesTags: ["Report"],
     }),
-    getReportsByUnit: builder.query<any, { unitId: number; viewMode?: string }>(
+    getReportsByUnit: builder.query<any, { unitId: number; reportType: number; viewMode?: string }>(
       {
-        async queryFn({ unitId, viewMode = "active" }, __, ___, apiBaseQuery) {
+        async queryFn({ unitId, reportType, viewMode = "active" }, __, ___, apiBaseQuery) {
           try {
             const reportsReponse = await apiBaseQuery({
-              url: `reports/company/${unitId}?view_mode=${viewMode}`,
+              url: `reports/company/${unitId}?view_mode=${viewMode}&report_type=${reportType}`,
             });
 
             if (reportsReponse.error) {
@@ -395,16 +395,18 @@ export const reportApi = createApi({
         unitName: string;
         setupId: number;
         analysisType: string;
+        reportType: number;
         llm?: string;
         rating?: number;
         report: ITemplate;
       }
     >({
-      query: ({ unitName, setupId, analysisType, llm, rating, report }) => ({
+      query: ({ unitName, setupId, analysisType, reportType, llm, rating, report }) => ({
         url: `execute_report_background/${setupId}`,
         method: "POST",
         body: {
           analysis_type: analysisType,
+          report_type: reportType,
           llm,
           rating,
           report,

@@ -194,11 +194,11 @@ function AppRouter() {
                 children: [
                   {
                     path: "reports",
-                    element: <ReportsPage />,
+                    element: <ReportsPage reportType={1}/>,
                   },
                   {
                     path: "tearsheets",
-                    element: <ReportsPage />,
+                    element: <ReportsPage reportType={2}/>,
                   },
                   {
                     path: "setups",

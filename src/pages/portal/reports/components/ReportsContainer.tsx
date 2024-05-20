@@ -18,7 +18,7 @@ import { REPORTS_DICT } from "../../../../shared/models/constants";
 import { useLazyGetTaskStatusQuery } from "../../../../redux/services/transcriptAPI";
 import { TemplateViewModal } from "../../../../components/modals/TemplateViewModal";
 
-const ReportsContainer = memo(() => {
+const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
   const { user } = useSelector(currentUser);
   const params = useParams();
   const [searchParams] = useSearchParams();
@@ -35,7 +35,7 @@ const ReportsContainer = memo(() => {
     isFetching: fetchingReports,
     data: reports,
     refetch: refetchReports,
-  } = useGetReportsByUnitQuery({ unitId: +params.unitId!, viewMode });
+  } = useGetReportsByUnitQuery({ unitId: +params.unitId!, viewMode, reportType });
 
   const [deleteReport] = useDeleteReportMutation();
   const [markReport] = useMarkReportMutation();
