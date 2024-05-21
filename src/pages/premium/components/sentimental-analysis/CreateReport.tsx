@@ -40,9 +40,13 @@ export const CreateReport = ({
     is_company_available: false,
   });
 
+  const [dbFiles, setDbFiles] = useState<
+    { name: string; date: string; id?: number; graph_id: number }[]
+  >([]);
+
   const onSubmit = useCallback(() => {
-    onNext(form);
-  }, [onNext, form]);
+    onNext({ ...form, instance_metadata: { db_files: dbFiles } });
+  }, [onNext, form, dbFiles]);
 
   const onChangeCompany = useCallback((company: ICompany | null) => {
     setForm((prev) => ({
@@ -52,6 +56,11 @@ export const CreateReport = ({
       is_company_available: company?.is_available,
       instance_name: genInstanceName("report", company?.ticker),
     }));
+  }, []);
+
+  const onSelectedDBFiles = useCallback((files: any[]) => {
+    console.log(files, "files===");
+    setDbFiles(files);
   }, []);
 
   const onSavedInstance = useCallback(
@@ -65,7 +74,9 @@ export const CreateReport = ({
     <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
       <Box sx={{ display: "flex", alignItems: "center", mb: 4 }}>
         <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
-          <Typography color="text.primary">Sentiment Analysis</Typography>
+          <Typography color="text.primary">
+            Investment Criteria Analysis
+          </Typography>
           <Typography color="text.primary">Create Report</Typography>
         </Breadcrumbs>
         <Box mr="auto" />
@@ -74,10 +85,10 @@ export const CreateReport = ({
           sx={{ minWidth: 140 }}
           onClick={onSubmit}
           disabled={
-            !form.company_name ||
-            !form.ticker ||
-            !form.instance_name ||
-            !form.is_company_available
+            !(
+              (form.company_name && form.ticker && form.is_company_available) ||
+              dbFiles?.length
+            ) || !form.instance_name
           }
         >
           Next
@@ -88,6 +99,7 @@ export const CreateReport = ({
           value={form}
           analysisType="transcript"
           onChange={onChangeCompany}
+          onSelectedDBFiles={onSelectedDBFiles}
         />
         <TextField
           fullWidth

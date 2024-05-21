@@ -12,15 +12,20 @@ import { FetchFilesModal } from "../../pages/premium/components/sub-components/F
 import { tickers } from "../../shared/models/constants";
 import { useGetEnabledCompaniesQuery } from "../../redux/services/transcriptAPI";
 import { ICompany } from "../../redux/interfaces";
+import { SelectFileModal } from "./SelectFileModal";
 
 export const CompanySelector = ({
   analysisType = "",
   value,
   onChange,
+  onSelectedDBFiles,
 }: {
   analysisType?: "edgar" | "transcript" | "transaction" | "";
   value: ICompany | null;
   onChange: (company: ICompany | null, isAvailable?: boolean) => void;
+  onSelectedDBFiles?: (
+    files: { name: string; date: string; id?: string; graph_id: number }[]
+  ) => void;
 }) => {
   const { isLoading, data, refetch } = useGetEnabledCompaniesQuery(
     {
@@ -31,6 +36,7 @@ export const CompanySelector = ({
 
   const [viewMode, setViewMode] = useState<"all" | "available">("all");
   const [fetchModal, showFetchModal] = useState<boolean>(false);
+  const [selectFileModal, showSelectFileModal] = useState<boolean>(false);
 
   const updatedTickers: ICompany[] = useMemo(() => {
     if (!data || !data.length) return tickers;
@@ -69,6 +75,10 @@ export const CompanySelector = ({
     refetch();
   }, [analysisType, refetch]);
 
+  const onSelectFromDb = useCallback(() => {
+    showSelectFileModal(true);
+  }, []);
+
   return (
     <Box width="100%">
       <Autocomplete
@@ -100,15 +110,19 @@ export const CompanySelector = ({
           onChange(newValue);
         }}
       />
-      {!!analysisType && (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "flex-end",
-            mt: 0.5,
-            gap: 0.5,
-          }}
-        >
+
+      <Box
+        sx={{
+          display: "flex",
+          mt: 0.5,
+          gap: 0.5,
+        }}
+      >
+        <Button size="small" variant="outlined" onClick={onSelectFromDb}>
+          Select File(s) from Database{" "}
+        </Button>
+        <Box mr="auto" />
+        {!!analysisType && (
           <ToggleButtonGroup
             value={viewMode}
             exclusive
@@ -130,18 +144,19 @@ export const CompanySelector = ({
               </ToggleButton>
             ))}
           </ToggleButtonGroup>
-          {analysisType === "transcript" && (
-            <Button
-              variant="outlined"
-              size="small"
-              disabled={!value?.ticker}
-              onClick={onShowFetchModal}
-            >
-              Download files
-            </Button>
-          )}
-        </Box>
-      )}
+        )}
+        {analysisType === "transcript" && (
+          <Button
+            variant="outlined"
+            size="small"
+            disabled={!value?.ticker}
+            onClick={onShowFetchModal}
+          >
+            Download files
+          </Button>
+        )}
+      </Box>
+
       {fetchModal && (
         <FetchFilesModal
           open={fetchModal}
@@ -149,6 +164,13 @@ export const CompanySelector = ({
           company_name={value!.company_name}
           ticker={value!.ticker}
           analysis_type={analysisType as "edgar" | "transcript" | "transaction"}
+        />
+      )}
+      {selectFileModal && (
+        <SelectFileModal
+          open={selectFileModal}
+          onClose={() => showSelectFileModal(false)}
+          onActionPerformed={(records: any[]) => onSelectedDBFiles?.(records)}
         />
       )}
     </Box>

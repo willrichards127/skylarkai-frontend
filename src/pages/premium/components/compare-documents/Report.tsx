@@ -11,13 +11,13 @@ import {
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import IosShareIcon from "@mui/icons-material/IosShare";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import EmailIcon from "@mui/icons-material/Email";
+import AttachEmailIcon from "@mui/icons-material/AttachEmail";
 import { CitationModal } from "../../../../components/modals/CitationModal";
-import { ICustomInstance } from "./interfaces";
-import { generatePdf } from "../../../../shared/utils/pdf-generator";
+import { ExportModal } from "../../../../components/modals/ExportModal";
 import { Markdown } from "../../../portal/reports/components/Markdown";
 import { parseCitation } from "../../../../shared/utils/string";
 import { SendEmailModal } from "../../../../components/modals/SendEmailModal";
+import { ICustomInstance } from "./interfaces";
 
 export const Report = ({
   instance,
@@ -34,9 +34,10 @@ export const Report = ({
     quote: string;
   }>();
   const [emailModal, showEmailModal] = useState<boolean>(false);
+  const [exportModal, showExportModal] = useState<boolean>(false);
 
   const onExport = useCallback(() => {
-    generatePdf(ref.current!.innerHTML, "Compare documents", "Skylark", true);
+    showExportModal(true);
   }, []);
 
   const onSendEmail = useCallback(async () => {
@@ -56,7 +57,7 @@ export const Report = ({
 
   return (
     <Box sx={{ height: "100%" }}>
-      <Box sx={{ display: "flex", alignItems: "center" }}>
+      <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
         <IconButton size="small" onClick={onGotoMain} sx={{ mr: 1 }}>
           <ArrowBackIcon sx={{ fontSize: 18 }} />
         </IconButton>
@@ -69,19 +70,19 @@ export const Report = ({
         <Box mr="auto" />
         <Button
           variant="contained"
-          startIcon={<EmailIcon />}
-          sx={{ minWidth: 140, mr: 1 }}
-          onClick={onSendEmail}
-        >
-          Send via Email
-        </Button>
-        <Button
-          variant="contained"
           startIcon={<IosShareIcon />}
           sx={{ minWidth: 140 }}
           onClick={onExport}
         >
           Export
+        </Button>
+        <Button
+          variant="contained"
+          startIcon={<AttachEmailIcon />}
+          sx={{ minWidth: 140 }}
+          onClick={onSendEmail}
+        >
+          Send via Email
         </Button>
       </Box>
 
@@ -117,6 +118,13 @@ export const Report = ({
           onClose={() => showEmailModal(false)}
           element={ref.current!}
           filename="Compare document report.pdf"
+        />
+      )}
+      {exportModal && (
+        <ExportModal
+          open={exportModal}
+          exportContent={ref.current!}
+          onClose={() => showExportModal(false)}
         />
       )}
       {citationData ? (

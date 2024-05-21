@@ -10,10 +10,12 @@ import {
 } from "@mui/material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import IosShareIcon from "@mui/icons-material/IosShare";
+import AttachEmailIcon from '@mui/icons-material/AttachEmail';
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { CitationModal } from "../../../../components/modals/CitationModal";
+import { ExportModal } from "../../../../components/modals/ExportModal";
+import { SendEmailModal } from "../../../../components/modals/SendEmailModal";
 import { ICustomInstance } from "./interfaces";
-import { generatePdf } from "../../../../shared/utils/pdf-generator";
 import { Markdown } from "../../../portal/reports/components/Markdown";
 import { parseCitation } from "../../../../shared/utils/string";
 
@@ -31,13 +33,23 @@ export const Report = ({
     quote: string;
   }>();
 
-  const onExport = useCallback(() => {
-    generatePdf(ref.current!.innerHTML, "Sentiment Analysis", "Skylark", true);
+  const [exportModal, showExportModal] = useState<boolean>(false);
+  const [emailModal, showEmailModal] = useState<boolean>(false);
+
+  // const onPrint = useCallback(() => {
+  //   generatePdf(ref.current!.innerHTML, "Investment Criteria Analysis", "Skylark", true);
+  // }, []);
+
+  const onPrint = useCallback(() => {
+    showExportModal(true);
+  }, []);
+
+  const onSendEmail = useCallback(() => {
+    showEmailModal(true);
   }, []);
 
   const onCitationLink = useCallback(
     ({ filename, quote }: { filename: string; quote: string }) => {
-      console.log(filename, quote, "citation==");
       setCitationData({
         filename: `${filename}.pdf`,
         quote,
@@ -48,13 +60,13 @@ export const Report = ({
 
   return (
     <Box sx={{ height: "100%" }}>
-      <Box sx={{ display: "flex", alignItems: "center", mb: 4 }}>
+      <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 4 }}>
         <IconButton size="small" onClick={onGotoMain} sx={{ mr: 1 }}>
           <ArrowBackIcon sx={{ fontSize: 18 }} />
         </IconButton>
         <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
           <Link underline="hover" color="inherit" href="#" onClick={onGotoMain}>
-            Sentiment Analysis
+            Investment Criteria Analysis
           </Link>
           <Typography color="text.primary">Report</Typography>
         </Breadcrumbs>
@@ -63,9 +75,17 @@ export const Report = ({
           variant="contained"
           startIcon={<IosShareIcon />}
           sx={{ minWidth: 140 }}
-          onClick={onExport}
+          onClick={onPrint}
         >
           Export
+        </Button>
+        <Button
+          variant="contained"
+          startIcon={<AttachEmailIcon />}
+          sx={{ minWidth: 140 }}
+          onClick={onSendEmail}
+        >
+          Send via Email
         </Button>
       </Box>
       <Box sx={{ height: "calc(100% - 60px)", position: "relative" }}>
@@ -100,6 +120,21 @@ export const Report = ({
           }}
         />
       ) : null}
+      {exportModal && (
+        <ExportModal
+          open={exportModal}
+          exportContent={ref.current!}
+          onClose={() => showExportModal(false)}
+        />
+      )}
+      {emailModal && (
+        <SendEmailModal
+          open={emailModal}
+          onClose={() => showEmailModal(false)}
+          element={ref.current!}
+          filename={`Investment criteria analysis.pdf`}
+        />
+      )}
     </Box>
   );
 };

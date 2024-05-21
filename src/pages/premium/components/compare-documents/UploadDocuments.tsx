@@ -21,6 +21,7 @@ import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import { FileUploader } from "../../../../components/FileUploader";
 import { SplitContainer } from "../../../../components/SplitContainer";
+import { PdfViewer } from "../../../../components/PDFViewer";
 import { ICustomInstance } from "./interfaces";
 import {
   useCreateFeatureInstanceMutation,
@@ -62,8 +63,11 @@ export const UploadDocuments = ({
       const reader = new FileReader();
       reader.onload = (e) => {
         if (typeof e.target?.result === "string") {
-          if (fileIndex === 0) setFileContent0(e.target.result);
-          else setFileContent1(e.target.result);
+          if (fileIndex === 0) {
+            setFileContent0(e.target.result);
+          } else {
+            setFileContent1(e.target.result);
+          }
         }
       };
       reader.readAsDataURL(selectedFiles[0]);
@@ -134,6 +138,8 @@ export const UploadDocuments = ({
     file1,
     llm,
   ]);
+
+  console.log(fileContent0, fileContent1, "hey===");
 
   return (
     <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
@@ -247,7 +253,8 @@ export const UploadDocuments = ({
           leftPanel={
             <Box
               sx={{
-                height: "100%",
+                pb: 2,
+                height: 480,
                 width: "100%",
               }}
             >
@@ -256,33 +263,23 @@ export const UploadDocuments = ({
                   {file0.name}
                 </Typography>
               )}
-              {!!fileContent0 && (
-                <iframe src={fileContent0} width="100%" height="100%" />
-              )}
+              {!!fileContent0 && <PdfViewer pdfUrl={fileContent0} />}
             </Box>
           }
           rightPanel={
             <Box
               sx={{
-                height: "100%",
+                pb: 2,
+                height: 480,
                 width: "100%",
               }}
             >
-              <Box
-                sx={{
-                  height: "100%",
-                  width: "100%",
-                }}
-              >
-                {!!file1 && (
-                  <Typography variant="body2" gutterBottom>
-                    {file1.name}
-                  </Typography>
-                )}
-                {!!fileContent1 && (
-                  <iframe src={fileContent1} width="100%" height="100%" />
-                )}
-              </Box>
+              {!!file1 && (
+                <Typography variant="body2" gutterBottom>
+                  {file1.name}
+                </Typography>
+              )}
+              {!!fileContent1 && <PdfViewer pdfUrl={fileContent1} />}
             </Box>
           }
         />
