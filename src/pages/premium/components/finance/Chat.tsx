@@ -24,6 +24,7 @@ import {
 import { addDownloadButtons } from "../../../../shared/utils/xlsx";
 import { ITopic } from "../../../../redux/interfaces";
 import { suggestionDict as suggestions } from "../../../../shared/models/constants";
+import { currentUser } from "../../../../redux/features/authSlice";
 
 export const Chat = ({
   instance,
@@ -35,7 +36,7 @@ export const Chat = ({
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const tagRef = useRef<string>("");
-  const { sys_graph_id } = useSelector((state: any) => state.userAuthSlice);
+  const { sys_graph_id, tenancy } = useSelector(currentUser);
 
   const [file, setFile] = useState<any>();
   const viewFile = useMemo(
@@ -69,6 +70,7 @@ export const Chat = ({
     myHeaders.append("Authorization", `Bearer ${token}`);
     myHeaders.append("Content-Type", "application/json");
     myHeaders.append("Accept", "application/pdf");
+    myHeaders.append("X-TENANT-ID", tenancy!);
 
     const raw = JSON.stringify({
       graph_id: sys_graph_id!,
@@ -95,7 +97,7 @@ export const Chat = ({
         setFile(fileURL);
       })
       .catch((error) => console.log("error", error));
-  }, [instance, sys_graph_id]);
+  }, [instance, sys_graph_id, tenancy]);
 
   useEffect(() => {
     if (!iframeRef.current) return;

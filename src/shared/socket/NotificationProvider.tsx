@@ -1,14 +1,30 @@
 import React, {
   useCallback,
   useContext,
-  useEffect,
+  // useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
-import { useSelector } from "react-redux";
-import { currentUser } from "../../redux/features/authSlice";
+// import { useSelector } from "react-redux";
+// import { currentUser } from "../../redux/features/authSlice";
 import { NotificationData } from "./interface";
+
+declare let WebSocket: {
+  prototype: WebSocket;
+  new (
+    uri: string,
+    protocols?: string | string[] | null,
+    options?: {
+      headers: { [headerName: string]: string };
+      [optionName: string]: any;
+    } | null
+  ): WebSocket;
+  readonly CLOSED: number;
+  readonly CLOSING: number;
+  readonly CONNECTING: number;
+  readonly OPEN: number;
+};
 
 export type SocketContextProps = {
   notifications: NotificationData[];
@@ -29,14 +45,14 @@ export const NotificationProvider = ({
   const clientRef = useRef<WebSocket | null>(null);
   const clientCloseRef = useRef<boolean>(false);
 
-  const { user, token } = useSelector(currentUser);
-  const socketUrl = useMemo(() => {
-    if (user && token) {
-      return `${import.meta.env.VITE_WEBSOCKET_URL}ws/${
-        user.id
-      }?token=${token}`;
-    }
-  }, [user, token]);
+  // const { user, token, tenancy } = useSelector(currentUser);
+  // const socketUrl = useMemo(() => {
+  //   if (user && token) {
+  //     return `${import.meta.env.VITE_WEBSOCKET_URL}ws/${
+  //       user.id
+  //     }?token=${token}`;
+  //   }
+  // }, [user, token]);
 
   const [messages, setMesssages] = useState<NotificationData[]>([]);
   const lastNotification = useMemo(
@@ -53,8 +69,9 @@ export const NotificationProvider = ({
     }
   };
 
-  const start = useCallback((url: string) => {
-    const sock = new WebSocket(url);
+  const start = useCallback((url: string, tenancy: string) => {
+    const headers = { ["X-TENANT-ID"]: tenancy };
+    const sock = new WebSocket(url, null, { headers: headers });
 
     sock.onopen = () => {
       console.log("socket connected");
@@ -75,22 +92,22 @@ export const NotificationProvider = ({
       console.log("socket closed");
       if (!clientCloseRef.current) {
         console.log("retry after 3s");
-        setTimeout(() => start(url), 3000);
+        setTimeout(() => start(url, tenancy), 3000);
       }
     };
   }, []);
 
-  const close = useCallback(() => {
-    if (clientRef.current) {
-      clientCloseRef.current = true;
-      clientRef.current.close();
-      clientRef.current = null;
-    }
-  }, []);
+  // const close = useCallback(() => {
+  //   if (clientRef.current) {
+  //     clientCloseRef.current = true;
+  //     clientRef.current.close();
+  //     clientRef.current = null;
+  //   }
+  // }, []);
 
   // useEffect(() => {
-  //   if (socketUrl) {
-  //     start(socketUrl);
+  //   if (socketUrl && tenancy) {
+  //     start(socketUrl, tenancy);
   //   } else {
   //     close();
   //   }
@@ -98,7 +115,7 @@ export const NotificationProvider = ({
   //   return () => {
   //     close();
   //   };
-  // }, [socketUrl, start, close]);
+  // }, [socketUrl, tenancy, start, close]);
 
   return (
     <SocketContext.Provider

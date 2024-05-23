@@ -338,13 +338,14 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
             </Button>
           </Box>
         )}
-      {reportsModal && (
+      {reportsModal && currentReport && currentReport.type ? (
         <ReportsSelectionModal
           open={reportsModal}
           onClose={() => showReportsModal(false)}
           onActionPerformed={onAddReport}
+          reportType={currentReport.type}
         />
-      )}
+      ) : null}
       {inviteModal && (
         <InviteCollaboraterModal
           open={inviteModal}

@@ -292,11 +292,11 @@ export const ExecutionModal = memo(
             llm: llmNode?.properties?.model || "OpenAI",
             recursion: llmNode?.properties?.recursion || 5,
           });
-          if ("data" in resp && resp.data.rating && resp.data.rating >= 1) {
+          if ("data" in resp && resp.data!.rating && resp.data!.rating >= 1) {
             result += `<h${depth.length + 3} class='heading-question'>${
               item.name
             }</h${depth.length + 3}>${
-              marked.parse(resp.data.content as string) as string
+              marked.parse(resp.data!.content as string) as string
             }`;
           }
           const successObj = depth.reduceRight<any>(
