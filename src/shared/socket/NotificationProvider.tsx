@@ -88,17 +88,17 @@ export const NotificationProvider = ({
     }
   }, []);
 
-  useEffect(() => {
-    if (socketUrl) {
-      start(socketUrl);
-    } else {
-      close();
-    }
+  // useEffect(() => {
+  //   if (socketUrl) {
+  //     start(socketUrl);
+  //   } else {
+  //     close();
+  //   }
 
-    return () => {
-      close();
-    };
-  }, [socketUrl, start, close]);
+  //   return () => {
+  //     close();
+  //   };
+  // }, [socketUrl, start, close]);
 
   return (
     <SocketContext.Provider

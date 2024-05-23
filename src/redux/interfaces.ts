@@ -24,13 +24,23 @@ export interface IUser {
   created_at?: string;
 }
 
+export interface IUserRegister extends IUser {
+  tenancy: string;
+}
+
+export interface IUserLogin {
+  email: string;
+  password: string;
+  tenancy: string;
+}
+
 export interface IUserAuth {
   user?: IUser;
   sys_graph_id?: number;
   token?: string;
   loading?: boolean;
   error?: boolean; // only for clear activities
-  redirect: string | null;
+  tenancy?: string;
 }
 
 export interface ITranscript {

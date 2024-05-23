@@ -5,31 +5,26 @@ import type { BaseQueryFn } from "@reduxjs/toolkit/query";
 import axios from "axios";
 import type { AxiosRequestConfig, AxiosError } from "axios";
 import { loadStoreValue } from "../../shared/utils/storage";
+import { RootState } from "../store";
 
 export const baseQuery = retry(
-  async (args, api, extraOptions) => {
-    const result = await fetchBaseQuery({
+  async (args, api, extraOptions) =>
+    fetchBaseQuery({
       baseUrl: import.meta.env.VITE_API_URL,
-      prepareHeaders: (headers) => {
-        const token = loadStoreValue("token");
-        if (!token) {
-          // do action for logout
-          return headers;
-        }
+      prepareHeaders: (headers, { getState }) => {
+        const token = (getState() as RootState).userAuthSlice.token;
+        const tenancy = (getState() as RootState).userAuthSlice.tenancy;
+
         if (token) {
           headers.set("Authorization", `Bearer ${token}`);
         }
+
+        if (tenancy) {
+          headers.set("X-TENANT-ID", tenancy);
+        }
         return headers;
       },
-    })(args, api, extraOptions);
-
-    // if any error, need to try to call this api again
-    // if (!!result.error) {
-    // 	clearItems();
-    // 	window.location.href = "/auth/login";
-    // }
-    return result;
-  },
+    })(args, api, extraOptions),
   {
     maxRetries: 0,
   }

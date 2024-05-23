@@ -2,7 +2,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
 import axios from "axios";
-import { IUser, IUserAuth } from "../interfaces";
+import { IUserAuth, IUserLogin, IUserRegister } from "../interfaces";
 import { removeStoreValue, saveStoreValue } from "../../shared/utils/storage";
 
 const initialState: IUserAuth = {
@@ -10,16 +10,20 @@ const initialState: IUserAuth = {
   token: undefined,
   loading: false,
   error: undefined,
-  redirect: null
 };
 
 export const registerAPI = createAsyncThunk(
   "users/register",
-  async (userData: IUser) => {
+  async ({ tenancy, ...data }: IUserRegister) => {
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}register`,
-        userData
+        data,
+        {
+          headers: {
+            "X-TENANT-ID": tenancy,
+          },
+        }
       );
       return response.data;
     } catch (e) {
@@ -33,13 +37,18 @@ export const registerAPI = createAsyncThunk(
 
 export const loginAPI = createAsyncThunk(
   "users/login",
-  async ({ email, password }: { email: string; password: string }) => {
+  async ({ email, password, tenancy }: IUserLogin) => {
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}login`,
         {
           email,
           password,
+        },
+        {
+          headers: {
+            "X-TENANT-ID": tenancy,
+          },
         }
       );
       // get system graph id
@@ -49,11 +58,13 @@ export const loginAPI = createAsyncThunk(
           headers: {
             Authorization: `Bearer ${response.data.token}`,
             "Content-Type": "application/json",
+            "X-TENANT-ID": tenancy,
           },
         }
       );
       return {
         ...response.data,
+        tenancy: tenancy,
         sys_graph_id: responseSystemGraph.data,
       };
     } catch (e) {
@@ -66,44 +77,28 @@ export const loginAPI = createAsyncThunk(
   }
 );
 
-export const subscriptionAPI = createAsyncThunk("subscriptions", async () => {
-  const response = await axios(`${import.meta.env.VITE_API_URL}subscriptions`);
-
-  if (response.status !== 200) {
-    return {
-      error: "Failed to get subscriptions.",
-    };
-  }
-  return response.data;
-});
-
-export const verifyTokenAPI = createAsyncThunk(
-  "verify_token",
-  async ({ token, redirect }: { token: string; redirect: string | null }) => {
+export const clearUserActivitiesAPI = createAsyncThunk(
+  "users/clear",
+  async ({ email, tenancy }: { email: string; tenancy: string }) => {
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}verify_token?token=${token}`,
-      );
-      // get system graph id
-      const responseSystemGraph = await axios.get(
-        `${import.meta.env.VITE_API_URL}system_graph_id`,
+      const response = await axios.delete(
+        `${import.meta.env.VITE_API_URL}user_activities/${email}`,
         {
           headers: {
-            Authorization: `Bearer ${response.data.token}`,
-            "Content-Type": "application/json",
+            "X-TENANT-ID": tenancy,
           },
         }
       );
-
-      return {
-        ...response.data,
-        redirect,
-        sys_graph_id: responseSystemGraph.data,
-      };
+      if (response.data) {
+        return true;
+      } else {
+        return false;
+      }
     } catch (e) {
       return {
         error:
-          (e as any).response.data.detail || "Failed to verify your email.",
+          (e as any).response.data.detail ||
+          "Incorrect email or password. Please retry with correct credentials.",
       };
     }
   }
@@ -126,12 +121,18 @@ export const userAuthSlice = createSlice({
       state.token = undefined;
       state.loading = false;
       state.error = undefined;
+      state.tenancy = undefined;
       removeStoreValue("user-info");
       removeStoreValue("token");
+      removeStoreValue("tenancy");
     },
     updateToken: (state, { payload }) => {
       state.token = payload;
       saveStoreValue("token", payload);
+    },
+    setTenancy: (state, { payload }) => {
+      state.tenancy = payload;
+      saveStoreValue("tenancy", payload);
     },
   },
   extraReducers: (builder) => {
@@ -146,7 +147,6 @@ export const userAuthSlice = createSlice({
           errorHandler(state, payload.error);
           return;
         }
-        state.user = payload;
       }),
       builder.addCase(loginAPI.pending, (state) => {
         state.loading = true;
@@ -170,52 +170,23 @@ export const userAuthSlice = createSlice({
           errorHandler(state, "This user registeration is rejected.");
           return;
         }
+
+        const { token, sys_graph_id, tenancy, ...restPayload } = payload;
         state.user = {
-          ...payload,
-          main_features: (payload.main_features || []).filter(
+          ...restPayload,
+          main_features: (restPayload.main_features || []).filter(
             (item: any) => item.id < 7 && item.id !== 2
           ), // remove 7, 8 features now
         };
 
-        state.token = payload.token;
-        state.sys_graph_id = payload.sys_graph_id;
-        saveStoreValue("user-info", state.user);
-        saveStoreValue("token", payload.token);
-        saveStoreValue("sys_graph_id", payload.sys_graph_id);
-      }),
-      builder.addCase(verifyTokenAPI.pending, (state) => {
-        state.loading = true;
-      }),
-      builder.addCase(verifyTokenAPI.fulfilled, (state, { payload }) => {
-        state.loading = false;
-        if (payload.error) {
-          if (payload.error === "This user is already logged in.") {
-            state.error = true;
-          }
-          errorHandler(state, payload.error);
-          return;
-        }
-        if (payload.status === 3) {
-          errorHandler(state, "This user registeration is under the review.");
-          return;
-        }
-        if (payload.status === 2) {
-          errorHandler(state, "This user registeration is rejected.");
-          return;
-        }
-        state.user = {
-          ...payload,
-          main_features: (payload.main_features || []).filter(
-            (item: any) => item.id < 7 && item.id !== 2
-          ), // remove 7, 8 features now
-        };
+        state.token = token;
+        state.sys_graph_id = sys_graph_id;
+        state.tenancy = tenancy;
 
-        state.token = payload.token;
-        state.sys_graph_id = payload.sys_graph_id;
-        state.redirect = payload.redirect || null;
         saveStoreValue("user-info", state.user);
-        saveStoreValue("token", payload.token);
-        saveStoreValue("sys_graph_id", payload.sys_graph_id);
+        saveStoreValue("token", token);
+        saveStoreValue("sys_graph_id", sys_graph_id);
+        saveStoreValue("tenancy", tenancy);
       });
   },
 });

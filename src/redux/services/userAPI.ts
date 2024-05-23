@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createApi } from "@reduxjs/toolkit/query/react";
+import { FetchBaseQueryError, createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQueryWithReauth } from "./base";
 import { IUser } from "../interfaces";
+import { updateTokenAsync } from "../features/authSlice";
 
 export const userApi = createApi({
   reducerPath: "userApi",
@@ -11,6 +12,9 @@ export const userApi = createApi({
   }),
   tagTypes: ["Users"],
   endpoints: (builder) => ({
+    getTenancy: builder.query<string[], void>({
+      query: () => ({ url: "subscriber_names", method: "GET" }),
+    }),
     getPersonas: builder.query<any[], void>({
       query: () => ({ url: "personas", method: "GET" }),
     }),
@@ -50,14 +54,40 @@ export const userApi = createApi({
         method: "DELETE",
       }),
     }),
+    refreshToken: builder.mutation<any, void>({
+      async queryFn(_, api, __, apiBaseQuery) {
+        try {
+          const { token } = (api.getState() as any).userAuthSlice;
+          const response = await apiBaseQuery({
+            method: "POST",
+            url: `refresh?token=${token}`,
+          });
+          const newToken = (response.data as any).access_token;
+          api.dispatch(updateTokenAsync(newToken));
+          return {
+            data: { message: "Refreshed token successfully." },
+          };
+        } catch (e) {
+          return {
+            error: {
+              status: "CUSTOM_ERROR",
+              error: "Error in refresh token",
+              data: e,
+            } as FetchBaseQueryError,
+          };
+        }
+      },
+    }),
   }),
 });
 
 export const {
+  useGetTenancyQuery,
   useGetPersonasQuery,
   useGetTenantsQuery,
   useGetUsersQuery,
   useUpdateUserMutation,
   useAddUserActivityMutation,
   useClearUserActivitiesMutation,
+  useRefreshTokenMutation,
 } = userApi;

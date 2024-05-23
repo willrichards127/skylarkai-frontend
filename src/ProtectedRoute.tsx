@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { useRefreshTokenMutation } from "./redux/services/authAPI";
+import { useRefreshTokenMutation } from "./redux/services/userAPI";
 import Layout from "./pages/layouts/Layout";
 
 export const ProtectedRoute = ({
