@@ -40,7 +40,7 @@ const menu = [
     page: 6,
   },
   {
-    label: "Sentiment Analysis",
+    label: "Investment Criteria Analysis",
     page: 7,
   },
 ];
@@ -53,23 +53,31 @@ export default function HelpPage() {
   }, []);
 
   const onPrev = useCallback(() => {
-    setSelectedPage((prev) => prev - 1);
+    setSelectedPage((prev) => (prev - 1 > 1 && prev - 1 < 6 ? 1 : prev - 1));
   }, []);
 
   const onNext = useCallback(() => {
-    setSelectedPage((prev) => prev + 1);
+    setSelectedPage((prev) => (prev + 1 > 1 && prev + 1 < 6 ? 6 : prev + 1));
   }, []);
 
   const prevButtonLabel = useMemo(() => {
     if (selectedPage > 1) {
-      return menu.find((item) => item.page === selectedPage - 1)!.label;
+      return menu.find(
+        (item) =>
+          item.page ===
+          (selectedPage - 1 > 1 && selectedPage - 1 < 6 ? 1 : selectedPage - 1)
+      )!.label;
     }
     return "";
   }, [selectedPage]);
 
   const nextButtonLabel = useMemo(() => {
     if (selectedPage < menu.length) {
-      return menu.find((item) => item.page === selectedPage + 1)!.label;
+      return menu.find(
+        (item) =>
+          item.page ===
+          (selectedPage + 1 > 1 && selectedPage + 1 < 6 ? 6 : selectedPage + 1)
+      )!.label;
     }
     return "";
   }, [selectedPage]);
@@ -102,6 +110,7 @@ export default function HelpPage() {
                 }
                 selected={selectedPage === option.page}
                 onClick={() => onClickItem(option.page)}
+                disabled={option.page > 1 && option.page < 6}
               />
             ))}
           </Box>
@@ -144,11 +153,7 @@ export default function HelpPage() {
             </Button>
           )}
           {selectedPage < menu.length && (
-            <Button
-              variant="contained"
-              sx={{ minWidth: 220 }}
-              onClick={onNext}
-            >
+            <Button variant="contained" sx={{ minWidth: 220 }} onClick={onNext}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <Box textAlign="left">
                   <Typography variant="body2" color="black">

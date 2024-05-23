@@ -504,20 +504,27 @@ export const transcriptApi = createApi({
       any,
       {
         sentiments: string[];
-        filenames: string[];
+        filenames: { graph_id: number; id?: number; file_name: string }[];
+        is_report?: boolean;
+        analysis_type: string;
         llm?: string;
       }
     >({
       async queryFn(
-        { sentiments, filenames, llm = "OpenAI" },
-        api,
+        {
+          sentiments,
+          is_report = false,
+          analysis_type,
+          filenames,
+          llm = "OpenAI",
+        },
+        _,
         __,
         apiBaseQuery
       ) {
-        const graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
         try {
           const response: any = await apiBaseQuery({
-            url: `sentimentanalysis/${graph_id}?llm=${llm}`,
+            url: `sentimentanalysis?llm=${llm}&is_report=${is_report}&analysis_type=${analysis_type}`,
             method: "POST",
             data: {
               sentiments,
@@ -536,6 +543,20 @@ export const transcriptApi = createApi({
           return handleCatchError(e, "generateSentimentAnalysis");
         }
       },
+    }),
+    cloneFeatureReport: builder.mutation<
+      any,
+      { report_name: string; content: string; unit_id: number }
+    >({
+      query: ({ report_name, content, unit_id }) => ({
+        url: "feature_report",
+        method: "POST",
+        data: {
+          report_name,
+          content,
+          company_id: unit_id,
+        },
+      }),
     }),
     getFilesData: builder.query<
       any,
@@ -793,7 +814,7 @@ export const transcriptApi = createApi({
       }),
       keepUnusedDataFor: 0,
       providesTags: ["FetchFileLog"],
-    }),    
+    }),
     updateFetchFileLog: builder.mutation<
       void,
       {
@@ -890,6 +911,8 @@ export const {
   useGetTransactionsQuery,
   // sentiment analysis
   useGenerateSentimentAnalysisMutation,
+
+  useCloneFeatureReportMutation,
 
   // create investment memo
   useGetSiteContentMutation,

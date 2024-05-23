@@ -38,6 +38,13 @@ const TabContainer = ({
         </Button>
         <Button
           size="small"
+          variant={viewMode === "general" ? "contained" : "text"}
+          onClick={() => onSwitchViewMode("general")}
+        >
+          General
+        </Button>
+        <Button
+          size="small"
           variant={viewMode === "archived" ? "contained" : "text"}
           onClick={() => onSwitchViewMode("archived")}
         >

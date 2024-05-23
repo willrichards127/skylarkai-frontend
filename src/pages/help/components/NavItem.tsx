@@ -4,10 +4,12 @@ import React from "react";
 export const NavItem = ({
   label,
   selected = false,
+  disabled,
   onClick,
 }: {
   label: React.ReactNode;
   selected?: boolean;
+  disabled?: boolean;
   onClick: () => void;
 }) => {
   return (
@@ -17,6 +19,7 @@ export const NavItem = ({
         alignItems: "center",
         gap: 2,
         cursor: "pointer",
+        pointerEvents: disabled ? "none" : "auto",
       }}
       onClick={onClick}
     >
@@ -25,6 +28,7 @@ export const NavItem = ({
         color={selected ? "white" : "grey"}
         gutterBottom
         sx={{
+          pointerEvents: disabled ? "none" : "auto",
           "&:hover": {
             color: "white",
           },

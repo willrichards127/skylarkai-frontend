@@ -95,6 +95,7 @@ export default function FeaturesPage() {
                       label={feature.feature}
                       onCard={() => onCard(+feature.id)}
                       size="md"
+                      disabled={feature.id <= 4}
                     />
                   </Grid>
                 ))}
