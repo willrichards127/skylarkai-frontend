@@ -10,7 +10,7 @@ export const Markdown = ({
 }: {
   html: string;
   isHidden?: boolean;
-  onCitationLink: ({
+  onCitationLink?: ({
     filename,
     quote,
   }: {
@@ -50,7 +50,7 @@ export const Markdown = ({
                 {...props}
                 className="no-print"
                 style={{ color: "tomato", fontSize: "14px" }}
-                onClick={() => onCitationLink({ filename, quote })}
+                onClick={() => onCitationLink?.({ filename, quote })}
                 title={`${filename}.pdf:${quote}`}
               />
             );

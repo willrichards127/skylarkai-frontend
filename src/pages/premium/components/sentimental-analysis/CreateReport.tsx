@@ -11,6 +11,7 @@ import {
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { CompanySelector } from "../../../../components/CompanySelector";
 import { SavedInstancesContainer } from "../sub-components/SavedInstancesContainer";
+import { SelectFileModal } from "../../../../components/CompanySelector/SelectFileModal";
 import { ICustomInstance } from "./interfaces";
 import { IFeatureInstance, ICompany } from "../../../../redux/interfaces";
 import { useGetFeatureInstancesQuery } from "../../../../redux/services/transcriptAPI";
@@ -40,6 +41,8 @@ export const CreateReport = ({
     is_company_available: false,
   });
 
+  const [selectFileModal, showSelectFileModal] = useState<boolean>(false);
+
   const [dbFiles, setDbFiles] = useState<
     { name: string; date: string; id?: number; graph_id: number }[]
   >([]);
@@ -59,8 +62,15 @@ export const CreateReport = ({
   }, []);
 
   const onSelectedDBFiles = useCallback((files: any[]) => {
-    console.log(files, "files===");
     setDbFiles(files);
+    setForm((prev) => ({
+      ...prev,
+      instance_name: genInstanceName("report"),
+    }));
+  }, []);
+
+  const onSelectFromDb = useCallback(() => {
+    showSelectFileModal(true);
   }, []);
 
   const onSavedInstance = useCallback(
@@ -95,21 +105,40 @@ export const CreateReport = ({
         </Button>
       </Box>
       <Stack spacing={2} direction="row" mb={2}>
-        <CompanySelector
-          value={form}
-          analysisType="transcript"
-          onChange={onChangeCompany}
-          onSelectedDBFiles={onSelectedDBFiles}
-        />
-        <TextField
-          fullWidth
-          size="small"
-          label="Report Name"
-          value={form.instance_name}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setForm((prev) => ({ ...prev, instance_name: e.target.value }))
-          }
-        />
+        <Stack spacing={1} width="100%">
+          <Typography variant="body2" fontWeight="bold" gutterBottom>
+            Publicly traded companies
+          </Typography>
+          <CompanySelector
+            value={form}
+            analysisType="transcript"
+            onChange={onChangeCompany}
+          />
+          <Box width="100%" textAlign="center">
+            OR
+          </Box>
+          <Typography variant="body2" fontWeight="bold" gutterBottom>
+            Local Reports/VDR files
+          </Typography>
+          <Button size="small" variant="outlined" onClick={onSelectFromDb}>
+            Select Reports/VDR files
+            {dbFiles.length > 0 && `(${dbFiles.length} files are selected)`}
+          </Button>
+        </Stack>
+        <Stack spacing={1} width="100%">
+          <Typography variant="body2" fontWeight="bold" gutterBottom>
+            Enter new report name
+          </Typography>
+          <TextField
+            fullWidth
+            size="small"
+            label="Report Name"
+            value={form.instance_name}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setForm((prev) => ({ ...prev, instance_name: e.target.value }))
+            }
+          />
+        </Stack>
       </Stack>
       <Divider />
       <SavedInstancesContainer
@@ -118,6 +147,13 @@ export const CreateReport = ({
         instanceType="report"
         onSavedInstance={onSavedInstance}
       />
+      {selectFileModal && (
+        <SelectFileModal
+          open={selectFileModal}
+          onClose={() => showSelectFileModal(false)}
+          onActionPerformed={onSelectedDBFiles}
+        />
+      )}
     </Box>
   );
 };

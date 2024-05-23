@@ -35,6 +35,7 @@ export interface IUserAuth {
 
 export interface ITranscript {
   file_name: string;
+  id?: number;
 }
 
 export const metrics: TMetric[] = [

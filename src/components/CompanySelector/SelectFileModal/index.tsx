@@ -11,18 +11,28 @@ export const SelectFileModal = ({
   open,
   onClose,
   onActionPerformed,
+  isCompanySelect,
 }: {
   open: boolean;
+  isCompanySelect?: boolean;
   onClose: () => void;
   onActionPerformed: (records: any[]) => void;
 }) => {
   const [activeStep, setActiveStep] = useState<number>(0);
   const [unit, setUnit] = useState<any>();
 
-  const onSelectedUnit = useCallback((selectedUnit: any) => {
-    setUnit(selectedUnit);
-    setActiveStep(1);
-  }, []);
+  const onSelectedUnit = useCallback(
+    (selectedUnit: any) => {
+      if (isCompanySelect) {
+        onActionPerformed([selectedUnit]);
+        onClose();
+      } else {
+        setUnit(selectedUnit);
+        setActiveStep(1);
+      }
+    },
+    [isCompanySelect, onClose, onActionPerformed]
+  );
 
   const onApplied = useCallback(
     (selectedRecords: any[]) => {
@@ -47,18 +57,20 @@ export const SelectFileModal = ({
       }
       size="lg"
     >
-      <Box pb={4} px={8}>
-        <Stepper activeStep={activeStep}>
-          {steps.map((label) => {
-            const stepProps: { completed?: boolean } = {};
-            return (
-              <Step key={label} {...stepProps}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            );
-          })}
-        </Stepper>
-      </Box>
+      {!isCompanySelect && (
+        <Box pb={4} px={8}>
+          <Stepper activeStep={activeStep}>
+            {steps.map((label) => {
+              const stepProps: { completed?: boolean } = {};
+              return (
+                <Step key={label} {...stepProps}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              );
+            })}
+          </Stepper>
+        </Box>
+      )}
       {activeStep === 0 && (
         <UnitStepPanel onSelectedUnit={onSelectedUnit} onClose={onClose} />
       )}

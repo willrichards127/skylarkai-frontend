@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState } from "react";
+import { useRef, useCallback, useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import {
   Box,
@@ -10,14 +10,19 @@ import {
 } from "@mui/material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import IosShareIcon from "@mui/icons-material/IosShare";
-import AttachEmailIcon from '@mui/icons-material/AttachEmail';
+import AttachEmailIcon from "@mui/icons-material/AttachEmail";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import SendIcon from "@mui/icons-material/Send";
+import { marked } from "marked";
 import { CitationModal } from "../../../../components/modals/CitationModal";
 import { ExportModal } from "../../../../components/modals/ExportModal";
 import { SendEmailModal } from "../../../../components/modals/SendEmailModal";
 import { ICustomInstance } from "./interfaces";
 import { Markdown } from "../../../portal/reports/components/Markdown";
+import { SelectFileModal } from "../../../../components/CompanySelector/SelectFileModal";
 import { parseCitation } from "../../../../shared/utils/string";
+import { useCloneFeatureReportMutation } from "../../../../redux/services/transcriptAPI";
+import { toast } from "react-toastify";
 
 export const Report = ({
   instance,
@@ -33,12 +38,11 @@ export const Report = ({
     quote: string;
   }>();
 
+  const [cloneReport, { isSuccess }] = useCloneFeatureReportMutation();
+
+  const [fileModal, showFileModal] = useState<boolean>(false);
   const [exportModal, showExportModal] = useState<boolean>(false);
   const [emailModal, showEmailModal] = useState<boolean>(false);
-
-  // const onPrint = useCallback(() => {
-  //   generatePdf(ref.current!.innerHTML, "Investment Criteria Analysis", "Skylark", true);
-  // }, []);
 
   const onPrint = useCallback(() => {
     showExportModal(true);
@@ -47,6 +51,23 @@ export const Report = ({
   const onSendEmail = useCallback(() => {
     showEmailModal(true);
   }, []);
+
+  const onAppend = useCallback(() => {
+    showFileModal(true);
+  }, []);
+
+  const onActionPerformed = useCallback(
+    (units: any[]) => {
+      cloneReport({
+        report_name: "Investment Criteria Report",
+        unit_id: units[0].id,
+        content: marked.parse(
+          instance.instance_metadata?.report || ""
+        ) as string,
+      });
+    },
+    [instance, cloneReport]
+  );
 
   const onCitationLink = useCallback(
     ({ filename, quote }: { filename: string; quote: string }) => {
@@ -57,6 +78,12 @@ export const Report = ({
     },
     []
   );
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success("Sent this report to the selected company/sector.");
+    }
+  }, [isSuccess]);
 
   return (
     <Box sx={{ height: "100%" }}>
@@ -86,6 +113,14 @@ export const Report = ({
           onClick={onSendEmail}
         >
           Send via Email
+        </Button>
+        <Button
+          variant="contained"
+          startIcon={<SendIcon />}
+          sx={{ minWidth: 140 }}
+          onClick={onAppend}
+        >
+          Append to Company/Sector Page
         </Button>
       </Box>
       <Box sx={{ height: "calc(100% - 60px)", position: "relative" }}>
@@ -133,6 +168,14 @@ export const Report = ({
           onClose={() => showEmailModal(false)}
           element={ref.current!}
           filename={`Investment criteria analysis.pdf`}
+        />
+      )}
+      {fileModal && (
+        <SelectFileModal
+          open={fileModal}
+          onClose={() => showFileModal(false)}
+          onActionPerformed={onActionPerformed}
+          isCompanySelect
         />
       )}
     </Box>

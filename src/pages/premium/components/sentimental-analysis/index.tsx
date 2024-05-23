@@ -15,7 +15,7 @@ import { ITranscript } from "../../../../redux/interfaces";
 
 const SentimentalAnalysisFeature = ({ featureId }: { featureId: number }) => {
   const { sys_graph_id } = useSelector((state: any) => state.userAuthSlice);
-  const fileRef = useRef<string>("");
+  const fileRef = useRef<{ id?: number; file_name: string }>();
   const [fileModal, showFileModal] = useState<boolean>(false);
 
   const [instance, setInstance] = useState<ICustomInstance>({
@@ -85,8 +85,11 @@ const SentimentalAnalysisFeature = ({ featureId }: { featureId: number }) => {
     }));
   }, []);
 
-  const onViewFile = useCallback((filename: string) => {
-    fileRef.current = filename;
+  const onViewFile = useCallback((file: { id?: number; file_name: string }) => {
+    fileRef.current = {
+      ...(!!file.id && { id: file.id }),
+      file_name: file.file_name,
+    };
     showFileModal(true);
   }, []);
 
@@ -116,7 +119,7 @@ const SentimentalAnalysisFeature = ({ featureId }: { featureId: number }) => {
                         instance.step === "chat" &&
                         instance.view_doc === doc.file_name
                       }
-                      onClick={() => onViewFile(doc.file_name)}
+                      onClick={() => onViewFile(doc)}
                       onDelete={() => onRemoveFile(doc.file_name)}
                     />
                   ))}
@@ -162,9 +165,10 @@ const SentimentalAnalysisFeature = ({ featureId }: { featureId: number }) => {
         <CitationModal
           open={fileModal}
           onClose={() => showFileModal(false)}
-          title={`File View: ${fileRef.current}`}
+          title={`File View: ${fileRef.current.file_name}`}
           data={{
-            filename: fileRef.current,
+            filename: fileRef.current.file_name,
+            id: fileRef.current.id,
             quote: "",
             graph_id: sys_graph_id!,
             analysis_type: "compare",

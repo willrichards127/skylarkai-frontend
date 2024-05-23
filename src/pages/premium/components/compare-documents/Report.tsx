@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState } from "react";
+import { useRef, useCallback, useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import {
   Box,
@@ -12,12 +12,17 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import IosShareIcon from "@mui/icons-material/IosShare";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AttachEmailIcon from "@mui/icons-material/AttachEmail";
+import SendIcon from "@mui/icons-material/Send";
+import { marked } from "marked";
 import { CitationModal } from "../../../../components/modals/CitationModal";
 import { ExportModal } from "../../../../components/modals/ExportModal";
+import { SelectFileModal } from "../../../../components/CompanySelector/SelectFileModal";
 import { Markdown } from "../../../portal/reports/components/Markdown";
 import { parseCitation } from "../../../../shared/utils/string";
 import { SendEmailModal } from "../../../../components/modals/SendEmailModal";
 import { ICustomInstance } from "./interfaces";
+import { useCloneFeatureReportMutation } from "../../../../redux/services/transcriptAPI";
+import { toast } from "react-toastify";
 
 export const Report = ({
   instance,
@@ -27,7 +32,7 @@ export const Report = ({
   onGotoMain: () => void;
 }) => {
   const { sys_graph_id } = useSelector((state: any) => state.userAuthSlice);
-
+  const [cloneReport, {isSuccess}] = useCloneFeatureReportMutation();
   const ref = useRef<HTMLDivElement>();
   const [citationData, setCitationData] = useState<{
     filename: string;
@@ -35,6 +40,7 @@ export const Report = ({
   }>();
   const [emailModal, showEmailModal] = useState<boolean>(false);
   const [exportModal, showExportModal] = useState<boolean>(false);
+  const [fileModal, showFileModal] = useState<boolean>(false);
 
   const onExport = useCallback(() => {
     showExportModal(true);
@@ -42,6 +48,10 @@ export const Report = ({
 
   const onSendEmail = useCallback(async () => {
     showEmailModal(true);
+  }, []);
+
+  const onAppend = useCallback(() => {
+    showFileModal(true);
   }, []);
 
   const onCitationLink = useCallback(
@@ -55,9 +65,28 @@ export const Report = ({
     []
   );
 
+  const onActionPerformed = useCallback(
+    (units: any[]) => {
+      cloneReport({
+        report_name: "Comparsion Report",
+        unit_id: units[0].id,
+        content: marked.parse(
+          instance.instance_metadata?.report || ""
+        ) as string,
+      });
+    },
+    [instance, cloneReport]
+  );
+
+  useEffect(() => {
+    if(isSuccess) {
+      toast.success("Sent this report to the selected company/sector.")
+    }
+  }, [isSuccess])
+
   return (
     <Box sx={{ height: "100%" }}>
-      <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+      <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}>
         <IconButton size="small" onClick={onGotoMain} sx={{ mr: 1 }}>
           <ArrowBackIcon sx={{ fontSize: 18 }} />
         </IconButton>
@@ -83,6 +112,14 @@ export const Report = ({
           onClick={onSendEmail}
         >
           Send via Email
+        </Button>
+        <Button
+          variant="contained"
+          startIcon={<SendIcon />}
+          sx={{ minWidth: 140 }}
+          onClick={onAppend}
+        >
+          Append to Company/Sector Page
         </Button>
       </Box>
 
@@ -138,6 +175,14 @@ export const Report = ({
           }}
         />
       ) : null}
+      {fileModal && (
+        <SelectFileModal
+          open={fileModal}
+          onClose={() => showFileModal(false)}
+          onActionPerformed={onActionPerformed}
+          isCompanySelect
+        />
+      )}
     </Box>
   );
 };

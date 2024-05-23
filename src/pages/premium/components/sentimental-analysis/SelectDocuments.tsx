@@ -124,12 +124,14 @@ export const SelectDocuments = ({
         analysis_type: "financial_diligence",
         sentiments: criteria,
         llm,
+        ...(!!instance.instance_metadata.db_files[0].id && { is_report: true }),
       }).unwrap();
       const responseInstance = await createInstance({
         ...instance,
         instance_metadata: {
           docs: instance.instance_metadata.db_files.map((file) => ({
             file_name: file.name,
+            ...(!!file.id && { id: file.id }),
           })),
           criteria,
           report: responseReport.content,
@@ -290,6 +292,11 @@ export const SelectDocuments = ({
       </Stack>
 
       <XPanel sxProps={{ bgcolor: "#000D1C", p: 2 }}>
+        {!!instance.instance_metadata.db_files?.length && (
+          <Typography variant="body2" fontWeight="bold" mb={2}>
+            Selected Report/VDR files
+          </Typography>
+        )}
         {!!instance.instance_metadata.db_files?.length &&
           instance.instance_metadata.db_files.map((file) => (
             <Box
@@ -299,7 +306,12 @@ export const SelectDocuments = ({
               {file.name}
             </Box>
           ))}
-        {instance.company_name && (
+        {!!instance.company_name && (
+          <Typography variant="body2" fontWeight="bold" mb={2}>
+            Transcripts
+          </Typography>
+        )}
+        {!!instance.company_name && (
           <XTable
             loading={loadingTranscripts}
             columns={[

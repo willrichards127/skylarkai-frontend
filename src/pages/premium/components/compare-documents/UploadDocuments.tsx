@@ -137,9 +137,7 @@ export const UploadDocuments = ({
     file0,
     file1,
     llm,
-  ]);
-
-  console.log(fileContent0, fileContent1, "hey===");
+  ]);  
 
   return (
     <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>

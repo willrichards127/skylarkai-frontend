@@ -210,7 +210,9 @@ export const FilesStepPanel = ({
       >
         <Button onClick={onStepBack}>Back</Button>
         <Button onClick={onClose}>Close</Button>
-        <Button onClick={onApply}>Apply</Button>
+        <Button onClick={onApply} disabled={!selectedRecords.length}>
+          Apply
+        </Button>
       </Box>
     </>
   );

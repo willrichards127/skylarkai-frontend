@@ -594,6 +594,20 @@ export const transcriptApi = createApi({
         }
       },
     }),
+    cloneFeatureReport: builder.mutation<
+      any,
+      { report_name: string; content: string; unit_id: number }
+    >({
+      query: ({ report_name, content, unit_id }) => ({
+        url: "feature_report",
+        method: "POST",
+        data: {
+          report_name,
+          content,
+          company_id: unit_id,
+        },
+      }),
+    }),
     getFilesData: builder.query<
       any,
       { docs: { name: string; analysis_type: string }[] }
@@ -983,6 +997,8 @@ export const {
   useGetTransactionsQuery,
   // sentiment analysis
   useGenerateSentimentAnalysisMutation,
+
+  useCloneFeatureReportMutation,
 
   // create investment memo
   useGetSiteContentMutation,
