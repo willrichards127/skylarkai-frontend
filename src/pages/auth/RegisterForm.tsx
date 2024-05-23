@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { registerAPI, currentUser } from "../../redux/features/authSlice";
@@ -50,6 +50,12 @@ const RegisterForm = memo(() => {
     },
     [dispatch, form]
   );
+
+  useEffect(() => {
+    if (tenancies && tenancies.length) {
+      setForm((prev) => ({ ...prev, tenancy: tenancies[0] }));
+    }
+  }, [tenancies]);
 
   return (
     <Box
@@ -148,6 +154,7 @@ const RegisterForm = memo(() => {
                 </Stack>
                 <Stack spacing={2} direction="row">
                   <TextField
+                    fullWidth
                     select
                     label="Select Persona"
                     name="persona_id"
@@ -161,6 +168,7 @@ const RegisterForm = memo(() => {
                     ))}
                   </TextField>
                   <TextField
+                    fullWidth
                     select
                     label="Select Tenancy"
                     name="tenancy"

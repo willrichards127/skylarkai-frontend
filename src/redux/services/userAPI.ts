@@ -1,15 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FetchBaseQueryError, createApi } from "@reduxjs/toolkit/query/react";
-import { axiosBaseQueryWithReauth } from "./base";
+import { baseQuery } from "./base";
 import { IUser } from "../interfaces";
 import { updateTokenAsync } from "../features/authSlice";
 
 export const userApi = createApi({
   reducerPath: "userApi",
-  baseQuery: axiosBaseQueryWithReauth({
-    baseUrl: import.meta.env.VITE_API_URL,
-    isGuarded: true,
-  }),
+  baseQuery: baseQuery,
   tagTypes: ["Users"],
   endpoints: (builder) => ({
     getTenancy: builder.query<string[], void>({

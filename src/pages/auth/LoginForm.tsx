@@ -17,15 +17,11 @@ import {
   currentUser,
   loginAPI,
 } from "../../redux/features/authSlice";
-import {
-  useClearUserActivitiesMutation,
-  useGetTenancyQuery,
-} from "../../redux/services/userAPI";
+import { useGetTenancyQuery } from "../../redux/services/userAPI";
 
 const LoginForm = memo(() => {
   const navigate = useNavigate();
 
-  const [clearActivities] = useClearUserActivitiesMutation();
   const { data: tenancies, isLoading: isTenancyLoading } = useGetTenancyQuery();
   const { user, error } = useSelector(currentUser);
 
@@ -49,7 +45,7 @@ const LoginForm = memo(() => {
         tenancy: form.tenancy,
       }) as any
     );
-  }, [clearActivities, form]);
+  }, [dispatch, form.email, form.tenancy]);
 
   const onChangeValues = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -66,11 +62,17 @@ const LoginForm = memo(() => {
     [form, dispatch]
   );
 
-  // useEffect(() => {
-  //   if (isLoggedIn) {
-  //     navigate("/");
-  //   }
-  // }, [navigate, isLoggedIn]);
+  useEffect(() => {
+    if (tenancies && tenancies.length) {
+      setForm((prev) => ({ ...prev, tenancy: tenancies[0] }));
+    }
+  }, [tenancies]);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate("/");
+    }
+  }, [navigate, isLoggedIn]);
 
   return (
     <Box
