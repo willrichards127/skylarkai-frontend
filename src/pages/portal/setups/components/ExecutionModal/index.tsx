@@ -3,7 +3,11 @@ import { Box, CircularProgress, Typography } from "@mui/material";
 import update from "immutability-helper";
 import { XModal } from "../../../../../components/XModal";
 import Templateview from "../../../../../components/TemplateView";
-import { ISetup, ITemplateItem } from "../../../../../shared/models/interfaces";
+import {
+  ISetup,
+  ITemplate,
+  ITemplateItem,
+} from "../../../../../shared/models/interfaces";
 import {
   useIngestFilesMutation,
   useSaveSetupMutation,
@@ -147,75 +151,97 @@ export const ExecutionModal = memo(
         };
       }
 
-      const templateNodeIndex = updatedSetup.nodes.findIndex(
+      const templateInvestNodeIndex = updatedSetup.nodes.findIndex(
         (node) => node.template_node_id === 17
       );
 
+      const templateTearNodeIndex = updatedSetup.nodes.findIndex(
+        (node) => node.template_node_id === 18
+      );
+
+      let templateData: ITemplate | undefined;
+      let reportType: number | undefined;
+
       if (
-        templateNodeIndex > -1 &&
+        templateInvestNodeIndex > -1 &&
         skyDBNodeIndex > -1 &&
-        updatedSetup.nodes[templateNodeIndex].properties?.text
+        updatedSetup.nodes[templateInvestNodeIndex].properties?.text
       ) {
-        const templateData = convertJSON(
-          updatedSetup.nodes[templateNodeIndex].properties!.text
+        templateData = convertJSON(
+          updatedSetup.nodes[templateInvestNodeIndex].properties!.text
         );
-
-        if (templateData) {
-          const items = addIdtoTemplateJson(templateData.data, {
-            excludeUnChecked: true,
-          });
-
-          if (isBackground) {
-            const openAINodeIndex = updatedSetup.nodes.findIndex(
-              (node) => node.template_node_id == 7
-            );
-            if (openAINodeIndex > -1) {
-
-              await executionReport({
-                unitName,
-                setupId: setup.id!,
-                analysisType: "financial_diligence",
-                report: {
-                  title: templateData.title,
-                  data: items,
-                  default_llm: updatedSetup.nodes[openAINodeIndex].properties?.model || "OpenAI",
-                  recursion: updatedSetup.nodes[openAINodeIndex].properties?.recursion || 5,
-                },
-              }).unwrap();
-            }
-          } else {
-            setItems(items);
-
-            setCustomQueyring(true);
-            const filenames = updatedSetup.nodes[
-              skyDBNodeIndex
-            ].properties!.files.map((f: any) => f.file_name);
-            const ret = await handleCustomQuery(items, filenames);
-            const report =
-              `<h1 style="text-align: center;">Investment memo: ${
-                updatedSetup.name
-              }</h1>
-            <p style="text-align: center;"><strong>${longDateFormat(
-              new Date()
-            )}</strong></p>` + ret;
-
-            const reportName = `${templateData.title}-${
-              new Date().getTime() % 1000
-            }`;
-
-            const generatedId = await generateReport({
-              setupId: setup.id!,
-              data: initializeHtmlResponse(report),
-              queryType: reportName,
-            }).unwrap();
-            navigate(
-              `/portal/reports/${generatedId}?reportName=${reportName}&setupId=${setup.id}&viewMode=active`
-            );
-            setCustomQueyring(false);
-          }
-        }
+        reportType = 1;
       }
 
+      if (
+        templateTearNodeIndex > -1 &&
+        skyDBNodeIndex > -1 &&
+        updatedSetup.nodes[templateTearNodeIndex].properties?.text
+      ) {
+        templateData = convertJSON(
+          updatedSetup.nodes[templateTearNodeIndex].properties!.text
+        );
+        reportType = 2;
+      }
+
+      if (templateData && reportType) {
+        const items = addIdtoTemplateJson(templateData.data, {
+          excludeUnChecked: true,
+        });
+
+        if (isBackground) {
+          const openAINodeIndex = updatedSetup.nodes.findIndex(
+            (node) => node.template_node_id == 7
+          );
+          if (openAINodeIndex > -1) {
+            await executionReport({
+              unitName,
+              setupId: setup.id!,
+              analysisType: "financial_diligence",
+              reportType: reportType,
+              report: {
+                title: templateData.title,
+                data: items,
+                default_llm:
+                  updatedSetup.nodes[openAINodeIndex].properties?.model ||
+                  "OpenAI",
+                recursion:
+                  updatedSetup.nodes[openAINodeIndex].properties?.recursion ||
+                  5,
+              },
+            }).unwrap();
+          }
+        } else {
+          setItems(items);
+
+          setCustomQueyring(true);
+          const filenames = updatedSetup.nodes[
+            skyDBNodeIndex
+          ].properties!.files.map((f: any) => f.file_name);
+          const ret = await handleCustomQuery(items, filenames);
+          const report =
+            `<h1 style="text-align: center;">Investment memo: ${
+              updatedSetup.name
+            }</h1>
+          <p style="text-align: center;"><strong>${longDateFormat(
+            new Date()
+          )}</strong></p>` + ret;
+
+          const reportName = `${templateData.title}-${
+            new Date().getTime() % 1000
+          }`;
+
+          const generatedId = await generateReport({
+            setupId: setup.id!,
+            data: initializeHtmlResponse(report),
+            queryType: reportName,
+          }).unwrap();
+          navigate(
+            `/portal/reports/${generatedId}?reportName=${reportName}&setupId=${setup.id}&viewMode=active`
+          );
+          setCustomQueyring(false);
+        }
+      }
       onClose(updatedSetup);
     };
 
