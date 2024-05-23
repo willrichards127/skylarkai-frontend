@@ -101,10 +101,10 @@ export const htmlTable2CSV = (html: string) => {
 
 const cleanUp = (inputString: string, limitWordCount?: number) => {
   // replace all `("` and `")` with `"`
-  let result = inputString.replace(/\("\s?/g, '"');
-  result = result.replace(/"\)/g, '"');
+  // let result = inputString.replace(/\("\s?/g, '"');
+  const result = inputString.replace(/"\)/g, '"');
   // replace all `(` and `)` with `'`;
-  result = result.replace(/[()]/g, "'");
+  // result = result.replace(/[()]/g, "'");
   let filename: string = "",
     quote: string = "";
   try {

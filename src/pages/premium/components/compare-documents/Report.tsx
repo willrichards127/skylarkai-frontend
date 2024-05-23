@@ -13,7 +13,6 @@ import IosShareIcon from "@mui/icons-material/IosShare";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AttachEmailIcon from "@mui/icons-material/AttachEmail";
 import SendIcon from "@mui/icons-material/Send";
-import { marked } from "marked";
 import { CitationModal } from "../../../../components/modals/CitationModal";
 import { ExportModal } from "../../../../components/modals/ExportModal";
 import { SelectFileModal } from "../../../../components/CompanySelector/SelectFileModal";
@@ -32,7 +31,7 @@ export const Report = ({
   onGotoMain: () => void;
 }) => {
   const { sys_graph_id } = useSelector((state: any) => state.userAuthSlice);
-  const [cloneReport, {isSuccess}] = useCloneFeatureReportMutation();
+  const [cloneReport, { isSuccess }] = useCloneFeatureReportMutation();
   const ref = useRef<HTMLDivElement>();
   const [citationData, setCitationData] = useState<{
     filename: string;
@@ -70,19 +69,17 @@ export const Report = ({
       cloneReport({
         report_name: "Comparsion Report",
         unit_id: units[0].id,
-        content: marked.parse(
-          instance.instance_metadata?.report || ""
-        ) as string,
+        content: instance.instance_metadata?.report || "",
       });
     },
     [instance, cloneReport]
   );
 
   useEffect(() => {
-    if(isSuccess) {
-      toast.success("Sent this report to the selected company/sector.")
+    if (isSuccess) {
+      toast.success("Sent this report to the selected company/sector.");
     }
-  }, [isSuccess])
+  }, [isSuccess]);
 
   return (
     <Box sx={{ height: "100%" }}>
