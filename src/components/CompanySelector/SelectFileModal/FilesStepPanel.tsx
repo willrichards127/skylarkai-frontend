@@ -31,6 +31,7 @@ export const FilesStepPanel = ({
     {
       unitId: companyId,
       viewMode: "active",
+      reportType: 1,
     },
     { skip: selectionType === "vdr" }
   );

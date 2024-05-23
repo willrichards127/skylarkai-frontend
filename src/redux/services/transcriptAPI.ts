@@ -39,7 +39,7 @@ export const transcriptApi = createApi({
       }) => ({
         url: "feature_instances",
         method: "POST",
-        data: {
+        body: {
           feature_id,
           company_name,
           ticker,
@@ -526,7 +526,7 @@ export const transcriptApi = createApi({
           const response: any = await apiBaseQuery({
             url: `sentimentanalysis?llm=${llm}&is_report=${is_report}&analysis_type=${analysis_type}`,
             method: "POST",
-            data: {
+            body: {
               sentiments,
               filenames,
             },
@@ -551,7 +551,7 @@ export const transcriptApi = createApi({
       query: ({ report_name, content, unit_id }) => ({
         url: "feature_report",
         method: "POST",
-        data: {
+        body: {
           report_name,
           content,
           company_id: unit_id,
@@ -624,7 +624,7 @@ export const transcriptApi = createApi({
           const response: any = await apiBaseQuery({
             url: `compare_document/${graph_id}?analysis_type=${analysis_type}`,
             method: "POST",
-            data: {
+            body: {
               document1,
               document2,
               template,
@@ -657,6 +657,7 @@ export const transcriptApi = createApi({
         apiBaseQuery
       ) {
         const graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
+        console.log("=================", analysis_type)
         try {
           const formdata = new FormData();
           formdata.append("analysis_type", analysis_type);
@@ -667,7 +668,7 @@ export const transcriptApi = createApi({
           const response: any = await apiBaseQuery({
             url: `ingestfiles?graph_id=${graph_id}&company_name=${company_name}`,
             method: "POST",
-            data: formdata,
+            body: formdata,
           });
 
           return {
