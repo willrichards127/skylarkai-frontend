@@ -28,6 +28,8 @@ import {
   useIngestFilesMutation,
   useCompareDocumentsMutation,
 } from "../../../../redux/services/transcriptAPI";
+import { marked } from "marked";
+import { parseCitation } from "../../../../shared/utils/string";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -123,7 +125,7 @@ export const UploadDocuments = ({
         filename0: file0!.name.replace(".pdf", ""),
         filename1: file1!.name.replace(".pdf", ""),
         criteria,
-        report: responseCompare,
+        report: marked.parse(parseCitation(responseCompare)) as string,
       },
     }).unwrap();
     onNext(responseInstance as ICustomInstance);
@@ -137,7 +139,7 @@ export const UploadDocuments = ({
     file0,
     file1,
     llm,
-  ]);  
+  ]);
 
   return (
     <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>

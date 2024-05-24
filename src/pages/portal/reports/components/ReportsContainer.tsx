@@ -39,7 +39,7 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
   } = useGetReportsByUnitQuery({
     unitId: +params.unitId!,
     viewMode: viewMode === "general" ? "active" : viewMode,
-    reportType
+    reportType,
   });
 
   const [deleteReport] = useDeleteReportMutation();
@@ -157,6 +157,7 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
           headerHeight={37}
           viewMode={viewMode}
           onSwitchViewMode={onSwitchViewMode}
+          showGeneralTab={reportType === 1}
         >
           {[
             ...reports.reports.filter((report: any) =>
