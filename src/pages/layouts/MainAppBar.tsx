@@ -215,6 +215,7 @@ export const MainAppBar = memo(() => {
                         setAnchorEl(null);
                         navigate(`/features/${feature.id}`);
                       }}
+                      disabled={feature.id <= 4}
                     >
                       {feature.feature}
                     </MenuItem>

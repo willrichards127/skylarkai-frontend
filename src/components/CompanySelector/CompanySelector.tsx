@@ -100,15 +100,16 @@ export const CompanySelector = ({
           onChange(newValue);
         }}
       />
-      {!!analysisType && (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "flex-end",
-            mt: 0.5,
-            gap: 0.5,
-          }}
-        >
+
+      <Box
+        sx={{
+          display: "flex",
+          mt: 0.5,
+          gap: 0.5,
+        }}
+      >
+        <Box mr="auto" />
+        {!!analysisType && (
           <ToggleButtonGroup
             value={viewMode}
             exclusive
@@ -130,18 +131,19 @@ export const CompanySelector = ({
               </ToggleButton>
             ))}
           </ToggleButtonGroup>
-          {analysisType === "transcript" && (
-            <Button
-              variant="outlined"
-              size="small"
-              disabled={!value?.ticker}
-              onClick={onShowFetchModal}
-            >
-              Download files
-            </Button>
-          )}
-        </Box>
-      )}
+        )}
+        {analysisType === "transcript" && (
+          <Button
+            variant="outlined"
+            size="small"
+            disabled={!value?.ticker}
+            onClick={onShowFetchModal}
+          >
+            Download files
+          </Button>
+        )}
+      </Box>
+
       {fetchModal && (
         <FetchFilesModal
           open={fetchModal}

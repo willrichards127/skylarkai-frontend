@@ -4,7 +4,6 @@ import { userApi } from "./services/userAPI";
 import { adminApi } from "./services/adminAPI";
 import { transcriptApi } from "./services/transcriptAPI";
 
-import { authApi } from "./services/authAPI";
 import { setupApi } from "./services/setupApi";
 import { reportApi } from "./services/reportApi";
 import { workOrderApi } from "./services/workOrderApi";
@@ -19,7 +18,7 @@ export const store = configureStore({
       user: loadStoreValue("user-info"),
       token: loadStoreValue("token"),
       sys_graph_id: loadStoreValue("sys_graph_id"),
-      redirect: null
+      tenancy: loadStoreValue("tenancy")
     },
   },
   reducer: {
@@ -30,7 +29,6 @@ export const store = configureStore({
     [setupApi.reducerPath]: setupApi.reducer,
 		[reportApi.reducerPath]: reportApi.reducer,
 		[workOrderApi.reducerPath]: workOrderApi.reducer,
-    [authApi.reducerPath]: authApi.reducer,
     [vdrApi.reducerPath]: vdrApi.reducer,
   },
   devTools: import.meta.env.VITE_NODE_ENV !== "production",
@@ -39,7 +37,6 @@ export const store = configureStore({
       userApi.middleware,
       adminApi.middleware,
       transcriptApi.middleware,
-      authApi.middleware,
       setupApi.middleware,
 			reportApi.middleware,
 			workOrderApi.middleware,

@@ -2,32 +2,51 @@
 import { memo, useCallback, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { Box, Typography, Stack, TextField, Button } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Stack,
+  TextField,
+  Button,
+  MenuItem,
+  CircularProgress,
+} from "@mui/material";
 import { LeftArrowDecorator, RightArrowDecorator } from "../../components/Svgs";
 import { NeutralButton } from "../../components/buttons/NeutralButton";
-import { currentUser, loginAPI } from "../../redux/features/authSlice";
-import { useClearUserActivitiesMutation } from "../../redux/services/userAPI";
+import {
+  clearUserActivitiesAPI,
+  currentUser,
+  loginAPI,
+} from "../../redux/features/authSlice";
+import { useGetTenancyQuery } from "../../redux/services/userAPI";
 
 const LoginForm = memo(() => {
   const navigate = useNavigate();
 
-  const [clearActivities] = useClearUserActivitiesMutation();
-
-  const { loading, user, error } = useSelector(currentUser);
+  const { data: tenancies, isLoading: isTenancyLoading } = useGetTenancyQuery();
+  const { user, error, loading } = useSelector(currentUser);
 
   const dispatch = useDispatch();
   const [form, setForm] = useState<{
     email: string;
     password: string;
+    tenancy: string;
   }>({
     email: "",
     password: "",
+    tenancy: "",
   });
-  const isLoggedIn = !!user && !loading;
+
+  const isLoggedIn = !!user;
 
   const onClear = useCallback(() => {
-    clearActivities({ email: form.email });
-  }, [clearActivities, form]);
+    dispatch(
+      clearUserActivitiesAPI({
+        email: form.email,
+        tenancy: form.tenancy,
+      }) as any
+    );
+  }, [dispatch, form.email, form.tenancy]);
 
   const onChangeValues = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -45,10 +64,23 @@ const LoginForm = memo(() => {
   );
 
   useEffect(() => {
+    if (tenancies && tenancies.length) {
+      setForm((prev) => ({ ...prev, tenancy: tenancies[0] }));
+    }
+  }, [tenancies]);
+
+  useEffect(() => {
     if (isLoggedIn) {
       navigate("/");
     }
   }, [navigate, isLoggedIn]);
+
+  if (loading)
+    return (
+      <Box sx={{ width: "100%", p: 2, textAlign: "center" }}>
+        <CircularProgress />
+      </Box>
+    );
 
   return (
     <Box
@@ -77,6 +109,20 @@ const LoginForm = memo(() => {
             <LeftArrowDecorator />
           </Box>
           <Stack spacing={6}>
+            <TextField
+              select
+              label="Tenancy"
+              name="tenancy"
+              value={form.tenancy}
+              onChange={onChangeValues}
+              disabled={!tenancies || isTenancyLoading}
+            >
+              {(tenancies || []).map((tenancy, index) => (
+                <MenuItem key={`tenancy-option-${index}`} value={tenancy}>
+                  {tenancy}
+                </MenuItem>
+              ))}
+            </TextField>
             <TextField
               placeholder="Enter your email"
               label="Email"

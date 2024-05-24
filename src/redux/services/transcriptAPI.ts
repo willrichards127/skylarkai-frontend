@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { axiosBaseQueryWithReauth } from "./base";
+import { baseQuery } from "./base";
 import {
   IChat,
   IEdgarFile,
@@ -13,13 +13,11 @@ import {
   IFetchFileResponse,
 } from "../interfaces";
 import { parseTransaction } from "../../shared/utils/string";
+import { handleCatchError } from "./helper";
 
 export const transcriptApi = createApi({
   reducerPath: "transcriptApi",
-  baseQuery: axiosBaseQueryWithReauth({
-    baseUrl: import.meta.env.VITE_API_URL,
-    isGuarded: true,
-  }),
+  baseQuery: baseQuery,
   tagTypes: ["FeatureInstance", "FetchFileLog"],
   endpoints: (builder) => ({
     createFeatureInstance: builder.mutation<
@@ -41,7 +39,7 @@ export const transcriptApi = createApi({
       }) => ({
         url: "feature_instances",
         method: "POST",
-        data: {
+        body: {
           feature_id,
           company_name,
           ticker,
@@ -134,13 +132,7 @@ export const transcriptApi = createApi({
             data: response.data,
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              msg: "Error in fetch_edgar/fetch_transcript API",
-            },
-          };
+          return handleCatchError(e, "fetchFiles");
         }
       },
     }),
@@ -180,13 +172,7 @@ export const transcriptApi = createApi({
             data: response.data,
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              msg: "Error in edgar_files/transcript_files/insider_transaction API",
-            },
-          };
+          return handleCatchError(e, "getFiles");
         }
       },
       keepUnusedDataFor: 0,
@@ -214,13 +200,7 @@ export const transcriptApi = createApi({
             ),
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              msg: "Error in edgar_files API",
-            },
-          };
+          return handleCatchError(e, "getEdgars");
         }
       },
     }),
@@ -241,13 +221,7 @@ export const transcriptApi = createApi({
             data: response.data,
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              msg: "Error in transcript_files API",
-            },
-          };
+          return handleCatchError(e, "getTranscripts");
         }
       },
     }),
@@ -292,13 +266,7 @@ export const transcriptApi = createApi({
               ),
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              msg: "Error in insider_transaction API",
-            },
-          };
+          return handleCatchError(e, "getTransactions");
         }
       },
       keepUnusedDataFor: 0,
@@ -347,13 +315,7 @@ export const transcriptApi = createApi({
 
           throw new Error("Fetch error");
         } catch (e) {
-          return {
-            error: {
-              status: "Update feedback error",
-              error: "Error in update-feedback API",
-              data: e,
-            },
-          };
+          return handleCatchError(e, "updateFeedback");
         }
       },
     }),
@@ -534,13 +496,7 @@ export const transcriptApi = createApi({
             data: generatedId,
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              msg: "Error in creteReport API",
-            },
-          };
+          return handleCatchError(e, "createReport");
         }
       },
     }),
@@ -548,22 +504,29 @@ export const transcriptApi = createApi({
       any,
       {
         sentiments: string[];
-        filenames: string[];
+        filenames: { graph_id: number; id?: number; file_name: string }[];
+        is_report?: boolean;
+        analysis_type: string;
         llm?: string;
       }
     >({
       async queryFn(
-        { sentiments, filenames, llm = "OpenAI" },
-        api,
+        {
+          sentiments,
+          is_report = false,
+          analysis_type,
+          filenames,
+          llm = "OpenAI",
+        },
+        _,
         __,
         apiBaseQuery
       ) {
-        const graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
         try {
           const response: any = await apiBaseQuery({
-            url: `sentimentanalysis/${graph_id}?llm=${llm}`,
+            url: `sentimentanalysis?llm=${llm}&is_report=${is_report}&analysis_type=${analysis_type}`,
             method: "POST",
-            data: {
+            body: {
               sentiments,
               filenames,
             },
@@ -577,15 +540,23 @@ export const transcriptApi = createApi({
             },
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              msg: "Error in sentimentanalysis API",
-            },
-          };
+          return handleCatchError(e, "generateSentimentAnalysis");
         }
       },
+    }),
+    cloneFeatureReport: builder.mutation<
+      any,
+      { report_name: string; content: string; unit_id: number }
+    >({
+      query: ({ report_name, content, unit_id }) => ({
+        url: "feature_report",
+        method: "POST",
+        body: {
+          report_name,
+          content,
+          company_id: unit_id,
+        },
+      }),
     }),
     getFilesData: builder.query<
       any,
@@ -617,13 +588,7 @@ export const transcriptApi = createApi({
             data: merged,
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              msg: "Error in file_data API",
-            },
-          };
+          return handleCatchError(e, "getFilesData");
         }
       },
       keepUnusedDataFor: 0,
@@ -659,7 +624,7 @@ export const transcriptApi = createApi({
           const response: any = await apiBaseQuery({
             url: `compare_document/${graph_id}?analysis_type=${analysis_type}`,
             method: "POST",
-            data: {
+            body: {
               document1,
               document2,
               template,
@@ -673,13 +638,7 @@ export const transcriptApi = createApi({
             data: response.data.compared_document,
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              msg: "Error in compare_document API",
-            },
-          };
+          return handleCatchError(e, "compareDocuments");
         }
       },
     }),
@@ -698,6 +657,7 @@ export const transcriptApi = createApi({
         apiBaseQuery
       ) {
         const graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
+        console.log("=================", analysis_type)
         try {
           const formdata = new FormData();
           formdata.append("analysis_type", analysis_type);
@@ -708,20 +668,14 @@ export const transcriptApi = createApi({
           const response: any = await apiBaseQuery({
             url: `ingestfiles?graph_id=${graph_id}&company_name=${company_name}`,
             method: "POST",
-            data: formdata,
+            body: formdata,
           });
 
           return {
             data: response.data,
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              msg: "Error in ingestfiles API",
-            },
-          };
+          return handleCatchError(e, "ingestFiles");
         }
       },
     }),
@@ -786,13 +740,7 @@ export const transcriptApi = createApi({
             data: response.data.new_id,
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              msg: "Error in sentimentanalysis API",
-            },
-          };
+          return handleCatchError(e, "generateInvestmentReport");
         }
       },
     }),
@@ -814,13 +762,7 @@ export const transcriptApi = createApi({
             data: response.data as ITopic[],
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              msg: "Error in analysis_type_queries API",
-            },
-          };
+          return handleCatchError(e, "getSuggestions");
         }
       },
       keepUnusedDataFor: 0,
@@ -873,7 +815,7 @@ export const transcriptApi = createApi({
       }),
       keepUnusedDataFor: 0,
       providesTags: ["FetchFileLog"],
-    }),    
+    }),
     updateFetchFileLog: builder.mutation<
       void,
       {
@@ -927,13 +869,7 @@ export const transcriptApi = createApi({
             data: response.data,
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              msg: "Error in send email API",
-            },
-          };
+          return handleCatchError(e, "sendReportsViaEmails");
         }
       },
     }),
@@ -976,6 +912,8 @@ export const {
   useGetTransactionsQuery,
   // sentiment analysis
   useGenerateSentimentAnalysisMutation,
+
+  useCloneFeatureReportMutation,
 
   // create investment memo
   useGetSiteContentMutation,

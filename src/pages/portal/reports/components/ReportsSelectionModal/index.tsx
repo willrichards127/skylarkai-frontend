@@ -11,10 +11,12 @@ export const ReportsSelectionModal = ({
   open,
   onClose,
   onActionPerformed,
+  reportType,
 }: {
   open: boolean;
   onClose: () => void;
   onActionPerformed: (unit: any, report: any) => void;
+  reportType: number;
 }) => {
   const [activeStep, setActiveStep] = useState<number>(0);
   const [unit, setUnit] = useState<any>();
@@ -77,6 +79,7 @@ export const ReportsSelectionModal = ({
         <ReportStepPanel
           companyId={unit.id}
           onSelectedReport={onSelectedReport}
+          reportType={reportType}
         />
       )}
     </XModal>

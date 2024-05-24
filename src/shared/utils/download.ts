@@ -11,10 +11,12 @@ export const downloadPdf = async ({
 }) => {
   try {
     const token = loadStoreValue("token");
+    const tenancy = loadStoreValue("tenancy");
     const myHeaders = new Headers();
     myHeaders.append("Authorization", `Bearer ${token}`);
     myHeaders.append("Content-Type", "application/json");
     myHeaders.append("Accept", "application/pdf");
+    myHeaders.append("X-TENANT-ID", tenancy);
 
     const raw = JSON.stringify(options);
     const requestOptions = {

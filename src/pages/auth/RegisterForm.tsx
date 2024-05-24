@@ -1,12 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { registerAPI, currentUser } from "../../redux/features/authSlice";
-import { Box, Typography, Stack, TextField, MenuItem } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Stack,
+  TextField,
+  MenuItem,
+  CircularProgress,
+} from "@mui/material";
 import { LeftArrowDecorator, RightArrowDecorator } from "../../components/Svgs";
 import { NeutralButton } from "../../components/buttons/NeutralButton";
 import { personaList } from "../../shared/models/constants";
+import { useGetTenancyQuery } from "../../redux/services/userAPI";
 
 const RegisterForm = memo(() => {
   const { loading, user } = useSelector(currentUser);
@@ -20,6 +28,7 @@ const RegisterForm = memo(() => {
     company: string;
     company_website?: string;
     persona_id: number;
+    tenancy: string;
   }>({
     email: "",
     username: "",
@@ -28,7 +37,10 @@ const RegisterForm = memo(() => {
     company: "",
     company_website: "",
     persona_id: 1,
+    tenancy: "",
   });
+
+  const { data: tenancies, isLoading: isTenancyLoading } = useGetTenancyQuery();
 
   const onChangeValues = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -45,6 +57,19 @@ const RegisterForm = memo(() => {
     },
     [dispatch, form]
   );
+
+  useEffect(() => {
+    if (tenancies && tenancies.length) {
+      setForm((prev) => ({ ...prev, tenancy: tenancies[0] }));
+    }
+  }, [tenancies]);
+
+  if (loading)
+    return (
+      <Box sx={{ width: "100%", p: 2, textAlign: "center" }}>
+        <CircularProgress />
+      </Box>
+    );
 
   return (
     <Box
@@ -143,16 +168,31 @@ const RegisterForm = memo(() => {
                 </Stack>
                 <Stack spacing={2} direction="row">
                   <TextField
+                    fullWidth
                     select
                     label="Select Persona"
                     name="persona_id"
                     value={form.persona_id}
                     onChange={onChangeValues}
-                    sx={{ width: "49%" }}
                   >
                     {personaList.map((persona) => (
                       <MenuItem key={persona.value} value={persona.value}>
                         {persona.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                  <TextField
+                    fullWidth
+                    select
+                    label="Select Tenancy"
+                    name="tenancy"
+                    value={form.tenancy}
+                    onChange={onChangeValues}
+                    disabled={!tenancies || isTenancyLoading}
+                  >
+                    {(tenancies || []).map((tenancy, index) => (
+                      <MenuItem key={`tenancy-option-${index}`} value={tenancy}>
+                        {tenancy}
                       </MenuItem>
                     ))}
                   </TextField>

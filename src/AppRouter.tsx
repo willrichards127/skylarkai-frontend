@@ -6,8 +6,8 @@ import {
   RouterProvider,
   useRouteError,
 } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { Backdrop, CircularProgress, Box } from "@mui/material";
+import { useSelector } from "react-redux";
+import { Backdrop, CircularProgress } from "@mui/material";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { currentUser } from "./redux/features/authSlice";
 import { useAddUserActivityMutation } from "./redux/services/userAPI";
@@ -26,7 +26,6 @@ import ProfilePage from "./pages/portal/profile/ProfilePage";
 import DashboardPage from "./pages/dashboard";
 import UnitsPage from "./pages/portal/units";
 import UnitPage from "./pages/portal/units/unit";
-import { verifyTokenAPI } from "./redux/features/authSlice";
 
 // const LandingPage = lazy(() => import("./pages/landing"));
 
@@ -53,17 +52,11 @@ const ErrorBoundary = () => {
 };
 
 function AppRouter() {
-  const params = new URLSearchParams(window.location.search);
-  const accessToken = params.get("token");
-  const redirectTo = params.get("redirect");
-
-  const { user, token, loading, redirect } = useSelector(currentUser);
-  const dispatch = useDispatch();
+  const { user, token } = useSelector(currentUser);
   const redirectPath = useMemo(() => {
     if (!user || !token) {
       return "/login";
     } else {
-      if (redirect) return redirect;
       if (user.persona_id === 5) {
         // admin role: system, skylarkai admin
         return "/admin";
@@ -76,7 +69,7 @@ function AppRouter() {
       }
       return "/welcome";
     }
-  }, [user, token, redirect]);
+  }, [user, token]);
 
   const [addActivity] = useAddUserActivityMutation();
 
@@ -90,26 +83,6 @@ function AppRouter() {
       window.removeEventListener("beforeunload", onCloseTab);
     };
   }, [onCloseTab]);
-
-  useEffect(() => {
-    if (!accessToken) return;
-    const verifyAccessToken = async () => {
-      await dispatch(
-        verifyTokenAPI({
-          token: accessToken,
-          redirect: redirectTo ? redirectTo.replaceAll("___", "&") : null,
-        }) as any
-      );
-    };
-    verifyAccessToken();
-  }, [accessToken, redirectTo, dispatch]);
-
-  if (loading)
-    return (
-      <Box sx={{ width: "100%", p: 2, textAlign: "center" }}>
-        <CircularProgress />
-      </Box>
-    );
 
   return (
     <Suspense
@@ -194,11 +167,11 @@ function AppRouter() {
                 children: [
                   {
                     path: "reports",
-                    element: <ReportsPage />,
+                    element: <ReportsPage reportType={1}/>,
                   },
                   {
                     path: "tearsheets",
-                    element: <ReportsPage />,
+                    element: <ReportsPage reportType={2}/>,
                   },
                   {
                     path: "setups",

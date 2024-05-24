@@ -18,8 +18,9 @@ import { REPORTS_DICT } from "../../../../shared/models/constants";
 import { useLazyGetTaskStatusQuery } from "../../../../redux/services/transcriptAPI";
 import { TemplateViewModal } from "../../../../components/modals/TemplateViewModal";
 
-const ReportsContainer = memo(() => {
+const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
   const { user } = useSelector(currentUser);
+  const { sys_graph_id } = useSelector((state: any) => state.userAuthSlice);
   const params = useParams();
   const [searchParams] = useSearchParams();
   const unitName = searchParams.get("unitName");
@@ -35,7 +36,11 @@ const ReportsContainer = memo(() => {
     isFetching: fetchingReports,
     data: reports,
     refetch: refetchReports,
-  } = useGetReportsByUnitQuery({ unitId: +params.unitId!, viewMode });
+  } = useGetReportsByUnitQuery({
+    unitId: +params.unitId!,
+    viewMode: viewMode === "general" ? "active" : viewMode,
+    reportType,
+  });
 
   const [deleteReport] = useDeleteReportMutation();
   const [markReport] = useMarkReportMutation();
@@ -52,7 +57,7 @@ const ReportsContainer = memo(() => {
     ) {
       refetchReports();
     }
-  }, [lastNotification]);
+  }, [lastNotification, refetchReports]);
 
   // useEffect(() => {
   //   if (
@@ -152,19 +157,15 @@ const ReportsContainer = memo(() => {
           headerHeight={37}
           viewMode={viewMode}
           onSwitchViewMode={onSwitchViewMode}
-          // suffixActionRenderer={
-          //   <Button
-          //     variant="contained"
-          //     startIcon={<AddIcon />}
-          //     // onClick={onNewReportModal}
-          //     disabled
-          //     sx={{ ml: "auto" }}
-          //   >
-          //     New Report
-          //   </Button>
-          // }
+          showGeneralTab={reportType === 1}
         >
-          {[...reports.reports]
+          {[
+            ...reports.reports.filter((report: any) =>
+              viewMode === "active"
+                ? report.graph_id !== sys_graph_id
+                : report.graph_id === sys_graph_id
+            ),
+          ]
             .sort(
               (a: any, b: any) =>
                 new Date(a.created_at).getTime() -
@@ -194,7 +195,11 @@ const ReportsContainer = memo(() => {
                 }
               />
             ))}
-          {[...reports.executing]
+          {[
+            ...reports.executing.filter(() =>
+              viewMode === "active" ? true : false
+            ),
+          ]
             .sort(
               (a: any, b: any) =>
                 new Date(a.created_at).getTime() -
@@ -232,12 +237,6 @@ const ReportsContainer = memo(() => {
           )}
         </TabContainer>
       )}
-      {/* {newReportModal && (
-        <NewReportModal
-          open={newReportModal}
-          onClose={() => showNewReportModal(false)}
-        />
-      )} */}
     </Box>
   );
 });

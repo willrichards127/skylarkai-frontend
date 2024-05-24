@@ -9,6 +9,7 @@ const TabContainer = ({
   suffixActionRenderer,
   children,
   hasDivider,
+  showGeneralTab = false,
 }: {
   viewMode: string;
   onSwitchViewMode: (tab: string) => void;
@@ -17,6 +18,7 @@ const TabContainer = ({
   children: React.ReactNode;
   headerHeight?: number;
   hasDivider?: boolean;
+  showGeneralTab?: boolean;
 }) => {
   return (
     <Box>
@@ -36,6 +38,15 @@ const TabContainer = ({
         >
           Active
         </Button>
+        {showGeneralTab && (
+          <Button
+            size="small"
+            variant={viewMode === "general" ? "contained" : "text"}
+            onClick={() => onSwitchViewMode("general")}
+          >
+            General
+          </Button>
+        )}
         <Button
           size="small"
           variant={viewMode === "archived" ? "contained" : "text"}

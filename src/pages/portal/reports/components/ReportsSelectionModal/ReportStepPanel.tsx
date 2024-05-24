@@ -4,14 +4,17 @@ import { useGetReportsByUnitQuery } from "../../../../../redux/services/reportAp
 
 export const ReportStepPanel = ({
   companyId,
+  reportType,
   onSelectedReport,
 }: {
   companyId: number;
+  reportType: number;
   onSelectedReport: (report: any) => void;
 }) => {
   const [searchText, setSearchText] = useState<string>("");
 
   const { isLoading, data: reports } = useGetReportsByUnitQuery({
+    reportType,
     unitId: companyId,
     viewMode: "active",
   });

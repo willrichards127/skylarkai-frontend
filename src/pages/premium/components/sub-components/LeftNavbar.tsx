@@ -45,6 +45,7 @@ export const LeftNavbar = ({
         {(user!.main_features || []).map((item: IMainFeature) => (
           <ListItem disablePadding key={item.id}>
             <ListItemButton
+              disabled={item.id < 5}
               selected={featureId === item.id.toString()}
               onClick={() => onItem(item.id)}
             >

@@ -1,14 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { axiosBaseQueryWithReauth } from "./base";
+import { baseQuery } from "./base";
 import { IMainFeature } from "../interfaces";
+import { handleCatchError } from "./helper";
 
 export const adminApi = createApi({
   reducerPath: "adminApi",
-  baseQuery: axiosBaseQueryWithReauth({
-    baseUrl: import.meta.env.VITE_API_URL,
-    isGuarded: false,
-  }),
+  baseQuery: baseQuery,
   endpoints: (builder) => ({
     getFeatures: builder.query<IMainFeature[], void>({
       query: () => ({ url: "main_features", method: "get" }),
@@ -42,13 +40,7 @@ export const adminApi = createApi({
               .sort((a: { id: number }, b: { id: number }) => a.id - b.id),
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              data: "Error in getSubscription features API",
-            },
-          };
+          return handleCatchError(e)
         }
       },
     }),

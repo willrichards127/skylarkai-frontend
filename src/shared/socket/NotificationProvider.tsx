@@ -29,14 +29,14 @@ export const NotificationProvider = ({
   const clientRef = useRef<WebSocket | null>(null);
   const clientCloseRef = useRef<boolean>(false);
 
-  const { user, token } = useSelector(currentUser);
+  const { user, token, tenancy } = useSelector(currentUser);
   const socketUrl = useMemo(() => {
-    if (user && token) {
+    if (user && token && tenancy) {
       return `${import.meta.env.VITE_WEBSOCKET_URL}ws/${
         user.id
-      }?token=${token}`;
+      }?token=${token}&X-Tenant-ID=${tenancy}`;
     }
-  }, [user, token]);
+  }, [user, token, tenancy]);
 
   const [messages, setMesssages] = useState<NotificationData[]>([]);
   const lastNotification = useMemo(

@@ -21,7 +21,7 @@ export const generatePdf = (
   watermark?: string,
   alternative?: boolean
 ) => {
-  if (alternative) {
+  if (!alternative) {
     const doc = new jsPDF({ format: "a4", unit: "px" });
     doc.html(`<div style="width:794px">${htmlContent}</div>`, {
       autoPaging: 'text',
