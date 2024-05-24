@@ -3,7 +3,14 @@ import { memo, useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { registerAPI, currentUser } from "../../redux/features/authSlice";
-import { Box, Typography, Stack, TextField, MenuItem } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Stack,
+  TextField,
+  MenuItem,
+  CircularProgress,
+} from "@mui/material";
 import { LeftArrowDecorator, RightArrowDecorator } from "../../components/Svgs";
 import { NeutralButton } from "../../components/buttons/NeutralButton";
 import { personaList } from "../../shared/models/constants";
@@ -56,6 +63,13 @@ const RegisterForm = memo(() => {
       setForm((prev) => ({ ...prev, tenancy: tenancies[0] }));
     }
   }, [tenancies]);
+
+  if (loading)
+    return (
+      <Box sx={{ width: "100%", p: 2, textAlign: "center" }}>
+        <CircularProgress />
+      </Box>
+    );
 
   return (
     <Box
@@ -177,7 +191,7 @@ const RegisterForm = memo(() => {
                     disabled={!tenancies || isTenancyLoading}
                   >
                     {(tenancies || []).map((tenancy, index) => (
-                      <MenuItem  key={`tenancy-option-${index}`} value={tenancy}>
+                      <MenuItem key={`tenancy-option-${index}`} value={tenancy}>
                         {tenancy}
                       </MenuItem>
                     ))}

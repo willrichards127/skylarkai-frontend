@@ -7,7 +7,7 @@ import {
   useRouteError,
 } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { Backdrop, CircularProgress, Box } from "@mui/material";
+import { Backdrop, CircularProgress } from "@mui/material";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { currentUser } from "./redux/features/authSlice";
 import { useAddUserActivityMutation } from "./redux/services/userAPI";
@@ -52,7 +52,7 @@ const ErrorBoundary = () => {
 };
 
 function AppRouter() {
-  const { user, token, loading } = useSelector(currentUser);
+  const { user, token } = useSelector(currentUser);
   const redirectPath = useMemo(() => {
     if (!user || !token) {
       return "/login";
@@ -83,13 +83,6 @@ function AppRouter() {
       window.removeEventListener("beforeunload", onCloseTab);
     };
   }, [onCloseTab]);
-
-  if (loading)
-    return (
-      <Box sx={{ width: "100%", p: 2, textAlign: "center" }}>
-        <CircularProgress />
-      </Box>
-    );
 
   return (
     <Suspense
