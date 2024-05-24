@@ -359,7 +359,7 @@ export const transcriptApi = createApi({
                 : ""
             }`,
             method: "POST",
-            data: {
+            body: {
               company_name,
               question,
               filenames,
