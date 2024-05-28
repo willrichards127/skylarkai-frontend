@@ -861,7 +861,7 @@ export const transcriptApi = createApi({
           const response: any = await apiBaseQuery({
             url: `send_email`,
             method: "POST",
-            data: formdata,
+            body: formdata,
           });
           console.log(response, "email: response");
 

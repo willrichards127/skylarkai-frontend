@@ -136,7 +136,7 @@ const LoginForm = memo(() => {
               <Typography variant="body2" mt={1}>
                 <Box
                   component={Link}
-                  to="/auth/forgot-password"
+                  to="/forgot_password"
                   sx={{
                     color: "primary.main",
                     textDecoration: "none",

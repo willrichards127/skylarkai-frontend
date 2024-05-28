@@ -104,6 +104,69 @@ export const clearUserActivitiesAPI = createAsyncThunk(
   }
 );
 
+export const forgotPasswordAPI = createAsyncThunk(
+  "users/forgot_password",
+  async ({ email, tenancy }: { email: string; tenancy: string }) => {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}forgot_password?email=${email}`,
+        undefined,
+        {
+          headers: {
+            "X-TENANT-ID": tenancy,
+          },
+        }
+      );
+      if (response.data) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return {
+        error: (e as any).response.data.detail || "Incorrect email.",
+      };
+    }
+  }
+);
+
+export const resetPasswordAPI = createAsyncThunk(
+  "users/reset_password",
+  async ({
+    token,
+    new_password,
+    tenancy,
+  }: {
+    token: string;
+    new_password: string;
+    tenancy: string;
+  }) => {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}reset_password`,
+        {
+          token,
+          new_password,
+        },
+        {
+          headers: {
+            "X-TENANT-ID": tenancy,
+          },
+        }
+      );
+      if (response.data) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return {
+        error: (e as any).response.data.detail || "Incorrect email.",
+      };
+    }
+  }
+);
+
 const errorHandler = (state: any, action: string) => {
   state.userInfo = undefined;
   state.token = undefined;
@@ -187,7 +250,27 @@ export const userAuthSlice = createSlice({
         saveStoreValue("token", token);
         saveStoreValue("sys_graph_id", sys_graph_id);
         saveStoreValue("tenancy", tenancy);
-      });
+      }),
+      builder.addCase(
+        forgotPasswordAPI.fulfilled,
+        (state, { payload }: { payload: any }) => {
+          if (payload.error) {
+            errorHandler(state, payload.error);
+            return;
+          }
+          toast.success("Sent a reset password link to your email.");
+        }
+      ),
+      builder.addCase(
+        resetPasswordAPI.fulfilled,
+        (state, { payload }: { payload: any }) => {
+          if (payload.error) {
+            errorHandler(state, payload.error);
+            return;
+          }
+          toast.success("Updated your password successfully.");
+        }
+      );
   },
 });
 const { reset, updateToken } = userAuthSlice.actions;

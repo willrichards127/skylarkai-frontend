@@ -188,8 +188,6 @@ export const SelectDocuments = ({
     );
   }, [instance, loadingTranscripts]);
 
-  console.log(instance, "instance===");
-
   return (
     <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
       <Backdrop

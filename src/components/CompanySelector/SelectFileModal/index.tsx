@@ -5,16 +5,16 @@ import { XModal } from "../../../components/XModal";
 import { UnitStepPanel } from "./UnitStepPanel";
 import { FilesStepPanel } from "./FilesStepPanel";
 
-const steps = ["Select Company/Sector", "Select Report(s)/VDR File(s)"];
-
 export const SelectFileModal = ({
   open,
   onClose,
   onActionPerformed,
   isCompanySelect,
+  isVDROnly,
 }: {
   open: boolean;
   isCompanySelect?: boolean;
+  isVDROnly?: boolean;
   onClose: () => void;
   onActionPerformed: (records: any[]) => void;
 }) => {
@@ -60,7 +60,12 @@ export const SelectFileModal = ({
       {!isCompanySelect && (
         <Box pb={4} px={8}>
           <Stepper activeStep={activeStep}>
-            {steps.map((label) => {
+            {[
+              "Select Company/Sector",
+              ...(isVDROnly
+                ? ["Select VDR File(s)"]
+                : ["Select Report(s)/VDR File(s)"]),
+            ].map((label) => {
               const stepProps: { completed?: boolean } = {};
               return (
                 <Step key={label} {...stepProps}>
@@ -80,6 +85,7 @@ export const SelectFileModal = ({
           onStepBack={onStepBack}
           onClose={onClose}
           onApplied={onApplied}
+          isVDROnly={isVDROnly}
         />
       )}
     </XModal>
