@@ -22,6 +22,7 @@ import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import { FileUploader } from "../../../../components/FileUploader";
 import { SplitContainer } from "../../../../components/SplitContainer";
 import { PdfViewer } from "../../../../components/PDFViewer";
+import { SelectFileModal } from "../../../../components/CompanySelector/SelectFileModal";
 import { ICustomInstance } from "./interfaces";
 import {
   useCreateFeatureInstanceMutation,
@@ -30,6 +31,7 @@ import {
 } from "../../../../redux/services/transcriptAPI";
 import { marked } from "marked";
 import { parseCitation } from "../../../../shared/utils/string";
+import { downloadPdf } from "../../../../shared/utils/download";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -53,10 +55,13 @@ export const UploadDocuments = ({
   const [compareDocs, { isLoading: loadingCompare }] =
     useCompareDocumentsMutation();
 
-  const [file0, setFile0] = useState<File | undefined>();
-  const [file1, setFile1] = useState<File | undefined>();
-  const [fileContent0, setFileContent0] = useState<string>("");
-  const [fileContent1, setFileContent1] = useState<string>("");
+  const [file0, setFile0] = useState<any>();
+  const [file1, setFile1] = useState<any>();
+  const [fileContent0, setFileContent0] = useState<any>();
+  const [fileContent1, setFileContent1] = useState<any>();
+  const [dbFile0, setDbFile0] = useState<any>();
+  const [dbFile1, setDbFile1] = useState<any>();
+  const [selectFileModal, showSelectFileModal] = useState<number>(-1);
   const [criteria, setCriteria] = useState<string[]>([]);
   const [llm, setLlm] = useState<string>("Gemini");
 
@@ -75,8 +80,10 @@ export const UploadDocuments = ({
       reader.readAsDataURL(selectedFiles[0]);
       if (fileIndex === 0) {
         setFile0(selectedFiles[0]);
+        setDbFile0(null);
       } else {
         setFile1(selectedFiles[0]);
+        setDbFile1(null);
       }
       onUploadedDocuments({
         fileIndex,
@@ -84,6 +91,52 @@ export const UploadDocuments = ({
       });
     },
     [onUploadedDocuments]
+  );
+
+  const onSelectFromDb = useCallback(
+    (fileIndex: number) => () => {
+      showSelectFileModal(fileIndex);
+    },
+    []
+  );
+
+  const onSelectedDBFiles = useCallback(
+    (files: any[]) => {
+      if (selectFileModal === 0) {
+        setDbFile0(files[0]);
+        setFile0(null);
+        downloadPdf({
+          graph_id: files[0].graph_id,
+          analysis_type: "financial_diligence",
+          filename: files[0].name.replace(".pdf", ""),
+        }).then((pdfBuffer) => {
+          if (pdfBuffer) {
+            setFileContent0(new Uint8Array(pdfBuffer));
+          }
+        });
+      } else {
+        setDbFile1(files[0]);
+        setFile1(null);
+      }
+      downloadPdf({
+        graph_id: files[0].graph_id,
+        analysis_type: "financial_diligence",
+        filename: files[0].name.replace(".pdf", ""),
+      }).then((pdfBuffer) => {
+        if (pdfBuffer) {
+          if (selectFileModal === 0) {
+            setFileContent0(new Uint8Array(pdfBuffer));
+          } else {
+            setFileContent1(new Uint8Array(pdfBuffer));
+          }
+        }
+      });
+      onUploadedDocuments({
+        fileIndex: selectFileModal,
+        file: files[0],
+      });
+    },
+    [selectFileModal, onUploadedDocuments]
   );
 
   const onChangeCriteria = useCallback(
@@ -101,19 +154,40 @@ export const UploadDocuments = ({
   );
 
   const onNextStep = useCallback(async () => {
-    await ingestFiles({
-      analysis_type: "compare",
-      files: [file0!, file1!],
-    });
-
     let template = `## Compare Documents Report\n\n\nCreated: ${new Date().toLocaleDateString()} \n\n`;
     criteria!.forEach((crit) => {
       template += `### ${crit} \n\n`;
     });
+    let filename0, filename1: string;
+    if (file0 && file1) {
+      filename0 = file0.name;
+      filename1 = file1.name;
+      await ingestFiles({
+        analysis_type: "compare",
+        files: [file0!, file1!],
+      });
+    } else if (dbFile0 && file1) {
+      filename0 = dbFile0.name;
+      filename1 = file1.name;
+      await ingestFiles({
+        analysis_type: "compare",
+        files: [file1!],
+      });
+    } else if (dbFile1 && file0) {
+      filename0 = file0.name;
+      filename1 = dbFile1.name;
+      await ingestFiles({
+        analysis_type: "compare",
+        files: [file0!],
+      });
+    } else {
+      filename0 = dbFile0.name;
+      filename1 = dbFile1.name;
+    }
 
     const responseCompare = await compareDocs({
-      document1: file0!.name.replace(".pdf", ""),
-      document2: file1!.name.replace(".pdf", ""),
+      document1: filename0.replace(".pdf", ""),
+      document2: filename1.replace(".pdf", ""),
       template,
       llm,
       is_template_with_content: true,
@@ -122,8 +196,8 @@ export const UploadDocuments = ({
     const responseInstance = await createInstance({
       ...instance,
       instance_metadata: {
-        filename0: file0!.name.replace(".pdf", ""),
-        filename1: file1!.name.replace(".pdf", ""),
+        filename0: filename0.replace(".pdf", ""),
+        filename1: filename1.replace(".pdf", ""),
         criteria,
         report: marked.parse(parseCitation(responseCompare)) as string,
       },
@@ -138,6 +212,8 @@ export const UploadDocuments = ({
     instance,
     file0,
     file1,
+    dbFile0,
+    dbFile1,
     llm,
   ]);
 
@@ -161,7 +237,15 @@ export const UploadDocuments = ({
           variant="contained"
           sx={{ minWidth: 140 }}
           onClick={onNextStep}
-          disabled={!file0 || !file1 || !criteria.length}
+          disabled={
+            (!file0 && dbFile1) ||
+            (file0 && !dbFile1) ||
+            (!file1 && dbFile0) ||
+            (file1 && !dbFile0) ||
+            (!file0 && !file1) ||
+            (!dbFile0 && !dbFile1) ||
+            !criteria.length
+          }
         >
           Next
         </Button>
@@ -170,17 +254,57 @@ export const UploadDocuments = ({
         Upload company specific documents
       </Typography>
       <Stack spacing={2} direction="row" alignItems="flex-start">
-        <FileUploader
-          isOneFileOnly
-          onUploadCompleted={onFileUploaded(0)}
-          showFileList
-        />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            height: "100%",
+            gap: 1,
+          }}
+        >
+          <FileUploader
+            isOneFileOnly
+            onUploadCompleted={onFileUploaded(0)}
+            showFileList
+          />
+          <Box width="100%" textAlign="center" mt="auto">
+            OR
+          </Box>
+          <Typography variant="body2" fontWeight="bold" gutterBottom>
+            Local VDR files
+          </Typography>
+          <Button size="small" variant="outlined" onClick={onSelectFromDb(0)}>
+            Select VDR files
+            {!!dbFile0 && `(${dbFile0.name})`}
+          </Button>
+        </Box>
         <Typography variant="h6">VS</Typography>
-        <FileUploader
-          isOneFileOnly
-          onUploadCompleted={onFileUploaded(1)}
-          showFileList
-        />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            height: "100%",
+            gap: 1,
+          }}
+        >
+          <FileUploader
+            isOneFileOnly
+            onUploadCompleted={onFileUploaded(1)}
+            showFileList
+          />
+          <Box width="100%" textAlign="center" mt="auto">
+            OR
+          </Box>
+          <Typography variant="body2" fontWeight="bold" gutterBottom>
+            Local VDR files
+          </Typography>
+          <Button size="small" variant="outlined" onClick={onSelectFromDb(1)}>
+            Select VDR files
+            {!!dbFile1 && `(${dbFile1.name})`}
+          </Button>
+        </Box>
       </Stack>
       <Divider sx={{ my: 2 }} />
       <Stack spacing={2} direction="row" justifyContent="space-between">
@@ -258,11 +382,6 @@ export const UploadDocuments = ({
                 width: "100%",
               }}
             >
-              {!!file0 && (
-                <Typography variant="body2" gutterBottom>
-                  {file0.name}
-                </Typography>
-              )}
               {!!fileContent0 && <PdfViewer pdfUrl={fileContent0} />}
             </Box>
           }
@@ -274,14 +393,17 @@ export const UploadDocuments = ({
                 width: "100%",
               }}
             >
-              {!!file1 && (
-                <Typography variant="body2" gutterBottom>
-                  {file1.name}
-                </Typography>
-              )}
               {!!fileContent1 && <PdfViewer pdfUrl={fileContent1} />}
             </Box>
           }
+        />
+      )}
+      {selectFileModal > -1 && (
+        <SelectFileModal
+          open={selectFileModal > -1}
+          onClose={() => showSelectFileModal(-1)}
+          onActionPerformed={onSelectedDBFiles}
+          isVDROnly
         />
       )}
     </Box>

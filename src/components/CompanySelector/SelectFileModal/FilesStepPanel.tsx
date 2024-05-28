@@ -17,14 +17,18 @@ export const FilesStepPanel = ({
   onClose,
   onStepBack,
   onApplied,
+  isVDROnly,
 }: {
   companyId: number;
+  isVDROnly?: boolean;
   onStepBack: () => void;
   onClose: () => void;
   onApplied: (records: any[]) => void;
 }) => {
   const [searchText, setSearchText] = useState<string>("");
-  const [selectionType, setSelectionType] = useState<string>("report");
+  const [selectionType, setSelectionType] = useState<string>(
+    isVDROnly ? "vdr" : "report"
+  );
   const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
 
   const { isLoading: loadingReports, data: reports } = useGetReportsByUnitQuery(
@@ -33,7 +37,7 @@ export const FilesStepPanel = ({
       viewMode: "active",
       reportType: 1,
     },
-    { skip: selectionType === "vdr" }
+    { skip: selectionType === "vdr" || isVDROnly }
   );
 
   const { isLoading: loadingVDRs, data: vdrs } = useGetVDRsQuery(
@@ -113,13 +117,15 @@ export const FilesStepPanel = ({
           disabled={loadingReports || loadingVDRs}
         />
         <Box mr="auto" />
-        <Button
-          size="small"
-          variant={selectionType === "report" ? "contained" : "text"}
-          onClick={() => setSelectionType("report")}
-        >
-          Reports
-        </Button>
+        {!isVDROnly && (
+          <Button
+            size="small"
+            variant={selectionType === "report" ? "contained" : "text"}
+            onClick={() => setSelectionType("report")}
+          >
+            Reports
+          </Button>
+        )}
         <Button
           size="small"
           variant={selectionType === "vdr" ? "contained" : "text"}

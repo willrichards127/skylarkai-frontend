@@ -7,7 +7,7 @@ import {
   useRouteError,
 } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { Backdrop, CircularProgress } from "@mui/material";
+import { Backdrop, CircularProgress, Box } from "@mui/material";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { currentUser } from "./redux/features/authSlice";
 import { useAddUserActivityMutation } from "./redux/services/userAPI";
@@ -34,6 +34,9 @@ const AdminPage = lazy(() => import("./pages/admin"));
 const ForgotPasswordForm = lazy(
   () => import("./pages/auth/ForgotPasswordForm")
 );
+
+const ResetPasswordForm = lazy(() => import("./pages/auth/ResetPasswordForm"));
+
 const ForgotPasswordOTPForm = lazy(
   () => import("./pages/auth/ForgotPasswordOTPForm")
 );
@@ -52,24 +55,29 @@ const ErrorBoundary = () => {
 };
 
 function AppRouter() {
-  const { user, token } = useSelector(currentUser);
+  const params = new URLSearchParams(window.location.search);
+  const redirectTo = (params.get("redirect") || "").replaceAll("___", "&");
+
+  const { user, token, loading } = useSelector(currentUser);
   const redirectPath = useMemo(() => {
     if (!user || !token) {
-      return "/login";
+      return `/login${redirectTo ? "?redirect=" + redirectTo : ""}`;
     } else {
       if (user.persona_id === 5) {
         // admin role: system, skylarkai admin
         return "/admin";
       } else if (user.persona_id === 1) {
         // analyst role
-        return "/portal/units?type=companies";
+        return `/portal/units?type=companies${
+          redirectTo ? "&redirect=" + redirectTo : ""
+        }`;
       } else if (user.persona_id === 2) {
         // partner role
-        return "/dashboard";
+        return `/dashboard${redirectTo ? "?redirect=" + redirectTo : ""}`;
       }
       return "/welcome";
     }
-  }, [user, token]);
+  }, [user, token, redirectTo]);
 
   const [addActivity] = useAddUserActivityMutation();
 
@@ -83,6 +91,18 @@ function AppRouter() {
       window.removeEventListener("beforeunload", onCloseTab);
     };
   }, [onCloseTab]);
+
+  useEffect(() => {
+    if (!user || !token || !redirectTo) return;
+    window.location.href = redirectTo;
+  }, [user, token, redirectTo]);
+
+  if (loading)
+    return (
+      <Box sx={{ width: "100%", p: 2, textAlign: "center" }}>
+        <CircularProgress />
+      </Box>
+    );
 
   return (
     <Suspense
@@ -120,6 +140,11 @@ function AppRouter() {
           {
             path: "/forgot_password",
             element: <ForgotPasswordForm />,
+            errorElement: <ErrorBoundary />,
+          },
+          {
+            path: "/reset_password",
+            element: <ResetPasswordForm />,
             errorElement: <ErrorBoundary />,
           },
           {
@@ -167,11 +192,11 @@ function AppRouter() {
                 children: [
                   {
                     path: "reports",
-                    element: <ReportsPage reportType={1}/>,
+                    element: <ReportsPage reportType={1} />,
                   },
                   {
                     path: "tearsheets",
-                    element: <ReportsPage reportType={2}/>,
+                    element: <ReportsPage reportType={2} />,
                   },
                   {
                     path: "setups",

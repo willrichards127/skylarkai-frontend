@@ -19,7 +19,6 @@ import { ReportViewer } from "../templates/ReportViewer";
 import { ReportsSelectionModal } from "./ReportsSelectionModal";
 import { InviteCollaboraterModal } from "./InviteCollaboraterModal";
 import { SendEmailModal } from "../../../../components/modals/SendEmailModal";
-import { useGetSetupsQuery } from "../../../../redux/services/setupApi";
 import {
   reportBottomHeight,
   reportTabHeaderHeight,
@@ -46,10 +45,6 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
 
   const isPartner = user!.persona_id === 2;
 
-  const { isLoading, data: setups } = useGetSetupsQuery({
-    unitId: +unitId!,
-    viewMode: "active",
-  });
   const { isLoading: loadingReport, data: currentReport } = useGetReportQuery({
     reportId: +reportId!,
   });
@@ -167,7 +162,6 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
   }, [reportId, updateReviewStatus]);
 
   useEffect(() => {
-    if (isLoading || !setups?.length) return;
     setReportTabs([
       {
         setupId: +setupId!,
@@ -176,7 +170,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
         unitName: unitName!,
       },
     ]);
-  }, [isLoading, setups, setupId, unitName, reportId, reportName]);
+  }, [setupId, unitName, reportId, reportName]);
 
   useEffect(() => {
     if (!reportTabs.length) return;
@@ -195,7 +189,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
     >
       <Backdrop
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={isLoading || loadingReport || updatingReviewStatus}
+        open={loadingReport || updatingReviewStatus}
       >
         <CircularProgress color="inherit" />
       </Backdrop>

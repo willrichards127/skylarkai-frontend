@@ -1,16 +1,28 @@
 import { memo, useState, useCallback, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { Box, MenuItem, Typography, TextField, Stack } from "@mui/material";
 import { LeftArrowDecorator, RightArrowDecorator } from "../../components/Svgs";
 import { NeutralButton } from "../../components/buttons/NeutralButton";
-import { forgotPasswordAPI } from "../../redux/features/authSlice";
-import { useGetTenancyQuery } from "../../redux/services/userAPI";
+import { resetPasswordAPI } from "../../redux/features/authSlice";
+import {
+  useAddUserActivityMutation,
+  useGetTenancyQuery,
+} from "../../redux/services/userAPI";
 
-const ForgotPasswordForm = memo(() => {
+const ResetPasswordForm = memo(() => {
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
   const dispatch = useDispatch();
+  const [addActivity] = useAddUserActivityMutation();
   const { data: tenancies, isLoading: isTenancyLoading } = useGetTenancyQuery();
-  const [form, setForm] = useState<{ email: string; tenancy: string }>({
-    email: "",
+  const [form, setForm] = useState<{
+    tenancy: string;
+    new_pass: string;
+    confirm_pass: string;
+  }>({
+    new_pass: "",
+    confirm_pass: "",
     tenancy: "",
   });
 
@@ -23,12 +35,15 @@ const ForgotPasswordForm = memo(() => {
 
   const onSubmit = useCallback(() => {
     dispatch(
-      forgotPasswordAPI({
-        email: form.email,
+      resetPasswordAPI({
+        token: token!,
+        new_password: form.new_pass,
         tenancy: form.tenancy,
       }) as any
     );
-  }, [form, dispatch]);
+    addActivity({ user_action_id: 2 });
+    setForm({ new_pass: "", confirm_pass: "", tenancy: tenancies![0] });
+  }, [form, token, tenancies, addActivity, dispatch]);
 
   useEffect(() => {
     if (tenancies && tenancies.length) {
@@ -57,12 +72,9 @@ const ForgotPasswordForm = memo(() => {
           }}
         >
           <RightArrowDecorator />
-          <Typography variant="h5">Forgot Password</Typography>
+          <Typography variant="h5">Reset Password</Typography>
           <LeftArrowDecorator />
         </Box>
-        <Typography variant="body2" textAlign="center" mb={6}>
-          Enter your email so that you can access your account.
-        </Typography>
         <Stack spacing={2}>
           <TextField
             select
@@ -80,12 +92,21 @@ const ForgotPasswordForm = memo(() => {
           </TextField>
           <TextField
             fullWidth
-            placeholder="Enter your email"
-            label="Email"
-            type="email"
-            name="email"
-            value={form.email}
+            label="New Password"
+            name="new_pass"
+            type="password"
+            value={form.new_pass}
             onChange={onChangeValues}
+            disabled={!tenancies || isTenancyLoading}
+          />
+          <TextField
+            fullWidth
+            label="Confirm Password"
+            name="confirm_pass"
+            type="password"
+            value={form.confirm_pass}
+            onChange={onChangeValues}
+            disabled={!tenancies || isTenancyLoading}
           />
         </Stack>
 
@@ -94,14 +115,35 @@ const ForgotPasswordForm = memo(() => {
           variant="contained"
           size="large"
           sxProps={{ mt: 6, mb: 1 }}
-          disabled={!form.email || !form.tenancy}
+          disabled={
+            !form.new_pass ||
+            !form.confirm_pass ||
+            form.new_pass !== form.confirm_pass ||
+            isTenancyLoading ||
+            !tenancies ||
+            !token
+          }
           onClick={onSubmit}
         >
-          Submit
+          Confirm
         </NeutralButton>
+        <Box textAlign="right">
+          <Box
+            component={Link}
+            to="/login"
+            sx={{
+              fontSize: 13,
+              color: "primary.main",
+              textDecoration: "none",
+              fontWeight: "bold",
+            }}
+          >
+            Go to Login
+          </Box>
+        </Box>
       </Box>
     </Box>
   );
 });
 
-export default ForgotPasswordForm;
+export default ResetPasswordForm;
