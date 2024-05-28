@@ -9,6 +9,7 @@ import {
   TextField,
   Button,
   MenuItem,
+  CircularProgress,
 } from "@mui/material";
 import { LeftArrowDecorator, RightArrowDecorator } from "../../components/Svgs";
 import { NeutralButton } from "../../components/buttons/NeutralButton";
@@ -23,7 +24,7 @@ const LoginForm = memo(() => {
   const navigate = useNavigate();
 
   const { data: tenancies, isLoading: isTenancyLoading } = useGetTenancyQuery();
-  const { user, error } = useSelector(currentUser);
+  const { user, error, loading } = useSelector(currentUser);
 
   const dispatch = useDispatch();
   const [form, setForm] = useState<{
@@ -73,6 +74,13 @@ const LoginForm = memo(() => {
       navigate("/");
     }
   }, [navigate, isLoggedIn]);
+
+  if (loading)
+    return (
+      <Box sx={{ width: "100%", p: 2, textAlign: "center" }}>
+        <CircularProgress />
+      </Box>
+    );
 
   return (
     <Box

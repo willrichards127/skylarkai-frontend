@@ -19,7 +19,7 @@ export const ProtectedRoute = ({
     // refresh token every 1 hour
     const timer = setInterval(() => {
       refreshToken();
-    }, 1000 * 60 * 60);
+    }, 1000 * 60 * 60 * 5);
 
     return () => {
       clearInterval(timer);
