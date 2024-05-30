@@ -5,7 +5,7 @@ import * as cheerios from "cheerio";
 import { parse } from "node-html-parser";
 import * as marked from "marked";
 import { IDNDContainer, IDNDItem } from "../models/interfaces";
-import { csvToHtmlTable } from "./string";
+import { replaceContentBetweenCodeBlock } from "./string";
 
 export const parseSWOT = (content: string) => {
   const strengthsRegex = /Strengths:([\s\S]*?)(Weaknesses:|$)/;
@@ -73,12 +73,12 @@ export const parseTable = (data: string) => {
       $(row)
         .find("td")
         .each((j, td) => {
-          if (columns[j].type === "numeric") {
+          if (columns[j]?.type === "numeric") {
             rowData[columns[j].label] = $(td)
               .text()
               .replace(/\$|%|billion|million/g, "");
           } else {
-            rowData[columns[j].label] = $(td).text();
+            rowData[columns[j]?.label] = $(td).text();
           }
         });
 
@@ -210,9 +210,11 @@ const cleanUp = (inputString: string, limitWordCount?: number) => {
 };
 
 // parse citation phase only
-const parseCitation = (content: string, limitWordCount?: number) => {
+const parseCitation = (html: string, limitWordCount?: number) => {
   let startIndex = -1;
   let braceCount = 0;
+
+  let content = replaceContentBetweenCodeBlock(html);
 
   for (let i = 0; i < content.length; i++) {
     if (content[i] === "{") {
@@ -263,31 +265,51 @@ export const categoryParser3 = (htmlString: string) => {
               },
             });
           } else {
+            let value;
+            if (
+              child.firstChild.rawTagName === "p" &&
+              marked
+                .parse(child.firstChild.innerHTML)
+                .toString()
+                .includes("<table>")
+            ) {
+              value = {
+                content: marked.parse(child.firstChild.innerHTML) as string,
+                tag: "table",
+              };
+            } else if (
+              child.firstChild.rawTagName === "p" &&
+              child.firstChild?.firstChild?.rawTagName === "code"
+            ) {
+              value = {
+                tag: "table",
+                content: parseCitation(child.innerHTML),
+              };
+            } else if (
+              child.firstChild.rawTagName === "p" &&
+              child.firstChild?.firstChild?.rawTagName === "strong" &&
+              child.firstChild?.childNodes?.length > 1 &&
+              child.firstChild.childNodes[2].rawTagName === "code"
+            ) {
+              value = {
+                tag: "table",
+                content: parseCitation(
+                  child.innerHTML
+                    .replace(/<strong>[\s\S]*?<\/strong>/g, "")
+                    .replace("\n", "")
+                ),
+              };
+            } else {
+              value = {
+                tag: child.firstChild.rawTagName,
+                content: parseCitation(child.innerHTML),
+              };
+            }
             children.push({
               id: getNewId(),
               parentId: containerId,
               type: "ITEM",
-              value:
-                child.firstChild.rawTagName === "p" &&
-                marked
-                  .parse(child.firstChild.innerHTML)
-                  .toString()
-                  .includes("<table>")
-                  ? {
-                      content: marked.parse(
-                        child.firstChild.innerHTML
-                      ) as string,
-                      tag: "table",
-                    }
-                  : child.firstChild.rawTagName === "code"
-                  ? {
-                      tag: "table",
-                      content: csvToHtmlTable(child.firstChild.innerHTML),
-                    }
-                  : {
-                      tag: child.firstChild.rawTagName,
-                      content: parseCitation(child.innerHTML),
-                    },
+              value,
             });
           }
         }
@@ -299,7 +321,6 @@ export const categoryParser3 = (htmlString: string) => {
       });
     }
   });
-
   return sections;
 };
 
@@ -358,12 +379,7 @@ export const initializeHtmlResponse = (htmlString: string) => {
       .forEach((el: any) => {
         categorizedHtml += '<div class="dnd-container">';
         // replace <pre>, <code> tags and parse inner content again
-        const htmlContent = el.outerHTML
-          .replaceAll("```", "")
-          .replaceAll("<pre>", "")
-          .replaceAll("<code>", "")
-          .replaceAll("</pre>", "")
-          .replaceAll("</code>", "");
+        const htmlContent = el.outerHTML;
         if (htmlContent.trim()) {
           categorizedHtml += `<div class="dnd-item">${marked
             .parse(htmlContent)
