@@ -73,8 +73,10 @@ const WorkflowPanel = memo(
       { setupId: +params.setupId! },
       {
         skip: isNew,
+        refetchOnMountOrArgChange: true,
       }
     );
+
     const [saveSetup, { isLoading: isLoadingSaveSetup, data: savedData }] =
       useSaveSetupMutation();
 

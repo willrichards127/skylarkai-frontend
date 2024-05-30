@@ -1,6 +1,7 @@
 import { memo, useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Box, Button, TextField, colors } from "@mui/material";
+import { Box, Button, IconButton, TextField, colors } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { XModal } from "../XModal";
 import Templateview from "../TemplateView";
 import { ITemplate, ITemplateItem } from "../../shared/models/interfaces";
@@ -59,10 +60,17 @@ export const TemplateViewModal = memo(
         if (indexing.length === 1) {
           result = status[indexing[0]]["summary_result"];
         } else if (indexing.length === 2) {
-          result =
-            status[indexing[0]]["sub_query_results"][indexing[1]]["answer"][
-              "answer"
-            ];
+          const subQueryItem = items[indexing[0]].children;
+          if (subQueryItem && subQueryItem[indexing[1]].name) {
+            const subQueryResultItem = status[indexing[0]][
+              "sub_query_results"
+            ].find(
+              (r: any) => r["question"] === subQueryItem[indexing[1]].name
+            );
+            if (subQueryResultItem) {
+              result = subQueryResultItem["answer"]["answer"];
+            }
+          }
         }
 
         setAnswer(result);
@@ -141,8 +149,22 @@ export const TemplateViewModal = memo(
                 borderRadius: 2,
                 padding: 2,
                 mt: 2,
+                position: "relative",
               }}
             >
+              <Box sx={{ position: "absolute", right: 0, top: 0 }}>
+                <IconButton
+                  aria-label="close"
+                  onClick={() => setAnswer(undefined)}
+                  sx={{
+                    position: "absolute",
+                    right: 8,
+                    top: 8,
+                  }}
+                >
+                  <CloseIcon />
+                </IconButton>
+              </Box>
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeRaw as any]}

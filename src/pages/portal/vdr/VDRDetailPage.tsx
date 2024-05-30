@@ -28,7 +28,7 @@ export default function VDRDetailPage() {
 
   const { lastNotification } = useNotification();
   const { data, isLoading, refetch } = useGetVDRQuery({ vdrId: +vdrId });
-  const [ingestFiles] = useIngestFilesMutation();
+  const [ingestFiles, { isLoading: isIngesting }] = useIngestFilesMutation();
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [viewFile, setViewFile] = useState<File>();
@@ -79,6 +79,7 @@ export default function VDRDetailPage() {
             }}
           >
             <IconButton
+              disabled={isIngesting}
               size="small"
               onClick={() =>
                 navigate(
@@ -95,6 +96,7 @@ export default function VDRDetailPage() {
               variant="contained"
               sx={{ minWidth: 140, mr: 2 }}
               onClick={onIngestFiles}
+              disabled={isIngesting}
             >
               Ingest Files
             </Button>
@@ -111,7 +113,11 @@ export default function VDRDetailPage() {
                   cloud
                 />
               </Box>
-              {selectedFiles.length ? (
+              {isIngesting ? (
+                <Box sx={{ width: "100%", display: "flex", justifyContent: "center", py: 2 }}>
+                  <CircularProgress />
+                </Box>
+              ) : selectedFiles.length ? (
                 <Grid container columnSpacing={3} rowSpacing={3}>
                   {selectedFiles.map((file, index) => (
                     <Grid
