@@ -41,6 +41,7 @@ export interface IUserAuth {
   loading?: boolean;
   error?: boolean; // only for clear activities
   tenancy?: string;
+  is_enabled_features?: boolean;
 }
 
 export interface ITranscript {

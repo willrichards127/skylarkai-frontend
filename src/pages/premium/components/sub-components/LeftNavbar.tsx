@@ -24,6 +24,9 @@ export const LeftNavbar = ({
 
   const navigate = useNavigate();
   const { user } = useSelector(currentUser);
+  const { is_enabled_features } = useSelector(
+    (state: any) => state.userAuthSlice
+  );
 
   const onItem = useCallback(
     (itemId: number) => {
@@ -45,7 +48,7 @@ export const LeftNavbar = ({
         {(user!.main_features || []).map((item: IMainFeature) => (
           <ListItem disablePadding key={item.id}>
             <ListItemButton
-              disabled={item.id < 5}
+              disabled={is_enabled_features ? false : item.id < 5}
               selected={featureId === item.id.toString()}
               onClick={() => onItem(item.id)}
             >

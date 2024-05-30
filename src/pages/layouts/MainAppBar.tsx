@@ -10,7 +10,7 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  // Button,
+  Switch,
 } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -27,7 +27,11 @@ import {
 } from "../../components/Svgs";
 import { Notifications } from "./Notifications";
 import { XPopmenu } from "../../components/XPopmenu";
-import { currentUser, clearUserInfo } from "../../redux/features/authSlice";
+import {
+  currentUser,
+  clearUserInfo,
+  updatePremiumFeaturesAsync,
+} from "../../redux/features/authSlice";
 import { HeaderConfig } from "../../shared/models/constants";
 import { useAddUserActivityMutation } from "../../redux/services/userAPI";
 
@@ -56,6 +60,9 @@ const profileDropdownItems = [
 
 export const MainAppBar = memo(() => {
   const { user } = useSelector(currentUser);
+  const { is_enabled_features } = useSelector(
+    (state: any) => state.userAuthSlice
+  );
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -64,6 +71,12 @@ export const MainAppBar = memo(() => {
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+
+  const onChangePremiumFeatures = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch(updatePremiumFeaturesAsync(e.target.checked) as any);
+  };
+
+  console.log(is_enabled_features, "is_enabled_features====");
 
   const onFeatures = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -215,7 +228,7 @@ export const MainAppBar = memo(() => {
                         setAnchorEl(null);
                         navigate(`/features/${feature.id}`);
                       }}
-                      disabled={feature.id <= 4}
+                      disabled={is_enabled_features ? false : feature.id < 5}
                     >
                       {feature.feature}
                     </MenuItem>
@@ -298,6 +311,23 @@ export const MainAppBar = memo(() => {
                 <SupportIcon />
                 Support
               </Box>
+            </Box>
+            <Box mr="auto" />
+            <Box
+              sx={{
+                fontSize: 13,
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+              }}
+            >
+              Disable
+              <Switch
+                checked={is_enabled_features}
+                size="small"
+                onChange={onChangePremiumFeatures}
+              />
+              Enable All
             </Box>
           </Box>
         </Box>

@@ -30,7 +30,7 @@ export const userApi = createApi({
       query: ({ id, user_status }) => ({
         url: `users/${id}/update_status`,
         method: "POST",
-        data: {
+        body: {
           user_status,
         },
       }),
@@ -40,7 +40,7 @@ export const userApi = createApi({
       query: ({ user_action_id }) => ({
         url: "user_activities",
         method: "POST",
-        data: {
+        body: {
           user_action_id,
         },
       }),
