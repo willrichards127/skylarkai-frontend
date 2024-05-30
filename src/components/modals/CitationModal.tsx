@@ -23,7 +23,7 @@ export const CitationModal = memo(
       id?: number; // the only case for report
       quote: string;
     };
-  }) => {
+  }) => {    
     const { data: report } = useGetReportQuery(
       { reportId: data.id! },
       { skip: !data.id }

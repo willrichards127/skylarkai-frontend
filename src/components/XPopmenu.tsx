@@ -78,10 +78,10 @@ export const XPopmenu = memo(
             ) : (
               <MenuItem
                 key={item.id}
-                onClick={() => onItemClick(item.id)}
-                sx={{
-                  pointerEvents: item.clickable ? "auto" : "none",
-                }}
+                onClick={() => (item.clickable ? onItemClick(item.id) : null)}
+                // sx={{
+                //   pointerEvents: item.clickable ? "auto" : "none",
+                // }}
               >
                 {item.content}
               </MenuItem>

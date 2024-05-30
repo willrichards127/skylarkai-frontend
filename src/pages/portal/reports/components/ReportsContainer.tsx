@@ -163,7 +163,9 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
             ...reports.reports.filter((report: any) =>
               viewMode === "active"
                 ? report.graph_id !== sys_graph_id
-                : report.graph_id === sys_graph_id
+                : viewMode === "general"
+                ? report.graph_id === sys_graph_id
+                : true
             ),
           ]
             .sort(

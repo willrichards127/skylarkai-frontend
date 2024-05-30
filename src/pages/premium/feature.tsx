@@ -7,7 +7,7 @@ import AnalyzeEarningCallsFeature from "./components/analyze-earnings";
 import CompareDocumentsFeature from "./components/compare-documents";
 import SentimentalAnalysisFeature from "./components/sentimental-analysis";
 // import ChatDataFeature from "./components/chat-data";
-import FinanceFeature from "./components/finance";
+// import FinanceFeature from "./components/finance";
 
 const compDict: Record<number, any> = {
   1: AskSecFilingsFeature,
@@ -17,7 +17,7 @@ const compDict: Record<number, any> = {
   5: CompareDocumentsFeature,
   6: SentimentalAnalysisFeature,
   // 7: ChatDataFeature,
-  8: FinanceFeature,
+  // 8: FinanceFeature,
 };
 
 export default function FeaturePage() {

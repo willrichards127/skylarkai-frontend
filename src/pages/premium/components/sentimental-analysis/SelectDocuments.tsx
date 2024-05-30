@@ -28,6 +28,8 @@ import {
   useCreateFeatureInstanceMutation,
   useGenerateSentimentAnalysisMutation,
 } from "../../../../redux/services/transcriptAPI";
+import { marked } from "marked";
+import { parseCitation } from "../../../../shared/utils/string";
 
 const extractRow = (row: { file_name: string }) => {
   const splited = row.file_name.split("_");
@@ -134,7 +136,7 @@ export const SelectDocuments = ({
             ...(!!file.id && { id: file.id }),
           })),
           criteria,
-          report: responseReport.content,
+          report: marked.parse(parseCitation(responseReport.content)) as string,
         },
       }).unwrap();
       onNext(responseInstance as ICustomInstance);

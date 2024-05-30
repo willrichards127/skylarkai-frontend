@@ -10,6 +10,7 @@ const initialState: IUserAuth = {
   token: undefined,
   loading: false,
   error: undefined,
+  is_enabled_features: false,
 };
 
 export const registerAPI = createAsyncThunk(
@@ -197,6 +198,9 @@ export const userAuthSlice = createSlice({
       state.tenancy = payload;
       saveStoreValue("tenancy", payload);
     },
+    updatePremiumFeatures: (state, { payload }) => {
+      state.is_enabled_features = payload;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(registerAPI.pending, (state) => {
@@ -245,6 +249,7 @@ export const userAuthSlice = createSlice({
         state.token = token;
         state.sys_graph_id = sys_graph_id;
         state.tenancy = tenancy;
+        state.is_enabled_features = false;
 
         saveStoreValue("user-info", state.user);
         saveStoreValue("token", token);
@@ -273,8 +278,11 @@ export const userAuthSlice = createSlice({
       );
   },
 });
-const { reset, updateToken } = userAuthSlice.actions;
+const { reset, updateToken, updatePremiumFeatures } = userAuthSlice.actions;
 export const clearUserInfo = () => (dispatch: any) => dispatch(reset());
 export const updateTokenAsync = (newToken: string) => (dispatch: any) =>
   dispatch(updateToken(newToken));
+export const updatePremiumFeaturesAsync =
+  (enabled: boolean) => (dispatch: any) =>
+    dispatch(updatePremiumFeatures(enabled));
 export const currentUser = (state: any) => state.userAuthSlice as IUserAuth;

@@ -30,6 +30,9 @@ const featureEnterpriseImgDict: Record<string, FC> = {
 export default function FeaturesPage() {
   const navigate = useNavigate();
   const { user } = useSelector(currentUser);
+  const { is_enabled_features } = useSelector(
+    (state: any) => state.userAuthSlice
+  );
 
   const onCard = useCallback(
     (featureId: number) => {
@@ -95,7 +98,7 @@ export default function FeaturesPage() {
                       label={feature.feature}
                       onCard={() => onCard(+feature.id)}
                       size="md"
-                      disabled={feature.id <= 4}
+                      disabled={is_enabled_features ? false : feature.id < 5}
                     />
                   </Grid>
                 ))}
