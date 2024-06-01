@@ -396,6 +396,77 @@ export const transcriptApi = createApi({
         }
       },
     }),
+    bulkCustomQuery: builder.mutation<
+      any[],
+      {
+        graph_id?: number;
+        questions: string[];
+        company_name?: string;
+        filenames: string[];
+        analysis_type?: string;
+        llm?: string;
+        recursion?: number;
+        chatmode?: boolean;
+        insider_transaction?: boolean;
+      }
+    >({
+      async queryFn(
+        {
+          graph_id,
+          questions,
+          filenames,
+          company_name,
+          recursion = 5,
+          analysis_type = "transcript",
+          chatmode = false,
+          llm = "OpenAI",
+          insider_transaction = false,
+        },
+        api,
+        __,
+        apiBaseQuery
+      ) {
+        const sys_graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
+        const current_graph_id = graph_id || sys_graph_id;
+        try {
+          const promises: any[] = [];
+          for (const question of questions) {
+            const promise = Promise.resolve(
+              apiBaseQuery({
+                url: `customquery/${current_graph_id}?llm=${llm}&recursion=${recursion}&analysis_type=${analysis_type}&company_name=${company_name}&${
+                  insider_transaction
+                    ? "&insider_transaction=" + insider_transaction
+                    : ""
+                }`,
+                method: "POST",
+                body: {
+                  company_name,
+                  question,
+                  filenames,
+                  chatmode,
+                  llm,
+                },
+              })
+            );
+            promises.push(promise);
+          }
+
+          const responses: any = await Promise.all(promises);
+          const answers = responses.map((res: any) => res.data.answer);
+          return {
+            data: answers,
+          } as any;
+        } catch (e) {
+          return {
+            error: {
+              status: "CUSTOM_ERROR",
+              error: "Error in customQuery API",
+              data: e,
+            },
+          };
+        }
+      },
+    }),
     reportSectionTemplate: builder.mutation<
       any,
       {
@@ -657,7 +728,7 @@ export const transcriptApi = createApi({
         apiBaseQuery
       ) {
         const graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
-        console.log("=================", analysis_type)
+        console.log("=================", analysis_type);
         try {
           const formdata = new FormData();
           formdata.append("analysis_type", analysis_type);
@@ -897,6 +968,7 @@ export const {
   useUpdateFeedbackMutation,
   // chatbot
   useCustomQueryMutation,
+  useBulkCustomQueryMutation,
 
   // fetch SEC filings or transcript files
   useFetchFilesMutation,

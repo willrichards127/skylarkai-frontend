@@ -39,11 +39,13 @@ export const ReportTemplate = ({
   unitName,
   reportContent,
   analysisType,
+  isReadOnly = false,
 }: {
   reportId: number;
   reportName: string;
   setupId: number;
-  unitName: string;
+  unitName?: string;
+  isReadOnly?: boolean;
   reportContent: string;
   analysisType: string;
 }) => {
@@ -224,6 +226,31 @@ export const ReportTemplate = ({
     []
   );
 
+  const onSectionContentChanged = useCallback(
+    (startIndex: number, endIndex: number, newContainers: IDNDContainer[]) => {
+      console.log(startIndex, endIndex, newContainers, "section indexes");
+      if (newContainers.length) {
+        setReportItems((prevContainers) => {
+          prevContainers.splice(
+            startIndex + 1,
+            endIndex - startIndex,
+            ...newContainers
+          );
+          return prevContainers.map((con) => ({ ...con, loading: false }));
+        });
+      } else {
+        setReportItems((prevContainers) =>
+          prevContainers.map((con, index) =>
+            index >= startIndex && index <= endIndex
+              ? { ...con, loading: true }
+              : { ...con, loading: false }
+          )
+        );
+      }
+    },
+    []
+  );
+
   const onAddNewItem = useCallback((item: IDNDItem) => {
     setReportItems((prevContainers) =>
       prevContainers.map((c) =>
@@ -289,7 +316,7 @@ export const ReportTemplate = ({
   // }, []);
 
   const onRerunReport = async () => {
-    if (uploadedFiles && uploadedFiles["file"]) {
+    if (uploadedFiles && uploadedFiles["file"] && unitName) {
       await ingestFiles({
         setupId,
         companyName: unitName,
@@ -314,83 +341,143 @@ export const ReportTemplate = ({
 
   return (
     <>
-      <SplitContainer
-        sizes={[70, 30]}
-        leftPanel={
+      {isReadOnly ? (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            flexDirection: "column",
+            overflowY: "auto",
+            flex: 1,
+            py: 2,
+          }}
+        >
           <Box
+            ref={printRef}
             sx={{
-              display: "flex",
-              borderRadius: 2,
+              maxWidth: "8.8in",
+              bgcolor: "white",
+              color: "black",
+              p: 6,
             }}
           >
-            <ReportDrawer
-              setupId={setupId}
-              isShowQuestion={isShowQuestion}
-              items={reportItems}
-              onSwitchMode={(mode) => setIsShowQuestion(mode)}
-              onRemoveFiles={onRemoveFiles}
-              // onUploadedFiles={onUploadedFiles}
-              onRerunReport={onRerunReport}
-              onSave={onSaveReport}
-              onPrint={onPrint}
-              onSendEmail={onSendEmail}
-              uploadedFiles={uploadedFiles}
-            />
+            <DndProvider backend={HTML5Backend}>
+              <DragLayer />
+              {reportItems.map((item) => (
+                <Container
+                  key={item.id}
+                  loading={item.loading}
+                  containers={reportItems}
+                  setupId={setupId}
+                  unitName={unitName!}
+                  id={item.id}
+                  type={item.type}
+                  children={item.children}
+                  onExchangeItem={onExchangeItem}
+                  onMoveContainer={onMoveContainer}
+                  onChangeChildOrder={onChangeChildOrder}
+                  isShowQuestion={isShowQuestion}
+                  onSectionContentChanged={onSectionContentChanged}
+                  onAddNew={() => onAddNewContainer(item)}
+                  onRemove={() => onRemoveContainer(item)}
+                  onAddNewItem={onAddNewItem}
+                  onRemoveItem={onRemoveItem}
+                  onItemValueChanged={onItemValueChanged}
+                  onCitationLink={onCitationLink}
+                />
+              ))}
+            </DndProvider>
+          </Box>
+        </Box>
+      ) : (
+        <SplitContainer
+          sizes={[70, 30]}
+          leftPanel={
             <Box
               sx={{
                 display: "flex",
-                alignItems: "center",
-                flexDirection: "column",
-                overflowY: "auto",
-                flex: 1,
-                py: 2,
+                borderRadius: 2,
               }}
             >
+              <ReportDrawer
+                setupId={setupId}
+                isShowQuestion={isShowQuestion}
+                items={reportItems}
+                onSwitchMode={(mode) => setIsShowQuestion(mode)}
+                onRemoveFiles={onRemoveFiles}
+                // onUploadedFiles={onUploadedFiles}
+                onRerunReport={onRerunReport}
+                onSave={onSaveReport}
+                onPrint={onPrint}
+                onSendEmail={onSendEmail}
+                uploadedFiles={uploadedFiles}
+              />
               <Box
-                ref={printRef}
                 sx={{
-                  maxWidth: "8.8in",
-                  bgcolor: "white",
-                  color: "black",
-                  p: 6,
+                  display: "flex",
+                  alignItems: "center",
+                  flexDirection: "column",
+                  overflowY: "auto",
+                  flex: 1,
+                  py: 2,
                 }}
               >
-                <DndProvider backend={HTML5Backend}>
-                  <DragLayer />
-                  {reportItems.map((item) => (
-                    <Container
-                      key={item.id}
-                      id={item.id}
-                      type={item.type}
-                      children={item.children}
-                      onExchangeItem={onExchangeItem}
-                      onMoveContainer={onMoveContainer}
-                      onChangeChildOrder={onChangeChildOrder}
-                      isShowQuestion={isShowQuestion}
-                      onAddNew={() => onAddNewContainer(item)}
-                      onRemove={() => onRemoveContainer(item)}
-                      onAddNewItem={onAddNewItem}
-                      onRemoveItem={onRemoveItem}
-                      onItemValueChanged={onItemValueChanged}
-                      onCitationLink={onCitationLink}
-                    />
-                  ))}
-                </DndProvider>
+                <Box
+                  ref={printRef}
+                  sx={{
+                    maxWidth: "8.8in",
+                    bgcolor: "white",
+                    color: "black",
+                    p: 6,
+                  }}
+                >
+                  <DndProvider backend={HTML5Backend}>
+                    <DragLayer />
+                    {reportItems.map((item) => (
+                      <Container
+                        key={item.id}
+                        loading={item.loading}
+                        containers={reportItems}
+                        setupId={setupId}
+                        unitName={unitName!}
+                        id={item.id}
+                        type={item.type}
+                        children={item.children}
+                        onExchangeItem={onExchangeItem}
+                        onMoveContainer={onMoveContainer}
+                        onChangeChildOrder={onChangeChildOrder}
+                        isShowQuestion={isShowQuestion}
+                        onAddNew={() => onAddNewContainer(item)}
+                        onRemove={() => onRemoveContainer(item)}
+                        onAddNewItem={onAddNewItem}
+                        onRemoveItem={onRemoveItem}
+                        onItemValueChanged={onItemValueChanged}
+                        onSectionContentChanged={onSectionContentChanged}
+                        onCitationLink={onCitationLink}
+                      />
+                    ))}
+                  </DndProvider>
+                </Box>
               </Box>
             </Box>
-          </Box>
-        }
-        rightPanel={
-          <ChatPanel
-            graph_id={setupId}
-            companyName={unitName}
-            analysis_type={analysisType}
-            onAddToReport={onAddToReport}
-            filenames={[]}
-            onJumpTo={onCitationLink}
-          />
-        }
-      />
+          }
+          rightPanel={
+            unitName ? (
+              <ChatPanel
+                graph_id={setupId}
+                companyName={unitName}
+                analysis_type={analysisType}
+                onAddToReport={onAddToReport}
+                filenames={[]}
+                onJumpTo={onCitationLink}
+              />
+            ) : (
+              <></>
+            )
+          }
+        />
+      )}
+
       {citationData ? (
         <CitationModal
           open={!!citationData}

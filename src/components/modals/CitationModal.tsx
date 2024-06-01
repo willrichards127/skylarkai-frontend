@@ -2,9 +2,9 @@ import { memo, useEffect, useState } from "react";
 import { XModal } from "../XModal";
 import { Box } from "@mui/material";
 import { PdfViewer } from "../PDFViewer";
-import { Markdown } from "../../pages/portal/reports/components/Markdown";
 import { downloadPdf } from "../../shared/utils/download";
 import { useGetReportQuery } from "../../redux/services/reportApi";
+import { ReportTemplate } from "../../pages/portal/reports/templates/ReportTemplate";
 
 export const CitationModal = memo(
   ({
@@ -23,7 +23,7 @@ export const CitationModal = memo(
       id?: number; // the only case for report
       quote: string;
     };
-  }) => {    
+  }) => {
     const { data: report } = useGetReportQuery(
       { reportId: data.id! },
       { skip: !data.id }
@@ -48,17 +48,22 @@ export const CitationModal = memo(
         open={open}
         onClose={onClose}
         header={<Box textAlign="center">{title || "Citation"}</Box>}
-        size="md"
+        size="lg"
       >
         {file && (
           <div style={{ height: 800 }}>
             <PdfViewer pdfUrl={file} keyword={data.quote} />
           </div>
         )}
-        {!!report?.content && (
-          <Box sx={{ color: "black", bgcolor: "white", p: 2 }}>
-            <Markdown html={report.content.trim()} />
-          </Box>
+        {!!report && (
+          <ReportTemplate
+            reportId={report.id}
+            reportName={report.report_metadata.reportname}
+            setupId={report.graph_id}
+            reportContent={report.content}
+            analysisType="financial_diligence"
+            isReadOnly
+          />
         )}
       </XModal>
     );

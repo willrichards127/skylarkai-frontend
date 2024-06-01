@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef } from "react";
-import { Box } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 import { useDrop, useDrag } from "react-dnd";
 import { Item } from "./Item";
 import { ContainerActionPane } from "./ContainerActionPane";
@@ -12,10 +12,14 @@ import {
 import { changeOrder } from "../../../../../shared/utils/base";
 
 export const Container = ({
+  loading = false,
   id,
+  setupId,
+  unitName,
   type,
   children,
   isShowQuestion,
+  containers,
   onExchangeItem,
   onMoveContainer,
   onChangeChildOrder,
@@ -24,12 +28,22 @@ export const Container = ({
   onAddNewItem,
   onRemoveItem,
   onItemValueChanged,
+  onSectionContentChanged,
   onCitationLink,
 }: {
+  loading?: boolean;
   id: string;
+  setupId: number;
+  unitName: string;
   type: TDNDItemType;
   children: IDNDItem[];
+  containers: IDNDContainer[];
   isShowQuestion?: boolean;
+  onSectionContentChanged: (
+    startIndex: number,
+    endIndex: number,
+    newContainers: IDNDContainer[]
+  ) => void;
   onExchangeItem: (
     sourceId: string,
     targetId: string,
@@ -132,11 +146,14 @@ export const Container = ({
             display: "flex",
           },
         },
+        pointerEvents: loading ? "none" : "auto",
       }}
       data-handler-id={handlerId}
       ref={ref}
     >
-      <ContainerActionPane onAddNew={onAddNew} onRemove={onRemove} />
+      {!loading && (
+        <ContainerActionPane onAddNew={onAddNew} onRemove={onRemove} />
+      )}
       {children.length > 0 ? (
         children
           .filter((item) =>
@@ -146,7 +163,11 @@ export const Container = ({
           )
           .map((child) => (
             <Item
+              loading={loading}
               key={child.id}
+              containers={containers}
+              setupId={setupId}
+              unitName={unitName}
               id={child.id}
               type={child.type}
               value={child.value!}
@@ -154,12 +175,29 @@ export const Container = ({
               onMoveItem={onMoveItem}
               onAddNew={() => onAddNewItem(child)}
               onRemove={() => onRemoveItem(child)}
+              onSectionContentChanged={onSectionContentChanged}
               onItemValueChanged={onItemValueChanged}
               onCitationLink={onCitationLink}
             />
           ))
       ) : (
         <small style={{ color: "grey" }}>Empty Container</small>
+      )}
+      {loading && (
+        <Box
+          sx={{
+            position: "absolute",
+            width: "100%",
+            height: "100%",
+            bgcolor: "rgba(0, 0, 0, 0.1)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            borderRadius: 1
+          }}
+        >
+          <CircularProgress color="info" size={20} />
+        </Box>
       )}
     </Box>
   );

@@ -76,8 +76,6 @@ export const MainAppBar = memo(() => {
     dispatch(updatePremiumFeaturesAsync(e.target.checked) as any);
   };
 
-  console.log(is_enabled_features, "is_enabled_features====");
-
   const onFeatures = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
     event.preventDefault();
     setAnchorEl(event.currentTarget);
@@ -321,13 +319,13 @@ export const MainAppBar = memo(() => {
                 gap: 2,
               }}
             >
-              Disable
+              Disable Premium
               <Switch
                 checked={is_enabled_features}
                 size="small"
                 onChange={onChangePremiumFeatures}
               />
-              Enable All
+              Enable Premium
             </Box>
           </Box>
         </Box>

@@ -1,5 +1,7 @@
 import { useRef, useState, useCallback, useMemo } from "react";
 import { useDrag, useDrop } from "react-dnd";
+import * as marked from "marked";
+import { toast } from "react-toastify";
 import { Markdown } from "../Markdown";
 import { ItemWrapper } from "./ItemWrapper";
 import { ItemActionPane } from "./ItemActionPane";
@@ -12,12 +14,24 @@ import {
   IReportItemMetadata,
 } from "../../../../../shared/models/interfaces";
 import { ItemEditor } from "./ItemEditor";
-import { parseTable } from "../../../../../shared/utils/parse";
+import {
+  categoryParser2,
+  getSectionName,
+  parseTable,
+  sectionIndexes,
+} from "../../../../../shared/utils/parse";
 import { Chart } from "../Chart";
 import { htmlTable2CSV } from "../../../../../shared/utils/string";
 import { downloadCSV } from "../../../../../shared/utils/download";
+import { useBulkCustomQueryMutation } from "../../../../../redux/services/transcriptAPI";
+import { useGetSetupQuery } from "../../../../../redux/services/setupApi";
+
 
 export const Item = ({
+  loading,
+  setupId,
+  containers,
+  unitName,
   id,
   value,
   type,
@@ -25,9 +39,14 @@ export const Item = ({
   onMoveItem,
   onAddNew,
   onRemove,
+  onSectionContentChanged,
   onItemValueChanged,
   onCitationLink,
 }: {
+  loading?: boolean;
+  setupId: number;
+  containers: IDNDContainer[];
+  unitName: string;
   id: string;
   parentId: string;
   type: TDNDItemType;
@@ -35,6 +54,11 @@ export const Item = ({
   onMoveItem: (dragId: string, hoverId: string) => void; // move item inside one container
   onAddNew: () => void;
   onRemove: () => void;
+  onSectionContentChanged: (
+    startIndex: number,
+    endIndex: number,
+    newContainers: IDNDContainer[]
+  ) => void;
   onItemValueChanged: (
     replaceItem: IDNDItem,
     containers: IDNDContainer[]
@@ -47,6 +71,11 @@ export const Item = ({
     quote: string;
   }) => void;
 }) => {
+  const { isLoading: loadingSetup, data: setup } = useGetSetupQuery({
+    setupId,
+  });
+  const [bulkCustomQuery, { isLoading: loadingBulkQuery }] =
+    useBulkCustomQueryMutation();
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [vizModal, showVizModal] = useState<boolean>(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -125,6 +154,60 @@ export const Item = ({
     [onItemValueChanged, id, parentId, value, type]
   );
 
+  const onRerunSection = useCallback(
+    async (htmlContent: string, llm: string) => {
+      const templateNode = (setup as any).nodes.find((node: any) =>
+        node.attributes.graph_node_id.startsWith("Template_")
+      );
+      const template = JSON.parse(templateNode.properties.text);
+
+      const matchedSection = template.data.find(
+        (item: any) => item.name === getSectionName(htmlContent)
+      );
+      if (!matchedSection) {
+        toast.warn("This section doesn't match to the template.");
+        return;
+      }
+
+      const validQuestions = matchedSection.children!.filter(
+        (child: any) => !child.isUnChecked
+      );
+      // get all containers for this section
+      const indexes = sectionIndexes(containers, parentId);
+      // update the current containers statuses
+      onSectionContentChanged(indexes.startIndex, indexes.endIndex, []);
+
+      const answers = await bulkCustomQuery({
+        graph_id: setup!.id,
+        filenames: [],
+        questions: validQuestions.map((item: any) => item.name),
+        company_name: unitName,
+        analysis_type: "financial_diligence",
+        llm,
+      }).unwrap();
+
+      const html = answers.reduce((pv, cv) => {
+        pv += marked.parse(cv, { gfm: true });
+        return pv;
+      }, "");
+      const newContainers = categoryParser2(html);
+
+      onSectionContentChanged(
+        indexes.startIndex,
+        indexes.endIndex,
+        newContainers
+      );
+    },
+    [
+      parentId,
+      setup,
+      unitName,
+      containers,
+      bulkCustomQuery,
+      onSectionContentChanged,
+    ]
+  );
+
   const tableValue = useMemo(
     () => (value.tag === "table" ? parseTable(value.content) : null),
     [value]
@@ -144,6 +227,8 @@ export const Item = ({
 
   drag(drop(ref));
 
+  const isLoading = loading || loadingSetup || loadingBulkQuery;
+
   return (
     <ItemWrapper
       ref={ref}
@@ -156,23 +241,25 @@ export const Item = ({
       data-viz-option={value.axis}
       id={id}
       style={{
+        pointerEvents: isLoading ? "none" : "auto",
         width: "100%",
         cursor: "move",
         opacity: isDragging ? 0.4 : 1,
       }}
       data-handler-id={handlerId}
-      onDoubleClick={onEdit}
+      onDoubleClick={() => (isLoading ? null : onEdit())}
     >
-      {!isEdit && (
+      {!isLoading && !isEdit && (
         <ItemActionPane
           item={{ id, value, type, parentId }}
           onAddNew={onAddNew}
           onRemove={onRemove}
           onShowViz={onShowViz}
           onDownloadCSV={onDownloadCSV}
+          onRerunSection={onRerunSection}
         />
       )}
-      {isEdit && (
+      {!isLoading && isEdit && (
         <ItemEditor
           onClickAway={onClickAway}
           item={{ id, value, parentId, type }}
