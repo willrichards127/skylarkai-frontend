@@ -144,6 +144,7 @@ interface IDNDItemBase {
 }
 export interface IDNDContainer extends IDNDItemBase {
   children: IDNDItem[];
+  loading?: boolean;
 }
 
 export interface IDNDItem extends IDNDItemBase {

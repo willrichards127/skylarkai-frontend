@@ -324,6 +324,28 @@ export const categoryParser3 = (htmlString: string) => {
   return sections;
 };
 
+export const getSectionName = (html: string) => {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+  return doc.querySelector("h2")?.innerText;
+};
+
+// get containers for the given section
+// assuming that section has h2 tag
+export const sectionIndexes = (
+  containers: IDNDContainer[],
+  containerId: string
+) => {
+  const startIndex = containers.findIndex((con) => con.id === containerId);
+  const endIndex = containers.findIndex(
+    (con, index) => index > startIndex && con.children[0].value.tag === "h2"
+  );
+  return {
+    startIndex,
+    endIndex: endIndex === -1 ? containers.length - 1 : endIndex - 1,
+  };
+};
+
 // content parser for generating report
 export const categoryParser2 = (htmlString: string) => {
   const sections: IDNDContainer[] = [];

@@ -67,17 +67,24 @@ export const Markdown = ({
             }}
           />
         ),
-        h2: (props) => (
-          <h2
-            {...props}
-            style={{
-              ...props.style,
-              fontSize: "22px",
-              color: "#327bf0",
-              margin: "18.76px 0",
-            }}
-          />
-        ),
+        h2: (props: any) => {
+          return (
+            <h2
+              {...props}
+              style={{
+                ...props.style,
+                fontSize: "22px",
+                color: "#327bf0",
+                margin: "18.76px 0",
+              }}
+              title={
+                props["data-rating"]
+                  ? `Average Rating: ${props["data-rating"]}`
+                  : ""
+              }
+            />
+          );
+        },
         h3: (props) => (
           <h3
             {...props}

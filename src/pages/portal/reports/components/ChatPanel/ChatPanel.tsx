@@ -39,7 +39,7 @@ export const ChatPanel = memo(
     const [llm, setLlm] = useState<"OpenAI" | "Anthropic" | "BOTH" | "Gemini">(
       "OpenAI"
     );
-    const [recursion, setRecursion] = useState<number>(2);
+    const [recursion, setRecursion] = useState<number>(1);
     const [emailModal, showEmailModal] = useState<boolean>(false);
     const [chatHistory, setChatHistory] = useState<IChat[]>([]);
 
@@ -177,13 +177,13 @@ export const ChatPanel = memo(
                 },
               }}
             >
-              {[1, 2, 3, 4, 5].map((item) => (
-                <option key={item} value={item}>
-                  {item === 1
-                    ? "1 (Quickest Overview)"
-                    : item === 5
-                    ? "5 (In-Depth Insights)"
-                    : item}
+              {[
+                "Quickest Overview",
+                "Balanced Summary",
+                "In-Depth Insights",
+              ].map((item, index) => (
+                <option key={item} value={index + 1}>
+                  {item}
                 </option>
               ))}
             </TextField>

@@ -1,6 +1,6 @@
 import { memo, useCallback } from "react";
 import { useReactFlow } from "reactflow";
-import { Box } from "@mui/material";
+import { Box, TextField } from "@mui/material";
 import { SimpleDropdown } from "../../../../../../../components/SimpleDropdown";
 import { Handlers } from "../../Handlers";
 import { ITemplateNode } from "../../../../../../../shared/models/interfaces";
@@ -52,23 +52,34 @@ export const LLMNode = memo(
             mb: 2,
           }}
         />
-        <label htmlFor="model" style={{ fontSize: 10 }}>
-          Recursion
-        </label>
-        <SimpleDropdown
-          id="recursion"
-          value={nodeContent.properties?.recursion || 5}
+        <TextField
+          select
+          label="Recursion"
+          sx={{
+            "& .MuiInputBase-input": {
+              fontSize: 12,
+            },
+            "& .MuiNativeSelect-select": {
+              height: 24,
+              padding: "4px 14px",
+            },
+          }}
+          value={nodeContent.properties?.recursion || 3}
           onChange={(e) => {
             onChangeFormValues("recursion", +e.target.value);
           }}
-          size="small"
-          fullWidth
-          hiddenLabel
-          options={["1", "2", "3", "4", "5"]}
-          sxProps={{
-            mb: 2,
+          SelectProps={{
+            native: true,
           }}
-        />
+        >
+          {["Quickest Overview", "Balanced Summary", "In-Depth Insights"].map(
+            (option, index) => (
+              <option key={option} value={index + 1}>
+                {option}
+              </option>
+            )
+          )}
+        </TextField>
       </Box>
     );
   }
