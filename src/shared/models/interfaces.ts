@@ -154,6 +154,9 @@ export interface IDNDItem extends IDNDItemBase {
 export type TTreeData = {
   name: string;
   template?: string;
+  answer?: string;
+  duration?: string;
+  completedAt?: string;
   isUnChecked?: boolean;
   isLoading?: boolean;
   isSuccess?: boolean;
@@ -175,4 +178,12 @@ export interface ITemplate {
   data: ITemplateItemPure[];
   recursion?: number;
   default_llm?: "OpenAI" | "Anthropic";
+}
+
+export interface ITemplateResultItem {
+  question: string;
+  answer?: string;
+  duration?: string;
+  completedAt?: string;
+  children?: ITemplateResultItem[];
 }

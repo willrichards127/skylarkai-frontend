@@ -1,13 +1,23 @@
 import { memo, useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Box, Button, IconButton, TextField, colors } from "@mui/material";
+import {
+  Box,
+  Button,
+  IconButton,
+  TextField,
+  Typography,
+  colors,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { XModal } from "../XModal";
 import Templateview from "../TemplateView";
-import { ITemplate, ITemplateItem } from "../../shared/models/interfaces";
+import {
+  ITemplate,
+  ITemplateItem,
+  ITemplateResultItem,
+} from "../../shared/models/interfaces";
 import {
   addIdtoTemplateJson,
-  getIndexing,
   removeIdTemplateJson,
   selectAll,
   updateStatus,
@@ -15,6 +25,8 @@ import {
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { parseCitation } from "../../shared/utils/string";
+import { IExecutionSectionDetail } from "../../redux/interfaces";
+import moment from "moment";
 
 export const TemplateViewModal = memo(
   ({
@@ -28,7 +40,7 @@ export const TemplateViewModal = memo(
     onClose: (data?: ITemplate) => void;
     data: ITemplate;
     isEditMode?: boolean;
-    status?: any;
+    status?: { resultStatus: any; timeStatus: IExecutionSectionDetail[] };
   }) => {
     const [title, setTitle] = useState<string>(data.title);
     const [items, setItems] = useState<ITemplateItem[]>(
@@ -36,44 +48,61 @@ export const TemplateViewModal = memo(
     );
 
     const [answer, setAnswer] = useState<string>();
+    const [duration, setDuration] = useState<string>();
+    const [completedAt, setCompletedAt] = useState<string>();
 
     useEffect(() => {
       if (status) {
-        const loadingStatus = status.reduce(
-          (prev: number[], cur: any, index: number) => {
-            if (cur.summary_result) {
-              return prev;
-            } else {
-              return [index, cur.sub_query_results.length];
-            }
-          },
-          []
-        );
-        setItems((prev) => updateStatus(prev, loadingStatus));
+        const currentResultStatus: ITemplateResultItem[] =
+          status.resultStatus.map((section: any) => {
+            const sectionIndex = status.timeStatus.findIndex(
+              (t) => t.section_name === section.section_name
+            );
+            const duration = status.timeStatus[sectionIndex].section_duration;
+            const completedAt =
+              status.timeStatus[sectionIndex].section_completed_at;
+
+            const children: ITemplateResultItem[] =
+              section.sub_query_results.map((query: any) => {
+                const queryIndex = status.timeStatus[
+                  sectionIndex
+                ].sub_queries.findIndex(
+                  (t) => t.question === query["question"]
+                );
+                const duration =
+                  status.timeStatus[sectionIndex].sub_queries[queryIndex]
+                    .sub_query_duration;
+                const completedAt =
+                  status.timeStatus[sectionIndex].sub_queries[queryIndex]
+                    .completed_at;
+
+                return {
+                  question: query["question"],
+                  answer: query["answer"]
+                    ? query["answer"]["answer"]
+                    : undefined,
+                  duration,
+                  completedAt,
+                };
+              });
+
+            return {
+              question: section.section_name,
+              answer: section.summary_result,
+              duration,
+              completedAt,
+              children,
+            };
+          });
+        setItems((prev) => updateStatus(prev, currentResultStatus));
       }
     }, [status]);
 
     const onItemSelected = (item: ITemplateItem) => {
-      const indexing = getIndexing(items, item);
-      if (item.isSuccess && indexing && status) {
-        let result: string | undefined;
-        if (indexing.length === 1) {
-          result = status[indexing[0]]["summary_result"];
-        } else if (indexing.length === 2) {
-          const subQueryItem = items[indexing[0]].children;
-          if (subQueryItem && subQueryItem[indexing[1]].name) {
-            const subQueryResultItem = status[indexing[0]][
-              "sub_query_results"
-            ].find(
-              (r: any) => r["question"] === subQueryItem[indexing[1]].name
-            );
-            if (subQueryResultItem) {
-              result = subQueryResultItem["answer"]["answer"];
-            }
-          }
-        }
-
-        setAnswer(result);
+      if (item.isSuccess) {
+        setAnswer(item.answer);
+        setDuration(item.duration);
+        setCompletedAt(item.completedAt);
       }
     };
 
@@ -139,23 +168,16 @@ export const TemplateViewModal = memo(
               onItemSelected={onItemSelected}
             />
           </Box>
-          {answer ? (
-            <Box
-              sx={{
-                minHeight: 200,
-                maxHeight: 400,
-                overflowY: "auto",
-                border: "1px solid gray",
-                borderRadius: 2,
-                padding: 2,
-                mt: 2,
-                position: "relative",
-              }}
-            >
-              <Box sx={{ position: "absolute", right: 0, top: 0 }}>
+          {duration || completedAt || answer ? (
+            <Box sx={{ marginTop: 1, position: "relative" }}>
+              <Box sx={{ position: "absolute", right: -12, top: -12 }}>
                 <IconButton
                   aria-label="close"
-                  onClick={() => setAnswer(undefined)}
+                  onClick={() => {
+                    setDuration(undefined);
+                    setCompletedAt(undefined);
+                    setAnswer(undefined);
+                  }}
                   sx={{
                     position: "absolute",
                     right: 8,
@@ -165,86 +187,114 @@ export const TemplateViewModal = memo(
                   <CloseIcon />
                 </IconButton>
               </Box>
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                rehypePlugins={[rehypeRaw as any]}
-                allowElement={(element, _, parent) => {
-                  if (
-                    element.tagName === "p" &&
-                    (parent as any).tagName === "li"
-                  ) {
-                    return false;
-                  }
-                  if (
-                    element.tagName === "strong" &&
-                    (parent as any).tagName === "li"
-                  ) {
-                    return false;
-                  }
-                  return true;
-                }}
-                unwrapDisallowed={true}
-                components={{
-                  li: ({ ordered, ...props }: any) => (
-                    <li style={{ marginLeft: 16 }} {...props} />
-                  ),
-                  p: ({ ...props }: any) => (
-                    <p {...props} style={{ margin: "6px 0" }} />
-                  ),
-                  a: (props: any) => {
-                    if (props.href) {
-                      const splited = props.href.split("______");
-                      const filename = splited[0]
-                        .replaceAll("___", " ")
-                        .slice(1);
-                      const quote = splited[1].replaceAll("___", " ");
-                      return (
-                        <a
+              {duration || completedAt ? (
+                <Box sx={{ display: "flex", gap: 1 }}>
+                  {duration ? (
+                    <Typography>Duration: {duration}</Typography>
+                  ) : null}
+                  {completedAt ? (
+                    <Typography>
+                      Completed at:{" "}
+                      {moment(completedAt).format("MMMM Do YYYY, h:mm:ss a")}
+                    </Typography>
+                  ) : null}
+                </Box>
+              ) : null}
+              {answer ? (
+                <Box
+                  sx={{
+                    minHeight: 200,
+                    maxHeight: 400,
+                    overflowY: "auto",
+                    border: "1px solid gray",
+                    borderRadius: 2,
+                    padding: 2,
+                    mt: 2,
+                  }}
+                >
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeRaw as any]}
+                    allowElement={(element, _, parent) => {
+                      if (
+                        element.tagName === "p" &&
+                        (parent as any).tagName === "li"
+                      ) {
+                        return false;
+                      }
+                      if (
+                        element.tagName === "strong" &&
+                        (parent as any).tagName === "li"
+                      ) {
+                        return false;
+                      }
+                      return true;
+                    }}
+                    unwrapDisallowed={true}
+                    components={{
+                      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                      li: ({ ordered, ...props }: any) => (
+                        <li style={{ marginLeft: 16 }} {...props} />
+                      ),
+                      p: ({ ...props }: any) => (
+                        <p {...props} style={{ margin: "6px 0" }} />
+                      ),
+                      a: (props: any) => {
+                        if (props.href) {
+                          const splited = props.href.split("______");
+                          const filename = splited[0]
+                            .replaceAll("___", " ")
+                            .slice(1);
+                          const quote = splited[1].replaceAll("___", " ");
+                          return (
+                            <a
+                              {...props}
+                              className="no-print"
+                              style={{ color: "tomato" }}
+                              // onClick={() => onJumpTo({ filename, quote })}
+                              title={`${filename}.pdf:${quote}`}
+                            />
+                          );
+                        } else return <p {...props} />;
+                      },
+                      table: (props: any) => {
+                        return (
+                          <table
+                            {...props}
+                            style={{
+                              borderCollapse: "collapse",
+                              margin: "4px 2px",
+                              overflowX: "auto",
+                            }}
+                          />
+                        );
+                      },
+                      th: (props) => (
+                        <th
                           {...props}
-                          className="no-print"
-                          style={{ color: "tomato" }}
-                          // onClick={() => onJumpTo({ filename, quote })}
-                          title={`${filename}.pdf:${quote}`}
+                          style={{
+                            textAlign: "center",
+                            padding: "2px 4px",
+                            border: `1px solid ${colors.grey[500]}`,
+                          }}
                         />
-                      );
-                    } else return <p {...props} />;
-                  },
-                  table: (props: any) => {
-                    return (
-                      <table
-                        {...props}
-                        style={{
-                          borderCollapse: "collapse",
-                          margin: "4px 2px",
-                          overflowX: "auto",
-                        }}
-                      />
-                    );
-                  },
-                  th: (props) => (
-                    <th
-                      {...props}
-                      style={{
-                        textAlign: "center",
-                        padding: "2px 4px",
-                        border: `1px solid ${colors.grey[500]}`,
-                      }}
-                    />
-                  ),
-                  td: (props) => (
-                    <td
-                      {...props}
-                      style={{
-                        textAlign: "center",
-                        padding: "4px 8px",
-                        border: `1px solid ${colors.grey[500]}`,
-                      }}
-                    />
-                  ),
-                }}
-              >
-                {parseCitation(answer)}
-              </ReactMarkdown>
+                      ),
+                      td: (props) => (
+                        <td
+                          {...props}
+                          style={{
+                            textAlign: "center",
+                            padding: "4px 8px",
+                            border: `1px solid ${colors.grey[500]}`,
+                          }}
+                        />
+                      ),
+                    }}
+                  >
+                    {parseCitation(answer)}
+                  </ReactMarkdown>
+                </Box>
+              ) : null}
             </Box>
           ) : null}
         </Box>

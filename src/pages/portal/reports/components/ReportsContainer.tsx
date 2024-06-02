@@ -15,8 +15,12 @@ import {
 import { useNotification } from "../../../../shared/socket/NotificationProvider";
 import { getDate } from "../../../../shared/utils/parse";
 import { REPORTS_DICT } from "../../../../shared/models/constants";
-import { useLazyGetTaskStatusQuery } from "../../../../redux/services/transcriptAPI";
+import {
+  useLazyGetTaskExecutionResultStatusQuery,
+  useLazyGetTaskExecutionTimeStatusQuery,
+} from "../../../../redux/services/transcriptAPI";
 import { TemplateViewModal } from "../../../../components/modals/TemplateViewModal";
+import { IExecutionSectionDetail } from "../../../../redux/interfaces";
 
 const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
   const { user } = useSelector(currentUser);
@@ -30,7 +34,10 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
   const { lastNotification } = useNotification();
   const [viewMode, setViewMode] = useState<string>("active");
   const [selectedExecute, setSelectedExecute] = useState<any>(null);
-  const [executingStatus, setExecutingStatus] = useState<any>();
+  const [executingStatus, setExecutingStatus] = useState<{
+    resultStatus: any;
+    timeStatus: IExecutionSectionDetail[];
+  }>();
   // const [newReportModal, showNewReportModal] = useState<boolean>(false);
   const {
     isFetching: fetchingReports,
@@ -44,8 +51,22 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
 
   const [deleteReport] = useDeleteReportMutation();
   const [markReport] = useMarkReportMutation();
-  const [getTaskStatus, { currentData: statusData, isSuccess, isFetching }] =
-    useLazyGetTaskStatusQuery();
+  const [
+    getTaskResultStatus,
+    {
+      currentData: statusResultData,
+      isSuccess: isStatusResultSuccess,
+      isFetching: isStatusResultFetching,
+    },
+  ] = useLazyGetTaskExecutionResultStatusQuery();
+  const [
+    getTaskTimeStatus,
+    {
+      currentData: statusTimeData,
+      isSuccess: isStatusTimeSuccess,
+      isFetching: isStatusTimeFetching,
+    },
+  ] = useLazyGetTaskExecutionTimeStatusQuery();
   // const onNewReportModal = useCallback(() => {
   //   showNewReportModal(true);
   // }, []);
@@ -70,17 +91,35 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
   // }, [lastNotification, selectedExecute]);
 
   useEffect(() => {
-    if (!isFetching && isSuccess && statusData) {
-      const sections = statusData.result?.base_query?.sections;
-      setExecutingStatus(sections);
+    if (
+      !isStatusResultFetching &&
+      isStatusResultSuccess &&
+      statusResultData &&
+      !isStatusTimeFetching &&
+      isStatusTimeSuccess &&
+      statusTimeData
+    ) {
+      const resultStatus = statusResultData.result?.base_query?.sections;
+      const timeStatus = statusTimeData.sections;
+      setExecutingStatus({
+        resultStatus,
+        timeStatus,
+      });
     }
-  }, [statusData, isSuccess, isFetching]);
+  }, [
+    statusResultData,
+    isStatusResultSuccess,
+    isStatusResultFetching,
+    isStatusTimeFetching,
+    isStatusTimeSuccess,
+    statusTimeData,
+  ]);
 
   useEffect(() => {
-    if (isFetching) {
+    if (isStatusResultFetching) {
       setExecutingStatus(undefined);
     }
-  }, [isFetching]);
+  }, [isStatusResultFetching]);
 
   const moreItems = useMemo(
     () =>
@@ -101,6 +140,11 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
                     content: "Archive",
                     clickable: true,
                   },
+                  {
+                    id: "detail",
+                    content: "Detail",
+                    clickable: true,
+                  }
                 ]),
           ],
     [viewMode, user]
@@ -116,9 +160,19 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
         deleteReport({ reportId: +cardId, viewMode });
       } else if (menuItemId === "mark_as_active") {
         markReport({ reportId: +cardId });
+      } else if (menuItemId === "detail") {
+        // const report = reports.reports.find((r: any) => r.id === +cardId)
+        // if (report) {
+        //   setSelectedExecute({
+        //     task_id: id,
+        //     data: report.data.report_data,
+        //   });
+        //   getTaskTimeStatus({ task_id: id });
+        //   getTaskResultStatus({ task_id: id });
+        // }
       }
     },
-    [viewMode, deleteReport, markReport]
+    [deleteReport, viewMode, markReport]
   );
 
   const onCard = useCallback(
@@ -135,7 +189,8 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
             task_id: id,
             data: report.data.report_data,
           });
-          getTaskStatus({ task_id: id });
+          getTaskTimeStatus({ task_id: id });
+          getTaskResultStatus({ task_id: id });
         }
       } else {
         navigate(
@@ -143,7 +198,16 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
         );
       }
     },
-    [navigate, params, unitName, type, viewMode, reports]
+    [
+      navigate,
+      params,
+      unitName,
+      type,
+      viewMode,
+      reports,
+      getTaskResultStatus,
+      getTaskTimeStatus,
+    ]
   );
 
   return (

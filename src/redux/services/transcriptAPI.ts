@@ -11,6 +11,7 @@ import {
   ICompany,
   IChatResponse,
   IFetchFileResponse,
+  IExecutionReportDetail,
 } from "../interfaces";
 import { parseTransaction } from "../../shared/utils/string";
 import { handleCatchError } from "./helper";
@@ -154,13 +155,12 @@ export const transcriptApi = createApi({
         const graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
         try {
           const response: any = await apiBaseQuery({
-            url: `${
-              analysis_type === "edgar"
+            url: `${analysis_type === "edgar"
                 ? "edgar_files"
                 : analysis_type === "transcript"
-                ? "transcript_files"
-                : "insider_transaction"
-            }/${graph_id}?company_name=${company_name}&ticker=${ticker}`,
+                  ? "transcript_files"
+                  : "insider_transaction"
+              }/${graph_id}?company_name=${company_name}&ticker=${ticker}`,
             method: "GET",
           });
           if (!response.data || response.data[1] === 400) {
@@ -353,11 +353,10 @@ export const transcriptApi = createApi({
         const current_graph_id = graph_id || sys_graph_id;
         try {
           const response = await apiBaseQuery({
-            url: `customquery/${current_graph_id}?llm=${llm}&recursion=${recursion}&analysis_type=${analysis_type}&company_name=${company_name}&${
-              insider_transaction
+            url: `customquery/${current_graph_id}?llm=${llm}&recursion=${recursion}&analysis_type=${analysis_type}&company_name=${company_name}&${insider_transaction
                 ? "&insider_transaction=" + insider_transaction
                 : ""
-            }`,
+              }`,
             method: "POST",
             body: {
               company_name,
@@ -798,13 +797,23 @@ export const transcriptApi = createApi({
         },
       }),
     }),
-    getTaskStatus: builder.query<
+    getTaskExecutionResultStatus: builder.query<
       { state: string; status: string; result: any },
       { task_id: string }
     >({
       query: ({ task_id }) => ({
         method: "GET",
         url: `task/${task_id}`,
+      }),
+      keepUnusedDataFor: 0,
+    }),
+    getTaskExecutionTimeStatus: builder.query<
+      IExecutionReportDetail,
+      { task_id: string }
+    >({
+      query: ({ task_id }) => ({
+        method: "GET",
+        url: `admin/report_execution_time?task_id=${task_id}`,
       }),
       keepUnusedDataFor: 0,
     }),
@@ -932,8 +941,10 @@ export const {
   useAddChatMutation,
 
   //get fetched file logs
-  useGetTaskStatusQuery,
-  useLazyGetTaskStatusQuery,
+  useGetTaskExecutionResultStatusQuery,
+  useLazyGetTaskExecutionResultStatusQuery,
+  useGetTaskExecutionTimeStatusQuery,
+  useLazyGetTaskExecutionTimeStatusQuery,
   useGetFetchFileLogsQuery,
   useLazyGetFetchFileLogsQuery,
   useUpdateFetchFileLogMutation,

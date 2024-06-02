@@ -157,3 +157,23 @@ export interface IResponseAnswer {
   data: string[];
   question_history?: string[][] | string[] | string;
 }
+
+export interface IExecutionQueryDetail {
+  question: string;
+  completed_at: string | null;
+  sub_query_duration: string | null;
+}
+
+export interface IExecutionSectionDetail {
+  section_name: string;
+  section_completed_at: string | null;
+  section_duration: string | null;
+  sub_queries: IExecutionQueryDetail[];
+}
+
+export interface IExecutionReportDetail {
+  report_name: string;
+  base_query_completed_at: string | null;
+  base_query_duration: string | null;
+  sections: IExecutionSectionDetail[];
+}

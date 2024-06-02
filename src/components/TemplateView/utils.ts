@@ -5,6 +5,7 @@ import {
   ITemplate,
   ITemplateItem,
   ITemplateItemPure,
+  ITemplateResultItem,
   TTreeData,
 } from "../../shared/models/interfaces";
 
@@ -25,7 +26,7 @@ export const convertJSON = (text: string) => {
     if ("title" in obj && "data" in obj) {
       return obj as ITemplate;
     }
-  } catch (err) {}
+  } catch (err) { }
 };
 
 export const addIdtoTemplateJson = (
@@ -165,32 +166,25 @@ export const selectAll = (
 
 export const updateStatus = (
   elements: ITemplateItem[],
-  status: number[],
-  depth: number = 0,
-  offset: number = 0
+  status: ITemplateResultItem[],
 ) => {
-  return elements.map((element, index: number) => {
-    if (element.children) {
+  return elements.map((element) => {
+    const matchStatus = status.find(s => s.question === element.name);
+    
+    if (matchStatus && matchStatus.answer) {
+      element.isSuccess = true;
+      element.answer = matchStatus.answer;
+      element.duration = matchStatus.duration;
+      element.completedAt = matchStatus.completedAt;
+    }
+
+    if (element.children && matchStatus?.children) {  
       element.children = updateStatus(
         element.children,
-        status,
-        depth + 1,
-        status[depth] - index
+        matchStatus.children,
       );
-    } else {
-      if (offset > 0) {
-        element.isSuccess = true;
-      } else if (offset === 0) {
-        if (index < status[depth]) {
-          element.isSuccess = true;
-        } else if (index === status[depth]) {
-          element.isLoading = true;
-        } else {
-          delete element["isSuccess"];
-          delete element["isLoading"];
-        }
-      }
     }
+    
     return element;
   });
 };
@@ -204,7 +198,7 @@ export const getIndexing = (
     const element = elements[i];
 
     currentIndex.push(i);
-    
+
     if (element.index === target.index) {
       return currentIndex;
     } else if (element.children && element.children.length > 0) {
@@ -213,7 +207,7 @@ export const getIndexing = (
         return result;
       }
     }
-    
+
     currentIndex.pop();
   }
 
@@ -223,14 +217,14 @@ export const getIndexing = (
 export const getElementByIndexing = (elements: ITemplateItem[], indexingArray: number[]): ITemplateItem | null => {
   let currentArray = elements;
   for (const index of indexingArray) {
-      if (index >= currentArray.length || index < 0) {
-          return null; // Index out of bounds
-      }
-      const element = currentArray[index];
-      if (!element) {
-          return null; // Element not found
-      }
-      currentArray = element.children || [];
+    if (index >= currentArray.length || index < 0) {
+      return null; // Index out of bounds
+    }
+    const element = currentArray[index];
+    if (!element) {
+      return null; // Element not found
+    }
+    currentArray = element.children || [];
   }
   return currentArray.length > 0 ? currentArray[0] : null;
 };
