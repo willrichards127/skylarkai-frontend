@@ -289,7 +289,7 @@ export const categoryParser3 = (htmlString: string) => {
               child.firstChild.rawTagName === "p" &&
               child.firstChild?.firstChild?.rawTagName === "strong" &&
               child.firstChild?.childNodes?.length > 1 &&
-              child.firstChild.childNodes[2].rawTagName === "code"
+              child.firstChild.childNodes[2] && child.firstChild.childNodes[2].rawTagName === "code"
             ) {
               value = {
                 tag: "table",
