@@ -67,6 +67,7 @@ const SmallAccordionSummary = styled((props: AccordionSummaryProps) => (
   },
   "& .MuiAccordionSummary-content": {
     margin: 0.5,
+    paddingLeft: 4
   },
 }));
 

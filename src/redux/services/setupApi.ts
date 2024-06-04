@@ -107,9 +107,9 @@ export const setupApi = createApi({
           method: setupId ? "PUT" : "POST",
           body: setupId
             ? {
-                ...(setupId !== undefined && { graph_id: setupId }),
-                ...setupData,
-              }
+              ...(setupId !== undefined && { graph_id: setupId }),
+              ...setupData,
+            }
             : setupData,
         };
       },
@@ -305,6 +305,15 @@ export const setupApi = createApi({
       },
       invalidatesTags: ["Unit"],
     }),
+    executeCriteria: builder.mutation<any, { setupId: number; companyName: string; question: string; llm?: string; }>({
+      query: ({ setupId, question, llm = "Anthropic", companyName }) => {
+        return {
+          url: `evalpassfail/${setupId}?analysis_type=investmentmemo&llm=${llm}&rating=5&recursion=1&company_name=${companyName}`,
+          method: "POST",
+          body: {question},
+        };
+      },
+    }),
   }),
 });
 
@@ -324,4 +333,5 @@ export const {
   useAddUnitMutation,
   useUpdateUnitMutation,
   useGenerateJsonTemplateMutation,
+  useExecuteCriteriaMutation,
 } = setupApi;

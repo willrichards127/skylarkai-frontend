@@ -45,6 +45,8 @@ import {
 } from "../../../../../../shared/utils/string";
 import { ExportModal } from "../../../../../../components/modals/ExportModal";
 import { VDDNode } from "../nodes/dataloaders/VDDNode";
+import { useExecuteCriteriaMutation } from "../../../../../../redux/services/setupApi";
+
 // key is corresponding to items.name
 const ComponentDict: Record<
   string,
@@ -102,10 +104,14 @@ const FloatPanel = memo(
     const unitName = searchParams.get("unitName");
     const printRef = useRef();
     const { getNodes, setNodes } = useReactFlow();
+
     const [customQuery, { isLoading }] = useCustomQueryMutation();
     const [exportModal, showExportModal] = useState<boolean>(false);
 
-    const [fetchTime, setFetchTime] = useState("0.0");
+    const [executeCriteria, { isLoading: isExecutingCriteria }] =
+      useExecuteCriteriaMutation();
+    const [executionTime, setExecutionTime] = useState("0.0");
+
     const XForm = ComponentDict[nodeContent.name];
 
     const onExecuteNode = useCallback(async () => {
@@ -154,8 +160,65 @@ const FloatPanel = memo(
             : node
         )
       );
-      setFetchTime(fetchDurationInSeconds);
+      setExecutionTime(fetchDurationInSeconds);
     }, [customQuery, getNodes, setNodes, unitName, nodeContent]);
+
+    const onExecuteCriteria = async () => {
+      const nodes = getNodes();
+      const llmNode = nodes.find((node) => node.data.name === "LLM");
+      const criteriaNode = nodes.find(
+        (node) => node.data.name === "InvestmentCriteria"
+      );
+      if (criteriaNode && llmNode) {
+        const llm: string = llmNode.data.properties.model;
+        const criterias = criteriaNode.data.properties.json;
+
+        const result = await Promise.all(
+          criterias.map(async (criteriaCategory: any) => {
+            const subResult = await Promise.all(
+              criteriaCategory.children.map(async (criteria: any) => {
+                const response = await executeCriteria({
+                  setupId: nodeContent.setupId!,
+                  llm,
+                  companyName: nodeContent.setupName!,
+                  question: criteria.question,
+                }).unwrap();
+
+                if (response && response.length) {
+                  return {
+                    ...criteria,
+                    ...response[0],
+                  };
+                } else {
+                  return {
+                    ...criteria,
+                  };
+                }
+              })
+            );
+
+            return {
+              name: criteriaCategory.name,
+              children: subResult,
+            };
+          })
+        );
+
+        setNodes((prev) =>
+          prev.map((node) =>
+            node.id === nodeId
+              ? {
+                  ...node,
+                  data: {
+                    ...node.data,
+                    properties: { json: result },
+                  },
+                }
+              : node
+          )
+        );
+      }
+    };
 
     const onExport = useCallback(() => {
       showExportModal(true);
@@ -181,7 +244,7 @@ const FloatPanel = memo(
               mt: 0.5,
             }}
           >
-            {["Output"].includes(nodeContent.name) && (
+            {["Output"].includes(nodeContent.name) ? (
               <Box
                 sx={{
                   display: "flex",
@@ -208,12 +271,30 @@ const FloatPanel = memo(
                 <XChip
                   label={
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <AccessTimeIcon sx={{ fontSize: 14 }} /> {fetchTime}s
+                      <AccessTimeIcon sx={{ fontSize: 14 }} /> {executionTime}s
                     </Box>
                   }
                 />
               </Box>
-            )}
+            ) : ["InvestmentCriteria"].includes(nodeContent.name) ? (
+              <Box
+                sx={{
+                  display: "flex",
+                  width: "100%",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <Box mr="auto" />
+                {!isExecutingCriteria ? (
+                  <IconButton size="small" onClick={onExecuteCriteria}>
+                    <PlayArrowIcon sx={{ fontSize: 18 }} />
+                  </IconButton>
+                ) : (
+                  <CircularProgress size={18} />
+                )}
+              </Box>
+            ) : null}
           </Box>
         }
         sxProps={{ minWidth: 320, maxWidth: 400 }}

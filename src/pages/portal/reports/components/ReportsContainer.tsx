@@ -12,6 +12,7 @@ import {
   useDeleteReportMutation,
   useMarkReportMutation,
   useLazyGetExecutionDetailQuery,
+  useUpdateReportMutation,
 } from "../../../../redux/services/reportApi";
 import { useNotification } from "../../../../shared/socket/NotificationProvider";
 import { getDate } from "../../../../shared/utils/parse";
@@ -22,6 +23,7 @@ import {
 } from "../../../../redux/services/transcriptAPI";
 import { TemplateViewModal } from "../../../../components/modals/TemplateViewModal";
 import { IExecutionSectionDetail } from "../../../../redux/interfaces";
+import { RenameReportModal } from "../../setups/components/RenameReportModal";
 
 const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
   const { user } = useSelector(currentUser);
@@ -39,6 +41,8 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
     resultStatus: any;
     timeStatus: IExecutionSectionDetail[];
   }>();
+  const [selectedReportId, setSelectedReportId] = useState<number>();
+
   // const [newReportModal, showNewReportModal] = useState<boolean>(false);
   const {
     isFetching: fetchingReports,
@@ -69,7 +73,7 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
     },
   ] = useLazyGetTaskExecutionTimeStatusQuery();
   const [getExecutionDetail] = useLazyGetExecutionDetailQuery();
-
+  const [updateReport] = useUpdateReportMutation();
   // const onNewReportModal = useCallback(() => {
   //   showNewReportModal(true);
   // }, []);
@@ -102,7 +106,9 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
       isStatusTimeSuccess &&
       statusTimeData
     ) {
-      const resultStatus = statusResultData.result?.base_query?.sections || statusResultData.result?.execution_data?.base_query?.sections;
+      const resultStatus =
+        statusResultData.result?.base_query?.sections ||
+        statusResultData.result?.execution_data?.base_query?.sections;
       const timeStatus = statusTimeData.sections;
       setExecutingStatus({
         resultStatus,
@@ -138,6 +144,11 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
                   },
                 ]
               : [
+                  {
+                    id: "rename",
+                    content: "Rename",
+                    clickable: true,
+                  },
                   {
                     id: "archive",
                     content: "Archive",
@@ -178,9 +189,19 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
             getTaskResultStatus({ task_id: executionData.task_id });
           }
         }
+      } else if (menuItemId === "rename") {
+        setSelectedReportId(+cardId);
       }
     },
-    [deleteReport, viewMode, markReport, reports, getExecutionDetail, getTaskTimeStatus, getTaskResultStatus]
+    [
+      deleteReport,
+      viewMode,
+      markReport,
+      reports,
+      getExecutionDetail,
+      getTaskTimeStatus,
+      getTaskResultStatus,
+    ]
   );
 
   const onCard = useCallback(
@@ -218,6 +239,20 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
     ]
   );
 
+  const onRename = async (id: number, newName: string) => {
+    const response = await updateReport({
+      reportId: id,
+      name: newName,
+    }).unwrap();
+    console.log("=================", response);
+  };
+
+  const getReportName = (report: any) =>
+    report
+      ? REPORTS_DICT[report.report_metadata.reportname]?.label ||
+        report.report_metadata.reportname
+      : "";
+
   return (
     <Box sx={{ height: "100%" }}>
       {fetchingReports ? (
@@ -245,26 +280,23 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
                 new Date(a.created_at).getTime() -
                 new Date(b.created_at).getTime()
             )
-            .map((card: any) => (
+            .map((report: any) => (
               <ReportCard
-                key={`generated-${card.id}`}
-                id={card.id}
-                reviewStatus={card.review_status}
-                label={
-                  REPORTS_DICT[card.report_metadata.reportname]?.label ||
-                  card.report_metadata.reportname
-                }
+                key={`generated-${report.id}`}
+                id={report.id}
+                reviewStatus={report.review_status}
+                label={getReportName(report)}
                 updatedAt={getDate(
-                  new Date(card.created_at || card.executed_at)
+                  new Date(report.created_at || report.executed_at)
                 )}
                 width={350}
                 moreItems={moreItems}
-                onMoreItem={(menuItemId) => onMoreItem(card.id, menuItemId)}
+                onMoreItem={(menuItemId) => onMoreItem(report.id, menuItemId)}
                 onCard={() =>
                   onCard(
-                    card.id,
-                    card.graph_id,
-                    card.report_metadata.reportname
+                    report.id,
+                    report.graph_id,
+                    report.report_metadata.reportname
                   )
                 }
               />
@@ -307,6 +339,19 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
               onClose={() => setSelectedExecute(null)}
               data={selectedExecute.data}
               status={executingStatus}
+            />
+          )}
+          {!!selectedReportId && (
+            <RenameReportModal
+              open={!!selectedReportId}
+              onClose={() => setSelectedReportId(undefined)}
+              onSaveName={onRename}
+              data={{
+                id: selectedReportId,
+                name: getReportName(
+                  reports.reports.find((r: any) => r.id === selectedReportId)
+                ),
+              }}
             />
           )}
         </TabContainer>

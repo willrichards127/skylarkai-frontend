@@ -59,7 +59,7 @@ export const ReportTemplate = ({
     // },
   ] = useReGenerateReportMutation();
 
-  const [saveReport, { isSuccess: isSaved }] = useUpdateReportMutation();
+  const [updateReport, { isSuccess: isSaved }] = useUpdateReportMutation();
 
   const [ingestFiles] = useIngestFilesMutation();
 
@@ -304,12 +304,12 @@ export const ReportTemplate = ({
     for (const item of removeItems) {
       item.remove();
     }
-    saveReport({
+    updateReport({
       reportId,
       content: container.firstElementChild!.innerHTML,
       custom: [],
     });
-  }, [saveReport, reportId]);
+  }, [updateReport, reportId]);
 
   // const onUploadedFiles = useCallback((type: string, files: File[]) => {
   //   setUploadedFiles((prev) => ({ ...prev, [type]: files }));

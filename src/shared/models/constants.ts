@@ -54324,6 +54324,7 @@ export const ACCEPT_TEMPLATE_NODE_DICT: Record<string, string[]> = {
     "Comparison",
     "Template",
     "GoogleSearch",
+    "InvestmentCriteria",
   ],
   File: ["PitchBook", "Sky", "Edgar"],
   Chroma: ["File", "CustomAPI", "GoogleSearch", "YahooFinance", "Webcrawler"],

@@ -27,16 +27,18 @@ export const reportApi = createApi({
       any,
       {
         reportId: number;
-        content: string;
-        custom: Record<string, any>;
+        content?: string;
+        custom?: Record<string, any>;
+        name?: string;
       }
     >({
-      query: ({ reportId, content, custom }) => ({
+      query: ({ reportId, content, custom, name }) => ({
         url: `reports/${reportId}`,
         method: "PUT",
         body: {
-          data: content,
+          content,
           custom,
+          name,
         },
       }),
       invalidatesTags: ["Report"],

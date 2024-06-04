@@ -52,7 +52,8 @@ import {
 } from "../../../../redux/services/setupApi";
 import { ExecutionModal } from "./ExecutionModal";
 
-import TemplateNodeData from "../../../../shared/utils/mocks.json";
+import TemplateNodeData from "../../../../shared/utils/mock/template.json";
+import CriteriaNodeData from "../../../../shared/utils/mock/criteria.json";
 
 const nodeTypes = {
   custom: CustomNode,
@@ -188,6 +189,13 @@ const WorkflowPanel = memo(
           dndItem.properties = {
             ...dndItem.properties,
             text: JSON.stringify(TemplateNodeData),
+          };
+        }
+
+        if (dndItem.template_node_id === 48) {
+          dndItem.properties = {
+            ...dndItem.properties,
+            json: CriteriaNodeData,
           };
         }
         //
