@@ -419,6 +419,11 @@ export const reportApi = createApi({
         url: `files/${setupId}?analysis_type=${analysis_type}`,
       }),
     }),
+    getExecutionDetail: builder.query<any, { baseQeuryId: number; }>({
+      query: ({ baseQeuryId }) => ({
+        url: `reports/${baseQeuryId}/execution_detail`,
+      }),
+    }),
   }),
 });
 
@@ -442,5 +447,7 @@ export const {
   useMarkReportMutation,
   useUpdateReportReviewStatusMutation,
   useExecuteReportBackgroundMutation,
-  useGetIngestedFilesQuery
+  useGetIngestedFilesQuery,
+  useGetExecutionDetailQuery,
+  useLazyGetExecutionDetailQuery,
 } = reportApi;

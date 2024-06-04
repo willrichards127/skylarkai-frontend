@@ -11,6 +11,7 @@ import {
   useGetReportsByUnitQuery,
   useDeleteReportMutation,
   useMarkReportMutation,
+  useLazyGetExecutionDetailQuery,
 } from "../../../../redux/services/reportApi";
 import { useNotification } from "../../../../shared/socket/NotificationProvider";
 import { getDate } from "../../../../shared/utils/parse";
@@ -67,6 +68,8 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
       isFetching: isStatusTimeFetching,
     },
   ] = useLazyGetTaskExecutionTimeStatusQuery();
+  const [getExecutionDetail] = useLazyGetExecutionDetailQuery();
+
   // const onNewReportModal = useCallback(() => {
   //   showNewReportModal(true);
   // }, []);
@@ -99,7 +102,7 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
       isStatusTimeSuccess &&
       statusTimeData
     ) {
-      const resultStatus = statusResultData.result?.base_query?.sections;
+      const resultStatus = statusResultData.result?.base_query?.sections || statusResultData.result?.execution_data?.base_query?.sections;
       const timeStatus = statusTimeData.sections;
       setExecutingStatus({
         resultStatus,
@@ -144,7 +147,7 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
                     id: "detail",
                     content: "Detail",
                     clickable: true,
-                  }
+                  },
                 ]),
           ],
     [viewMode, user]
@@ -155,24 +158,29 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
   }, []);
 
   const onMoreItem = useCallback(
-    (cardId: string, menuItemId: string) => {
+    async (cardId: string, menuItemId: string) => {
       if (menuItemId === "delete" || menuItemId === "archive") {
         deleteReport({ reportId: +cardId, viewMode });
       } else if (menuItemId === "mark_as_active") {
         markReport({ reportId: +cardId });
       } else if (menuItemId === "detail") {
-        // const report = reports.reports.find((r: any) => r.id === +cardId)
-        // if (report) {
-        //   setSelectedExecute({
-        //     task_id: id,
-        //     data: report.data.report_data,
-        //   });
-        //   getTaskTimeStatus({ task_id: id });
-        //   getTaskResultStatus({ task_id: id });
-        // }
+        const report = reports.reports.find((r: any) => r.id === +cardId);
+        if (report && report.base_query_id) {
+          const executionData = await getExecutionDetail({
+            baseQeuryId: report.base_query_id,
+          }).unwrap();
+          if (executionData && executionData.task_id) {
+            setSelectedExecute({
+              task_id: executionData.task_id,
+              data: executionData.input_json,
+            });
+            getTaskTimeStatus({ task_id: executionData.task_id });
+            getTaskResultStatus({ task_id: executionData.task_id });
+          }
+        }
       }
     },
-    [deleteReport, viewMode, markReport]
+    [deleteReport, viewMode, markReport, reports, getExecutionDetail, getTaskTimeStatus, getTaskResultStatus]
   );
 
   const onCard = useCallback(
