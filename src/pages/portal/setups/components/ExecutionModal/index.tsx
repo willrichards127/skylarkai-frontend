@@ -54,7 +54,8 @@ export const ExecutionModal = memo(
       useGenerateReportMutation();
     const [generateCustomReport] = useGenerateCustomReportMutation();
     const [customQuery] = useCustomQueryMutation();
-    const [convertToGraph] = useConvertToGraphMutation();
+    const [convertToGraph, { isLoading: isCloningVDR }] =
+      useConvertToGraphMutation();
     const [executionReport] = useExecuteReportBackgroundMutation();
 
     const [items, setItems] = useState<ITemplateItem[]>([]);
@@ -193,6 +194,7 @@ export const ExecutionModal = memo(
           const openAINodeIndex = updatedSetup.nodes.findIndex(
             (node) => node.template_node_id == 7
           );
+          
           if (openAINodeIndex > -1) {
             await executionReport({
               unitName,
@@ -361,6 +363,20 @@ export const ExecutionModal = memo(
             >
               <Typography variant="body1" sx={{ marginBottom: 8 }}>
                 Generating Report...
+              </Typography>
+              <CircularProgress />
+            </Box>
+          )}
+          {isCloningVDR && (
+            <Box
+              display={"flex"}
+              flexDirection={"column"}
+              justifyContent={"center"}
+              alignItems={"center"}
+              height={"100%"}
+            >
+              <Typography variant="body1" sx={{ marginBottom: 8 }}>
+                Cloning VDR...
               </Typography>
               <CircularProgress />
             </Box>
