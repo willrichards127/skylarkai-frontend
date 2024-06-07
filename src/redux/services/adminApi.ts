@@ -44,8 +44,40 @@ export const adminApi = createApi({
         }
       },
     }),
+    getDashboard: builder.query<{
+      companies: number;
+      sectors: number;
+      reports: number;
+      graphs: number;
+      vdrs: number;
+    }, void>({
+      query: () => ({ url: `dashboard`, method: "get" }),
+    }),
+    getUnits: builder.query<any, { type?: number }>({
+      query: ({ type }) => ({ url: `dashboard/unit${type ? `?type=${type}` : ""}`, method: "get" }),
+    }),
+    getReports: builder.query<any, void>({
+      query: () => ({ url: `/dashboard/reports`, method: "get" }),
+    }),
+    getGraphs: builder.query<any, void>({
+      query: () => ({ url: `/dashboard/graphs`, method: "get" }),
+    }),
+    getVDRs: builder.query<any, void>({
+      query: () => ({ url: `/dashboard/vdrs`, method: "get" }),
+    }),
   }),
 });
 
-export const { useGetFeaturesQuery, useGetSubScriptionFeaturesQuery } =
-  adminApi;
+export const {
+  useGetFeaturesQuery,
+  useGetSubScriptionFeaturesQuery,
+  useGetDashboardQuery,
+  useGetUnitsQuery,
+  useLazyGetUnitsQuery,
+  useGetReportsQuery,
+  useLazyGetReportsQuery,
+  useGetGraphsQuery,
+  useLazyGetGraphsQuery,
+  useGetVDRsQuery,
+  useLazyGetVDRsQuery,
+} = adminApi;

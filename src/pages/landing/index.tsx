@@ -20,7 +20,7 @@ import compareDocImg from "../../assets/premium/compare.png";
 import sentimentImg from "../../assets/premium/sentiment.png";
 import bottomNavBg from "../../assets/global/bottom-nav-bg.png";
 import { bottomNavHeight } from "../../shared/models/constants";
-import { useGetSubScriptionFeaturesQuery } from "../../redux/services/adminAPI";
+import { useGetSubScriptionFeaturesQuery } from "../../redux/services/adminApi";
 import { Stack } from "@mui/system";
 
 const featureImgDict: Record<string, string> = {

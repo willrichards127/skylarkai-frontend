@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { userAuthSlice } from "./features/authSlice";
 import { userApi } from "./services/userAPI";
-import { adminApi } from "./services/adminAPI";
+import { adminApi } from "./services/adminApi";
 import { transcriptApi } from "./services/transcriptAPI";
 
 import { setupApi } from "./services/setupApi";

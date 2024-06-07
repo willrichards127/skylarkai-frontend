@@ -1,14 +1,23 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
-  // colors,
   Box,
-  // Button,
-  GridSize,
   Grid,
   TextField,
   Typography,
   MenuItem,
+  GridProps,
+  CircularProgress,
 } from "@mui/material";
+import {
+  useGetDashboardQuery,
+  useLazyGetGraphsQuery,
+  useLazyGetReportsQuery,
+  useLazyGetUnitsQuery,
+  useLazyGetVDRsQuery,
+} from "../../../redux/services/adminApi";
+import AGTable from "../../../components/agTable/AGTable";
+import { ColDef } from "ag-grid-community";
+import moment from "moment";
 // import { useGetUnitsQuery } from "../../../redux/services/setupApi";
 
 const durations = [
@@ -39,39 +48,271 @@ const durations = [
 ];
 
 const GridItem = ({
-  xs,
-  sm,
-  md,
-  lg,
-  xl,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  item,
+  selected,
   children,
-}: {
-  xs?: GridSize;
-  sm?: GridSize;
-  md?: GridSize;
-  lg?: GridSize;
-  xl?: GridSize;
-  children: React.ReactNode;
-}) => {
+  ...props
+}: GridProps & { selected: boolean }) => {
   return (
-    <Grid item xs={xs} sm={sm} md={md} lg={lg} xl={xl}>
-      <Box sx={{ p: 2, borderRadius: 2, bgcolor: "black" }}>{children}</Box>
+    <Grid item {...props} sx={{ cursor: "pointer" }}>
+      <Box
+        sx={{
+          p: 2,
+          borderRadius: 2,
+          bgcolor: selected ? "#A9B6FF" : "black",
+          color: selected ? "black" : "white",
+          border: "2px solid #424242",
+          "&.MuiBox-root:hover": { borderColor: "#292943" },
+        }}
+      >
+        {children}
+      </Box>
     </Grid>
   );
 };
 
-export const SystemManagement = () => {  
+export const SystemManagement = () => {
   const [duration, setDuration] = useState<number>(7);
 
-  // const {isLoading, data} = useGetUnitsQuery({
+  const [currentTarget, setCurrentTarget] = useState<string>();
 
-  // });
+  const { data: totalData } = useGetDashboardQuery();
+  const [getUnits, { data: units, isFetching: isUnitFetching }] =
+    useLazyGetUnitsQuery();
+  const [getReports, { data: reports, isFetching: isReportFetching }] =
+    useLazyGetReportsQuery();
+  const [getGraphs, { data: graphs, isFetching: isGraphFetching }] =
+    useLazyGetGraphsQuery();
+  const [getVDRs, { data: vdrs, isFetching: isVDRFetching }] =
+    useLazyGetVDRsQuery();
+
+  const columns = useMemo<ColDef[]>(
+    () =>
+      currentTarget === "company" || currentTarget === "sector"
+        ? [
+            { field: "id", headerName: "Company ID" },
+            {
+              field: "name",
+              headerName: "Company Name",
+              align: "left",
+              filter: "agTextColumnFilter",
+            },
+            {
+              field: "username",
+              headerName: "Creator",
+              align: "left",
+              filter: "agTextColumnFilter",
+            },
+            {
+              field: "created_at",
+              headerName: "Created At",
+              filter: "agDateColumnFilter",
+              valueFormatter: (params: any) =>
+                new Date(params.value).toLocaleString(),
+            },
+            {
+              field: "report_count",
+              headerName: "Reports",
+              filter: "agNumberColumnFilter",
+            },
+            {
+              field: "graph_count",
+              headerName: "SLMs",
+              filter: "agNumberColumnFilter",
+            },
+            {
+              field: "vdr_count",
+              headerName: "VDRs",
+              filter: "agNumberColumnFilter",
+            },
+            {
+              field: "is_active",
+              headerName: "Status",
+              cellDataType: false,
+              cellStyle: (params) => ({
+                color: params.value ? "green" : "red",
+              }),
+              valueFormatter: (params: any) =>
+                params.value ? "Active" : "Archive",
+            },
+          ]
+        : currentTarget === "report"
+        ? [
+            { field: "id", headerName: "Report ID" },
+            {
+              field: "name",
+              headerName: "Report Name",
+              align: "left",
+              filter: "agTextColumnFilter",
+            },
+            {
+              field: "username",
+              headerName: "Creator",
+              align: "left",
+              filter: "agTextColumnFilter",
+            },
+            {
+              field: "graph_name",
+              headerName: "Graph Name",
+              align: "left",
+              filter: "agTextColumnFilter",
+            },
+            {
+              field: "created_at",
+              headerName: "Created At",
+              filter: "agDateColumnFilter",
+              valueFormatter: (params: any) =>
+                new Date(params.value).toLocaleString(),
+            },
+            {
+              field: "duration",
+              headerName: "Executing duration",
+              valueFormatter: (params: any) => {
+                if (params.value) {
+                  const _duration = moment.duration(params.value, "seconds");
+                  const hours = _duration.hours();
+                  const minutes = _duration.minutes();
+                  const seconds = _duration.seconds();
+
+                  let duration = "";
+                  if (hours) duration += `${hours}h`;
+                  if (minutes) duration += `${duration ? " " : ""}${minutes}m`;
+                  if (seconds) duration += `${duration ? " " : ""}${seconds}s`;
+
+                  return duration;
+                }
+                return "";
+              },
+            },
+            {
+              field: "is_active",
+              headerName: "Status",
+              cellDataType: false,
+              cellStyle: (params) => ({
+                color: params.value ? "green" : "red",
+              }),
+              valueFormatter: (params: any) =>
+                params.value ? "Active" : "Archive",
+            },
+          ]
+        : currentTarget === "graph"
+        ? [
+            { field: "id", headerName: "SLM ID" },
+            {
+              field: "name",
+              headerName: "SLM Name",
+              align: "left",
+              filter: "agTextColumnFilter",
+            },
+            {
+              field: "username",
+              headerName: "Creator",
+              align: "left",
+              filter: "agTextColumnFilter",
+            },
+            {
+              field: "is_active",
+              headerName: "Status",
+              cellDataType: false,
+              cellStyle: (params) => ({
+                color: params.value ? "green" : "red",
+              }),
+              valueFormatter: (params: any) =>
+                params.value ? "Active" : "Archive",
+            },
+          ]
+        : currentTarget === "vdr"
+        ? [
+            { field: "id", headerName: "VDR ID" },
+            {
+              field: "name",
+              headerName: "VDR Name",
+              align: "left",
+              filter: "agTextColumnFilter",
+            },
+            {
+              field: "username",
+              headerName: "Creator",
+              align: "left",
+              filter: "agTextColumnFilter",
+            },
+            {
+              field: "ingested_count",
+              headerName: "Ingested files",
+              align: "left",
+              filter: "agNumberColumnFilter",
+            },
+            {
+              field: "is_active",
+              headerName: "Status",
+              cellDataType: false,
+              cellStyle: (params) => ({
+                color: params.value ? "green" : "red",
+              }),
+              valueFormatter: (params: any) =>
+                params.value ? "Active" : "Archive",
+            },
+          ]
+        : [],
+    [currentTarget]
+  );
+
+  const rows = useMemo(() => {
+    return currentTarget === "company" || currentTarget === "sector"
+      ? units || []
+      : currentTarget === "report"
+      ? (reports || []).map((report: any) => {
+          return {
+            ...report,
+            name: report?.report_metadata?.reportname || "",
+            duration:
+              report.completed_at && report.created_at
+                ? moment
+                    .duration(
+                      moment(report.completed_at).diff(report.created_at)
+                    )
+                    .asSeconds()
+                : null,
+          };
+        })
+      : currentTarget === "graph"
+      ? graphs || []
+      : currentTarget === "vdr"
+      ? vdrs || []
+      : [];
+  }, [currentTarget, graphs, reports, units, vdrs]);
 
   const onChangeDuration = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setDuration(+e.target.value),
     []
   );
+
+  const onCompany = () => {
+    setCurrentTarget("company");
+    getUnits({ type: 1 });
+  };
+
+  const onSector = () => {
+    setCurrentTarget("sector");
+    getUnits({ type: 2 });
+  };
+
+  const onReport = () => {
+    setCurrentTarget("report");
+    getReports();
+  };
+
+  const onGraph = () => {
+    setCurrentTarget("graph");
+    getGraphs();
+  };
+
+  const onVDR = () => {
+    setCurrentTarget("vdr");
+    getVDRs();
+  };
 
   return (
     <Box sx={{ height: "100%", bgcolor: "secondary.dark" }}>
@@ -92,68 +333,97 @@ export const SystemManagement = () => {
           ))}
         </TextField>
       </Box>
-      <Box sx={{ px: 2 }}>
+      <Box sx={{ p: 2 }}>
         <Grid container spacing={2}>
-          <GridItem xs={12} sm={6} md={6} lg={3}>
+          <GridItem
+            xs={12}
+            sm={6}
+            md={6}
+            lg={3}
+            selected={currentTarget == "company"}
+            onClick={onCompany}
+          >
             <Typography variant="body2">Total Companies</Typography>
-            <Typography variant="h4">8</Typography>
+            <Typography variant="h4">{totalData?.companies || "_"}</Typography>
           </GridItem>
-          <GridItem xs={12} sm={6} md={6} lg={3}>
+          <GridItem
+            xs={12}
+            sm={6}
+            md={6}
+            lg={3}
+            selected={currentTarget == "sector"}
+            onClick={onSector}
+          >
             <Typography variant="body2">Total Sectors</Typography>
-            <Typography variant="h4">8</Typography>
+            <Typography variant="h4">{totalData?.sectors || "_"}</Typography>
           </GridItem>
-          <GridItem xs={12} sm={6} md={6} lg={2}>
+          <GridItem
+            xs={12}
+            sm={6}
+            md={6}
+            lg={2}
+            selected={currentTarget == "report"}
+            onClick={onReport}
+          >
             <Typography variant="body2">Total Reports</Typography>
-            <Typography variant="h4">7</Typography>
+            <Typography variant="h4">{totalData?.reports || "_"}</Typography>
           </GridItem>
-          <GridItem xs={12} sm={6} md={6} lg={2}>
+          <GridItem
+            xs={12}
+            sm={6}
+            md={6}
+            lg={2}
+            selected={currentTarget == "graph"}
+            onClick={onGraph}
+          >
             <Typography variant="body2">Total SLMs</Typography>
-            <Typography variant="h4">7</Typography>
+            <Typography variant="h4">{totalData?.graphs || "_"}</Typography>
           </GridItem>
-          <GridItem xs={12} sm={6} md={6} lg={2}>
+          <GridItem
+            xs={12}
+            sm={6}
+            md={6}
+            lg={2}
+            selected={currentTarget == "vdr"}
+            onClick={onVDR}
+          >
             <Typography variant="body2">Total VDRs</Typography>
-            <Typography variant="h4">7</Typography>
+            <Typography variant="h4">{totalData?.vdrs || "_"}</Typography>
           </GridItem>
-          {/* <Grid item xs={4} sx={{ height: "100%" }}>
-            <Box sx={{ p: 2, borderRadius: 2, bgcolor: "black", height: 570 }}>
-              <Box fontWeight="bold">Support Tickets</Box>
-              <Box sx={{ height: 480, overflowY: "auto", p: 2 }}>
-                {supportTickets.map((ticket) => (
-                  <Box
-                    key={ticket.id}
-                    sx={{
-                      display: "flex",
-                      gap: 2,
-                      alignItems: "center",
-                      py: 1,
-                      fontSize: 13,
-                    }}
-                  >
-                    <CircleIcon
-                      sx={{
-                        fontSize: 16,
-                        color:
-                          ticket.status === 1
-                            ? "red"
-                            : ticket.status === 2
-                            ? "green"
-                            : "blue",
-                      }}
-                    />
-                    <Box>{ticket.name}</Box>
-                    <Box>{ticket.created_at}</Box>
-                    <Box px={2}>{ticket.created_by}</Box>
-                  </Box>
-                ))}
-              </Box>
-            </Box>
-          </Grid> */}
         </Grid>
-        <Box pt={4}>
-          <Box fontWeight="bold" mb={2}>
-            Generated Reports:
+        {currentTarget ? (
+          <Box pt={4} height={800}>
+            <Box fontWeight="bold" mb={2}>
+              {currentTarget === "company"
+                ? "Created companies"
+                : currentTarget === "sector"
+                ? "Created sectors"
+                : currentTarget === "report"
+                ? "Genreated reports"
+                : currentTarget === "graph"
+                ? "Created SLMs"
+                : currentTarget === "vdr"
+                ? "Created VDRs"
+                : ""}
+              :
+            </Box>
+            {isUnitFetching ||
+            isReportFetching ||
+            isGraphFetching ||
+            isVDRFetching ? (
+              <Box
+                display={"flex"}
+                justifyContent={"center"}
+                width={"100%"}
+                height={"100%"}
+              >
+                <CircularProgress size={48} />
+              </Box>
+            ) : (
+              <AGTable columnDefs={columns} rowData={rows} />
+            )}
           </Box>
-        </Box>
+        ) : null}
       </Box>
     </Box>
   );
