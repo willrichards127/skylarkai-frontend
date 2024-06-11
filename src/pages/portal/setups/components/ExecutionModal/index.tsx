@@ -14,7 +14,7 @@ import {
 } from "../../../../../redux/services/setupApi";
 import {
   addIdtoTemplateJson,
-  convertJSON,
+  convertTemplateJSON,
 } from "../../../../../components/TemplateView/utils";
 import { useCustomQueryMutation } from "../../../../../redux/services/transcriptAPI";
 import {
@@ -168,7 +168,7 @@ export const ExecutionModal = memo(
         skyDBNodeIndex > -1 &&
         updatedSetup.nodes[templateInvestNodeIndex].properties?.text
       ) {
-        templateData = convertJSON(
+        templateData = convertTemplateJSON(
           updatedSetup.nodes[templateInvestNodeIndex].properties!.text
         );
         reportType = 1;
@@ -179,7 +179,7 @@ export const ExecutionModal = memo(
         skyDBNodeIndex > -1 &&
         updatedSetup.nodes[templateTearNodeIndex].properties?.text
       ) {
-        templateData = convertJSON(
+        templateData = convertTemplateJSON(
           updatedSetup.nodes[templateTearNodeIndex].properties!.text
         );
         reportType = 2;

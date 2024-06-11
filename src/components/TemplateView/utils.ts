@@ -20,13 +20,13 @@ export const createNewItem = (
   isFolder,
 });
 
-export const convertJSON = (text: string) => {
+export const convertTemplateJSON = (text: string) => {
   try {
     const obj = JSON.parse(text);
     if ("title" in obj && "data" in obj) {
       return obj as ITemplate;
     }
-  } catch (err) { }
+  } catch (err) { /* empty */ }
 };
 
 export const addIdtoTemplateJson = (

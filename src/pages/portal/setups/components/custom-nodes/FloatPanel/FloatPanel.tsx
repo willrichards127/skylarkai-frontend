@@ -172,7 +172,7 @@ const FloatPanel = memo(
       const criteriaNode = nodes.find(
         (node) => node.data.name === "InvestmentCriteria"
       );
-      if (criteriaNode && llmNode) {
+      if (criteriaNode && llmNode && criteriaNode.data.properties.isExecutable) {
         const llm: string = llmNode.data.properties.model;
         const criterias = criteriaNode.data.properties.json;
 

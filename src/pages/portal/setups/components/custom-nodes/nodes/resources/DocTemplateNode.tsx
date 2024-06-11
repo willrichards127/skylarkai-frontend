@@ -7,7 +7,7 @@ import { useReactFlow } from "reactflow";
 import { useDropzone } from "react-dropzone";
 import { ITemplateNode } from "../../../../../../../shared/models/interfaces";
 import { TemplateViewModal } from "../../../../../../../components/modals/TemplateViewModal";
-import { convertJSON } from "../../../../../../../components/TemplateView/utils";
+import { convertTemplateJSON } from "../../../../../../../components/TemplateView/utils";
 import { useGenerateJsonTemplateMutation } from "../../../../../../../redux/services/setupApi";
 import { useParams } from "react-router-dom";
 
@@ -27,7 +27,7 @@ export const DocTemplateNode = memo(
     const data = useMemo(
       () =>
         nodeContent.properties.text
-          ? convertJSON(nodeContent.properties.text)
+          ? convertTemplateJSON(nodeContent.properties.text)
           : undefined,
       [nodeContent]
     );

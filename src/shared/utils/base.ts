@@ -68,3 +68,10 @@ export const addElementsRightAfter = (
   updated.splice(insertIndex, 0, ...newElements);
   return updated;
 };
+
+export const convertCriteriaJSON = (text: string) => {
+  try {
+    const obj = JSON.parse(text);
+    return obj;
+  } catch (err) { /* empty */ }
+}
