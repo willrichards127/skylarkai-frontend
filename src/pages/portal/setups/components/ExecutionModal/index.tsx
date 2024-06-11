@@ -94,7 +94,7 @@ export const ExecutionModal = memo(
         JSON.stringify(updatedSetupResponse)
       );
 
-      const vdrNodes = setup.nodes.filter(
+      const vdrNodes = updatedSetup.nodes.filter(
         (node) => node.template_node_id === 1
       );
 

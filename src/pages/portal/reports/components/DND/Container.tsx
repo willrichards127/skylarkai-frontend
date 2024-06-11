@@ -20,6 +20,7 @@ export const Container = ({
   children,
   isShowQuestion,
   containers,
+  editable,
   onExchangeItem,
   onMoveContainer,
   onChangeChildOrder,
@@ -39,6 +40,7 @@ export const Container = ({
   children: IDNDItem[];
   containers: IDNDContainer[];
   isShowQuestion?: boolean;
+  editable?: boolean;
   onSectionContentChanged: (
     startIndex: number,
     endIndex: number,
@@ -151,7 +153,7 @@ export const Container = ({
       data-handler-id={handlerId}
       ref={ref}
     >
-      {!loading && (
+      {!loading && editable && (
         <ContainerActionPane onAddNew={onAddNew} onRemove={onRemove} />
       )}
       {children.length > 0 ? (
@@ -172,6 +174,7 @@ export const Container = ({
               type={child.type}
               value={child.value!}
               parentId={child.parentId}
+              editable={editable}
               onMoveItem={onMoveItem}
               onAddNew={() => onAddNewItem(child)}
               onRemove={() => onRemoveItem(child)}

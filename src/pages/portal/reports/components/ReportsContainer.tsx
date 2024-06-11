@@ -154,14 +154,19 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
                     content: "Archive",
                     clickable: true,
                   },
-                  {
-                    id: "detail",
-                    content: "Detail",
-                    clickable: true,
-                  },
-                ]),
+                ].concat(
+                  reportType !== 3
+                    ? [
+                        {
+                          id: "detail",
+                          content: "Detail",
+                          clickable: true,
+                        },
+                      ]
+                    : []
+                )),
           ],
-    [viewMode, user]
+    [viewMode, user, reportType]
   );
 
   const onSwitchViewMode = useCallback((mode: string) => {

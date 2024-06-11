@@ -443,6 +443,7 @@ export const ReportTemplate = ({
                         id={item.id}
                         type={item.type}
                         children={item.children}
+                        editable
                         onExchangeItem={onExchangeItem}
                         onMoveContainer={onMoveContainer}
                         onChangeChildOrder={onChangeChildOrder}

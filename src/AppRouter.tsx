@@ -199,6 +199,10 @@ function AppRouter() {
                     element: <ReportsPage reportType={2} />,
                   },
                   {
+                    path: "criterias",
+                    element: <ReportsPage reportType={3} />,
+                  },
+                  {
                     path: "setups",
                     element: <SetupsPage />,
                   },

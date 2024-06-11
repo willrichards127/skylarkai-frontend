@@ -36,6 +36,7 @@ export const Item = ({
   value,
   type,
   parentId,
+  editable,
   onMoveItem,
   onAddNew,
   onRemove,
@@ -51,6 +52,7 @@ export const Item = ({
   parentId: string;
   type: TDNDItemType;
   value: IReportItemValue;
+  editable?: boolean;
   onMoveItem: (dragId: string, hoverId: string) => void; // move item inside one container
   onAddNew: () => void;
   onRemove: () => void;
@@ -114,8 +116,10 @@ export const Item = ({
   });
 
   const onEdit = useCallback(() => {
-    setIsEdit(true);
-  }, []);
+    if(editable) {
+      setIsEdit(true);
+    }
+  }, [editable]);
 
   const onClickAway = useCallback(
     (replaceItem: IDNDItem, containers: IDNDContainer[]) => {
@@ -249,7 +253,7 @@ export const Item = ({
       data-handler-id={handlerId}
       onDoubleClick={() => (isLoading ? null : onEdit())}
     >
-      {!isLoading && !isEdit && (
+      {!isLoading && !isEdit && editable && (
         <ItemActionPane
           item={{ id, value, type, parentId }}
           onAddNew={onAddNew}
@@ -259,7 +263,7 @@ export const Item = ({
           onRerunSection={onRerunSection}
         />
       )}
-      {!isLoading && isEdit && (
+      {!isLoading && isEdit && editable && (
         <ItemEditor
           onClickAway={onClickAway}
           item={{ id, value, parentId, type }}

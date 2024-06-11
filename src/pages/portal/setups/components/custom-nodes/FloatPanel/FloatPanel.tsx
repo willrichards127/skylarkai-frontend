@@ -46,6 +46,8 @@ import {
 import { ExportModal } from "../../../../../../components/modals/ExportModal";
 import { VDDNode } from "../nodes/dataloaders/VDDNode";
 import { useExecuteCriteriaMutation } from "../../../../../../redux/services/setupApi";
+import { useSaveReportMutation } from "../../../../../../redux/services/reportApi";
+import { longDateFormat } from "../../../../../../shared/utils/basic";
 
 // key is corresponding to items.name
 const ComponentDict: Record<
@@ -106,6 +108,7 @@ const FloatPanel = memo(
     const { getNodes, setNodes } = useReactFlow();
 
     const [customQuery, { isLoading }] = useCustomQueryMutation();
+    const [saveReport] = useSaveReportMutation();
     const [exportModal, showExportModal] = useState<boolean>(false);
 
     const [executeCriteria, { isLoading: isExecutingCriteria }] =
@@ -217,6 +220,33 @@ const FloatPanel = memo(
               : node
           )
         );
+
+        const content = result
+          .map((category: any) => {
+            const subContent = category.children.map((criteria: any) => {
+              return `<h3>${
+                criteria.question
+              }<span style="font-size: 24px; color: ${
+                criteria.Criteria === "Pass" ? "green" : "red"
+              }">${
+                criteria.Criteria === "Pass" ? "&#x2714" : "&#x2718"
+              }</span></h3><p>${criteria.Explanation}${criteria.Citation.map(
+                (citation: any) => JSON.stringify({ citation: citation })
+              )}</p>`;
+            });
+            return `<h2>${category.name}</h2>${subContent}`;
+          })
+          .join("");
+
+        saveReport({
+          setupId: nodeContent.setupId!,
+          reportName: `Investment Criteria-${new Date().getTime() % 1000}`,
+          reportType: 3,
+          data:
+            `<h1 style="text-align: center;">Investment criteria: ${nodeContent.setupName}</h1><p style="text-align: center;"><strong>${longDateFormat(
+              new Date()
+            )}</strong></p>` + content,
+        });
       }
     };
 

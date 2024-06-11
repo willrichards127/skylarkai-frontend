@@ -285,6 +285,7 @@ const ReportPanel = ({ reportId }: { reportId: string }) => {
                 : 0)
             }px)`,
             display: reportTab.reportId === selectedReport ? "block" : "none",
+            overflow: "auto"
           }}
         >
           <ReportViewer

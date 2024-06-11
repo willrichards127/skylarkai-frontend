@@ -35,6 +35,7 @@ export const ReportViewer = memo(
         unitName={unitName}
         reportContent={reportData.content as string}
         analysisType="financial_diligence"
+        isReadOnly={reportData.type === 3}
       />
     );
   }

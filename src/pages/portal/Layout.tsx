@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Box, Tab, Tabs } from "@mui/material";
 import CloudSyncIcon from "@mui/icons-material/CloudSync";
 import ListAltIcon from "@mui/icons-material/ListAlt";
+import RuleIcon from '@mui/icons-material/Rule';
 import { AnalysisIcon, ToolsIcon } from "../../components/Svgs";
 
 export const Layout = ({
@@ -21,6 +22,7 @@ export const Layout = ({
     if (!location.pathname) return "reports";
     if (location.pathname.includes("reports")) return "reports";
     if (location.pathname.includes("tearsheets")) return "tearsheets";
+    if (location.pathname.includes("criterias")) return "criterias";
     if (location.pathname.includes("vdrs")) return "vdrs";
     return "setups";
   }, [location.pathname]);
@@ -58,6 +60,12 @@ export const Layout = ({
           icon={<ListAltIcon sx={{ color: "white" }} />}
           label={<Box ml={2}>Tear Sheets</Box>}
           value="tearsheets"
+          iconPosition="start"
+        />
+        <Tab
+          icon={<RuleIcon />}
+          label={<Box ml={2}>Investment Criterias</Box>}
+          value="criterias"
           iconPosition="start"
         />
         <Tab

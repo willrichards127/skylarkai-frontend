@@ -51,9 +51,10 @@ export const reportApi = createApi({
         reportName: string;
         data: string;
         template?: string;
+        reportType?: number;
       }
     >({
-      query: ({ setupId, reportName, data, template }) => ({
+      query: ({ setupId, reportName, data, template, reportType = 1 }) => ({
         url: `reports`,
         method: "POST",
         body: {
@@ -61,6 +62,7 @@ export const reportApi = createApi({
           report_name: reportName,
           data,
           ...(template ? { template } : { is_template_with_content: false }),
+          report_type: reportType,
         },
       }),
       invalidatesTags: ["Report"],
@@ -452,4 +454,5 @@ export const {
   useGetIngestedFilesQuery,
   useGetExecutionDetailQuery,
   useLazyGetExecutionDetailQuery,
+  useSaveReportMutation,
 } = reportApi;
