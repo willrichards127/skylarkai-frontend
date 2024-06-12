@@ -70,7 +70,11 @@ const WorkflowPanel = memo(
 
     const isNew = params.setupId === "new";
 
-    const { data: setup, isFetching } = useGetSetupQuery(
+    const {
+      data: setup,
+      refetch,
+      isFetching,
+    } = useGetSetupQuery(
       { setupId: +params.setupId! },
       {
         skip: isNew,
@@ -277,17 +281,13 @@ const WorkflowPanel = memo(
     useEffect(() => {
       if (isLoadingSaveSetup || !savedData) return;
       if (isNew) {
-        navigate(`/portal/setups/${savedData.id}?unitId=${unitId}&unitName=${unitName}&type=companies`);
+        navigate(
+          `/portal/setups/${savedData.id}?unitId=${unitId}&unitName=${unitName}&type=companies`
+        );
       } else {
         updateSetupWithLoadedData(savedData);
       }
-    }, [
-      updateSetupWithLoadedData,
-      isLoadingSaveSetup,
-      isNew,
-      savedData,
-      navigate,
-    ]);
+    }, [updateSetupWithLoadedData, isLoadingSaveSetup, isNew, savedData, navigate, unitId, unitName]);
 
     useEffect(() => {
       if (isFetching || !setup) return;
@@ -408,10 +408,10 @@ const WorkflowPanel = memo(
             }}
             unitId={+unitId!}
             unitName={unitName!}
-            onClose={(setup?: ISetup) => {
+            onClose={(refresh?: boolean) => {
               showProgressModal(false);
-              if (setup) {
-                updateSetupWithLoadedData(setup);
+              if (refresh) {
+                refetch();
               }
             }}
           />

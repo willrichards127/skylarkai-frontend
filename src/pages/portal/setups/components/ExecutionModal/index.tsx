@@ -26,7 +26,10 @@ import { useNavigate } from "react-router-dom";
 import { longDateFormat } from "../../../../../shared/utils/basic";
 import * as marked from "marked";
 import { initializeHtmlResponse } from "../../../../../shared/utils/parse";
-import { useConvertToGraphMutation } from "../../../../../redux/services/vdrApi";
+import {
+  useCopyIngestedFilesMutation,
+  useDeleteIngestedFilesMutation,
+} from "../../../../../redux/services/vdrApi";
 
 const isBackground = true;
 export const ExecutionModal = memo(
@@ -38,7 +41,7 @@ export const ExecutionModal = memo(
     unitName,
   }: {
     open: boolean;
-    onClose: (ret?: ISetup) => void;
+    onClose: (refresh?: boolean) => void;
     setup: ISetup;
     unitId: number;
     unitName: string;
@@ -54,8 +57,10 @@ export const ExecutionModal = memo(
       useGenerateReportMutation();
     const [generateCustomReport] = useGenerateCustomReportMutation();
     const [customQuery] = useCustomQueryMutation();
-    const [convertToGraph, { isLoading: isCloningVDR }] =
-      useConvertToGraphMutation();
+    const [copyFiles, { isLoading: isCopying }] =
+      useCopyIngestedFilesMutation();
+    const [deleteFiles, { isLoading: isDeleting }] =
+      useDeleteIngestedFilesMutation();
     const [executionReport] = useExecuteReportBackgroundMutation();
 
     const [items, setItems] = useState<ITemplateItem[]>([]);
@@ -98,59 +103,46 @@ export const ExecutionModal = memo(
         (node) => node.template_node_id === 1
       );
 
-      let ingestedFiles: any = [];
       if (vdrNodes.length) {
         for (let i = 0; i < vdrNodes.length; i++) {
           const properties = vdrNodes[i].properties;
-          if (
-            setup.id &&
-            properties &&
-            properties.files.filter((f: any) => f.checked).length
-          ) {
-            const convertResponse = await convertToGraph({
-              vdrId: properties.vdrId,
-              graphId: setup.id,
-              files: properties!.files
-                .filter((f: any) => f.checked)
-                .map((f: any) => f.file_name),
-            }).unwrap();
-            ingestedFiles = [
-              ...ingestedFiles,
-              ...convertResponse.files_moved.map((f: string) => ({
-                file_name: f,
-              })),
-            ];
+          if (updatedSetup.id && properties) {
+            const checkedFiles = properties.files.filter((f: any) => f.checked);
+            const unCheckedFiles = properties.files.filter(
+              (f: any) => !f.checked
+            );
+
+            if (checkedFiles.length) {
+              await copyFiles({
+                vdrId: properties.vdrId,
+                graphId: updatedSetup.id,
+                files: checkedFiles.map((f: any) => f.file_name),
+              }).unwrap();
+            }
+
+            if (unCheckedFiles.length) {
+              await deleteFiles({
+                graphId: updatedSetup.id,
+                files: unCheckedFiles.map((f: any) => f.file_name),
+              }).unwrap();
+            }
           }
         }
       }
 
       if (uploadFiles) {
-        const updateIngestResponse = await ingestFiles({
+        await ingestFiles({
           setupId: updatedSetup.id!,
           companyName: unitName,
           analysisType: "financial_diligence",
           // background: true,
           files: uploadFiles,
         }).unwrap();
-
-        ingestedFiles = [...ingestedFiles, ...updateIngestResponse];
       }
 
       const skyDBNodeIndex = updatedSetup.nodes.findIndex(
         (node) => node.template_node_id === 46
       );
-
-      if (skyDBNodeIndex > -1 && ingestedFiles.length) {
-        updatedSetup.nodes[skyDBNodeIndex].properties = {
-          ...(updatedSetup.nodes[skyDBNodeIndex].properties || {}),
-          files: [
-            ...(updatedSetup.nodes[skyDBNodeIndex].properties?.files || []),
-            ...ingestedFiles,
-          ].filter(
-            (v, i, a) => a.findIndex((v2) => v2.file_name === v.file_name) === i
-          ),
-        };
-      }
 
       const templateInvestNodeIndex = updatedSetup.nodes.findIndex(
         (node) => node.template_node_id === 17
@@ -194,11 +186,11 @@ export const ExecutionModal = memo(
           const openAINodeIndex = updatedSetup.nodes.findIndex(
             (node) => node.template_node_id == 7
           );
-          
+
           if (openAINodeIndex > -1) {
             await executionReport({
               unitName,
-              setupId: setup.id!,
+              setupId: updatedSetup.id!,
               analysisType: "financial_diligence",
               reportType: reportType,
               report: {
@@ -234,17 +226,17 @@ export const ExecutionModal = memo(
           }`;
 
           const generatedId = await generateReport({
-            setupId: setup.id!,
+            setupId: updatedSetup.id!,
             data: initializeHtmlResponse(report),
             queryType: reportName,
           }).unwrap();
           navigate(
-            `/portal/reports/${generatedId}?reportName=${reportName}&setupId=${setup.id}&viewMode=active`
+            `/portal/reports/${generatedId}?reportName=${reportName}&setupId=${updatedSetup.id}&viewMode=active`
           );
           setCustomQueyring(false);
         }
       }
-      onClose(updatedSetup);
+      onClose(true);
     };
 
     const handleCustomQuery = async (
@@ -367,7 +359,7 @@ export const ExecutionModal = memo(
               <CircularProgress />
             </Box>
           )}
-          {isCloningVDR && (
+          {isCopying && isDeleting && (
             <Box
               display={"flex"}
               flexDirection={"column"}

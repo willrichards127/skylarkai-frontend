@@ -42,7 +42,7 @@ export const vdrApi = createApi({
         invalidatesTags: ["VDR"],
       }),
     }),
-    convertToGraph: builder.mutation<
+    copyIngestedFiles: builder.mutation<
       any,
       { vdrId: number; graphId: number; files: string[] }
     >({
@@ -56,6 +56,19 @@ export const vdrApi = createApi({
         },
       }),
     }),
+    deleteIngestedFiles: builder.mutation<
+      any,
+      { graphId: number; files: string[] }
+    >({
+      query: ({ graphId, files }) => ({
+        url: `delete-categorized-entries/${graphId}`,
+        method: "POST",
+        body: {
+          filenames: files,
+          analysis_type_id: 3,
+        },
+      }),
+    }),
   }),
 });
 
@@ -66,5 +79,6 @@ export const {
   useLazyGetVDRsQuery,
   useSaveVDRMutation,
   useDeleteSetupMutation,
-  useConvertToGraphMutation,
+  useCopyIngestedFilesMutation,
+  useDeleteIngestedFilesMutation,
 } = vdrApi;
