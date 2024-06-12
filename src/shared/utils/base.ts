@@ -75,3 +75,10 @@ export const convertCriteriaJSON = (text: string) => {
     return obj;
   } catch (err) { /* empty */ }
 }
+
+export const ensureHttpOrHttps = (url: string) => {
+  if (!/^https?:\/\//i.test(url)) {
+    return 'https://' + url;
+  }
+  return url;
+};

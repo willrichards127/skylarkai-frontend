@@ -11,6 +11,7 @@ import {
 import LinkIcon from "@mui/icons-material/Link";
 import { Layout } from "../../Layout";
 import { useGetUnitQuery } from "../../../../redux/services/setupApi";
+import { ensureHttpOrHttps } from "../../../../shared/utils/base";
 
 const UnitPage = () => {
   const unitId = useParams<{ unitId: string }>().unitId!;
@@ -97,8 +98,9 @@ const UnitPage = () => {
                   </Typography>
                   {unit!.website ? (
                     <a
-                      href={unit!.website}
+                      href={ensureHttpOrHttps(unit!.website)}
                       target="_blank"
+                      rel='noopener noreferrer'
                       style={{ color: "lightblue", fontSize: 13 }}
                     >
                       {unit!.website}

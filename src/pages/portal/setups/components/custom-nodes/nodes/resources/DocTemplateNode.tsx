@@ -9,7 +9,6 @@ import { ITemplateNode } from "../../../../../../../shared/models/interfaces";
 import { TemplateViewModal } from "../../../../../../../components/modals/TemplateViewModal";
 import { convertTemplateJSON } from "../../../../../../../components/TemplateView/utils";
 import { useGenerateJsonTemplateMutation } from "../../../../../../../redux/services/setupApi";
-import { useParams } from "react-router-dom";
 
 const templates = [
   {
@@ -36,7 +35,6 @@ export const DocTemplateNode = memo(
     const [showModal, setShowModal] = useState<boolean>(false);
 
     const { getNodes, setNodes } = useReactFlow();
-    const params = useParams();
 
     const updateNode = useCallback(
       (key: string, value: string) => {
@@ -84,24 +82,25 @@ export const DocTemplateNode = memo(
           llm = llmNode.data.properties?.model || "OpenAI";
         }
 
-        const setupId = params.setupId;
+        const setupId = +nodeContent.setupId!;
 
         if (setupId) {
           const templateData = await generateJsonTemplate({
             file: acceptedFiles[0],
-            setupId: +setupId,
+            setupId: setupId,
             llm,
           }).unwrap();
 
           updateNode("text", JSON.stringify(templateData.template[0]));
         }
       },
-      [setNodes, nodeId, updateNode, generateJsonTemplate]
+      [getNodes, nodeContent.setupId, generateJsonTemplate, updateNode]
     );
 
     const { getRootProps, getInputProps } = useDropzone({
       onDrop,
       maxFiles: 1,
+      disabled: !+nodeContent.setupId!
     });
 
     return (
@@ -120,7 +119,7 @@ export const DocTemplateNode = memo(
               >
                 <div {...getRootProps()}>
                   <input {...getInputProps()} />
-                  <Button size="small" variant="outlined">
+                  <Button disabled={!+nodeContent.setupId!} size="small" variant="outlined">
                     Upload File
                   </Button>
                 </div>
