@@ -13,6 +13,7 @@ import {
   useMarkReportMutation,
   useLazyGetExecutionDetailQuery,
   useUpdateReportMutation,
+  useDeleteExecutingMutation,
 } from "../../../../redux/services/reportApi";
 import { useNotification } from "../../../../shared/socket/NotificationProvider";
 import { getDate } from "../../../../shared/utils/parse";
@@ -74,6 +75,7 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
   ] = useLazyGetTaskExecutionTimeStatusQuery();
   const [getExecutionDetail] = useLazyGetExecutionDetailQuery();
   const [updateReport] = useUpdateReportMutation();
+  const [deleteExecutingReport] = useDeleteExecutingMutation();
   // const onNewReportModal = useCallback(() => {
   //   showNewReportModal(true);
   // }, []);
@@ -130,7 +132,7 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
     }
   }, [isStatusResultFetching]);
 
-  const moreItems = useMemo(
+  const generalMoreItems = useMemo(
     () =>
       user!.persona_id === 2
         ? []
@@ -169,13 +171,24 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
     [viewMode, user, reportType]
   );
 
+  const executinMoreItems = useMemo(
+    () => [
+      {
+        id: "delete",
+        content: "Delete",
+        clickable: true,
+      },
+    ],
+    []
+  );
+
   const onSwitchViewMode = useCallback((mode: string) => {
     setViewMode(mode);
   }, []);
 
   const onMoreItem = useCallback(
     async (cardId: string, menuItemId: string) => {
-      if (menuItemId === "delete" || menuItemId === "archive") {
+      if (menuItemId === "archive") {
         deleteReport({ reportId: +cardId, viewMode });
       } else if (menuItemId === "mark_as_active") {
         markReport({ reportId: +cardId });
@@ -196,6 +209,9 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
         }
       } else if (menuItemId === "rename") {
         setSelectedReportId(+cardId);
+      } else if (menuItemId === "delete") {
+        await deleteExecutingReport({ taskId: cardId });
+        refetchReports();
       }
     },
     [
@@ -206,6 +222,8 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
       getExecutionDetail,
       getTaskTimeStatus,
       getTaskResultStatus,
+      deleteExecutingReport,
+      refetchReports,
     ]
   );
 
@@ -245,11 +263,10 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
   );
 
   const onRename = async (id: number, newName: string) => {
-    const response = await updateReport({
+    await updateReport({
       reportId: id,
       name: newName,
     }).unwrap();
-    console.log("=================", response);
   };
 
   const getReportName = (report: any) =>
@@ -295,7 +312,8 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
                   new Date(report.created_at || report.executed_at)
                 )}
                 width={350}
-                moreItems={moreItems}
+                moreItems={generalMoreItems}
+                llm={report?.llm}
                 onMoreItem={(menuItemId) => onMoreItem(report.id, menuItemId)}
                 onCard={() =>
                   onCard(
@@ -326,8 +344,13 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
                   REPORTS_DICT[card.data["report_data"]["title"]]?.label ||
                   card.data["report_data"]["title"]
                 }
-                updatedAt={getDate(new Date(card.created_at))}
                 width={350}
+                updatedAt={getDate(new Date(card.created_at))}
+                moreItems={executinMoreItems}
+                onMoreItem={(menuItemId) =>
+                  onMoreItem(card.task_id, menuItemId)
+                }
+                llm={card?.data?.report_data?.default_llm}
                 onCard={() =>
                   onCard(
                     card.task_id,

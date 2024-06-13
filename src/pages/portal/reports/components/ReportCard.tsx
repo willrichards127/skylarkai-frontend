@@ -28,6 +28,7 @@ export const ReportCard = memo(
     height,
     moreItems,
     executing,
+    llm,
     onMoreItem,
     onCard,
   }: {
@@ -38,6 +39,7 @@ export const ReportCard = memo(
     hasThumbnail?: boolean;
     moreItems?: IMenuItem[];
     executing?: boolean;
+    llm?: string;
     onCard?: () => void;
     onMoreItem?: (itemId: string) => void;
   } & ICard) => {
@@ -92,9 +94,14 @@ export const ReportCard = memo(
               titleTypographyProps={{ fontSize: 16, fontWeight: "500" }}
               subheader={
                 <Box>
-                  <Typography variant="body2" fontSize={12} gutterBottom>
-                    {updatedAt || ""}
-                  </Typography>
+                  <Box display={"flex"} alignItems={"center"} gap={2}>
+                    <Typography variant="body2" fontSize={12} gutterBottom>
+                      {updatedAt || ""}
+                    </Typography>
+                    <Typography fontWeight={"bold"} variant="body2" fontSize={12} gutterBottom>
+                      {llm}
+                    </Typography>
+                  </Box>
                   {reviewStatus !== undefined && reviewStatus !== null && (
                     <Chip
                       size="small"

@@ -78,8 +78,7 @@ export const reportApi = createApi({
       }
     >({
       query: ({ report, companyCode, companyName, question }) =>
-        `${report}?companycode=${companyCode}&companyname=${companyName}${
-          question ? "&question=" + question : ""
+        `${report}?companycode=${companyCode}&companyname=${companyName}${question ? "&question=" + question : ""
         }`,
     }),
 
@@ -392,7 +391,6 @@ export const reportApi = createApi({
       keepUnusedDataFor: 0,
       providesTags: ["Report"],
     }),
-
     executeReportBackground: builder.mutation<
       any,
       {
@@ -428,6 +426,17 @@ export const reportApi = createApi({
         url: `reports/${baseQeuryId}/execution_detail`,
       }),
     }),
+    deleteExecuting: builder.mutation<
+      any,
+      {
+        taskId: string;
+      }
+    >({
+      query: ({ taskId }) => ({
+        url: `fetch_file_logs?task_id=${taskId}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
@@ -455,4 +464,5 @@ export const {
   useGetExecutionDetailQuery,
   useLazyGetExecutionDetailQuery,
   useSaveReportMutation,
+  useDeleteExecutingMutation,
 } = reportApi;
