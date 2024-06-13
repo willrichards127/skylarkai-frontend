@@ -106,10 +106,8 @@ export const ReportTemplate = ({
 
   const onCitationLink = useCallback(
     ({ filename, quote }: { filename: string; quote: string }) => {
-      console.log(filename);
-      console.log(quote);
       setCitationData({
-        filename: `${filename}.pdf`,
+        filename,
         quote,
       });
     },
@@ -478,7 +476,6 @@ export const ReportTemplate = ({
           }
         />
       )}
-
       {citationData ? (
         <CitationModal
           open={!!citationData}
