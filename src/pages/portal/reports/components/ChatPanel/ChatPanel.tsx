@@ -7,10 +7,14 @@ import { XIconButton } from "../../../../../components/buttons/XIconButton";
 import { XPanel } from "../../../../../components/XPanel";
 import { ChatContentBox } from "./ChatContentBox";
 import { InputBox } from "./InputBox";
-import { IChat } from "../../../../../redux/interfaces";
-import { useCustomQueryMutation } from "../../../../../redux/services/transcriptAPI";
+import { IChat, IChatResponse } from "../../../../../redux/interfaces";
+import {
+  useAddChatMutation,
+  useGetChatHistoryQuery,
+} from "../../../../../redux/services/reportApi";
 import { generatePdf } from "../../../../../shared/utils/pdf-generator";
 import { SendEmailModal } from "../../../../../components/modals/SendEmailModal";
+import { useCustomQueryMutation } from "../../../../../redux/services/transcriptAPI";
 
 export const ChatPanel = memo(
   ({
@@ -43,7 +47,11 @@ export const ChatPanel = memo(
     const [emailModal, showEmailModal] = useState<boolean>(false);
     const [chatHistory, setChatHistory] = useState<IChat[]>([]);
 
+    const { isLoading: loadingChatHistory, data: chatHistoryData } =
+      useGetChatHistoryQuery({ reportId: graph_id });
+    const [addChat] = useAddChatMutation();
     const [getAnswer, { isLoading: loadingAnswer }] = useCustomQueryMutation();
+
     const onSend = useCallback(
       async (question: string) => {
         setChatHistory((prev) => [
@@ -69,16 +77,22 @@ export const ChatPanel = memo(
               rating_response: response.rating_response,
             },
           ]);
+          addChat({
+            reportId: graph_id,
+            question,
+            answer: response.content as string,
+          });
         }
       },
       [
         getAnswer,
-        llm,
+        graph_id,
+        filenames,
+        analysis_type,
         recursion,
         companyName,
-        filenames,
-        graph_id,
-        analysis_type,
+        llm,
+        addChat,
       ]
     );
 
@@ -113,6 +127,23 @@ export const ChatPanel = memo(
     const onSendViaEmail = useCallback(async () => {
       showEmailModal(true);
     }, []);
+
+    useEffect(() => {
+      if (loadingChatHistory || !chatHistoryData || !chatHistoryData.length)
+        return;
+      const extracted = chatHistoryData.reduce(
+        (nv: IChat[], cv: IChatResponse) => {
+          nv = [
+            ...nv,
+            { type: "question", content: cv.question },
+            { type: "answer", content: cv.answer },
+          ];
+          return nv;
+        },
+        []
+      );
+      setChatHistory(extracted);
+    }, [loadingChatHistory, chatHistoryData]);
 
     useEffect(() => {
       if (loadingAnswer) {
@@ -226,7 +257,10 @@ export const ChatPanel = memo(
           onAddToReport={onAddToReport}
           onJumpTo={onJumpTo}
         />
-        <InputBox disabled={loadingAnswer} onSubmitAction={onSend} />
+        <InputBox
+          disabled={loadingAnswer || loadingChatHistory}
+          onSubmitAction={onSend}
+        />
         {emailModal && (
           <SendEmailModal
             open={emailModal}

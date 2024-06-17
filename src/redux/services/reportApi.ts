@@ -3,7 +3,7 @@ import { baseQuery } from "./base";
 import { IResponseAnswer } from "../interfaces";
 import { ITemplate } from "../../shared/models/interfaces";
 import { REPORTS_DICT } from "../../shared/models/constants";
-import { groupBy } from "../../shared/utils/base";
+// import { groupBy } from "../../shared/utils/base";
 import { handleCatchError } from "./helper";
 
 export const reportApi = createApi({
@@ -365,31 +365,25 @@ export const reportApi = createApi({
       },
     }),
 
-    getChatHistory: builder.query<any, { setupId: number }>({
-      query: ({ setupId }) => ({
-        url: `chat_history/${setupId}`,
+    getChatHistory: builder.query<any, { reportId: number }>({
+      query: ({ reportId }) => ({
+        url: `chat_history_report/${reportId}`,
       }),
-      transformResponse: (response: any) => {
-        if (!response.length) return null;
-
-        const updated = response
-          .sort(
-            (a: any, b: any) =>
-              new Date(a.created_at).getTime() -
-              new Date(b.created_at).getTime()
-          )
-          .map((record: any) => ({
-            ...record,
-            created_at: record.created_at.split("T")[0],
-          }));
-
-        // group by date
-        const groups = groupBy("created_at")(updated);
-
-        return groups;
-      },
       keepUnusedDataFor: 0,
-      providesTags: ["Report"],
+    }),
+    addChat: builder.mutation<
+      void,
+      { reportId: number; answer: string; question: string }
+    >({
+      query: ({ reportId, question, answer }) => ({
+        method: "POST",
+        url: "chat_history_report",
+        body: {
+          report_id: reportId,
+          answer,
+          question,
+        },
+      }),
     }),
     executeReportBackground: builder.mutation<
       any,
@@ -456,6 +450,7 @@ export const {
   useGetChatWithDataMutation,
   useGenerateWarrantReportMutation,
   useGetChatHistoryQuery,
+  useAddChatMutation,
   useUpdateReportMutation,
   useMarkReportMutation,
   useUpdateReportReviewStatusMutation,

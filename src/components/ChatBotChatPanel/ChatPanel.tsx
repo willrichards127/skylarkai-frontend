@@ -39,7 +39,7 @@ export const ChatPanel = memo(
     const { isFetching: isFetchingChatHistoryDict, data: chatHistoryDict } =
       useGetChatHistoryQuery(
         {
-          setupId,
+          reportId: setupId,
         },
         { skip: isFloating }
       );

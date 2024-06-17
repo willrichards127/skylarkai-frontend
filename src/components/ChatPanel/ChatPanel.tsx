@@ -42,9 +42,9 @@ export const ChatPanel = memo(
   }) => {
     const ref = useRef<HTMLDivElement>();
 
-    const [llm, setLlm] = useState<
-      "OpenAI" | "Anthropic" | "BOTH" | "Gemini"
-    >("OpenAI");
+    const [llm, setLlm] = useState<"OpenAI" | "Anthropic" | "BOTH" | "Gemini">(
+      "OpenAI"
+    );
     const [emailModal, showEmailModal] = useState<boolean>(false);
 
     const [suggestion, setSuggestion] = useState<string>("");
@@ -218,13 +218,11 @@ export const ChatPanel = memo(
                 },
               }}
             >
-              {["OpenAI", "Anthropic", "BOTH", "Gemini"].map(
-                (item) => (
-                  <option key={item} value={item}>
-                    {item}
-                  </option>
-                )
-              )}
+              {["OpenAI", "Anthropic", "BOTH", "Gemini"].map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
             </TextField>
             <XIconButton
               size="small"
