@@ -20,6 +20,8 @@ import { loadStoreValue } from "../../../../shared/utils/storage";
 // import { useGetSuggestionsQuery } from "../../../../redux/services/transcriptAPI";
 import { scrollToAndHighlightInIFrame } from "../../../../shared/utils/basic";
 import { suggestionDict } from "../../../../shared/models/constants";
+import { useSelector } from "react-redux";
+import { currentUser } from "../../../../redux/features/authSlice";
 
 export const Chat = ({
   instance,
@@ -30,6 +32,7 @@ export const Chat = ({
   onChangeViewFile: (filename: string) => void;
   onGotoMain: () => void;
 }) => {
+  const { tenancy, token } = useSelector(currentUser);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const tagRef = useRef<string>("");
 
@@ -63,31 +66,33 @@ export const Chat = ({
   }, []);
 
   useEffect(() => {
-    const token = loadStoreValue("token");
-    const myHeaders = new Headers();
-    myHeaders.append("Authorization", `Bearer ${token}`);
+    if (token && tenancy) {
+      const token = loadStoreValue("token");
+      const myHeaders = new Headers();
+      myHeaders.append("Authorization", `Bearer ${token}`);
+      myHeaders.append("X-TENANT-ID", tenancy);
+      const formdata = new FormData();
+      formdata.append("url", viewFile!.url);
 
-    const formdata = new FormData();
-    formdata.append("url", viewFile!.url);
+      const requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: formdata,
+      };
 
-    const requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: formdata,
-    };
-
-    fetch(
-      `${import.meta.env.VITE_API_URL}edgar_file_with_url`,
-      requestOptions as any
-    )
-      .then((response) => response.text())
-      .then((result) => {
-        iframeRef.current?.contentDocument?.open();
-        iframeRef.current?.contentDocument?.write(result);
-        iframeRef.current?.contentDocument?.close();
-      })
-      .catch((error) => console.log("error", error));
-  }, [instance, viewFile]);
+      fetch(
+        `${import.meta.env.VITE_API_URL}edgar_file_with_url`,
+        requestOptions as any
+      )
+        .then((response) => response.text())
+        .then((result) => {
+          iframeRef.current?.contentDocument?.open();
+          iframeRef.current?.contentDocument?.write(result);
+          iframeRef.current?.contentDocument?.close();
+        })
+        .catch((error) => console.log("error", error));
+    }
+  }, [instance, tenancy, token, viewFile]);
 
   useEffect(() => {
     if (!iframeRef.current) return;
