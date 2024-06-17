@@ -861,7 +861,7 @@ export const transcriptApi = createApi({
       query: ({ feature_instance_id, question, answer }) => ({
         method: "POST",
         url: "chat_history",
-        data: {
+        body: {
           feature_instance_id,
           answer,
           question,
