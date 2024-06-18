@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { memo, useRef, useCallback, useEffect, useState } from "react";
+import { memo, useRef, useCallback, useEffect, useState, useMemo } from "react";
 import { Box, TextField } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
 import EmailIcon from "@mui/icons-material/Email";
@@ -13,6 +13,7 @@ import {
   useGetChatHistoryQuery,
   useGetChatWithDataMutation,
 } from "../../../../../redux/services/reportApi";
+import { useCustomQueryMutation } from "../../../../../redux/services/transcriptAPI";
 import { generatePdf } from "../../../../../shared/utils/pdf-generator";
 import { SendEmailModal } from "../../../../../components/modals/SendEmailModal";
 import moment from "moment";
@@ -52,8 +53,15 @@ export const ChatPanel = memo(
     const { isLoading: loadingChatHistory, data: chatHistoryData } =
       useGetChatHistoryQuery({ reportId });
     const [addChat] = useAddChatMutation();
-    const [getChatAnswer, { isLoading: loadingAnswer }] =
+    const [getFullAnswer, { isLoading: isFullLoading }] =
+      useCustomQueryMutation();
+    const [getQuickAnswer, { isLoading: isQuickLoading }] =
       useGetChatWithDataMutation();
+
+    const loadingAnswer = useMemo(
+      () => isFullLoading || isQuickLoading,
+      [isFullLoading, isQuickLoading]
+    );
 
     const onSend = useCallback(
       async (question: string) => {
@@ -62,17 +70,48 @@ export const ChatPanel = memo(
           { type: "question", content: question },
         ]);
         const startTime = new Date().getTime();
-        const response = await getChatAnswer({
-          setupId,
-          question,
-          content,
-          llm,
-        }).unwrap();
+
+        let result:
+          | Pick<IChat, "content" | "rating" | "rating_response">
+          | undefined;
+        if (recursion === 1) {
+          const response = await getQuickAnswer({
+            setupId,
+            question,
+            content,
+            llm,
+          }).unwrap();
+
+          if (response) {
+            result = {
+              content: response.answer,
+            };
+          }
+        } else {
+          const response = await getFullAnswer({
+            graph_id: setupId,
+            question,
+            filenames: [],
+            analysis_type: "financial_diligence",
+            recursion,
+            company_name: companyName,
+            llm,
+          }).unwrap();
+
+          if (response) {
+            result = {
+              content: response.content,
+              rating: response.rating,
+              rating_response: response.rating_response,
+            };
+          }
+        }
+
         const endTime = new Date().getTime();
         const duration = endTime - startTime;
-        if (response) {
-          const answer =
-            response.answer +
+        if (result) {
+          result.content =
+            result.content +
             `<p class="chat-duration">${getHumanableDuration(
               moment.duration(duration, "milliseconds")
             )}</p>`;
@@ -81,20 +120,27 @@ export const ChatPanel = memo(
             ...prev.filter((chat) => chat.type.toString() !== "loading"),
             {
               type: "answer",
-              content: answer,
-              // rating: response.rating,
-              // rating_response: response.rating_response,
-              duration,
+              ...result,
             },
           ]);
           addChat({
             reportId: reportId,
             question,
-            answer: answer,
+            answer: result.content,
           });
         }
       },
-      [getChatAnswer, setupId, content, llm, addChat, reportId]
+      [
+        recursion,
+        getQuickAnswer,
+        setupId,
+        content,
+        llm,
+        getFullAnswer,
+        companyName,
+        addChat,
+        reportId,
+      ]
     );
 
     const onPrint = useCallback(() => {
