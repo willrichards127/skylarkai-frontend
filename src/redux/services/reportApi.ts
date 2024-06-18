@@ -84,14 +84,15 @@ export const reportApi = createApi({
 
     getChatWithData: builder.mutation<
       any,
-      { setupId: number; content: string; question: string }
+      { setupId: number; content: string; question: string; llm: string; }
     >({
-      query: ({ setupId, question, content = "" }) => ({
+      query: ({ setupId, question, llm, content = "" }) => ({
         url: `chatwithdata/${setupId}`,
         method: "POST",
         body: {
           question,
           data: content,
+          llm,
         },
       }),
     }),

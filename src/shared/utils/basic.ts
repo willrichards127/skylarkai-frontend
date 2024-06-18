@@ -1,3 +1,5 @@
+import moment from "moment";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const getUniques = (arr: string[]) => {
   if (!arr.length) return [];
@@ -138,3 +140,16 @@ export const longDateFormat = (date: Date) => {
   });
   return formatter.format(date);
 };
+
+export const getHumanableDuration = (_duration: moment.Duration) => {
+  const hours = _duration.hours();
+  const minutes = _duration.minutes();
+  const seconds = _duration.seconds();
+
+  let duration = "";
+  if (hours) duration += `${hours}h`;
+  if (minutes) duration += `${duration ? " " : ""}${minutes}m`;
+  if (seconds) duration += `${duration ? " " : ""}${seconds}s`;
+
+  return duration;
+}

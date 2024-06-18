@@ -38,7 +38,6 @@ export const ReportTemplate = ({
   setupId,
   unitName,
   reportContent,
-  analysisType,
   isReadOnly = false,
 }: {
   reportId: number;
@@ -47,7 +46,6 @@ export const ReportTemplate = ({
   unitName?: string;
   isReadOnly?: boolean;
   reportContent: string;
-  analysisType: string;
 }) => {
   const printRef = useRef<HTMLDivElement>(null);
   const [
@@ -463,11 +461,11 @@ export const ReportTemplate = ({
           rightPanel={
             unitName ? (
               <ChatPanel
-                graph_id={setupId}
+                content={reportContent}
+                setupId={setupId}
+                reportId={reportId}
                 companyName={unitName}
-                analysis_type={analysisType}
                 onAddToReport={onAddToReport}
-                filenames={[]}
                 onJumpTo={onCitationLink}
               />
             ) : (

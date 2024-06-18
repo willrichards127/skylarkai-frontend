@@ -61,7 +61,6 @@ export const CitationModal = memo(
             reportName={report.report_metadata.reportname}
             setupId={report.graph_id}
             reportContent={report.content}
-            analysisType="financial_diligence"
             isReadOnly
           />
         )}

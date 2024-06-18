@@ -11,24 +11,26 @@ import { IChat, IChatResponse } from "../../../../../redux/interfaces";
 import {
   useAddChatMutation,
   useGetChatHistoryQuery,
+  useGetChatWithDataMutation,
 } from "../../../../../redux/services/reportApi";
 import { generatePdf } from "../../../../../shared/utils/pdf-generator";
 import { SendEmailModal } from "../../../../../components/modals/SendEmailModal";
-import { useCustomQueryMutation } from "../../../../../redux/services/transcriptAPI";
+import moment from "moment";
+import { getHumanableDuration } from "../../../../../shared/utils/basic";
 
 export const ChatPanel = memo(
   ({
-    graph_id,
-    analysis_type,
+    reportId,
+    setupId,
+    content,
     companyName,
-    filenames,
     onAddToReport,
     onJumpTo,
   }: {
-    graph_id: number;
-    analysis_type: string;
+    reportId: number;
+    setupId: number;
+    content: string;
     companyName: string;
-    filenames: string[];
     onAddToReport: (question: string, content: string) => void;
     onJumpTo: ({
       filename,
@@ -48,9 +50,10 @@ export const ChatPanel = memo(
     const [chatHistory, setChatHistory] = useState<IChat[]>([]);
 
     const { isLoading: loadingChatHistory, data: chatHistoryData } =
-      useGetChatHistoryQuery({ reportId: graph_id });
+      useGetChatHistoryQuery({ reportId });
     const [addChat] = useAddChatMutation();
-    const [getAnswer, { isLoading: loadingAnswer }] = useCustomQueryMutation();
+    const [getChatAnswer, { isLoading: loadingAnswer }] =
+      useGetChatWithDataMutation();
 
     const onSend = useCallback(
       async (question: string) => {
@@ -58,42 +61,40 @@ export const ChatPanel = memo(
           ...prev,
           { type: "question", content: question },
         ]);
-        const response = await getAnswer({
-          graph_id,
+        const startTime = new Date().getTime();
+        const response = await getChatAnswer({
+          setupId,
           question,
-          filenames,
-          analysis_type,
-          recursion,
-          company_name: companyName,
+          content,
           llm,
         }).unwrap();
+        const endTime = new Date().getTime();
+        const duration = endTime - startTime;
         if (response) {
+          const answer =
+            response.answer +
+            `<p class="chat-duration">${getHumanableDuration(
+              moment.duration(duration, "milliseconds")
+            )}</p>`;
+
           setChatHistory((prev) => [
             ...prev.filter((chat) => chat.type.toString() !== "loading"),
             {
               type: "answer",
-              content: response.content,
-              rating: response.rating,
-              rating_response: response.rating_response,
+              content: answer,
+              // rating: response.rating,
+              // rating_response: response.rating_response,
+              duration,
             },
           ]);
           addChat({
-            reportId: graph_id,
+            reportId: reportId,
             question,
-            answer: response.content as string,
+            answer: answer,
           });
         }
       },
-      [
-        getAnswer,
-        graph_id,
-        filenames,
-        analysis_type,
-        recursion,
-        companyName,
-        llm,
-        addChat,
-      ]
+      [getChatAnswer, setupId, content, llm, addChat, reportId]
     );
 
     const onPrint = useCallback(() => {
@@ -159,7 +160,15 @@ export const ChatPanel = memo(
           width: "100%",
           borderRadius: "none",
         }}
-        sxBodyProps={{ p: 1, flex: "none", height: "calc(100% - 45px)" }}
+        sxBodyProps={{
+          p: 1,
+          flex: "none",
+          height: "calc(100% - 45px)",
+          ".chat-duration": {
+            textAlign: "right",
+            color: "#41dc8e",
+          },
+        }}
         sxHeaderProps={{ bgcolor: "secondary.main" }}
         header={
           <Box
@@ -251,7 +260,7 @@ export const ChatPanel = memo(
       >
         <ChatContentBox
           ref={ref}
-          graph_id={graph_id}
+          setupId={setupId}
           chats={chatHistory}
           companyName={companyName}
           onAddToReport={onAddToReport}

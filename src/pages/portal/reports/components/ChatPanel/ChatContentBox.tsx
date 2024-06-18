@@ -8,13 +8,13 @@ import { IChat } from "../../../../../redux/interfaces";
 export const ChatContentBox = forwardRef(
   (
     {
-      graph_id,
+      setupId,
       chats,
       companyName,
       onAddToReport,
       onJumpTo,
     }: {
-      graph_id: number;
+      setupId: number;
       chats: IChat[];
       companyName: string;
       onAddToReport: (question: string, content: string) => void;
@@ -56,7 +56,7 @@ export const ChatContentBox = forwardRef(
             onJumpTo={onJumpTo}
             chats={chats}
             onAddToReport={onAddToReport}
-            graph_id={graph_id}
+            graph_id={setupId}
           />
         ))}
       </Box>

@@ -18,6 +18,7 @@ import {
 import AGTable from "../../../components/agTable/AGTable";
 import { ColDef } from "ag-grid-community";
 import moment from "moment";
+import { getHumanableDuration } from "../../../shared/utils/basic";
 // import { useGetUnitsQuery } from "../../../redux/services/setupApi";
 
 const durations = [
@@ -170,17 +171,7 @@ export const SystemManagement = () => {
               headerName: "Executing duration",
               valueFormatter: (params: any) => {
                 if (params.value) {
-                  const _duration = moment.duration(params.value, "seconds");
-                  const hours = _duration.hours();
-                  const minutes = _duration.minutes();
-                  const seconds = _duration.seconds();
-
-                  let duration = "";
-                  if (hours) duration += `${hours}h`;
-                  if (minutes) duration += `${duration ? " " : ""}${minutes}m`;
-                  if (seconds) duration += `${duration ? " " : ""}${seconds}s`;
-
-                  return duration;
+                  return getHumanableDuration(moment.duration(params.value, "seconds"));
                 }
                 return "";
               },
