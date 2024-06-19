@@ -7,7 +7,11 @@ import { XIconButton } from "../../../../../components/buttons/XIconButton";
 import { XPanel } from "../../../../../components/XPanel";
 import { ChatContentBox } from "./ChatContentBox";
 import { InputBox } from "./InputBox";
-import { IChat, IChatContent, IChatResponse } from "../../../../../redux/interfaces";
+import {
+  IChat,
+  IChatContent,
+  IChatResponse,
+} from "../../../../../redux/interfaces";
 import {
   useAddChatMutation,
   useGetChatHistoryQuery,
@@ -71,7 +75,7 @@ export const ChatPanel = memo(
         ]);
         const startTime = new Date().getTime();
 
-        let result: IChatContent | undefined;
+        const result: IChatContent = { content: "" };
         if (!recursion) {
           const response = await getQuickAnswer({
             setupId,
@@ -82,13 +86,11 @@ export const ChatPanel = memo(
           const endTime = new Date().getTime();
           const duration = endTime - startTime;
           if (response) {
-            result = {
-              content: `${
-                response.answer
-              }<p class="chat-duration">${getHumanableDuration(
-                moment.duration(duration, "milliseconds")
-              )}</p>`,
-            };
+            result.content = `${
+              response.answer
+            }<p class="chat-duration">${getHumanableDuration(
+              moment.duration(duration, "milliseconds")
+            )}</p>`;
           }
         } else {
           const response = await getFullAnswer({
@@ -103,19 +105,17 @@ export const ChatPanel = memo(
           const endTime = new Date().getTime();
           const duration = endTime - startTime;
           if (response) {
-            result = {
-              content: `${
-                response.content
-              }<p class="chat-duration">${getHumanableDuration(
-                moment.duration(duration, "milliseconds")
-              )}</p>`,
-              rating: response.rating,
-              rating_response: response.rating_response,
-            };
+            result.content = `${
+              response.content
+            }<p class="chat-duration">${getHumanableDuration(
+              moment.duration(duration, "milliseconds")
+            )}</p>`;
+            result.rating = response.rating;
+            result.rating_response = response.rating_response;
           }
         }
 
-        if (result) {
+        if (result.content) {
           setChatHistory((prev) => [
             ...prev.filter((chat) => chat.type.toString() !== "loading"),
             {
