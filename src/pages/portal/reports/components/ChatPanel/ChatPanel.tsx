@@ -46,7 +46,7 @@ export const ChatPanel = memo(
     const [llm, setLlm] = useState<"OpenAI" | "Anthropic" | "BOTH" | "Gemini">(
       "OpenAI"
     );
-    const [recursion, setRecursion] = useState<number>(1);
+    const [recursion, setRecursion] = useState<number>(0);
     const [emailModal, showEmailModal] = useState<boolean>(false);
     const [chatHistory, setChatHistory] = useState<IChat[]>([]);
 
@@ -74,7 +74,7 @@ export const ChatPanel = memo(
         let result:
           | Pick<IChat, "content" | "rating" | "rating_response">
           | undefined;
-        if (recursion === 1) {
+        if (!recursion) {
           const response = await getQuickAnswer({
             setupId,
             question,
@@ -268,7 +268,7 @@ export const ChatPanel = memo(
                 "Balanced Summary",
                 "In-Depth Insights",
               ].map((item, index) => (
-                <option key={item} value={index + 1}>
+                <option key={item} value={index}>
                   {item}
                 </option>
               ))}
