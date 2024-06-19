@@ -69,13 +69,16 @@ export type TMetric =
   | "Currentness"
   | "Verbosity";
 
-export interface IChat {
-  type: "question" | "answer" | "loading" | "topic" | "suggestions";
+export interface IChatContent {
   content: string | string[];
   tables?: string[];
   reference?: string[];
   rating?: number;
   rating_response?: Record<TMetric, IMetricContent>;
+}
+
+export interface IChat extends IChatContent {
+  type: "question" | "answer" | "loading" | "topic" | "suggestions";
 }
 
 export interface ICompany {
