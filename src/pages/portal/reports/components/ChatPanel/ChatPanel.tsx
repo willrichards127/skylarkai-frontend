@@ -81,10 +81,15 @@ export const ChatPanel = memo(
             content,
             llm,
           }).unwrap();
-
+          const endTime = new Date().getTime();
+          const duration = endTime - startTime;
           if (response) {
             result = {
-              content: response.answer,
+              content: `${
+                response.answer
+              }<p class="chat-duration">${getHumanableDuration(
+                moment.duration(duration, "milliseconds")
+              )}</p>`,
             };
           }
         } else {
@@ -97,25 +102,22 @@ export const ChatPanel = memo(
             company_name: companyName,
             llm,
           }).unwrap();
-
+          const endTime = new Date().getTime();
+          const duration = endTime - startTime;
           if (response) {
             result = {
-              content: response.content,
+              content: `${
+                response.content
+              }<p class="chat-duration">${getHumanableDuration(
+                moment.duration(duration, "milliseconds")
+              )}</p>`,
               rating: response.rating,
               rating_response: response.rating_response,
             };
           }
         }
 
-        const endTime = new Date().getTime();
-        const duration = endTime - startTime;
         if (result) {
-          result.content =
-            result.content +
-            `<p class="chat-duration">${getHumanableDuration(
-              moment.duration(duration, "milliseconds")
-            )}</p>`;
-
           setChatHistory((prev) => [
             ...prev.filter((chat) => chat.type.toString() !== "loading"),
             {
@@ -126,7 +128,7 @@ export const ChatPanel = memo(
           addChat({
             reportId: reportId,
             question,
-            answer: result.content,
+            answer: result.content as string,
           });
         }
       },
