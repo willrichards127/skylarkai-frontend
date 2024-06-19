@@ -7,7 +7,7 @@ import { XIconButton } from "../../../../../components/buttons/XIconButton";
 import { XPanel } from "../../../../../components/XPanel";
 import { ChatContentBox } from "./ChatContentBox";
 import { InputBox } from "./InputBox";
-import { IChat, IChatResponse } from "../../../../../redux/interfaces";
+import { IChat, IChatContent, IChatResponse } from "../../../../../redux/interfaces";
 import {
   useAddChatMutation,
   useGetChatHistoryQuery,
@@ -71,9 +71,7 @@ export const ChatPanel = memo(
         ]);
         const startTime = new Date().getTime();
 
-        let result:
-          | Pick<IChat, "content" | "rating" | "rating_response">
-          | undefined;
+        let result: IChatContent | undefined;
         if (!recursion) {
           const response = await getQuickAnswer({
             setupId,
