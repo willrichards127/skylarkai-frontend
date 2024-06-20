@@ -66,6 +66,7 @@ export const ChatBlock = ({
     showEmailModal(true);
   }, []);
 
+  console.log("================", chat.type, chat.content);
   return (
     <Box
       sx={{
@@ -122,7 +123,7 @@ export const ChatBlock = ({
               return true;
             }}
             unwrapDisallowed={true}
-            components={{              
+            components={{
               li: ({ ordered, ...props }: any) => (
                 <li style={{ marginLeft: 16 }} {...props} />
               ),
