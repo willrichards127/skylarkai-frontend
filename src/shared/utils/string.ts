@@ -166,7 +166,7 @@ const replaceContentBetweenTripleBackticks = (str: string) => {
   const regex = /```([\s\S]*?)```/g;
   return str.replace(regex, (s: string) => {
     // if pl starts with csv
-    const replaced = s.replaceAll("```", "").replaceAll("csv", "").replaceAll("json", "");
+    const replaced = s.replaceAll("```plaintext", "").replaceAll("```markdown", "").replaceAll("```", "").replaceAll("csv", "").replaceAll("json", "");
     // p1 contains the text between triple backticks
     if (isCSVFormat(replaced)) {
       return csvToHtmlTable(replaced);
