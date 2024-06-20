@@ -2,9 +2,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useCallback, useMemo, useRef, useState } from "react";
 import { colors, Box, Button } from "@mui/material";
-// import ReactMarkdown from "react-markdown";
-// import remarkGfm from "remark-gfm";
-// import rehypeRaw from "rehype-raw";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 import EmailIcon from "@mui/icons-material/Email";
 // import FileDownloadIcon from "@mui/icons-material/FileDownload";
 
@@ -24,6 +24,7 @@ export const ChatBlock = ({
   graph_id,
   chat,
   chats,
+  // onJumpTo,
   onAddToReport,
 }: {
   graph_id: number;
@@ -106,7 +107,7 @@ export const ChatBlock = ({
         onMouseOut={onMouseOut}
       >
         <Box width="100%" fontSize={13} ref={ref}>
-          {/* <ReactMarkdown
+          <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             rehypePlugins={[rehypeRaw as any]}
             allowElement={(element, _, parent) => {
@@ -122,83 +123,83 @@ export const ChatBlock = ({
               return true;
             }}
             unwrapDisallowed={true}
-            components={{
-              li: ({ ordered, ...props }: any) => (
-                <li style={{ marginLeft: 16 }} {...props} />
-              ),
-              p: ({ ...props }: any) => (
-                <p {...props} style={{ margin: "6px 0" }} />
-              ),
-              a: (props: any) => {
-                if (props.href) {
-                  const splited = props.href.split("______");
-                  const filename = splited[0].replaceAll("___", " ").slice(1);
-                  const quote = splited[1].replaceAll("___", " ");
-                  return (
-                    <a
-                      {...props}
-                      className="no-print"
-                      style={{ color: "tomato" }}
-                      onClick={() => onJumpTo({ filename, quote })}
-                      title={`${filename}.pdf:${quote}`}
-                    />
-                  );
-                } else return <p {...props} />;
-              },
-              table: (props: any) => {
-                return (
-                  <Tooltip
-                    title={
-                      <XIconButton
-                        size="small"
-                        variant="contained"
-                        sxProps={{
-                          "&.MuiButtonBase-root": {
-                            minHeight: 31,
-                            minWidth: 31,
-                          },
-                        }}
-                        onClick={() => onDownloadCSV(props["data-csv"])}
-                      >
-                        <FileDownloadIcon />
-                      </XIconButton>
-                    }
-                  >
-                    <table
-                      {...props}
-                      style={{
-                        borderCollapse: "collapse",
-                        margin: "4px 2px",
-                        overflowX: "auto",
-                      }}
-                    />
-                  </Tooltip>
-                );
-              },
-              th: (props) => (
-                <th
-                  {...props}
-                  style={{
-                    textAlign: "center",
-                    padding: "2px 4px",
-                    border: `1px solid ${colors.grey[500]}`,
-                  }}
-                />
-              ),
-              td: (props) => (
-                <td
-                  {...props}
-                  style={{
-                    textAlign: "center",
-                    padding: "4px 8px",
-                    border: `1px solid ${colors.grey[500]}`,
-                  }}
-                />
-              ),
-            }}
-          > */}
+            // components={{
+            //   li: ({ ordered, ...props }: any) => (
+            //     <li style={{ marginLeft: 16 }} {...props} />
+            //   ),
+            //   p: ({ ...props }: any) => (
+            //     <p {...props} style={{ margin: "6px 0" }} />
+            //   ),
+            //   a: (props: any) => {
+            //     if (props.href) {
+            //       const splited = props.href.split("______");
+            //       const filename = splited[0].replaceAll("___", " ").slice(1);
+            //       const quote = splited[1].replaceAll("___", " ");
+            //       return (
+            //         <a
+            //           {...props}
+            //           className="no-print"
+            //           style={{ color: "tomato" }}
+            //           onClick={() => onJumpTo({ filename, quote })}
+            //           title={`${filename}.pdf:${quote}`}
+            //         />
+            //       );
+            //     } else return <p {...props} />;
+            //   },
+            //   table: (props: any) => {
+            //     return (
+            //       <Tooltip
+            //         title={
+            //           <XIconButton
+            //             size="small"
+            //             variant="contained"
+            //             sxProps={{
+            //               "&.MuiButtonBase-root": {
+            //                 minHeight: 31,
+            //                 minWidth: 31,
+            //               },
+            //             }}
+            //             onClick={() => onDownloadCSV(props["data-csv"])}
+            //           >
+            //             <FileDownloadIcon />
+            //           </XIconButton>
+            //         }
+            //       >
+            //         <table
+            //           {...props}
+            //           style={{
+            //             borderCollapse: "collapse",
+            //             margin: "4px 2px",
+            //             overflowX: "auto",
+            //           }}
+            //         />
+            //       </Tooltip>
+            //     );
+            //   },
+            //   th: (props) => (
+            //     <th
+            //       {...props}
+            //       style={{
+            //         textAlign: "center",
+            //         padding: "2px 4px",
+            //         border: `1px solid ${colors.grey[500]}`,
+            //       }}
+            //     />
+            //   ),
+            //   td: (props) => (
+            //     <td
+            //       {...props}
+            //       style={{
+            //         textAlign: "center",
+            //         padding: "4px 8px",
+            //         border: `1px solid ${colors.grey[500]}`,
+            //       }}
+            //     />
+            //   ),
+            // }}
+          >
             {isBot ? answer : (chat.content as string)}
-          {/* </ReactMarkdown> */}
+          </ReactMarkdown>
           {chat.rating && chat.rating_response && (
             <FeedbackFloat
               graph_id={graph_id}
