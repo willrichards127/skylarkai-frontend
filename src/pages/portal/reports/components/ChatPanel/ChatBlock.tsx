@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useCallback, useMemo, useRef, useState } from "react";
-import { colors, Box, Button, Tooltip } from "@mui/material";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
+import { colors, Box, Button } from "@mui/material";
+// import ReactMarkdown from "react-markdown";
+// import remarkGfm from "remark-gfm";
+// import rehypeRaw from "rehype-raw";
 import EmailIcon from "@mui/icons-material/Email";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
+// import FileDownloadIcon from "@mui/icons-material/FileDownload";
 
 import { DotSpinner } from "../../../../../components/DotSpinner";
 import { XIconButton } from "../../../../../components/buttons/XIconButton";
@@ -18,13 +18,12 @@ import { IChat } from "../../../../../redux/interfaces";
 import { parseCitation } from "../../../../../shared/utils/string";
 import { SendEmailModal } from "../../../../../components/modals/SendEmailModal";
 import { FeedbackFloat } from "./feedback/FeedbackFloat";
-import { downloadCSV } from "../../../../../shared/utils/download";
+// import { downloadCSV } from "../../../../../shared/utils/download";
 
 export const ChatBlock = ({
   graph_id,
   chat,
   chats,
-  onJumpTo,
   onAddToReport,
 }: {
   graph_id: number;
@@ -57,9 +56,9 @@ export const ChatBlock = ({
     setBlogHovered(false);
   }, []);
 
-  const onDownloadCSV = useCallback((csvStr: string) => {
-    downloadCSV(csvStr);
-  }, []);
+  // const onDownloadCSV = useCallback((csvStr: string) => {
+  //   downloadCSV(csvStr);
+  // }, []);
 
   const onSendViaEmail = useCallback((question: string) => {
     questionRef.current = `<b>Question: ${question}</b><br />Answer: `;
@@ -107,7 +106,7 @@ export const ChatBlock = ({
         onMouseOut={onMouseOut}
       >
         <Box width="100%" fontSize={13} ref={ref}>
-          <ReactMarkdown
+          {/* <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             rehypePlugins={[rehypeRaw as any]}
             allowElement={(element, _, parent) => {
@@ -197,9 +196,9 @@ export const ChatBlock = ({
                 />
               ),
             }}
-          >
+          > */}
             {isBot ? answer : (chat.content as string)}
-          </ReactMarkdown>
+          {/* </ReactMarkdown> */}
           {chat.rating && chat.rating_response && (
             <FeedbackFloat
               graph_id={graph_id}
