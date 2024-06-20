@@ -66,7 +66,7 @@ export const ChatBlock = ({
     showEmailModal(true);
   }, []);
 
-  console.log("================", chat.type, chat.content);
+  console.log("================", isBot ? answer : (chat.content as string));
   return (
     <Box
       sx={{
@@ -110,18 +110,18 @@ export const ChatBlock = ({
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             rehypePlugins={[rehypeRaw as any]}
-            allowElement={(element, _, parent) => {
-              if (element.tagName === "p" && (parent as any).tagName === "li") {
-                return false;
-              }
-              if (
-                element.tagName === "strong" &&
-                (parent as any).tagName === "li"
-              ) {
-                return false;
-              }
-              return true;
-            }}
+            // allowElement={(element, _, parent) => {
+            //   if (element.tagName === "p" && (parent as any).tagName === "li") {
+            //     return false;
+            //   }
+            //   if (
+            //     element.tagName === "strong" &&
+            //     (parent as any).tagName === "li"
+            //   ) {
+            //     return false;
+            //   }
+            //   return true;
+            // }}
             unwrapDisallowed={true}
             // components={{
             //   li: ({ ordered, ...props }: any) => (
