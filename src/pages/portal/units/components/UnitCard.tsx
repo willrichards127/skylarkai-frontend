@@ -11,6 +11,7 @@ import {
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { XPopmenu } from "../../../../components/XPopmenu";
 import { IMenuItem } from "../../../../shared/models/interfaces";
+import { convertUtcToLocal } from "../../../../shared/utils/dateUtils";
 
 export const UnitCard = memo(
   ({
@@ -100,7 +101,7 @@ export const UnitCard = memo(
               subheader={
                 <Box>
                   {author && <Box fontSize={13} fontWeight="bold">Analyst: {author}</Box>}
-                  <Box fontSize={12}>{new Date(created_at || "").toLocaleString()}</Box>
+                  <Box fontSize={12}>{convertUtcToLocal(created_at || "")}</Box>
                 </Box>
               }
               sx={{ p: 1 }}

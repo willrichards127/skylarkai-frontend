@@ -19,6 +19,7 @@ import AGTable from "../../components/agTable/AGTable";
 import { useGetPersonasQuery } from "../../redux/services/userAPI";
 import { useGetReportsByTenantQuery } from "../../redux/services/reportApi";
 import { getUniques } from "../../shared/utils/basic";
+import { convertUtcToLocal } from "../../shared/utils/dateUtils";
 
 export const reviewStatusDict: Record<number, any> = {
   0: {
@@ -231,8 +232,7 @@ const DashboardPage = () => {
         field: "created_at",
         headerName: "Created At",
         filter: "agDateColumnFilter",
-        valueFormatter: (params: any) =>
-          new Date(params.value).toLocaleString(),
+        valueFormatter: (params: any) => convertUtcToLocal(params.value),
       },
       {
         field: "actions",

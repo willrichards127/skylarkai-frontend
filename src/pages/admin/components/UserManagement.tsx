@@ -11,6 +11,7 @@ import {
 } from "../../../redux/services/userAPI";
 import { ColDef } from "ag-grid-community";
 import { toast } from "react-toastify";
+import { convertUtcToLocal } from "../../../shared/utils/dateUtils";
 
 export const UserManagement = () => {
   const { user } = useSelector(currentUser);
@@ -108,7 +109,7 @@ export const UserManagement = () => {
         headerName: "Created At",
         filter: "agDateColumnFilter",
         valueFormatter: (params: any) =>
-          new Date(params.value).toLocaleString(),
+          convertUtcToLocal(params.value),
       },
       {
         field: "actions",

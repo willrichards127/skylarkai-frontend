@@ -4,6 +4,7 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { NoAvailable } from "../../../../components/NoAvailable";
 import { IFeatureInstance } from "../../../../redux/interfaces";
 import { useDeleteFeatureInstanceMutation } from "../../../../redux/services/transcriptAPI";
+import { convertUtcToLocal } from "../../../../shared/utils/dateUtils";
 
 export const SavedInstancesContainer = memo(
   ({
@@ -88,7 +89,7 @@ export const SavedInstancesContainer = memo(
                       {instance.instance_name}
                     </Typography>
                     <Typography variant="body2" gutterBottom>
-                      {new Date(instance.created_at!).toLocaleString()}
+                      {convertUtcToLocal(instance.created_at!)}
                     </Typography>
                   </Box>
                   <IconButton size="small" onClick={onDelete(instance.id!)}>

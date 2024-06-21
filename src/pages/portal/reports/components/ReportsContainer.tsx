@@ -16,7 +16,6 @@ import {
   useDeleteExecutingMutation,
 } from "../../../../redux/services/reportApi";
 import { useNotification } from "../../../../shared/socket/NotificationProvider";
-import { getDate } from "../../../../shared/utils/parse";
 import { REPORTS_DICT } from "../../../../shared/models/constants";
 import {
   useLazyGetTaskExecutionResultStatusQuery,
@@ -25,6 +24,7 @@ import {
 import { TemplateViewModal } from "../../../../components/modals/TemplateViewModal";
 import { IExecutionSectionDetail } from "../../../../redux/interfaces";
 import { RenameReportModal } from "../../setups/components/RenameReportModal";
+import { convertUtcToLocal } from "../../../../shared/utils/dateUtils";
 
 const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
   const { user } = useSelector(currentUser);
@@ -308,8 +308,9 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
                 id={report.id}
                 reviewStatus={report.review_status}
                 label={getReportName(report)}
-                updatedAt={getDate(
-                  new Date(report.created_at || report.executed_at)
+                updatedAt={convertUtcToLocal(
+                  report.created_at || report.executed_at,
+                  "MMM D, YYYY"
                 )}
                 width={350}
                 moreItems={generalMoreItems}
@@ -345,7 +346,7 @@ const ReportsContainer = memo(({ reportType }: { reportType: number }) => {
                   card.data["report_data"]["title"]
                 }
                 width={350}
-                updatedAt={getDate(new Date(card.created_at))}
+                updatedAt={convertUtcToLocal(card.created_at, "MMM D, YYYY")}
                 moreItems={executinMoreItems}
                 onMoreItem={(menuItemId) =>
                   onMoreItem(card.task_id, menuItemId)

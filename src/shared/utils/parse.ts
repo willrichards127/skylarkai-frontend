@@ -145,14 +145,6 @@ export const parse2Apex = (
   }
 };
 
-export const getDate = (date: Date = new Date()) => {
-  return date.toLocaleDateString("en", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-};
-
 export const getNewId = (prefix = "md") => `${prefix}_${uuidv4()}`;
 
 const parseExpression = (json: any, limitWordCount?: number) => {

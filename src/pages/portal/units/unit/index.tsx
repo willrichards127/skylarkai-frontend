@@ -12,6 +12,7 @@ import LinkIcon from "@mui/icons-material/Link";
 import { Layout } from "../../Layout";
 import { useGetUnitQuery } from "../../../../redux/services/setupApi";
 import { ensureHttpOrHttps } from "../../../../shared/utils/base";
+import { convertUtcToLocal } from "../../../../shared/utils/dateUtils";
 
 const UnitPage = () => {
   const unitId = useParams<{ unitId: string }>().unitId!;
@@ -85,7 +86,7 @@ const UnitPage = () => {
                 fontSize={13}
                 sx={{ whiteSpace: "nowrap" }}
               >
-                Updated: {new Date(unit!.updated_at || "").toLocaleDateString()}
+                Updated: {convertUtcToLocal(unit!.updated_at || "")}
               </Typography>
             </Box>
 

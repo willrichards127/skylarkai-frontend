@@ -15,8 +15,8 @@ import { useEffect, useState } from "react";
 import { DocumentChip } from "../../../components/DocumentChip";
 import { FileViewModal } from "../../premium/components/sub-components/FileViewModal";
 import { useIngestFilesMutation } from "../../../redux/services/setupApi";
-import { getDate } from "../../../shared/utils/parse";
 import { useNotification } from "../../../shared/socket/NotificationProvider";
+import { convertUtcToLocal } from "../../../shared/utils/dateUtils";
 
 export default function VDRDetailPage() {
   const vdrId = useParams<{ vdrId: string }>().vdrId!;
@@ -114,7 +114,14 @@ export default function VDRDetailPage() {
                 />
               </Box>
               {isIngesting ? (
-                <Box sx={{ width: "100%", display: "flex", justifyContent: "center", py: 2 }}>
+                <Box
+                  sx={{
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "center",
+                    py: 2,
+                  }}
+                >
                   <CircularProgress />
                 </Box>
               ) : selectedFiles.length ? (
@@ -178,7 +185,10 @@ export default function VDRDetailPage() {
                           </Typography>
                           {file.ingested_at ? (
                             <Typography variant="body2" sx={{ fontSize: 11 }}>
-                              {getDate(new Date(file.ingested_at))}
+                              {convertUtcToLocal(
+                                file.ingested_at,
+                                "MMM D, YYYY"
+                              )}
                             </Typography>
                           ) : null}
                         </>

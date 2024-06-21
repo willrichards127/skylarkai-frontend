@@ -90,8 +90,8 @@ const CategoryPanel = memo(
                 <KeyboardDoubleArrowLeftIcon sx={{ fontSize: 20 }} />
               </IconButton>
             </Box>
-            {categoryList.map(([label, items]) => (
-              <Box key={`category-${label}`} mb={0.5}>
+            {categoryList.map(([label, items], index) => (
+              <Box key={`category-${label}-${index}`} mb={0.5}>
                 <CollapsiblePanel
                   label={
                     <Typography
@@ -105,11 +105,11 @@ const CategoryPanel = memo(
                 >
                   {[...items]
                     .sort((a, b) => a.template_node_id - b.template_node_id)
-                    .map((item) =>
+                    .map((item, index) =>
                       item.template_node_id === 1 ? (
                         <>
                           <DndListItem
-                            key={`template-${item.template_node_id}`}
+                            key={`template-${item.template_node_id}-${index}`}
                             item={item}
                             draggable={false}
                           />

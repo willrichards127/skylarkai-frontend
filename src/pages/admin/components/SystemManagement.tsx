@@ -19,6 +19,7 @@ import AGTable from "../../../components/agTable/AGTable";
 import { ColDef } from "ag-grid-community";
 import moment from "moment";
 import { getHumanableDuration } from "../../../shared/utils/basic";
+import { convertUtcToLocal } from "../../../shared/utils/dateUtils";
 // import { useGetUnitsQuery } from "../../../redux/services/setupApi";
 
 const durations = [
@@ -110,7 +111,7 @@ export const SystemManagement = () => {
               headerName: "Created At",
               filter: "agDateColumnFilter",
               valueFormatter: (params: any) =>
-                new Date(params.value).toLocaleString(),
+                convertUtcToLocal(params.value),
             },
             {
               field: "report_count",
@@ -164,7 +165,7 @@ export const SystemManagement = () => {
               headerName: "Created At",
               filter: "agDateColumnFilter",
               valueFormatter: (params: any) =>
-                new Date(params.value).toLocaleString(),
+                convertUtcToLocal(params.value),
             },
             {
               field: "duration",

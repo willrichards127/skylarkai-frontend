@@ -7,6 +7,7 @@ import {
   CardActionArea,
   colors,
 } from "@mui/material";
+import { convertUtcToLocal } from "../../../../shared/utils/dateUtils";
 
 export const CompanyCard = memo(
   ({
@@ -61,7 +62,7 @@ export const CompanyCard = memo(
                   {label}
                 </Box>
               }
-              subheader={<Box fontSize={14}>{new Date(createdAt || "").toLocaleString()}</Box>}
+              subheader={<Box fontSize={14}>{convertUtcToLocal(createdAt || "")}</Box>}
             />
           </Box>
         </CardActionArea>

@@ -67,7 +67,7 @@ export const ExecutionModal = memo(
 
     useEffect(() => {
       onExecute();
-    }, [setup]);
+    }, [setup.id]);
 
     const onExecute = async () => {
       let uploadFiles: File[] | undefined = undefined;

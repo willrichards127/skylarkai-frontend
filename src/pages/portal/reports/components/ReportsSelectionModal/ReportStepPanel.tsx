@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { Box, TextField, Typography, CircularProgress } from "@mui/material";
 import { useGetReportsByUnitQuery } from "../../../../../redux/services/reportApi";
+import { convertUtcToLocal } from "../../../../../shared/utils/dateUtils";
 
 export const ReportStepPanel = ({
   companyId,
@@ -89,7 +90,7 @@ export const ReportStepPanel = ({
                   {report.report_metadata.reportname!}
                 </Typography>
                 <Typography variant="body2" fontSize={13}>
-                  Created At: {new Date(report.created_at).toLocaleString()}
+                  Created At: {convertUtcToLocal(report.created_at)}
                 </Typography>
               </Box>
             ))

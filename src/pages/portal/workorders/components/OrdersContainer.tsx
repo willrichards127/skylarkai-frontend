@@ -17,6 +17,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { XTable } from "../../../../components/table";
 import { useGetWorkOrdersPerCompanyQuery } from "../../../../redux/services/workOrderApi";
 import { useNavigate } from "react-router-dom";
+import { convertUtcToLocal } from "../../../../shared/utils/dateUtils";
 
 const statusColorDict: Record<number, any> = {
   2: {
@@ -163,7 +164,7 @@ const OrdersContainer = memo(
                 id: "created_at",
                 label: "Created At",
                 cellRenderer: ({ row, column }: { row: any; column: any }) =>
-                  new Date(row[column.id]).toLocaleString(),
+                  convertUtcToLocal(row[column.id]),
               },
               {
                 id: "actions",

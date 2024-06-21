@@ -26,7 +26,7 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { parseCitation } from "../../shared/utils/string";
 import { IExecutionSectionDetail } from "../../redux/interfaces";
-import moment from "moment";
+import { convertUtcToLocal } from "../../shared/utils/dateUtils";
 
 export const TemplateViewModal = memo(
   ({
@@ -195,7 +195,10 @@ export const TemplateViewModal = memo(
                   {completedAt ? (
                     <Typography>
                       Completed at:{" "}
-                      {moment(completedAt).format("MMMM Do YYYY, h:mm:ss a")}
+                      {convertUtcToLocal(
+                        completedAt,
+                        "MMMM Do YYYY, h:mm:ss a"
+                      )}
                     </Typography>
                   ) : null}
                 </Box>

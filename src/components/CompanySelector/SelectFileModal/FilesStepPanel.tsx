@@ -11,6 +11,7 @@ import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import { useGetReportsByUnitQuery } from "../../../redux/services/reportApi";
 import { useGetVDRsQuery } from "../../../redux/services/vdrApi";
 import { uniqueArr } from "../../../shared/utils/basic";
+import { convertUtcToLocal } from "../../../shared/utils/dateUtils";
 
 export const FilesStepPanel = ({
   companyId,
@@ -188,7 +189,7 @@ export const FilesStepPanel = ({
                   {record.name}
                 </Typography>
                 <Typography variant="body2" fontSize={13}>
-                  Date: {new Date(record.date).toLocaleString()}
+                  Date: {convertUtcToLocal(record.date)}
                 </Typography>
               </Box>
             ))

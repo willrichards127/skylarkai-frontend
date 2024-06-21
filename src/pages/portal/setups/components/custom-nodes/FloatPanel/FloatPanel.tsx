@@ -48,6 +48,7 @@ import { VDDNode } from "../nodes/dataloaders/VDDNode";
 import { useExecuteCriteriaMutation } from "../../../../../../redux/services/setupApi";
 import { useSaveReportMutation } from "../../../../../../redux/services/reportApi";
 import { longDateFormat } from "../../../../../../shared/utils/basic";
+import { CrunchbaseNode } from "../nodes/dataloaders/CrunchbaseNode";
 
 // key is corresponding to items.name
 const ComponentDict: Record<
@@ -88,6 +89,7 @@ const ComponentDict: Record<
   DataSearch: DataSearchNode,
   VDD: VDDNode,
   InvestmentCriteria: InvestmentCriteriaNode,
+  Crunchbase: CrunchbaseNode,
 };
 
 const FloatPanel = memo(
@@ -307,6 +309,24 @@ const FloatPanel = memo(
                 />
               </Box>
             ) : ["InvestmentCriteria"].includes(nodeContent.name) ? (
+              <Box
+                sx={{
+                  display: "flex",
+                  width: "100%",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <Box mr="auto" />
+                {!isExecutingCriteria ? (
+                  <IconButton size="small" onClick={onExecuteCriteria}>
+                    <PlayArrowIcon sx={{ fontSize: 18 }} />
+                  </IconButton>
+                ) : (
+                  <CircularProgress size={18} />
+                )}
+              </Box>
+            ) : ["Crunchbase"].includes(nodeContent.name) ? (
               <Box
                 sx={{
                   display: "flex",
