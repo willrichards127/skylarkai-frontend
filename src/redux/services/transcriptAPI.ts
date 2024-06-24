@@ -727,7 +727,6 @@ export const transcriptApi = createApi({
         apiBaseQuery
       ) {
         const graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
-        console.log("=================", analysis_type);
         try {
           const formdata = new FormData();
           formdata.append("analysis_type", analysis_type);

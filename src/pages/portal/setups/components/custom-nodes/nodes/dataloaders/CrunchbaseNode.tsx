@@ -59,7 +59,6 @@ export const CrunchbaseNode = memo(
 
     const onNodeSelect = (props: ITreeViewOnNodeSelectProps) => {
       const selectedIds = props.treeState?.selectedIds;
-      console.log("==================", selectedIds);
       if (selectedIds) {
         setNodes((prev) =>
           prev.map((node) => {

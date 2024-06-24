@@ -162,15 +162,28 @@ const cleanUp = (inputString: string, limitWordCount?: number) => {
   }
 };
 
-const replaceContentBetweenTripleBackticks = (str: string) => {
+export const removeTemplateCode = (str: string) => {
+  const regex = /<template>([\s\S]*?)<\/template>/g;
+  return str.replace(regex, (s: string) => {
+    const replaced = s
+      .replaceAll("<template>", "")
+      .replaceAll("</template>", "")
+    return replaced;
+  });
+}
+
+export const replaceContentBetweenTripleBackticks = (str: string) => {
   const regex = /```([\s\S]*?)```/g;
   return str.replace(regex, (s: string) => {
     // if pl starts with csv
     const replaced = s.replaceAll("```plaintext", "").replaceAll("```markdown", "").replaceAll("```", "").replaceAll("csv", "").replaceAll("json", "");
     // p1 contains the text between triple backticks
-    if (isCSVFormat(replaced)) {
-      return csvToHtmlTable(replaced);
-    }
+
+    /** FIXME **/
+    // if (isCSVFormat(replaced)) {
+    //   return csvToHtmlTable(replaced);
+    // }
+    /** FIXME **/
     return replaced;
   });
 };
@@ -180,14 +193,16 @@ export const replaceContentBetweenCodeBlock = (str: string) => {
 
   return str.replace(regex, (s: string) => {
     const replaced = s
+      .replaceAll("markdown", "")
       .replaceAll("csv", "")
       .replaceAll("json", "")
       .replaceAll("<p><code>", "")
       .replaceAll("</code></p>", "");
-    
-    if (isCSVFormat(replaced)) {
-      return csvToHtmlTable(replaced);
-    }
+    /** FIXME **/
+    // if (isCSVFormat(replaced)) {
+    //   return csvToHtmlTable(replaced);
+    // }
+    /** FIXME **/
     return replaced;
   });
 };

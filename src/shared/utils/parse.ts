@@ -5,7 +5,7 @@ import * as cheerios from "cheerio";
 import { parse } from "node-html-parser";
 import * as marked from "marked";
 import { IDNDContainer, IDNDItem } from "../models/interfaces";
-import { replaceContentBetweenCodeBlock } from "./string";
+import { removeTemplateCode, replaceContentBetweenCodeBlock, replaceContentBetweenTripleBackticks } from "./string";
 
 export const parseSWOT = (content: string) => {
   const strengthsRegex = /Strengths:([\s\S]*?)(Weaknesses:|$)/;
@@ -206,8 +206,8 @@ const parseCitation = (html: string, limitWordCount?: number) => {
   let startIndex = -1;
   let braceCount = 0;
 
-  let content = replaceContentBetweenCodeBlock(html);
-
+  let content = replaceContentBetweenCodeBlock(replaceContentBetweenTripleBackticks(html));
+  
   for (let i = 0; i < content.length; i++) {
     if (content[i] === "{") {
       if (braceCount === 0) {
@@ -234,7 +234,7 @@ const parseCitation = (html: string, limitWordCount?: number) => {
 // content parser for saved report (html format)
 export const categoryParser3 = (htmlString: string) => {
   const sections: IDNDContainer[] = [];
-  const root: any = parse(htmlString);
+  const root: any = parse(removeTemplateCode(htmlString));
   root.childNodes.forEach((el: any) => {
     // check if el is correct container
     if ((el.rawAttrs || "").includes("dnd-container")) {
@@ -273,6 +273,7 @@ export const categoryParser3 = (htmlString: string) => {
               child.firstChild.rawTagName === "p" &&
               child.firstChild?.firstChild?.rawTagName === "code"
             ) {
+              console.log('1111111111')
               value = {
                 tag: "table",
                 content: parseCitation(child.innerHTML),
@@ -283,6 +284,7 @@ export const categoryParser3 = (htmlString: string) => {
               child.firstChild?.childNodes?.length > 1 &&
               child.firstChild.childNodes[2] && child.firstChild.childNodes[2].rawTagName === "code"
             ) {
+              console.log('2222222222')
               value = {
                 tag: "table",
                 content: parseCitation(
@@ -292,6 +294,7 @@ export const categoryParser3 = (htmlString: string) => {
                 ),
               };
             } else {
+              console.log('3333333333', child.firstChild.rawTagName)
               value = {
                 tag: child.firstChild.rawTagName,
                 content: parseCitation(child.innerHTML),
@@ -387,7 +390,7 @@ export const initializeHtmlResponse = (htmlString: string) => {
     return htmlString;
   } else {
     let categorizedHtml = "";
-    const root: any = parse(htmlString);
+    const root: any = parse(removeTemplateCode(htmlString));
     root.childNodes
       .filter((el: any) => el.nodeType !== Node.TEXT_NODE) // Filter out text nodes
       .forEach((el: any) => {
