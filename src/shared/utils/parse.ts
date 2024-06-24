@@ -273,7 +273,6 @@ export const categoryParser3 = (htmlString: string) => {
               child.firstChild.rawTagName === "p" &&
               child.firstChild?.firstChild?.rawTagName === "code"
             ) {
-              console.log('1111111111')
               value = {
                 tag: "table",
                 content: parseCitation(child.innerHTML),
@@ -284,7 +283,6 @@ export const categoryParser3 = (htmlString: string) => {
               child.firstChild?.childNodes?.length > 1 &&
               child.firstChild.childNodes[2] && child.firstChild.childNodes[2].rawTagName === "code"
             ) {
-              console.log('2222222222')
               value = {
                 tag: "table",
                 content: parseCitation(
@@ -294,7 +292,6 @@ export const categoryParser3 = (htmlString: string) => {
                 ),
               };
             } else {
-              console.log('3333333333', child.firstChild.rawTagName)
               value = {
                 tag: child.firstChild.rawTagName,
                 content: parseCitation(child.innerHTML),
