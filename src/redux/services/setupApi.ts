@@ -200,10 +200,12 @@ export const setupApi = createApi({
         type?: number;
         website?: string;
         description?: string;
+        crunch_id?: string;
+        meta_data?: any;
       }
     >({
       async queryFn(
-        { name, logo_file, website, description, type = 1 },
+        { name, logo_file, website, description, crunch_id, meta_data, type = 1 },
         _,
         __,
         apiBaseQuery
@@ -223,7 +225,13 @@ export const setupApi = createApi({
           if (logo_file) {
             formdata.append("logo_file", logo_file);
           }
-
+          if (crunch_id) {
+            formdata.append("crunch_id", crunch_id);
+          }
+          if (meta_data) {
+            formdata.append("meta_data", JSON.stringify(meta_data));
+          }
+          
           const response: any = await apiBaseQuery({
             url: "target_companies",
             method: "POST",
@@ -255,10 +263,12 @@ export const setupApi = createApi({
         website?: string;
         is_active?: boolean;
         description?: string;
+        crunch_id?: string;
+        meta_data?: any;
       }
     >({
       async queryFn(
-        { id, name, logo_file, website, description, is_active, type = 1 },
+        { id, name, logo_file, website, description, is_active, crunch_id, meta_data, type = 1 },
         _,
         __,
         apiBaseQuery
@@ -279,6 +289,12 @@ export const setupApi = createApi({
           }
           if (logo_file) {
             formdata.append("logo_file", logo_file);
+          }
+          if (crunch_id) {
+            formdata.append("crunch_id", crunch_id);
+          }
+          if (meta_data) {
+            formdata.append("meta_data", meta_data);
           }
           if (is_active !== undefined && is_active !== null) {
             formdata.append("is_active", is_active.toString());

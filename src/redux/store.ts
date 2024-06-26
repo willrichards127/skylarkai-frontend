@@ -11,6 +11,7 @@ import { vdrApi } from "./services/vdrApi";
 
 import { loadStoreValue } from "../shared/utils/storage";
 import { checkForUnauthorized, rtkQueryErrorLogger } from "./middleware";
+import { factsetApi } from "./services/factsetApi";
 
 export const store = configureStore({
   preloadedState: {
@@ -30,6 +31,7 @@ export const store = configureStore({
 		[reportApi.reducerPath]: reportApi.reducer,
 		[workOrderApi.reducerPath]: workOrderApi.reducer,
     [vdrApi.reducerPath]: vdrApi.reducer,
+    [factsetApi.reducerPath]: factsetApi.reducer,
   },
   devTools: import.meta.env.VITE_NODE_ENV !== "production",
   middleware: (getDefaultMiddleware) =>
@@ -41,6 +43,7 @@ export const store = configureStore({
 			reportApi.middleware,
 			workOrderApi.middleware,
       vdrApi.middleware,
+      factsetApi.middleware,
       rtkQueryErrorLogger,
       checkForUnauthorized,
     ]),

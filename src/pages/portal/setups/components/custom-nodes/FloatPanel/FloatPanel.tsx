@@ -49,6 +49,7 @@ import { useExecuteCriteriaMutation } from "../../../../../../redux/services/set
 import { useSaveReportMutation } from "../../../../../../redux/services/reportApi";
 import { longDateFormat } from "../../../../../../shared/utils/basic";
 import { CrunchbaseNode } from "../nodes/dataloaders/CrunchbaseNode";
+import { useIngestFilesCrunchbaseMutation } from "../../../../../../redux/services/factsetApi";
 
 // key is corresponding to items.name
 const ComponentDict: Record<
@@ -115,6 +116,8 @@ const FloatPanel = memo(
 
     const [executeCriteria, { isLoading: isExecutingCriteria }] =
       useExecuteCriteriaMutation();
+    const [ingestfilesCrunchbase, { isLoading: isIngestingCrunchbase }] = useIngestFilesCrunchbaseMutation();
+
     const [executionTime, setExecutionTime] = useState("0.0");
 
     const XForm = ComponentDict[nodeContent.name];
@@ -174,7 +177,11 @@ const FloatPanel = memo(
       const criteriaNode = nodes.find(
         (node) => node.data.name === "InvestmentCriteria"
       );
-      if (criteriaNode && llmNode && criteriaNode.data.properties.isExecutable) {
+      if (
+        criteriaNode &&
+        llmNode &&
+        criteriaNode.data.properties.isExecutable
+      ) {
         const llm: string = llmNode.data.properties.model;
         const criterias = criteriaNode.data.properties.json;
 
@@ -245,9 +252,31 @@ const FloatPanel = memo(
           reportName: `Investment Criteria-${new Date().getTime() % 1000}`,
           reportType: 3,
           data:
-            `<h1 style="text-align: center;">Investment criteria: ${nodeContent.setupName}</h1><p style="text-align: center;"><strong>${longDateFormat(
+            `<h1 style="text-align: center;">Investment criteria: ${
+              nodeContent.setupName
+            }</h1><p style="text-align: center;"><strong>${longDateFormat(
               new Date()
             )}</strong></p>` + content,
+        });
+      }
+    };
+
+    const onIngestCrunchbase = async () => {
+      const nodes = getNodes();
+      const llmNode = nodes.find((node) => node.data.name === "LLM");
+      const crunchBaseNode = nodes.find(
+        (node) => node.data.name === "Crunchbase"
+      );
+
+      if (crunchBaseNode && llmNode && crunchBaseNode.data.properties) {
+        const llm: string = llmNode.data.properties.model;
+        const categories = crunchBaseNode.data.properties.json;
+        
+        await ingestfilesCrunchbase({
+          setupId: nodeContent.setupId!,
+          analysisType: "financial_diligence",
+          categories: categories.filter((category: any) => category.checked).map((category: any) => category.key),
+          llm,
         });
       }
     };
@@ -336,8 +365,8 @@ const FloatPanel = memo(
                 }}
               >
                 <Box mr="auto" />
-                {!isExecutingCriteria ? (
-                  <IconButton size="small" onClick={onExecuteCriteria}>
+                {!isIngestingCrunchbase ? (
+                  <IconButton size="small" onClick={onIngestCrunchbase}>
                     <PlayArrowIcon sx={{ fontSize: 18 }} />
                   </IconButton>
                 ) : (

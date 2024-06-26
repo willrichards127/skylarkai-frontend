@@ -1,6 +1,13 @@
 import React, { memo, useCallback, useRef, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { Box, Stack, Button, TextField, CircularProgress } from "@mui/material";
+import {
+  Box,
+  Stack,
+  Button,
+  TextField,
+  CircularProgress,
+  Autocomplete,
+} from "@mui/material";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import { XModal } from "../../../../components/XModal";
 import { NeutralLoadingButton } from "../../../../components/buttons/NeutralLoadingButton";
@@ -8,6 +15,13 @@ import {
   useAddUnitMutation,
   useUpdateUnitMutation,
 } from "../../../../redux/services/setupApi";
+import { StyledPopper } from "../../../../components/CompanySelector/sub-components";
+import { ICrunchbaseCompany } from "../../../../shared/models/interfaces";
+import {
+  useLazyGetDetailCompanyQuery,
+  useLazyGetSuggestCompaniesQuery,
+} from "../../../../redux/services/factsetApi";
+import useDebounce from "../../../../shared/hooks/useDebounce";
 
 export const NewUnitModal = memo(
   ({
@@ -23,6 +37,10 @@ export const NewUnitModal = memo(
   }) => {
     const isEdit = !!initialUnit;
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [suggestions, setSuggestions] = useState<ICrunchbaseCompany[]>([]);
+    const [selectedSuggestion, setSelectedSuggestion] =
+      useState<ICrunchbaseCompany | null>(null);
+    const [selectedDetail, setSelectedDetail] = useState<any>();
 
     const [addUnit, { isLoading: isLoadingAdd, isSuccess: isSuccessAdd }] =
       useAddUnitMutation();
@@ -30,6 +48,11 @@ export const NewUnitModal = memo(
       updateUnit,
       { isLoading: isLoadingUpdate, isSuccess: isSuccessUpdate },
     ] = useUpdateUnitMutation();
+    const [getSuggestions, { isLoading: isLoadingSuggestions }] =
+      useLazyGetSuggestCompaniesQuery();
+    const [getDetail, { isLoading: isLoadingDetail }] =
+      useLazyGetDetailCompanyQuery();
+
     const [form, setForm] = useState<{
       id?: number;
       name: string;
@@ -37,9 +60,25 @@ export const NewUnitModal = memo(
       logo_file?: File;
       logo?: string;
       description?: string;
+      crunch_id?: string;
+      meta_data?: any;
     }>({
       name: "",
     });
+
+    const keyword = useDebounce(form.name, 500);
+
+    useEffect(() => {
+      if (keyword) {
+        getSuggestions({ keyword })
+          .unwrap()
+          .then((res) => {
+            setSuggestions(res);
+          });
+      } else {
+        setSuggestions([]);
+      }
+    }, [getSuggestions, keyword]);
 
     const onChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -48,19 +87,49 @@ export const NewUnitModal = memo(
       []
     );
 
+    useEffect(() => {
+      if (selectedSuggestion) {
+        getDetail({ entityId: selectedSuggestion.id })
+          .unwrap()
+          .then((res: any) => {
+            setSelectedDetail(res[0]);
+            setForm((prev) => ({
+              ...prev,
+              website: res[0]["Website"] || res[0]["Website URL"],
+              description: res[0]["Description"],
+            }));
+          });
+      }
+    }, [getDetail, selectedSuggestion]);
+
     const onAction = useCallback(() => {
+      const data = { ...form };
+
+      if (selectedSuggestion) {
+        data.name = selectedSuggestion.name;
+        data.crunch_id = selectedSuggestion.id;
+        data.meta_data = selectedDetail;
+      }
       if (isEdit) {
         updateUnit({
-          ...form,
-          id: form.id!,
+          ...data,
+          id: data.id!,
         });
       } else {
         addUnit({
-          ...form,
+          ...data,
           type: category === "company" ? 1 : 2,
         });
       }
-    }, [addUnit, isEdit, updateUnit, form, category]);
+    }, [
+      form,
+      selectedSuggestion,
+      isEdit,
+      selectedDetail,
+      updateUnit,
+      addUnit,
+      category,
+    ]);
 
     const onUploadLogo = useCallback(() => {
       if (!fileInputRef.current) return;
@@ -85,9 +154,7 @@ export const NewUnitModal = memo(
     useEffect(() => {
       if (isSuccessAdd || isSuccessUpdate) {
         toast.success(
-          `The ${category} was ${
-            isEdit ? "updated" : "added"
-          } successfully.`
+          `The ${category} was ${isEdit ? "updated" : "added"} successfully.`
         );
         onClose();
       }
@@ -133,7 +200,7 @@ export const NewUnitModal = memo(
               variant="contained"
               sx={{ minWidth: 120 }}
               onClick={onAction}
-              disabled={!form.name}
+              disabled={!form.name || isLoadingSuggestions || isLoadingDetail}
             >
               {isEdit ? "Update" : "Add"} {category}
             </NeutralLoadingButton>
@@ -188,20 +255,59 @@ export const NewUnitModal = memo(
               )}
             </Box>
             <Stack spacing={2}>
-              <TextField
-                size="small"
-                name="name"
-                label={`${category} name`}
-                value={form.name}
-                onChange={onChange}
-                sx={{ width: 600, textTransform: "capitalize" }}
+              <Autocomplete
+                freeSolo
+                loading={isLoadingSuggestions}
+                fullWidth
+                disableListWrap
+                PopperComponent={StyledPopper}
+                options={suggestions}
+                getOptionLabel={(option) => {
+                  if (typeof option === "string") {
+                    return option;
+                  } else if (option && "name" in option) {
+                    return option.name;
+                  } else {
+                    return "";
+                  }
+                }}
+                getOptionKey={(option) => {
+                  if (typeof option === "string") {
+                    return option;
+                  } else if (option && "uuid" in option) {
+                    return option.uuid;
+                  } else {
+                    return "";
+                  }
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    name="name"
+                    size="small"
+                    label={`${category} name`}
+                    onChange={onChange}
+                    sx={{ width: 600, textTransform: "capitalize" }}
+                  />
+                )}
+                value={selectedSuggestion}
+                onChange={(
+                  _: React.SyntheticEvent<Element, Event>,
+                  newValue: ICrunchbaseCompany | string | null
+                ) => {
+                  if (typeof newValue === "string") {
+                    // setSelectedSuggestion(newValue);
+                  } else {
+                    setSelectedSuggestion(newValue);
+                  }
+                }}
               />
               {category === "company" && (
                 <TextField
                   size="small"
                   name="website"
                   label="Website (Optional)"
-                  value={form.website}
+                  value={form.website || ''}
                   onChange={onChange}
                   sx={{ width: 600 }}
                 />
@@ -210,7 +316,7 @@ export const NewUnitModal = memo(
                 size="small"
                 name="description"
                 label={`${category} Description`}
-                value={form.description}
+                value={form.description || ''}
                 rows={4}
                 multiline
                 onChange={onChange}

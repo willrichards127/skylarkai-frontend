@@ -13,11 +13,14 @@ import { Layout } from "../../Layout";
 import { useGetUnitQuery } from "../../../../redux/services/setupApi";
 import { ensureHttpOrHttps } from "../../../../shared/utils/base";
 import { convertUtcToLocal } from "../../../../shared/utils/dateUtils";
+import { DetailCompanyModal } from "../../../../components/modals/DetailCompanyModal";
+import { useState } from "react";
 
 const UnitPage = () => {
   const unitId = useParams<{ unitId: string }>().unitId!;
   const [searchParams] = useSearchParams();
   const analyst = searchParams.get("analyst");
+  const [isDetailOpen, showDetailModal] = useState<boolean>(false);
 
   const { isLoading, data: unit } = useGetUnitQuery(
     { unitId: +unitId! },
@@ -90,7 +93,7 @@ const UnitPage = () => {
               </Typography>
             </Box>
 
-            <Stack spacing={1} py={1} pl={10}>
+            <Stack spacing={1} py={1} pl={10} maxWidth={"50%"}>
               {unit!.type === 1 && (
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <LinkIcon sx={{ color: "grey" }} />
@@ -101,7 +104,7 @@ const UnitPage = () => {
                     <a
                       href={ensureHttpOrHttps(unit!.website)}
                       target="_blank"
-                      rel='noopener noreferrer'
+                      rel="noopener noreferrer"
                       style={{ color: "lightblue", fontSize: 13 }}
                     >
                       {unit!.website}
@@ -113,9 +116,32 @@ const UnitPage = () => {
                   )}
                 </Box>
               )}
-              <Typography variant="subtitle2" color="grey" fontSize={13}>
+              <Typography
+                variant="body1"
+                color="grey"
+                fontSize={13}
+                sx={{
+                  "-webkit-line-clamp": "3",
+                  display: "-webkit-box",
+                  "-webkit-box-orient": "vertical",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
                 {unit!.description || ""}
               </Typography>
+              {unit.meta_data ? (
+                <Box display={"flex"} justifyContent={"end"}>
+                  <Typography
+                    variant="caption"
+                    fontSize={13}
+                    sx={{ cursor: "pointer" }}
+                    onClick={() => showDetailModal(true)}
+                  >
+                    More detail
+                  </Typography>
+                </Box>
+              ) : null}
             </Stack>
           </Stack>
           <Layout
@@ -125,6 +151,14 @@ const UnitPage = () => {
           />
           <Outlet />
         </>
+      )}
+      {isDetailOpen && unit && (
+        <DetailCompanyModal
+          open={isDetailOpen}
+          onClose={() => showDetailModal(false)}
+          title={unit.name}
+          data={unit.meta_data}
+        />
       )}
     </Box>
   );

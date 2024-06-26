@@ -188,3 +188,10 @@ export interface ITemplateResultItem {
   completedAt?: string;
   children?: ITemplateResultItem[];
 }
+
+export interface ICrunchbaseCompany {
+  id: string;
+  name: string;
+  uuid: string;
+  description: string;
+}
