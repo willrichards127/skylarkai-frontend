@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import {
   Box,
   Grid,
@@ -7,20 +7,34 @@ import {
   MenuItem,
   GridProps,
   CircularProgress,
+  Button,
+  IconButton,
 } from "@mui/material";
 import {
   useGetDashboardQuery,
+  useLazyGetGeneratedReportBySetupQuery,
   useLazyGetGraphsQuery,
   useLazyGetReportsQuery,
+  useLazyGetIngestedFilesBySetupQuery,
   useLazyGetUnitsQuery,
   useLazyGetVDRsQuery,
+  useLazyGetExecutingReportsQuery,
 } from "../../../redux/services/adminApi";
 import AGTable from "../../../components/agTable/AGTable";
 import { ColDef } from "ag-grid-community";
 import moment from "moment";
 import { getHumanableDuration } from "../../../shared/utils/basic";
 import { convertUtcToLocal } from "../../../shared/utils/dateUtils";
+import { TemplateViewModal } from "../../../components/modals/TemplateViewModal";
+import {
+  useLazyGetTaskExecutionResultStatusQuery,
+  useLazyGetTaskExecutionTimeStatusQuery,
+} from "../../../redux/services/transcriptAPI";
+import { IExecutionSectionDetail } from "../../../redux/interfaces";
+import { useLazyGetExecutionDetailQuery } from "../../../redux/services/reportApi";
 // import { useGetUnitsQuery } from "../../../redux/services/setupApi";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import { CitationModal } from "../../../components/modals/CitationModal";
 
 const durations = [
   {
@@ -76,18 +90,87 @@ const GridItem = ({
 
 export const SystemManagement = () => {
   const [duration, setDuration] = useState<number>(7);
-
   const [currentTarget, setCurrentTarget] = useState<string>();
+  const [previousTarget, setPreviousTarget] = useState<string>();
+  const [selectedExecute, setSelectedExecute] = useState<any>(null);
+  const [executingStatus, setExecutingStatus] = useState<{
+    resultStatus: any;
+    timeStatus: IExecutionSectionDetail[];
+  }>();
+  const [selectedSetupId, setSelectedSetupId] = useState<number>();
+  const [selectedFileName, setSelectedFileName] = useState<string>();
 
   const { data: totalData } = useGetDashboardQuery();
   const [getUnits, { data: units, isFetching: isUnitFetching }] =
     useLazyGetUnitsQuery();
   const [getReports, { data: reports, isFetching: isReportFetching }] =
     useLazyGetReportsQuery();
+  const [
+    getExecutingReports,
+    { data: executingReports, isFetching: isExecutingReportFetching },
+  ] = useLazyGetExecutingReportsQuery();
   const [getGraphs, { data: graphs, isFetching: isGraphFetching }] =
     useLazyGetGraphsQuery();
   const [getVDRs, { data: vdrs, isFetching: isVDRFetching }] =
     useLazyGetVDRsQuery();
+  const [getExecutionDetail] = useLazyGetExecutionDetailQuery();
+  const [
+    getTaskResultStatus,
+    {
+      currentData: statusResultData,
+      isSuccess: isStatusResultSuccess,
+      isFetching: isStatusResultFetching,
+    },
+  ] = useLazyGetTaskExecutionResultStatusQuery();
+  const [
+    getTaskTimeStatus,
+    {
+      currentData: statusTimeData,
+      isSuccess: isStatusTimeSuccess,
+      isFetching: isStatusTimeFetching,
+    },
+  ] = useLazyGetTaskExecutionTimeStatusQuery();
+  const [
+    getIngestedFiles,
+    { data: ingestedFiles, isFetching: isSetupDetailFetching },
+  ] = useLazyGetIngestedFilesBySetupQuery();
+  const [
+    getSetupReports,
+    { data: subReports, isFetching: isSubReportFetching },
+  ] = useLazyGetGeneratedReportBySetupQuery();
+
+  useEffect(() => {
+    if (
+      !isStatusResultFetching &&
+      isStatusResultSuccess &&
+      statusResultData &&
+      !isStatusTimeFetching &&
+      isStatusTimeSuccess &&
+      statusTimeData
+    ) {
+      const resultStatus =
+        statusResultData.result?.base_query?.sections ||
+        statusResultData.result?.execution_data?.base_query?.sections;
+      const timeStatus = statusTimeData.sections;
+      setExecutingStatus({
+        resultStatus,
+        timeStatus,
+      });
+    }
+  }, [
+    statusResultData,
+    isStatusResultSuccess,
+    isStatusResultFetching,
+    isStatusTimeFetching,
+    isStatusTimeSuccess,
+    statusTimeData,
+  ]);
+
+  useEffect(() => {
+    if (isStatusResultFetching) {
+      setExecutingStatus(undefined);
+    }
+  }, [isStatusResultFetching]);
 
   const columns = useMemo<ColDef[]>(
     () =>
@@ -110,8 +193,7 @@ export const SystemManagement = () => {
               field: "created_at",
               headerName: "Created At",
               filter: "agDateColumnFilter",
-              valueFormatter: (params: any) =>
-                convertUtcToLocal(params.value),
+              valueFormatter: (params: any) => convertUtcToLocal(params.value),
             },
             {
               field: "report_count",
@@ -139,7 +221,7 @@ export const SystemManagement = () => {
                 params.value ? "Active" : "Archive",
             },
           ]
-        : currentTarget === "report"
+        : currentTarget === "report" || currentTarget === "sub_report"
         ? [
             { field: "id", headerName: "Report ID" },
             {
@@ -161,18 +243,25 @@ export const SystemManagement = () => {
               filter: "agTextColumnFilter",
             },
             {
+              field: "default_llm",
+              headerName: "LLM",
+              align: "left",
+              filter: "agTextColumnFilter",
+            },
+            {
               field: "created_at",
               headerName: "Created At",
               filter: "agDateColumnFilter",
-              valueFormatter: (params: any) =>
-                convertUtcToLocal(params.value),
+              valueFormatter: (params: any) => convertUtcToLocal(params.value),
             },
             {
               field: "duration",
               headerName: "Executing duration",
               valueFormatter: (params: any) => {
                 if (params.value) {
-                  return getHumanableDuration(moment.duration(params.value, "seconds"));
+                  return getHumanableDuration(
+                    moment.duration(params.value, "seconds")
+                  );
                 }
                 return "";
               },
@@ -186,6 +275,104 @@ export const SystemManagement = () => {
               }),
               valueFormatter: (params: any) =>
                 params.value ? "Active" : "Archive",
+            },
+            {
+              field: "actions",
+              headerName: "Actions",
+              cellRenderer: (params: any) => {
+                return (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      height: "42px",
+                    }}
+                  >
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={() =>
+                        onReportView(
+                          params.data.task_id,
+                          params.data.base_query_id
+                        )
+                      }
+                    >
+                      Detail View
+                    </Button>
+                  </Box>
+                );
+              },
+            },
+          ]
+        : currentTarget === "executing_report"
+        ? [
+            { field: "id", headerName: "Report ID" },
+            {
+              field: "report_name",
+              headerName: "Report Name",
+              align: "left",
+              filter: "agTextColumnFilter",
+            },
+            {
+              field: "username",
+              headerName: "Creator",
+              align: "left",
+              filter: "agTextColumnFilter",
+            },
+            {
+              field: "company_name",
+              headerName: "Company Name",
+              align: "left",
+              filter: "agTextColumnFilter",
+            },
+            {
+              field: "graph_name",
+              headerName: "Graph Name",
+              align: "left",
+              filter: "agTextColumnFilter",
+            },
+            {
+              field: "default_llm",
+              headerName: "LLM",
+              align: "left",
+              filter: "agTextColumnFilter",
+            },
+            {
+              field: "created_at",
+              headerName: "Created At",
+              filter: "agDateColumnFilter",
+              valueFormatter: (params: any) => convertUtcToLocal(params.value),
+            },
+            {
+              field: "actions",
+              headerName: "Actions",
+              cellRenderer: (params: any) => {
+                return (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      height: "42px",
+                    }}
+                  >
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={() =>
+                        onReportView(
+                          params.data.task_id,
+                          params.data.base_query_id
+                        )
+                      }
+                    >
+                      Detail View
+                    </Button>
+                  </Box>
+                );
+              },
             },
           ]
         : currentTarget === "graph"
@@ -213,6 +400,38 @@ export const SystemManagement = () => {
               valueFormatter: (params: any) =>
                 params.value ? "Active" : "Archive",
             },
+            {
+              field: "actions",
+              headerName: "Actions",
+              cellRenderer: (params: any) => {
+                return (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      height: "42px",
+                      gap: 1,
+                    }}
+                  >
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={() => onGraphDetail(params.data.id)}
+                    >
+                      Ingested Files
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={() => onGraphReports(params.data.id)}
+                    >
+                      Generated Reports
+                    </Button>
+                  </Box>
+                );
+              },
+            },
           ]
         : currentTarget === "vdr"
         ? [
@@ -230,10 +449,11 @@ export const SystemManagement = () => {
               filter: "agTextColumnFilter",
             },
             {
-              field: "ingested_count",
+              field: "ingested_files",
               headerName: "Ingested files",
               align: "left",
               filter: "agNumberColumnFilter",
+              valueFormatter: (params: any) => params.value?.count,
             },
             {
               field: "is_active",
@@ -244,6 +464,72 @@ export const SystemManagement = () => {
               }),
               valueFormatter: (params: any) =>
                 params.value ? "Active" : "Archive",
+            },
+            {
+              field: "actions",
+              headerName: "Actions",
+              cellRenderer: (params: any) => {
+                return (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      height: "42px",
+                    }}
+                  >
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={() => onGraphDetail(params.data.id)}
+                    >
+                      Ingested Files
+                    </Button>
+                  </Box>
+                );
+              },
+            },
+          ]
+        : currentTarget === "file"
+        ? [
+            {
+              field: "id",
+              headerName: "ID",
+              maxWidth: 90,
+            },
+            {
+              field: "file_name",
+              headerName: "File Name",
+              align: "left",
+              filter: "agTextColumnFilter",
+              minWidth: 500,
+              cellRenderer: (params: any) => {
+                return (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: "tomato",
+                      textDecoration: "underline",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => onFileView(params.value)}
+                  >
+                    {params.value}
+                  </Typography>
+                );
+              },
+            },
+            {
+              field: "ingested_at",
+              headerName: "Ingested At",
+              filter: "agDateColumnFilter",
+              valueFormatter: (params: any) => convertUtcToLocal(params.value),
+            },
+            {
+              field: "uploaded_at",
+              headerName: "Uploaded At",
+              filter: "agDateColumnFilter",
+              valueFormatter: (params: any) => convertUtcToLocal(params.value),
             },
           ]
         : [],
@@ -268,12 +554,43 @@ export const SystemManagement = () => {
                 : null,
           };
         })
+      : currentTarget === "sub_report"
+      ? (subReports || []).map((report: any) => {
+          return {
+            ...report,
+            name: report?.report_metadata?.reportname || "",
+            duration:
+              report.completed_at && report.created_at
+                ? moment
+                    .duration(
+                      moment(report.completed_at).diff(report.created_at)
+                    )
+                    .asSeconds()
+                : null,
+          };
+        })
+      : currentTarget === "executing_report"
+      ? executingReports || []
       : currentTarget === "graph"
       ? graphs || []
       : currentTarget === "vdr"
       ? vdrs || []
+      : currentTarget === "file"
+      ? (ingestedFiles || []).map((file: any, index: number) => ({
+          id: index + 1,
+          ...file,
+        }))
       : [];
-  }, [currentTarget, graphs, reports, units, vdrs]);
+  }, [
+    currentTarget,
+    executingReports,
+    graphs,
+    ingestedFiles,
+    reports,
+    subReports,
+    units,
+    vdrs,
+  ]);
 
   const onChangeDuration = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
@@ -296,6 +613,11 @@ export const SystemManagement = () => {
     getReports();
   };
 
+  const onExecutingReport = () => {
+    setCurrentTarget("executing_report");
+    getExecutingReports();
+  };
+
   const onGraph = () => {
     setCurrentTarget("graph");
     getGraphs();
@@ -304,6 +626,49 @@ export const SystemManagement = () => {
   const onVDR = () => {
     setCurrentTarget("vdr");
     getVDRs();
+  };
+
+  const onReportView = useCallback(
+    async (taskId: string | null, baseQueryId: number | null) => {
+      if (taskId && baseQueryId) {
+        const executionData = await getExecutionDetail({
+          baseQeuryId: baseQueryId,
+        }).unwrap();
+        if (executionData && executionData.task_id) {
+          setSelectedExecute({
+            task_id: executionData.task_id,
+            data: executionData.input_json,
+          });
+          getTaskTimeStatus({ task_id: taskId });
+          getTaskResultStatus({ task_id: taskId });
+          setPreviousTarget(currentTarget);
+        }
+      }
+    },
+    [currentTarget, getExecutionDetail, getTaskResultStatus, getTaskTimeStatus]
+  );
+
+  const onGraphDetail = useCallback(
+    async (setupId: number) => {
+      setPreviousTarget(currentTarget);
+      setCurrentTarget("file");
+      getIngestedFiles({ setupId: setupId });
+      setSelectedSetupId(setupId);
+    },
+    [currentTarget, getIngestedFiles]
+  );
+
+  const onGraphReports = useCallback(
+    async (setupId: number) => {
+      getSetupReports({ setupId: setupId });
+      setPreviousTarget(currentTarget);
+      setCurrentTarget("sub_report");
+    },
+    [currentTarget, getSetupReports]
+  );
+
+  const onFileView = async (fileName: string) => {
+    setSelectedFileName(fileName);
   };
 
   return (
@@ -331,7 +696,7 @@ export const SystemManagement = () => {
             xs={12}
             sm={6}
             md={6}
-            lg={3}
+            lg={2}
             selected={currentTarget == "company"}
             onClick={onCompany}
           >
@@ -342,7 +707,7 @@ export const SystemManagement = () => {
             xs={12}
             sm={6}
             md={6}
-            lg={3}
+            lg={2}
             selected={currentTarget == "sector"}
             onClick={onSector}
           >
@@ -359,6 +724,19 @@ export const SystemManagement = () => {
           >
             <Typography variant="body2">Total Reports</Typography>
             <Typography variant="h4">{totalData?.reports || "_"}</Typography>
+          </GridItem>
+          <GridItem
+            xs={12}
+            sm={6}
+            md={6}
+            lg={2}
+            selected={currentTarget == "executing_report"}
+            onClick={onExecutingReport}
+          >
+            <Typography variant="body2">Executing Reports</Typography>
+            <Typography variant="h4">
+              {totalData?.running_reports || "_"}
+            </Typography>
           </GridItem>
           <GridItem
             xs={12}
@@ -385,24 +763,52 @@ export const SystemManagement = () => {
         </Grid>
         {currentTarget ? (
           <Box pt={4} height={800}>
-            <Box fontWeight="bold" mb={2}>
-              {currentTarget === "company"
-                ? "Created companies"
-                : currentTarget === "sector"
-                ? "Created sectors"
-                : currentTarget === "report"
-                ? "Genreated reports"
-                : currentTarget === "graph"
-                ? "Created SLMs"
-                : currentTarget === "vdr"
-                ? "Created VDRs"
-                : ""}
-              :
+            <Box
+              display={"flex"}
+              flexDirection={"row"}
+              alignItems={"center"}
+              gap={1}
+              mb={2}
+            >
+              {currentTarget === "sub_report" ||
+                (currentTarget === "file" && (
+                  <IconButton
+                    aria-label="close"
+                    onClick={() => {
+                      setCurrentTarget(previousTarget);
+                    }}
+                  >
+                    <ArrowBackIosNewIcon />
+                  </IconButton>
+                ))}
+              <Box fontWeight="bold">
+                {currentTarget === "company"
+                  ? "Created companies"
+                  : currentTarget === "sector"
+                  ? "Created sectors"
+                  : currentTarget === "report"
+                  ? "Genreated reports"
+                  : currentTarget === "sub_report"
+                  ? "Genreated reports from SLM"
+                  : currentTarget === "graph"
+                  ? "Created SLMs"
+                  : currentTarget === "vdr"
+                  ? "Created VDRs"
+                  : currentTarget === "file"
+                  ? previousTarget === "graph"
+                    ? "Ingested Files from SLM"
+                    : "Ingested Files from VDR"
+                  : ""}
+                :
+              </Box>
             </Box>
             {isUnitFetching ||
             isReportFetching ||
             isGraphFetching ||
-            isVDRFetching ? (
+            isVDRFetching ||
+            isSubReportFetching ||
+            isSetupDetailFetching ||
+            isExecutingReportFetching ? (
               <Box
                 display={"flex"}
                 justifyContent={"center"}
@@ -417,6 +823,28 @@ export const SystemManagement = () => {
           </Box>
         ) : null}
       </Box>
+      {!!selectedExecute && (
+        <TemplateViewModal
+          open={!!selectedExecute}
+          onClose={() => setSelectedExecute(null)}
+          data={selectedExecute.data}
+          status={executingStatus}
+        />
+      )}
+      {selectedSetupId && !!selectedFileName && (
+        <CitationModal
+          open={!!selectedFileName}
+          onClose={() => {
+            setSelectedFileName(undefined);
+          }}
+          title={"File Preview"}
+          data={{
+            graph_id: selectedSetupId,
+            analysis_type: "financial_diligence",
+            filename: selectedFileName,
+          }}
+        />
+      )}
     </Box>
   );
 };

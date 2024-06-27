@@ -9,7 +9,7 @@ export const adminApi = createApi({
   baseQuery: baseQuery,
   endpoints: (builder) => ({
     getFeatures: builder.query<IMainFeature[], void>({
-      query: () => ({ url: "main_features", method: "get" }),
+      query: () => ({ url: "main_features" }),
     }),
     getSubScriptionFeatures: builder.query<
       IMainFeature[],
@@ -48,22 +48,38 @@ export const adminApi = createApi({
       companies: number;
       sectors: number;
       reports: number;
+      running_reports: number;
       graphs: number;
       vdrs: number;
     }, void>({
-      query: () => ({ url: `dashboard`, method: "get" }),
+      query: () => ({ url: `dashboard` }),
     }),
     getUnits: builder.query<any, { type?: number }>({
-      query: ({ type }) => ({ url: `dashboard/unit${type ? `?type=${type}` : ""}`, method: "get" }),
+      query: ({ type }) => ({ url: `dashboard/unit${type ? `?type=${type}` : ""}` }),
     }),
     getReports: builder.query<any, void>({
-      query: () => ({ url: `/dashboard/reports`, method: "get" }),
+      query: () => ({ url: `/dashboard/reports` }),
+    }),
+    getExecutingReports: builder.query<any, void>({
+      query: () => ({ url: `/dashboard/reports/running` }),
     }),
     getGraphs: builder.query<any, void>({
-      query: () => ({ url: `/dashboard/graphs`, method: "get" }),
+      query: () => ({ url: `/dashboard/graphs` }),
     }),
     getVDRs: builder.query<any, void>({
-      query: () => ({ url: `/dashboard/vdrs`, method: "get" }),
+      query: () => ({ url: `/dashboard/vdrs` }),
+    }),
+    getTaskDetail: builder.query<any, { taskId: string }>({
+      query: (({ taskId }) => ({ url: `dashboard/reports/${taskId}` }))
+    }),
+    getIngestedFilesBySetup: builder.query<any, { setupId: number }>({
+      query: ({ setupId }) => ({ url: `/dashboard/graphs/${setupId}` }),
+    }),
+    getGeneratedReportBySetup: builder.query<any, { setupId: number }>({
+      query: ({ setupId }) => ({ url: `/dashboard/graphs/${setupId}/reports` }),
+    }),
+    getTokenCounts: builder.query<any, void>({
+      query: () => ({ url: `/dashboard/tokencount` }),
     }),
   }),
 });
@@ -80,4 +96,14 @@ export const {
   useLazyGetGraphsQuery,
   useGetVDRsQuery,
   useLazyGetVDRsQuery,
+  useGetTaskDetailQuery,
+  useLazyGetTaskDetailQuery,
+  useGetIngestedFilesBySetupQuery,
+  useLazyGetIngestedFilesBySetupQuery,
+  useGetGeneratedReportBySetupQuery,
+  useLazyGetGeneratedReportBySetupQuery,
+  useGetExecutingReportsQuery,
+  useLazyGetExecutingReportsQuery,
+  useGetTokenCountsQuery,
+  useLazyGetTokenCountsQuery,
 } = adminApi;

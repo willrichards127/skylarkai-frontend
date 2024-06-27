@@ -264,9 +264,9 @@ export const ChatPanel = memo(
               }}
             >
               {[
+                "Answer From Report",
                 "Quickest Overview",
                 "Balanced Summary",
-                "In-Depth Insights",
               ].map((item, index) => (
                 <option key={item} value={index}>
                   {item}

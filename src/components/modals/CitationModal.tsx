@@ -21,7 +21,7 @@ export const CitationModal = memo(
       analysis_type: string;
       filename: string;
       id?: number; // the only case for report
-      quote: string;
+      quote?: string;
     };
   }) => {
     const { data: report } = useGetReportQuery(
