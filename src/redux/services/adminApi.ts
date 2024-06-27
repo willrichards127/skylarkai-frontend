@@ -51,6 +51,7 @@ export const adminApi = createApi({
       running_reports: number;
       graphs: number;
       vdrs: number;
+      token_counts: number;
     }, void>({
       query: () => ({ url: `dashboard` }),
     }),

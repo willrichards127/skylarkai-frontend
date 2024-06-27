@@ -19,6 +19,7 @@ import {
   useLazyGetUnitsQuery,
   useLazyGetVDRsQuery,
   useLazyGetExecutingReportsQuery,
+  useLazyGetTokenCountsQuery,
 } from "../../../redux/services/adminApi";
 import AGTable from "../../../components/agTable/AGTable";
 import { ColDef } from "ag-grid-community";
@@ -138,6 +139,9 @@ export const SystemManagement = () => {
     getSetupReports,
     { data: subReports, isFetching: isSubReportFetching },
   ] = useLazyGetGeneratedReportBySetupQuery();
+
+  const [getTokens, { data: tokens, isFetching: isTokenFetching }] =
+    useLazyGetTokenCountsQuery();
 
   useEffect(() => {
     if (
@@ -375,6 +379,46 @@ export const SystemManagement = () => {
               },
             },
           ]
+        : currentTarget === "token"
+        ? [
+            { field: "id", headerName: "Report ID" },
+            {
+              field: "report_name",
+              headerName: "Report Name",
+              align: "left",
+              filter: "agTextColumnFilter",
+            },
+            {
+              field: "user_name",
+              headerName: "Creator",
+              align: "left",
+              filter: "agTextColumnFilter",
+            },
+            {
+              field: "llm_name",
+              headerName: "LLM",
+              align: "left",
+              filter: "agTextColumnFilter",
+            },
+            {
+              field: "type",
+              headerName: "Type",
+              align: "left",
+              filter: "agTextColumnFilter",
+            },
+            {
+              field: "total_token_count",
+              headerName: "Token counts",
+              align: "left",
+              filter: "agNumberColumnFilter",
+            },
+            {
+              field: "execution_date",
+              headerName: "Executed At",
+              filter: "agDateColumnFilter",
+              valueFormatter: (params: any) => convertUtcToLocal(params.value),
+            },
+          ]
         : currentTarget === "graph"
         ? [
             { field: "id", headerName: "SLM ID" },
@@ -580,6 +624,11 @@ export const SystemManagement = () => {
           id: index + 1,
           ...file,
         }))
+      : currentTarget === "token"
+      ? (tokens || []).map((token: any, index: number) => ({
+          id: index + 1,
+          ...token,
+        }))
       : [];
   }, [
     currentTarget,
@@ -588,6 +637,7 @@ export const SystemManagement = () => {
     ingestedFiles,
     reports,
     subReports,
+    tokens,
     units,
     vdrs,
   ]);
@@ -627,6 +677,11 @@ export const SystemManagement = () => {
     setCurrentTarget("vdr");
     getVDRs();
   };
+
+  const onToken = () => {
+    setCurrentTarget("token");
+    getTokens();
+  }
 
   const onReportView = useCallback(
     async (taskId: string | null, baseQueryId: number | null) => {
@@ -760,6 +815,17 @@ export const SystemManagement = () => {
             <Typography variant="body2">Total VDRs</Typography>
             <Typography variant="h4">{totalData?.vdrs || "_"}</Typography>
           </GridItem>
+          <GridItem
+            xs={12}
+            sm={6}
+            md={6}
+            lg={2}
+            selected={currentTarget == "token"}
+            onClick={onToken}
+          >
+            <Typography variant="body2">Tokens</Typography>
+            <Typography variant="h4">{totalData?.token_counts || "_"}</Typography>
+          </GridItem>
         </Grid>
         {currentTarget ? (
           <Box pt={4} height={800}>
@@ -794,6 +860,8 @@ export const SystemManagement = () => {
                   ? "Created SLMs"
                   : currentTarget === "vdr"
                   ? "Created VDRs"
+                  : currentTarget === "token"
+                  ? "Tokens"
                   : currentTarget === "file"
                   ? previousTarget === "graph"
                     ? "Ingested Files from SLM"
@@ -808,7 +876,8 @@ export const SystemManagement = () => {
             isVDRFetching ||
             isSubReportFetching ||
             isSetupDetailFetching ||
-            isExecutingReportFetching ? (
+            isExecutingReportFetching ||
+            isTokenFetching ? (
               <Box
                 display={"flex"}
                 justifyContent={"center"}
