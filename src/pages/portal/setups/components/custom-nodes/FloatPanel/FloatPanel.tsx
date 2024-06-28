@@ -116,7 +116,8 @@ const FloatPanel = memo(
 
     const [executeCriteria, { isLoading: isExecutingCriteria }] =
       useExecuteCriteriaMutation();
-    const [ingestfilesCrunchbase, { isLoading: isIngestingCrunchbase }] = useIngestFilesCrunchbaseMutation();
+    const [ingestfilesCrunchbase, { isLoading: isIngestingCrunchbase }] =
+      useIngestFilesCrunchbaseMutation();
 
     const [executionTime, setExecutionTime] = useState("0.0");
 
@@ -268,14 +269,20 @@ const FloatPanel = memo(
         (node) => node.data.name === "Crunchbase"
       );
 
-      if (crunchBaseNode && llmNode && crunchBaseNode.data.properties) {
+      if (crunchBaseNode && llmNode && crunchBaseNode.data.properties.json) {
         const llm: string = llmNode.data.properties.model;
-        const categories = crunchBaseNode.data.properties.json;
+        const categories = crunchBaseNode.data.properties.json.reduce(
+          (accum: any, cur: any) => [
+            ...accum,
+            ...cur.children.filter((f: any) => f.checked).map((f: any) => f.key),
+          ],
+          []
+        );
         
         await ingestfilesCrunchbase({
           setupId: nodeContent.setupId!,
           analysisType: "financial_diligence",
-          categories: categories.filter((category: any) => category.checked).map((category: any) => category.key),
+          categories,
           llm,
         });
       }

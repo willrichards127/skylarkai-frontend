@@ -17,6 +17,7 @@ import { FileViewModal } from "../../premium/components/sub-components/FileViewM
 import { useIngestFilesMutation } from "../../../redux/services/setupApi";
 import { useNotification } from "../../../shared/socket/NotificationProvider";
 import { convertUtcToLocal } from "../../../shared/utils/dateUtils";
+import { CitationModal } from "../../../components/modals/CitationModal";
 
 export default function VDRDetailPage() {
   const vdrId = useParams<{ vdrId: string }>().vdrId!;
@@ -32,6 +33,7 @@ export default function VDRDetailPage() {
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [viewFile, setViewFile] = useState<File>();
+  const [selectedFileName, setSelectedFileName] = useState<string>();
 
   useEffect(() => {
     if (
@@ -208,7 +210,9 @@ export default function VDRDetailPage() {
                           }}
                         />
                       )}
-                      onClick={() => {}}
+                      onClick={() => {
+                        setSelectedFileName(file.file_name);
+                      }}
                     />
                   </Grid>
                 ))}
@@ -222,6 +226,20 @@ export default function VDRDetailPage() {
           open={!!viewFile}
           onClose={() => setViewFile(undefined)}
           file={viewFile}
+        />
+      ) : null}
+      {selectedFileName ? (
+        <CitationModal
+          open={!!selectedFileName}
+          onClose={() => {
+            setSelectedFileName(undefined);
+          }}
+          title={"File Preview"}
+          data={{
+            graph_id: +vdrId,
+            analysis_type: "financial_diligence",
+            filename: selectedFileName,
+          }}
         />
       ) : null}
     </Box>

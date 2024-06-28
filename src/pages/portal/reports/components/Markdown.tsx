@@ -51,7 +51,7 @@ export const Markdown = ({
                 className="no-print"
                 style={{ color: "tomato", fontSize: "14px" }}
                 onClick={() => onCitationLink?.({ filename, quote })}
-                title={`${filename}.pdf:${quote}`}
+                title={`${filename}:${quote}`}
               />
             );
           } else return <p {...props} />;

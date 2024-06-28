@@ -6,6 +6,7 @@ import { parse } from "node-html-parser";
 import * as marked from "marked";
 import { IDNDContainer, IDNDItem } from "../models/interfaces";
 import { removeTemplateCode, replaceContentBetweenCodeBlock, replaceContentBetweenTripleBackticks } from "./string";
+import { getFileExtension } from "./basic";
 
 export const parseSWOT = (content: string) => {
   const strengthsRegex = /Strengths:([\s\S]*?)(Weaknesses:|$)/;
@@ -97,15 +98,15 @@ export const parse2Apex = (
   table: {
     columns: (
       | {
-          type: string;
-          unit?: undefined;
-          label: string;
-        }
+        type: string;
+        unit?: undefined;
+        label: string;
+      }
       | {
-          unit: string;
-          type: string;
-          label: string;
-        }
+        unit: string;
+        type: string;
+        label: string;
+      }
     )[];
     rows: Record<string, string>[];
   },
@@ -185,7 +186,13 @@ const cleanUp = (inputString: string, limitWordCount?: number) => {
   try {
     parsed = JSON.parse(nextInputString);
     const { filename, quote } = parseExpression(parsed, limitWordCount);
-    return `<a href="#${filename}______${quote}">Link</a>`;
+    const extension = getFileExtension(filename);
+    if (extension === 'pdf' || extension === 'xlsx') {
+      return `<a href="#${filename}______${quote}">Link</a>`;
+    } else {
+      return "";
+    }
+
   } catch (e) {
     let result = nextInputString.replace(/\("\s?/g, '"');
     result = result.replace(/"\)/g, '"');
@@ -194,8 +201,15 @@ const cleanUp = (inputString: string, limitWordCount?: number) => {
     try {
       parsed = JSON.parse(result);
       const { filename, quote } = parseExpression(parsed, limitWordCount);
-      return `<a href="#${filename}______${quote}">Link</a>`;
+      const extension = getFileExtension(filename);
+
+      if (extension === 'pdf' || extension === 'xlsx') {
+        return `<a href="#${filename}______${quote}">Link</a>`;
+      } else {
+        return "";
+      }
     } catch (e) {
+      console.log('--------------333');
       return "";
     }
   }
@@ -207,7 +221,7 @@ const parseCitation = (html: string, limitWordCount?: number) => {
   let braceCount = 0;
 
   let content = replaceContentBetweenCodeBlock(replaceContentBetweenTripleBackticks(html));
-  
+
   for (let i = 0; i < content.length; i++) {
     if (content[i] === "{") {
       if (braceCount === 0) {
@@ -217,10 +231,12 @@ const parseCitation = (html: string, limitWordCount?: number) => {
     } else if (content[i] === "}") {
       braceCount--;
       if (braceCount === 0 && startIndex !== -1) {
+        console.log('==================111', content.substring(startIndex, i + 1))
         const section = cleanUp(
           content.substring(startIndex, i + 1),
           limitWordCount
         );
+        console.log('==================222', section)
         content = content.slice(0, startIndex) + section + content.slice(i + 1);
         i = startIndex; // Reset index to re-scan the string
         startIndex = -1;
@@ -353,18 +369,18 @@ export const categoryParser2 = (htmlString: string) => {
           type: "ITEM",
           value:
             el.rawTagName === "p" &&
-            marked.parse(el.innerHTML).toString().includes("<table>")
+              marked.parse(el.innerHTML).toString().includes("<table>")
               ? {
-                  content: marked.parse(el.innerHTML) as string,
-                  tag: "table",
-                }
+                content: marked.parse(el.innerHTML) as string,
+                tag: "table",
+              }
               : el.rawTagName === "p" &&
                 marked.parse(el.innerHTML).toString().includes("<img")
-              ? {
+                ? {
                   tag: "img",
                   content: marked.parse(el.innerHTML) as string,
                 }
-              : {
+                : {
                   content: parseCitation(el.outerHTML),
                   tag: el.rawTagName as string,
                 },

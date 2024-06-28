@@ -153,3 +153,8 @@ export const getHumanableDuration = (_duration: moment.Duration) => {
 
   return duration;
 }
+
+export function getFileExtension(fileName: string) {
+  const match = fileName.match(/\.([^.]+)$/);
+  return match ? match[1] : '';
+}

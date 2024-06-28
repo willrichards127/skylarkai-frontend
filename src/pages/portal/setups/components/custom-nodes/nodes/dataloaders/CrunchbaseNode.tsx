@@ -53,12 +53,20 @@ export const CrunchbaseNode = memo(
       const json = nodeContent.properties.json;
       return flattenTree({
         name: "",
-        children: json.map((element: any) => ({ name: element.name, id: element.key })),
+        children: json.map((element: any) => ({
+          name: element.name,
+          id: element.key,
+          children: element.children?.map((subElement: any) => ({
+            name: subElement.name,
+            id: subElement.key,
+          })),
+        })),
       });
     }, [nodeContent.properties]);
 
     const onNodeSelect = (props: ITreeViewOnNodeSelectProps) => {
       const selectedIds = props.treeState?.selectedIds;
+      console.log("==================", selectedIds);
       if (selectedIds) {
         setNodes((prev) =>
           prev.map((node) => {
@@ -67,9 +75,12 @@ export const CrunchbaseNode = memo(
                 ...node.data,
                 properties: {
                   ...node.data.properties,
-                  json: node.data.properties.json.map((f: any) => ({
-                    ...f,
-                    checked: selectedIds.has(f.key),
+                  json: node.data.properties.json.map((child: any) => ({
+                    ...child,
+                    children: child.children.map((f: any) => ({
+                      ...f,
+                      checked: selectedIds.has(f.key),
+                    })),
                   })),
                 },
               };
@@ -96,7 +107,20 @@ export const CrunchbaseNode = memo(
             propagateSelect
             propagateSelectUpwards
             togglableSelect
-            // onSelect={(props) => console.log("onSelect callback: ", props)}
+            selectedIds={nodeContent.properties.json.reduce(
+              (accum: any, cur: any) => {
+                const selectedChildrenIds =
+                  cur.children
+                    ?.filter((f: any) => f.checked)
+                    ?.map((f: any) => f.key) || [];
+                return [...accum, ...selectedChildrenIds].concat(
+                  selectedChildrenIds.length === cur.children?.length
+                    ? [cur.key]
+                    : []
+                );
+              },
+              []
+            )}
             onNodeSelect={onNodeSelect}
             nodeRenderer={({
               element,
@@ -136,9 +160,6 @@ export const CrunchbaseNode = memo(
                 </div>
               );
             }}
-            selectedIds={nodeContent.properties.json
-              .filter((f: any) => f.checked)
-              .map((f: any) => f.key)}
           />
         </Box>
       </Box>
