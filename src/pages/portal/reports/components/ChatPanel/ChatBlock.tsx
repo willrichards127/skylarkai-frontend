@@ -140,7 +140,7 @@ export const ChatBlock = ({
                       className="no-print"
                       style={{ color: "tomato" }}
                       onClick={() => onJumpTo({ filename, quote })}
-                      title={`${filename}.pdf:${quote}`}
+                      title={`${filename}:${quote}`}
                     />
                   );
                 } else return <p {...props} />;
