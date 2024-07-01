@@ -5,10 +5,9 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { XModal } from "../XModal";
 import { ColDef } from "ag-grid-community";
-import { convertUtcToLocal } from "../../shared/utils/dateUtils";
-import { IExecutionSectionDetail } from "../../redux/interfaces";
 import AGTable from "../agTable/AGTable";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import { parseCitation } from "../../shared/utils/string";
 
 export const ReportDetailModal = memo(
   ({
@@ -18,7 +17,7 @@ export const ReportDetailModal = memo(
   }: {
     open: boolean;
     onClose: () => void;
-    status?: { resultStatus: any; timeStatus: IExecutionSectionDetail[] };
+    status: any;
   }) => {
     const [history, setHistory] = useState<any>();
     const [data, setData] = useState<any>();
@@ -26,47 +25,25 @@ export const ReportDetailModal = memo(
 
     useEffect(() => {
       if (status) {
-        const currentResultStatus = status.resultStatus.map(
-          (section: any, index: number) => {
-            const sectionIndex = status.timeStatus.findIndex(
-              (t) => t.section_name === section.section_name
-            );
-            const duration = status.timeStatus[sectionIndex].section_duration;
-            const completedAt =
-              status.timeStatus[sectionIndex].section_completed_at;
+        const currentResultStatus =
+          status.report.execution_data.base_query.sections.map(
+            (section: any, index: number) => {
+              const subQueryResults = section.sub_query_results.map(
+                (query: any, index: number) => {
+                  return {
+                    id: index + 1,
+                    ...query,
+                  };
+                }
+              );
 
-            const subQueryResults = section.sub_query_results.map(
-              (query: any, index: number) => {
-                const queryIndex = status.timeStatus[
-                  sectionIndex
-                ].sub_queries.findIndex(
-                  (t) => t.question === query["question"]
-                );
-                const duration =
-                  status.timeStatus[sectionIndex].sub_queries[queryIndex]
-                    .sub_query_duration;
-                const completedAt =
-                  status.timeStatus[sectionIndex].sub_queries[queryIndex]
-                    .completed_at;
-
-                return {
-                  id: index + 1,
-                  ...query,
-                  sub_query_duration: duration,
-                  sub_query_completed_at: completedAt,
-                };
-              }
-            );
-
-            return {
-              id: index + 1,
-              ...section,
-              sub_query_results: subQueryResults,
-              section_completed_at: completedAt,
-              section_duration: duration,
-            };
-          }
-        );
+              return {
+                id: index + 1,
+                ...section,
+                sub_query_results: subQueryResults,
+              };
+            }
+          );
         setData(currentResultStatus);
       }
     }, [status]);
@@ -86,6 +63,7 @@ export const ReportDetailModal = memo(
                 headerName: "Rating",
                 align: "left",
                 filter: "agNumberColumnFilter",
+                valueFormatter: (params: any) => params.data?.answer?.rating,
                 tooltipValueGetter: (params: any) =>
                   Object.keys(params.data?.answer?.rating_response || {})
                     .map(
@@ -97,27 +75,13 @@ export const ReportDetailModal = memo(
                         params.data?.answer?.rating_response[key]["Feedback"]
                     )
                     ?.join("\n"),
-                valueFormatter: (params: any) =>
-                  params.data?.answer?.question_history?.length,
               },
               {
                 headerName: "History",
                 align: "left",
                 filter: "agNumberColumnFilter",
-                valueFormatter: (params: any) => params.data?.answer?.rating,
-              },
-              {
-                field: "sub_query_duration",
-                headerName: "Duration",
-                align: "left",
-                filter: "agTextColumnFilter",
-              },
-              {
-                field: "sub_query_completed_at",
-                headerName: "Completed At",
-                filter: "agDateColumnFilter",
                 valueFormatter: (params: any) =>
-                  convertUtcToLocal(params.value),
+                  params.data?.answer?.question_history?.length,
               },
               {
                 field: "actions",
@@ -162,19 +126,6 @@ export const ReportDetailModal = memo(
                 maxWidth: 900,
               },
               {
-                field: "section_duration",
-                headerName: "Duration",
-                align: "left",
-                filter: "agTextColumnFilter",
-              },
-              {
-                field: "section_completed_at",
-                headerName: "Completed At",
-                filter: "agDateColumnFilter",
-                valueFormatter: (params: any) =>
-                  convertUtcToLocal(params.value),
-              },
-              {
                 field: "actions",
                 headerName: "Actions",
                 cellRenderer: (params: any) => {
@@ -202,23 +153,20 @@ export const ReportDetailModal = memo(
       [subIndex]
     );
 
-    
     const content = useMemo(() => {
       if (history) {
-        if(history.length) {
-          console.log("================", history);
-          return history[0][0][0];
+        if (history.length) {
+          return history.map((h: any) => parseCitation(h[0][0])).join("<br/></br/><br/>")
         }
-        
       } else {
         return undefined;
       }
     }, [history]);
-    
+
     const rowData = useMemo<any[]>(
       () =>
-        data ? (subIndex ? data[subIndex - 1].sub_query_results : data) : [],
-      [data, subIndex]
+        status ? (subIndex ? data[subIndex - 1].sub_query_results : data) : [],
+      [data, status, subIndex]
     );
 
     return (

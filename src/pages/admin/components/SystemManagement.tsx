@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   Box,
   Grid,
@@ -20,18 +20,19 @@ import {
   useLazyGetVDRsQuery,
   useLazyGetExecutingReportsQuery,
   useLazyGetTokenCountsQuery,
+  useLazyGetTaskDetailQuery,
 } from "../../../redux/services/adminApi";
 import AGTable from "../../../components/agTable/AGTable";
 import { ColDef } from "ag-grid-community";
 import moment from "moment";
 import { getHumanableDuration } from "../../../shared/utils/basic";
 import { convertUtcToLocal } from "../../../shared/utils/dateUtils";
-import { TemplateViewModal } from "../../../components/modals/TemplateViewModal";
-import {
-  useLazyGetTaskExecutionResultStatusQuery,
-  useLazyGetTaskExecutionTimeStatusQuery,
-} from "../../../redux/services/transcriptAPI";
-import { IExecutionSectionDetail } from "../../../redux/interfaces";
+// import { TemplateViewModal } from "../../../components/modals/TemplateViewModal";
+// import {
+//   useLazyGetTaskExecutionResultStatusQuery,
+//   useLazyGetTaskExecutionTimeStatusQuery,
+// } from "../../../redux/services/transcriptAPI";
+// import { IExecutionSectionDetail } from "../../../redux/interfaces";
 import { useLazyGetExecutionDetailQuery } from "../../../redux/services/reportApi";
 // import { useGetUnitsQuery } from "../../../redux/services/setupApi";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
@@ -94,11 +95,12 @@ export const SystemManagement = () => {
   const [duration, setDuration] = useState<number>(7);
   const [currentTarget, setCurrentTarget] = useState<string>();
   const [previousTarget, setPreviousTarget] = useState<string>();
-  const [selectedExecute, setSelectedExecute] = useState<any>(null);
-  const [executingStatus, setExecutingStatus] = useState<{
-    resultStatus: any;
-    timeStatus: IExecutionSectionDetail[];
-  }>();
+  // const [selectedExecute, setSelectedExecute] = useState<any>(null);
+  // const [executingStatus, setExecutingStatus] = useState<{
+  //   resultStatus: any;
+  //   timeStatus: IExecutionSectionDetail[];
+  // }>();
+  const [taskDetail, setTaskDetail] = useState<any>();
   const [selectedSetupId, setSelectedSetupId] = useState<number>();
   const [selectedFileName, setSelectedFileName] = useState<string>();
 
@@ -116,22 +118,22 @@ export const SystemManagement = () => {
   const [getVDRs, { data: vdrs, isFetching: isVDRFetching }] =
     useLazyGetVDRsQuery();
   const [getExecutionDetail] = useLazyGetExecutionDetailQuery();
-  const [
-    getTaskResultStatus,
-    {
-      currentData: statusResultData,
-      isSuccess: isStatusResultSuccess,
-      isFetching: isStatusResultFetching,
-    },
-  ] = useLazyGetTaskExecutionResultStatusQuery();
-  const [
-    getTaskTimeStatus,
-    {
-      currentData: statusTimeData,
-      isSuccess: isStatusTimeSuccess,
-      isFetching: isStatusTimeFetching,
-    },
-  ] = useLazyGetTaskExecutionTimeStatusQuery();
+  // const [
+  //   getTaskResultStatus,
+  //   {
+  //     currentData: statusResultData,
+  //     isSuccess: isStatusResultSuccess,
+  //     isFetching: isStatusResultFetching,
+  //   },
+  // ] = useLazyGetTaskExecutionResultStatusQuery();
+  // const [
+  //   getTaskTimeStatus,
+  //   {
+  //     currentData: statusTimeData,
+  //     isSuccess: isStatusTimeSuccess,
+  //     isFetching: isStatusTimeFetching,
+  //   },
+  // ] = useLazyGetTaskExecutionTimeStatusQuery();
   const [
     getIngestedFiles,
     { data: ingestedFiles, isFetching: isSetupDetailFetching },
@@ -144,38 +146,40 @@ export const SystemManagement = () => {
   const [getTokens, { data: tokens, isFetching: isTokenFetching }] =
     useLazyGetTokenCountsQuery();
 
-  useEffect(() => {
-    if (
-      !isStatusResultFetching &&
-      isStatusResultSuccess &&
-      statusResultData &&
-      !isStatusTimeFetching &&
-      isStatusTimeSuccess &&
-      statusTimeData
-    ) {
-      const resultStatus =
-        statusResultData.result?.base_query?.sections ||
-        statusResultData.result?.execution_data?.base_query?.sections;
-      const timeStatus = statusTimeData.sections;
-      setExecutingStatus({
-        resultStatus,
-        timeStatus,
-      });
-    }
-  }, [
-    statusResultData,
-    isStatusResultSuccess,
-    isStatusResultFetching,
-    isStatusTimeFetching,
-    isStatusTimeSuccess,
-    statusTimeData,
-  ]);
+  const [getTaskDetail] = useLazyGetTaskDetailQuery();
 
-  useEffect(() => {
-    if (isStatusResultFetching) {
-      setExecutingStatus(undefined);
-    }
-  }, [isStatusResultFetching]);
+  // useEffect(() => {
+  //   if (
+  //     !isStatusResultFetching &&
+  //     isStatusResultSuccess &&
+  //     statusResultData &&
+  //     !isStatusTimeFetching &&
+  //     isStatusTimeSuccess &&
+  //     statusTimeData
+  //   ) {
+  //     const resultStatus =
+  //       statusResultData.result?.base_query?.sections ||
+  //       statusResultData.result?.execution_data?.base_query?.sections;
+  //     const timeStatus = statusTimeData.sections;
+  //     setExecutingStatus({
+  //       resultStatus,
+  //       timeStatus,
+  //     });
+  //   }
+  // }, [
+  //   statusResultData,
+  //   isStatusResultSuccess,
+  //   isStatusResultFetching,
+  //   isStatusTimeFetching,
+  //   isStatusTimeSuccess,
+  //   statusTimeData,
+  // ]);
+
+  // useEffect(() => {
+  //   if (isStatusResultFetching) {
+  //     setExecutingStatus(undefined);
+  //   }
+  // }, [isStatusResultFetching]);
 
   const columns = useMemo<ColDef[]>(
     () =>
@@ -695,13 +699,15 @@ export const SystemManagement = () => {
           //   task_id: executionData.task_id,
           //   data: executionData.input_json,
           // });
-          getTaskTimeStatus({ task_id: taskId });
-          getTaskResultStatus({ task_id: taskId });
+          // getTaskTimeStatus({ task_id: taskId });
+          // getTaskResultStatus({ task_id: taskId });
+          const res = await getTaskDetail({ taskId }).unwrap();
+          setTaskDetail(res);
           setPreviousTarget(currentTarget);
         }
       }
     },
-    [currentTarget, getExecutionDetail, getTaskResultStatus, getTaskTimeStatus]
+    [currentTarget, getExecutionDetail, getTaskDetail]
   );
 
   const onGraphDetail = useCallback(
@@ -897,21 +903,22 @@ export const SystemManagement = () => {
           </Box>
         ) : null}
       </Box>
-      {!!selectedExecute && (
+      {/* {!!selectedExecute && (
         <TemplateViewModal
           open={!!selectedExecute}
           onClose={() => setSelectedExecute(null)}
           data={selectedExecute.data}
           status={executingStatus}
         />
-      )}
-      {!!executingStatus && (
+      )} */}
+      {!!taskDetail && (
         <ReportDetailModal
-          open={!!executingStatus}
+          open={!!taskDetail}
           onClose={() => {
-            setExecutingStatus(undefined);
+            setTaskDetail(undefined);
+            // setExecutingStatus(undefined);
           }}
-          status={executingStatus}
+          status={taskDetail}
         />
       )}
       {selectedSetupId && !!selectedFileName && (
