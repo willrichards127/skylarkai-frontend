@@ -303,17 +303,35 @@ const FloatPanel = memo(
       const nodes = getNodes();
       const llmNode = nodes.find((node) => node.data.name === "LLM");
       const youtubeNode = nodes.find((node) => node.data.name === "Youtube");
+      const dbNode = nodes.find((node) => node.data.name === "SkyDatabase");
 
-      if (youtubeNode && llmNode && youtubeNode.data.properties.url) {
+      if (youtubeNode && llmNode && dbNode && youtubeNode.data.properties.url) {
         const llm: string = llmNode.data.properties.model;
         const youtubeUrl: string = youtubeNode.data.properties.url;
 
-        await ingestfilesYoutube({
+        const res = await ingestfilesYoutube({
           setupId: nodeContent.setupId!,
           analysisType: "financial_diligence",
           youtubeUrl,
           llm,
-        });
+        }).unwrap();
+
+        setNodes((prev) =>
+          prev.map((node) =>
+            node.data.name === "SkyDatabase"
+              ? {
+                  ...node,
+                  data: {
+                    ...node.data,
+                    properties: {
+                      ...node.data.properties,
+                      files: (node.data.properties.files || []).concat(res),
+                    },
+                  },
+                }
+              : node
+          )
+        );
       }
     };
 
@@ -326,12 +344,29 @@ const FloatPanel = memo(
         const llm: string = llmNode.data.properties.model;
         const linkedInUrl: string = linkedInNode.data.properties.url;
 
-        await ingestfilesLinkedin({
+        const res = await ingestfilesLinkedin({
           setupId: nodeContent.setupId!,
           analysisType: "financial_diligence",
           linkedInUrl,
           llm,
         });
+
+        setNodes((prev) =>
+          prev.map((node) =>
+            node.data.name === "SkyDatabase"
+              ? {
+                  ...node,
+                  data: {
+                    ...node.data,
+                    properties: {
+                      ...node.data.properties,
+                      files: (node.data.properties.files || []).concat(res),
+                    },
+                  },
+                }
+              : node
+          )
+        );
       }
     };
 
