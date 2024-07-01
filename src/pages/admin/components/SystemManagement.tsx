@@ -36,6 +36,7 @@ import { useLazyGetExecutionDetailQuery } from "../../../redux/services/reportAp
 // import { useGetUnitsQuery } from "../../../redux/services/setupApi";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import { CitationModal } from "../../../components/modals/CitationModal";
+import { ReportDetailModal } from "../../../components/modals/ReportDetailModal";
 
 const durations = [
   {
@@ -681,7 +682,7 @@ export const SystemManagement = () => {
   const onToken = () => {
     setCurrentTarget("token");
     getTokens();
-  }
+  };
 
   const onReportView = useCallback(
     async (taskId: string | null, baseQueryId: number | null) => {
@@ -690,10 +691,10 @@ export const SystemManagement = () => {
           baseQeuryId: baseQueryId,
         }).unwrap();
         if (executionData && executionData.task_id) {
-          setSelectedExecute({
-            task_id: executionData.task_id,
-            data: executionData.input_json,
-          });
+          // setSelectedExecute({
+          //   task_id: executionData.task_id,
+          //   data: executionData.input_json,
+          // });
           getTaskTimeStatus({ task_id: taskId });
           getTaskResultStatus({ task_id: taskId });
           setPreviousTarget(currentTarget);
@@ -824,7 +825,9 @@ export const SystemManagement = () => {
             onClick={onToken}
           >
             <Typography variant="body2">Tokens</Typography>
-            <Typography variant="h4">{totalData?.token_counts || "_"}</Typography>
+            <Typography variant="h4">
+              {totalData?.token_counts || "_"}
+            </Typography>
           </GridItem>
         </Grid>
         {currentTarget ? (
@@ -856,6 +859,8 @@ export const SystemManagement = () => {
                   ? "Genreated reports"
                   : currentTarget === "sub_report"
                   ? "Genreated reports from SLM"
+                  : currentTarget === "executing_report"
+                  ? "Executing reports"
                   : currentTarget === "graph"
                   ? "Created SLMs"
                   : currentTarget === "vdr"
@@ -897,6 +902,15 @@ export const SystemManagement = () => {
           open={!!selectedExecute}
           onClose={() => setSelectedExecute(null)}
           data={selectedExecute.data}
+          status={executingStatus}
+        />
+      )}
+      {!!executingStatus && (
+        <ReportDetailModal
+          open={!!executingStatus}
+          onClose={() => {
+            setExecutingStatus(undefined);
+          }}
           status={executingStatus}
         />
       )}

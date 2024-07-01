@@ -113,42 +113,44 @@ const UnitsPage = () => {
           <CircularProgress />
         </Box>
       ) : (
-        <TabContainer
-          hasDivider
-          headerHeight={90}
-          viewMode={viewMode}
-          onSwitchViewMode={onSwitchViewMode}
-          prefixActionRenderer={
-            <Stack spacing={2} direction="row" alignItems="center">
-              {type === "companies" ? (
-                <ApartmentIcon />
-              ) : (
-                <BusinessCenterIcon />
-              )}
-              <Typography variant="h5" textTransform="capitalize">
-                {type}
-              </Typography>
-            </Stack>
-          }
-          suffixActionRenderer={
-            <Button variant="contained" onClick={onAddUnit}>
-              + Add {type === "companies" ? "Company" : "Sector"}
-            </Button>
-          }
-        >
-          {(units || []).map((unit) => (
-            <UnitCard
-              key={unit.id}
-              name={unit.name}
-              created_at={unit.created_at}
-              logo={unit.logo}
-              author={unit.username}
-              onCard={() => onCard(unit)}
-              onMoreItem={(menuItemId) => onMoreItem(unit, menuItemId)}
-              moreItems={moreItems}
-            />
-          ))}
-        </TabContainer>
+        <>
+          <TabContainer
+            hasDivider
+            headerHeight={90}
+            viewMode={viewMode}
+            onSwitchViewMode={onSwitchViewMode}
+            prefixActionRenderer={
+              <Stack spacing={2} direction="row" alignItems="center">
+                {type === "companies" ? (
+                  <ApartmentIcon />
+                ) : (
+                  <BusinessCenterIcon />
+                )}
+                <Typography variant="h5" textTransform="capitalize">
+                  {type}
+                </Typography>
+              </Stack>
+            }
+            suffixActionRenderer={
+              <Button variant="contained" onClick={onAddUnit}>
+                + Add {type === "companies" ? "Company" : "Sector"}
+              </Button>
+            }
+          >
+            {(units || []).map((unit) => (
+              <UnitCard
+                key={unit.id}
+                name={unit.name}
+                created_at={unit.created_at}
+                logo={unit.logo}
+                author={unit.username}
+                onCard={() => onCard(unit)}
+                onMoreItem={(menuItemId) => onMoreItem(unit, menuItemId)}
+                moreItems={moreItems}
+              />
+            ))}
+          </TabContainer>
+        </>
       )}
       {unitModal && (
         <NewUnitModal

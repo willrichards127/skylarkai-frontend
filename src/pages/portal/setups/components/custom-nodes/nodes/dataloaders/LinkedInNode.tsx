@@ -4,7 +4,7 @@ import { TextField, Box } from "@mui/material";
 import { Handlers } from "../../Handlers";
 import { ITemplateNode } from "../../../../../../../shared/models/interfaces";
 
-export const YoutubuNode = memo(
+export const LinkedInNode = memo(
 	({ nodeId, nodeContent }: { nodeId: string; nodeContent: ITemplateNode }) => {
 		const { setNodes } = useReactFlow();
 
@@ -32,12 +32,12 @@ export const YoutubuNode = memo(
 		return (
 			<Box position='relative'>
 				<Handlers nodeId={nodeId} handlerType='source' />
-				<Box fontSize={12}>Youtube URL*</Box>
+				<Box fontSize={12}>LinkedInNode URL*</Box>
 				<TextField
 					className='nowheel'
 					size='small'
-					name='companyname'
-					value={nodeContent.properties?.companyname || ""}
+					name='url'
+					value={nodeContent.properties?.url || ""}
 					onChange={onChange}
 					fullWidth
 					sx={{
@@ -51,4 +51,4 @@ export const YoutubuNode = memo(
 	}
 );
 
-YoutubuNode.displayName = "YoutubuNode";
+LinkedInNode.displayName = "LinkedInNode";

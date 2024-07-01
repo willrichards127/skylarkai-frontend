@@ -44,7 +44,65 @@ export const factsetApi = createApi({
           }
         }
       }
-    })
+    }),
+    ingestFilesYoutube: builder.mutation<any, {
+      setupId: number;
+      analysisType: string;
+      youtubeUrl: string;
+      llm?: string;
+      background?: boolean;
+      extractTable?: boolean;
+    }>({
+      query: ({ setupId, analysisType, youtubeUrl, llm = "Gemini", background, extractTable }) => {
+        let url = `youtube/${setupId}?llm=${llm}`;
+
+        if (background) {
+          url += '&ingestinbackground=true';
+        }
+
+        if (extractTable) {
+          url += '&tableextractiononly=true';
+        }
+
+        return {
+          url: url,
+          method: 'POST',
+          body: {
+            "analysis_type": analysisType,
+            "url": youtubeUrl
+          }
+        }
+      }
+    }),
+    ingestFilesLinkedin: builder.mutation<any, {
+      setupId: number;
+      analysisType: string;
+      linkedInUrl: string;
+      llm?: string;
+      background?: boolean;
+      extractTable?: boolean;
+    }>({
+      query: ({ setupId, analysisType, linkedInUrl, llm = "Gemini", background, extractTable }) => {
+        let url = `linkedin/${setupId}?llm=${llm}`;
+
+        if (background) {
+          url += '&ingestinbackground=true';
+        }
+
+        if (extractTable) {
+          url += '&tableextractiononly=true';
+        }
+
+        return {
+          url: url,
+          method: 'POST',
+          body: {
+            "analysis_type": analysisType,
+            "url": linkedInUrl
+          }
+        }
+      }
+    }),
   }),
 });
 
@@ -54,4 +112,6 @@ export const {
   useGetDetailCompanyQuery,
   useLazyGetDetailCompanyQuery,
   useIngestFilesCrunchbaseMutation,
+  useIngestFilesLinkedinMutation,
+  useIngestFilesYoutubeMutation,
 } = factsetApi;

@@ -34,7 +34,7 @@ import { SlackNode } from "../nodes/dataloaders/SlackNode";
 import { HubspotNode } from "../nodes/dataloaders/HubspotNode";
 import { PostgresNode } from "../nodes/dataloaders/PostgresNode";
 import { ElasticSearchNode } from "../nodes/dataloaders/ElasticSearchNode";
-import { YoutubuNode } from "../nodes/dataloaders/YoutubuNode";
+import { YoutubeNode } from "../nodes/dataloaders/YoutubeNode";
 import { GoogleDriveNode } from "../nodes/dataloaders/GoogleDriveNode";
 import { DataSearchNode } from "../nodes/dataloaders/DataSearchNode";
 import { SkylarkDBNode } from "../nodes/vectors/SkylarkDBNode";
@@ -49,7 +49,12 @@ import { useExecuteCriteriaMutation } from "../../../../../../redux/services/set
 import { useSaveReportMutation } from "../../../../../../redux/services/reportApi";
 import { longDateFormat } from "../../../../../../shared/utils/basic";
 import { CrunchbaseNode } from "../nodes/dataloaders/CrunchbaseNode";
-import { useIngestFilesCrunchbaseMutation } from "../../../../../../redux/services/factsetApi";
+import {
+  useIngestFilesCrunchbaseMutation,
+  useIngestFilesLinkedinMutation,
+  useIngestFilesYoutubeMutation,
+} from "../../../../../../redux/services/factsetApi";
+import { LinkedInNode } from "../nodes/dataloaders/LinkedInNode";
 
 // key is corresponding to items.name
 const ComponentDict: Record<
@@ -85,12 +90,13 @@ const ComponentDict: Record<
   Hubspot: HubspotNode,
   Postgres: PostgresNode,
   ElasticSearch: ElasticSearchNode,
-  Youtube: YoutubuNode,
+  Youtube: YoutubeNode,
   GoogleDrive: GoogleDriveNode,
   DataSearch: DataSearchNode,
   VDD: VDDNode,
   InvestmentCriteria: InvestmentCriteriaNode,
   Crunchbase: CrunchbaseNode,
+  LinkedIn: LinkedInNode,
 };
 
 const FloatPanel = memo(
@@ -118,7 +124,10 @@ const FloatPanel = memo(
       useExecuteCriteriaMutation();
     const [ingestfilesCrunchbase, { isLoading: isIngestingCrunchbase }] =
       useIngestFilesCrunchbaseMutation();
-
+    const [ingestfilesYoutube, { isLoading: isIngestingYoutube }] =
+      useIngestFilesYoutubeMutation();
+    const [ingestfilesLinkedin, { isLoading: isIngestingLinkedin }] =
+      useIngestFilesLinkedinMutation();
     const [executionTime, setExecutionTime] = useState("0.0");
 
     const XForm = ComponentDict[nodeContent.name];
@@ -274,15 +283,53 @@ const FloatPanel = memo(
         const categories = crunchBaseNode.data.properties.json.reduce(
           (accum: any, cur: any) => [
             ...accum,
-            ...cur.children.filter((f: any) => f.checked).map((f: any) => f.key),
+            ...cur.children
+              .filter((f: any) => f.checked)
+              .map((f: any) => f.key),
           ],
           []
         );
-        
+
         await ingestfilesCrunchbase({
           setupId: nodeContent.setupId!,
           analysisType: "financial_diligence",
           categories,
+          llm,
+        });
+      }
+    };
+
+    const onIngestYoutube = async () => {
+      const nodes = getNodes();
+      const llmNode = nodes.find((node) => node.data.name === "LLM");
+      const youtubeNode = nodes.find((node) => node.data.name === "Youtube");
+
+      if (youtubeNode && llmNode && youtubeNode.data.properties.url) {
+        const llm: string = llmNode.data.properties.model;
+        const youtubeUrl: string = youtubeNode.data.properties.url;
+
+        await ingestfilesYoutube({
+          setupId: nodeContent.setupId!,
+          analysisType: "financial_diligence",
+          youtubeUrl,
+          llm,
+        });
+      }
+    };
+
+    const onIngestLinkedIn = async () => {
+      const nodes = getNodes();
+      const llmNode = nodes.find((node) => node.data.name === "LLM");
+      const linkedInNode = nodes.find((node) => node.data.name === "Youtube");
+
+      if (linkedInNode && llmNode && linkedInNode.data.properties.url) {
+        const llm: string = llmNode.data.properties.model;
+        const linkedInUrl: string = linkedInNode.data.properties.url;
+
+        await ingestfilesLinkedin({
+          setupId: nodeContent.setupId!,
+          analysisType: "financial_diligence",
+          linkedInUrl,
           llm,
         });
       }
@@ -374,6 +421,42 @@ const FloatPanel = memo(
                 <Box mr="auto" />
                 {!isIngestingCrunchbase ? (
                   <IconButton size="small" onClick={onIngestCrunchbase}>
+                    <PlayArrowIcon sx={{ fontSize: 18 }} />
+                  </IconButton>
+                ) : (
+                  <CircularProgress size={18} />
+                )}
+              </Box>
+            ) : ["Youtube"].includes(nodeContent.name) ? (
+              <Box
+                sx={{
+                  display: "flex",
+                  width: "100%",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <Box mr="auto" />
+                {!isIngestingYoutube ? (
+                  <IconButton size="small" onClick={onIngestYoutube}>
+                    <PlayArrowIcon sx={{ fontSize: 18 }} />
+                  </IconButton>
+                ) : (
+                  <CircularProgress size={18} />
+                )}
+              </Box>
+            ) : ["LinkedIn"].includes(nodeContent.name) ? (
+              <Box
+                sx={{
+                  display: "flex",
+                  width: "100%",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <Box mr="auto" />
+                {!isIngestingLinkedin ? (
+                  <IconButton size="small" onClick={onIngestLinkedIn}>
                     <PlayArrowIcon sx={{ fontSize: 18 }} />
                   </IconButton>
                 ) : (

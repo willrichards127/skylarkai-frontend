@@ -62,7 +62,10 @@ export const adminApi = createApi({
       query: () => ({ url: `/dashboard/reports` }),
     }),
     getExecutingReports: builder.query<any, void>({
-      query: () => ({ url: `/dashboard/reports/running` }),
+      query: () => ({ url: `/dashboard/executing_reports` }),
+    }),
+    getExecutingReportDetail: builder.query<any, void>({
+      query: () => ({ url: `/dashboard/executing_reports/detail` }),
     }),
     getGraphs: builder.query<any, void>({
       query: () => ({ url: `/dashboard/graphs` }),
