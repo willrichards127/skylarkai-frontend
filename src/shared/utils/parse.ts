@@ -209,7 +209,6 @@ const cleanUp = (inputString: string, limitWordCount?: number) => {
         return "";
       }
     } catch (e) {
-      console.log('--------------333');
       return "";
     }
   }
@@ -231,12 +230,10 @@ const parseCitation = (html: string, limitWordCount?: number) => {
     } else if (content[i] === "}") {
       braceCount--;
       if (braceCount === 0 && startIndex !== -1) {
-        console.log('==================111', content.substring(startIndex, i + 1))
         const section = cleanUp(
           content.substring(startIndex, i + 1),
           limitWordCount
         );
-        console.log('==================222', section)
         content = content.slice(0, startIndex) + section + content.slice(i + 1);
         i = startIndex; // Reset index to re-scan the string
         startIndex = -1;
