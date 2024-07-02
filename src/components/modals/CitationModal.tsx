@@ -1,6 +1,6 @@
 import { memo, useEffect, useState } from "react";
 import { XModal } from "../XModal";
-import { Box } from "@mui/material";
+import { Box, List, ListItemButton, ListItemText } from "@mui/material";
 import { PdfViewer } from "../PDFViewer";
 import { downloadPdf } from "../../shared/utils/download";
 import { useGetReportQuery } from "../../redux/services/reportApi";
@@ -22,6 +22,10 @@ export const CitationModal = memo(
       filename: string;
       id?: number; // the only case for report
       quote?: string;
+      categories?: {
+        category: string;
+        page: number;
+      }[];
     };
   }) => {
     const { data: report } = useGetReportQuery(
@@ -29,6 +33,7 @@ export const CitationModal = memo(
       { skip: !data.id }
     );
     const [file, setFile] = useState<any>();
+    const [pageIndex, setPageIndex] = useState<number>();
 
     useEffect(() => {
       if (data.id) return;
@@ -43,6 +48,10 @@ export const CitationModal = memo(
       });
     }, [data]);
 
+    const omJumpToPage = (page: number) => {
+      setPageIndex(page);
+    }
+
     return (
       <XModal
         open={open}
@@ -51,9 +60,22 @@ export const CitationModal = memo(
         size="lg"
       >
         {file && (
-          <div style={{ height: 800 }}>
-            <PdfViewer pdfUrl={file} keyword={data.quote} />
-          </div>
+          <Box display={"flex"} height={800} position={"relative"}>
+            <Box flex={1} height={"100%"}>
+              <PdfViewer pdfUrl={file} keyword={data.quote} pageIndex={pageIndex} />
+            </Box>
+            {data.categories ? (
+              <Box width={300} height={"100%"} overflow="auto">
+                <List>
+                  {data.categories.map((category, index) => (
+                    <ListItemButton key={`file-ingest-category-${index}`} onClick={() => omJumpToPage(category.page)}>
+                      <ListItemText primary={category.category} />
+                    </ListItemButton>
+                  ))}
+                </List>
+              </Box>
+            ) : null}
+          </Box>
         )}
         {!!report && (
           <ReportTemplate

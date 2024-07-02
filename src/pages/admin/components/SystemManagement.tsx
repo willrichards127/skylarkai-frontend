@@ -21,6 +21,7 @@ import {
   useLazyGetExecutingReportsQuery,
   useLazyGetTokenCountsQuery,
   useLazyGetTaskDetailQuery,
+  useLazyGetFileCategoryQuery,
 } from "../../../redux/services/adminApi";
 import AGTable from "../../../components/agTable/AGTable";
 import { ColDef } from "ag-grid-community";
@@ -33,7 +34,7 @@ import { convertUtcToLocal } from "../../../shared/utils/dateUtils";
 //   useLazyGetTaskExecutionTimeStatusQuery,
 // } from "../../../redux/services/transcriptAPI";
 // import { IExecutionSectionDetail } from "../../../redux/interfaces";
-import { useLazyGetExecutionDetailQuery } from "../../../redux/services/reportApi";
+// import { useLazyGetExecutionDetailQuery } from "../../../redux/services/reportApi";
 // import { useGetUnitsQuery } from "../../../redux/services/setupApi";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import { CitationModal } from "../../../components/modals/CitationModal";
@@ -102,7 +103,13 @@ export const SystemManagement = () => {
   // }>();
   const [taskDetail, setTaskDetail] = useState<any>();
   const [selectedSetupId, setSelectedSetupId] = useState<number>();
-  const [selectedFileName, setSelectedFileName] = useState<string>();
+  const [selectedFile, setSelectedFile] = useState<{
+    fileName: string;
+    categories: {
+      category: string;
+      page: number;
+    }[];
+  }>();
 
   const { data: totalData } = useGetDashboardQuery();
   const [getUnits, { data: units, isFetching: isUnitFetching }] =
@@ -115,9 +122,8 @@ export const SystemManagement = () => {
   ] = useLazyGetExecutingReportsQuery();
   const [getGraphs, { data: graphs, isFetching: isGraphFetching }] =
     useLazyGetGraphsQuery();
-  const [getVDRs, { data: vdrs, isFetching: isVDRFetching }] =
-    useLazyGetVDRsQuery();
-  const [getExecutionDetail] = useLazyGetExecutionDetailQuery();
+  const [getFileCategory] = useLazyGetFileCategoryQuery();
+  // const [getExecutionDetail] = useLazyGetExecutionDetailQuery();
   // const [
   //   getTaskResultStatus,
   //   {
@@ -142,6 +148,8 @@ export const SystemManagement = () => {
     getSetupReports,
     { data: subReports, isFetching: isSubReportFetching },
   ] = useLazyGetGeneratedReportBySetupQuery();
+  const [getVDRs, { data: vdrs, isFetching: isVDRFetching }] =
+    useLazyGetVDRsQuery();
 
   const [getTokens, { data: tokens, isFetching: isTokenFetching }] =
     useLazyGetTokenCountsQuery();
@@ -296,6 +304,7 @@ export const SystemManagement = () => {
                       justifyContent: "center",
                       alignItems: "center",
                       height: "42px",
+                      gap: "8px",
                     }}
                   >
                     <Button
@@ -303,12 +312,21 @@ export const SystemManagement = () => {
                       variant="contained"
                       onClick={() =>
                         onReportView(
-                          params.data.task_id,
-                          params.data.base_query_id
+                          params.data.task_id
+                          // params.data.base_query_id
                         )
                       }
                     >
                       Detail View
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={() =>
+                        onReportDownload(params.data.task_id, params.data.name)
+                      }
+                    >
+                      Download
                     </Button>
                   </Box>
                 );
@@ -372,8 +390,8 @@ export const SystemManagement = () => {
                       variant="contained"
                       onClick={() =>
                         onReportView(
-                          params.data.task_id,
-                          params.data.base_query_id
+                          params.data.task_id
+                          // params.data.base_query_id
                         )
                       }
                     >
@@ -689,26 +707,41 @@ export const SystemManagement = () => {
   };
 
   const onReportView = useCallback(
-    async (taskId: string | null, baseQueryId: number | null) => {
-      if (taskId && baseQueryId) {
-        const executionData = await getExecutionDetail({
-          baseQeuryId: baseQueryId,
-        }).unwrap();
-        if (executionData && executionData.task_id) {
-          // setSelectedExecute({
-          //   task_id: executionData.task_id,
-          //   data: executionData.input_json,
-          // });
-          // getTaskTimeStatus({ task_id: taskId });
-          // getTaskResultStatus({ task_id: taskId });
-          const res = await getTaskDetail({ taskId }).unwrap();
-          setTaskDetail(res);
-          setPreviousTarget(currentTarget);
-        }
+    async (taskId: string | null) => {
+      if (taskId) {
+        // const executionData = await getExecutionDetail({
+        //   baseQeuryId: baseQueryId,
+        // }).unwrap();
+        // if (executionData && executionData.task_id) {
+        // setSelectedExecute({
+        //   task_id: executionData.task_id,
+        //   data: executionData.input_json,
+        // });
+        // getTaskTimeStatus({ task_id: taskId });
+        // getTaskResultStatus({ task_id: taskId });
+        const res = await getTaskDetail({ taskId }).unwrap();
+        setTaskDetail(res);
+        setPreviousTarget(currentTarget);
       }
+      // }
     },
-    [currentTarget, getExecutionDetail, getTaskDetail]
+    [currentTarget, getTaskDetail]
   );
+
+  const onReportDownload = async (taskId: string | null, name: string) => {
+    if (taskId) {
+      const res = await getTaskDetail({ taskId }).unwrap();
+      const blob = new Blob([JSON.stringify(res, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${name}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  };
 
   const onGraphDetail = useCallback(
     async (setupId: number) => {
@@ -730,7 +763,13 @@ export const SystemManagement = () => {
   );
 
   const onFileView = async (fileName: string) => {
-    setSelectedFileName(fileName);
+    if (selectedSetupId && fileName) {
+      const res = await getFileCategory({
+        setupId: selectedSetupId,
+        fileName,
+      }).unwrap();
+      setSelectedFile({ fileName, categories: res });
+    }
   };
 
   return (
@@ -845,17 +884,16 @@ export const SystemManagement = () => {
               gap={1}
               mb={2}
             >
-              {currentTarget === "sub_report" ||
-                (currentTarget === "file" && (
-                  <IconButton
-                    aria-label="close"
-                    onClick={() => {
-                      setCurrentTarget(previousTarget);
-                    }}
-                  >
-                    <ArrowBackIosNewIcon />
-                  </IconButton>
-                ))}
+              {(currentTarget === "sub_report" || currentTarget === "file") && (
+                <IconButton
+                  aria-label="close"
+                  onClick={() => {
+                    setCurrentTarget(previousTarget);
+                  }}
+                >
+                  <ArrowBackIosNewIcon />
+                </IconButton>
+              )}
               <Box fontWeight="bold">
                 {currentTarget === "company"
                   ? "Created companies"
@@ -921,17 +959,18 @@ export const SystemManagement = () => {
           status={taskDetail}
         />
       )}
-      {selectedSetupId && !!selectedFileName && (
+      {selectedSetupId && !!selectedFile && (
         <CitationModal
-          open={!!selectedFileName}
+          open={!!selectedFile}
           onClose={() => {
-            setSelectedFileName(undefined);
+            setSelectedFile(undefined);
           }}
           title={"File Preview"}
           data={{
             graph_id: selectedSetupId,
             analysis_type: "financial_diligence",
-            filename: selectedFileName,
+            filename: selectedFile.fileName,
+            categories: selectedFile.categories,
           }}
         />
       )}

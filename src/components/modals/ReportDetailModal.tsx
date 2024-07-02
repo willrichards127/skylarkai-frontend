@@ -156,7 +156,12 @@ export const ReportDetailModal = memo(
     const content = useMemo(() => {
       if (history) {
         if (history.length) {
-          return history.map((h: any) => parseCitation(h[0][0])).join("<br/></br/><br/>")
+          return history
+            .filter((h: any) => h)
+            .map(
+              (h: any, index: number) => `${index + 1}` + parseCitation(h[0][0])
+            )
+            .join("<br/><br/><br/>");
         }
       } else {
         return undefined;

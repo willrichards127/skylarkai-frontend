@@ -85,6 +85,9 @@ export const adminApi = createApi({
     getTokenCounts: builder.query<any, void>({
       query: () => ({ url: `/dashboard/tokencount` }),
     }),
+    getFileCategory: builder.query<any, { setupId: number; fileName: string; }>({
+      query: ({ fileName, setupId }) => ({ url: `/dashboard/file_categories?file_name=${fileName}&graph_id=${setupId}` }),
+    })
   }),
 });
 
@@ -110,4 +113,6 @@ export const {
   useLazyGetExecutingReportsQuery,
   useGetTokenCountsQuery,
   useLazyGetTokenCountsQuery,
+  useGetFileCategoryQuery,
+  useLazyGetFileCategoryQuery,
 } = adminApi;
