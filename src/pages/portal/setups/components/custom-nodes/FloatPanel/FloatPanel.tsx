@@ -187,6 +187,7 @@ const FloatPanel = memo(
       const criteriaNode = nodes.find(
         (node) => node.data.name === "InvestmentCriteria"
       );
+
       if (
         criteriaNode &&
         llmNode &&
@@ -233,7 +234,7 @@ const FloatPanel = memo(
                   ...node,
                   data: {
                     ...node.data,
-                    properties: { json: result },
+                    properties: { ...node.data.properties, json: result },
                   },
                 }
               : node
@@ -257,6 +258,26 @@ const FloatPanel = memo(
           })
           .join("");
 
+        const overall = result.reduce(
+          (total, category: any) => {
+            const categoryTotal = category.children.reduce(
+              (total: number[], criteria: any) => {
+                if (criteria.Criteria === "Pass") {
+                  total[0] += 1;
+                } else {
+                  total[1] += 1;
+                }
+                return total;
+              },
+              [0, 0]
+            );
+            total[0] += categoryTotal[0];
+            total[1] += categoryTotal[1];
+            return total;
+          },
+          [0, 0]
+        );
+
         saveReport({
           setupId: nodeContent.setupId!,
           reportName: `Investment Criteria-${new Date().getTime() % 1000}`,
@@ -264,7 +285,11 @@ const FloatPanel = memo(
           data:
             `<h1 style="text-align: center;">Investment criteria: ${
               nodeContent.setupName
-            }</h1><p style="text-align: center;"><strong>${longDateFormat(
+            }</h1>
+            <p style="text-align: center;"><strong>Pass:&nbsp;${
+              overall[0]
+            },&nbsp;Fail:${overall[1]}</strong></p>
+            <p style="text-align: center;"><strong>${longDateFormat(
               new Date()
             )}</strong></p>` + content,
         });
@@ -303,9 +328,8 @@ const FloatPanel = memo(
       const nodes = getNodes();
       const llmNode = nodes.find((node) => node.data.name === "LLM");
       const youtubeNode = nodes.find((node) => node.data.name === "Youtube");
-      const dbNode = nodes.find((node) => node.data.name === "SkyDatabase");
 
-      if (youtubeNode && llmNode && dbNode && youtubeNode.data.properties.url) {
+      if (youtubeNode && llmNode && youtubeNode.data.properties.url) {
         const llm: string = llmNode.data.properties.model;
         const youtubeUrl: string = youtubeNode.data.properties.url;
 
@@ -338,7 +362,7 @@ const FloatPanel = memo(
     const onIngestLinkedIn = async () => {
       const nodes = getNodes();
       const llmNode = nodes.find((node) => node.data.name === "LLM");
-      const linkedInNode = nodes.find((node) => node.data.name === "Youtube");
+      const linkedInNode = nodes.find((node) => node.data.name === "LinkedIn");
 
       if (linkedInNode && llmNode && linkedInNode.data.properties.url) {
         const llm: string = llmNode.data.properties.model;
@@ -349,7 +373,7 @@ const FloatPanel = memo(
           analysisType: "financial_diligence",
           linkedInUrl,
           llm,
-        });
+        }).unwrap();
 
         setNodes((prev) =>
           prev.map((node) =>

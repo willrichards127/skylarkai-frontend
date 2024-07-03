@@ -55,9 +55,8 @@ export const Report = ({
 
   const onCitationLink = useCallback(
     ({ filename, quote }: { filename: string; quote: string }) => {
-      console.log(filename, quote, "citation==");
       setCitationData({
-        filename: `${filename}.pdf`,
+        filename: `${filename}`,
         quote,
       });
     },

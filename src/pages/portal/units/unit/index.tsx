@@ -121,9 +121,9 @@ const UnitPage = () => {
                 color="grey"
                 fontSize={13}
                 sx={{
-                  "-webkit-line-clamp": "3",
+                  WebkitLineClamp: "3",
                   display: "-webkit-box",
-                  "-webkit-box-orient": "vertical",
+                  WebkitBoxOrient: "vertical",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                 }}

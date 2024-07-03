@@ -55,8 +55,8 @@ export const UploadDocuments = ({
   const [compareDocs, { isLoading: loadingCompare }] =
     useCompareDocumentsMutation();
 
-  const [file0, setFile0] = useState<any>();
-  const [file1, setFile1] = useState<any>();
+  const [file0, setFile0] = useState<any>(null);
+  const [file1, setFile1] = useState<any>(null);
   const [fileContent0, setFileContent0] = useState<any>();
   const [fileContent1, setFileContent1] = useState<any>();
   const [dbFile0, setDbFile0] = useState<any>();
@@ -71,20 +71,17 @@ export const UploadDocuments = ({
       reader.onload = (e) => {
         if (typeof e.target?.result === "string") {
           if (fileIndex === 0) {
+            setFile0(selectedFiles[0]);
+            setDbFile0(null);
             setFileContent0(e.target.result);
           } else {
+            setFile1(selectedFiles[0]);
+            setDbFile1(null);
             setFileContent1(e.target.result);
           }
         }
       };
       reader.readAsDataURL(selectedFiles[0]);
-      if (fileIndex === 0) {
-        setFile0(selectedFiles[0]);
-        setDbFile0(null);
-      } else {
-        setFile1(selectedFiles[0]);
-        setDbFile1(null);
-      }
       onUploadedDocuments({
         fileIndex,
         file: selectedFiles[0],
@@ -102,31 +99,19 @@ export const UploadDocuments = ({
 
   const onSelectedDBFiles = useCallback(
     (files: any[]) => {
-      if (selectFileModal === 0) {
-        setDbFile0(files[0]);
-        setFile0(null);
-        downloadPdf({
-          graph_id: files[0].graph_id,
-          analysis_type: "financial_diligence",
-          filename: files[0].name.replace(".pdf", ""),
-        }).then((pdfBuffer) => {
-          if (pdfBuffer) {
-            setFileContent0(new Uint8Array(pdfBuffer));
-          }
-        });
-      } else {
-        setDbFile1(files[0]);
-        setFile1(null);
-      }
       downloadPdf({
         graph_id: files[0].graph_id,
         analysis_type: "financial_diligence",
-        filename: files[0].name.replace(".pdf", ""),
+        filename: files[0].name,
       }).then((pdfBuffer) => {
         if (pdfBuffer) {
           if (selectFileModal === 0) {
+            setDbFile0(files[0]);
+            setFile0(null);
             setFileContent0(new Uint8Array(pdfBuffer));
           } else {
+            setDbFile1(files[0]);
+            setFile1(null);
             setFileContent1(new Uint8Array(pdfBuffer));
           }
         }
@@ -186,8 +171,8 @@ export const UploadDocuments = ({
     }
 
     const responseCompare = await compareDocs({
-      document1: filename0.replace(".pdf", ""),
-      document2: filename1.replace(".pdf", ""),
+      document1: filename0,
+      document2: filename1,
       template,
       llm,
       is_template_with_content: true,
@@ -196,8 +181,8 @@ export const UploadDocuments = ({
     const responseInstance = await createInstance({
       ...instance,
       instance_metadata: {
-        filename0: filename0.replace(".pdf", ""),
-        filename1: filename1.replace(".pdf", ""),
+        filename0: filename0,
+        filename1: filename1,
         criteria,
         report: marked.parse(parseCitation(responseCompare)) as string,
       },
@@ -238,12 +223,7 @@ export const UploadDocuments = ({
           sx={{ minWidth: 140 }}
           onClick={onNextStep}
           disabled={
-            (!file0 && dbFile1) ||
-            (file0 && !dbFile1) ||
-            (!file1 && dbFile0) ||
-            (file1 && !dbFile0) ||
-            (!file0 && !file1) ||
-            (!dbFile0 && !dbFile1) ||
+            (!fileContent0 && !fileContent1) ||
             !criteria.length
           }
         >
