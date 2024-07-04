@@ -122,14 +122,13 @@ export const FileUploader = ({
     gapi.load("client:auth2", () => {
       gapi.client
         .init({
-          apiKey: "AIzaSyCENVD-OrG_k45HHXvRQH5dpSSPe2lPfZ8",
+          apiKey: import.meta.env.VITE_GOOGLE_API_KEY,
         })
         .then(() => {
           let tokenInfo = gapi.auth.getToken();
           openPicker({
-            clientId:
-              "78710376447-lbbsjg6rhon7a2q4t658g771t2j99kon.apps.googleusercontent.com",
-            developerKey: "AIzaSyCENVD-OrG_k45HHXvRQH5dpSSPe2lPfZ8",
+            clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+            developerKey: import.meta.env.VITE_GOOGLE_API_KEY,
             viewId: "DOCS",
             token: tokenInfo?.access_token,
             supportDrives: true,
