@@ -13,7 +13,7 @@ import {
   IDNDContainer,
   IReportItemMetadata,
 } from "../../../../../shared/models/interfaces";
-import { ItemEditor } from "./ItemEditor";
+import { ItemEditorTiny } from "./ItemEditor";
 import {
   categoryParser2,
   getSectionName,
@@ -264,7 +264,7 @@ export const Item = ({
         />
       )}
       {!isLoading && isEdit && editable && (
-        <ItemEditor
+        <ItemEditorTiny
           onClickAway={onClickAway}
           item={{ id, value, parentId, type }}
         />

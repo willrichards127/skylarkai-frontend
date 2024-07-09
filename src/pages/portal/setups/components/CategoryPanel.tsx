@@ -46,12 +46,11 @@ const CategoryPanel = memo(
         label: vdr.name!,
         properties: {
           vdrId: vdr.id,
+          vdrName: vdr.name,
           files: vdr.files,
         },
       };
     };
-
-    console.log(categoryList, "categoryList===");
 
     return (
       <Box sx={{ position: "relative", width: open ? 340 : 60 }}>

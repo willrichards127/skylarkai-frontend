@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, ReactNode } from "react";
 import { useDropzone } from "react-dropzone";
 import useDrivePicker from "react-google-drive-picker";
-import { ReactOneDriveFilePicker } from "react-onedrive-filepicker";
+// import { ReactOneDriveFilePicker } from "react-onedrive-filepicker";
 import { Box, Typography, LinearProgress, Stack } from "@mui/material";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import {
@@ -12,6 +12,7 @@ import {
 } from "./Svgs";
 import { DocumentChip } from "./DocumentChip";
 import { FileViewModal } from "../pages/premium/components/sub-components/FileViewModal";
+// import { OneDriveResult } from "react-onedrive-filepicker/lib/onedrive-picker";
 
 const LIMIT_DOCS = 125829120;
 
@@ -119,21 +120,24 @@ export const FileUploader = ({
   }, [initialFiles]);
 
   const handleGoogleDrive = () => {
+    const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
     gapi.load("client:auth2", () => {
       gapi.client
         .init({
-          apiKey: import.meta.env.VITE_GOOGLE_API_KEY,
+          apiKey,
+          clientId,
         })
         .then(() => {
           let tokenInfo = gapi.auth.getToken();
           openPicker({
-            clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-            developerKey: import.meta.env.VITE_GOOGLE_API_KEY,
-            viewId: "DOCS",
+            clientId,
+            developerKey: apiKey,
             token: tokenInfo?.access_token,
             supportDrives: true,
             multiselect: !isOneFileOnly,
-            callbackFunction: (data) => {
+            callbackFunction: async (data) => {
               if (data.action === "cancel") {
                 console.log("User clicked cancel/close button");
                 return;
@@ -141,48 +145,72 @@ export const FileUploader = ({
               if (!tokenInfo) {
                 tokenInfo = gapi.auth.getToken();
               }
-
-              const fetchOptions = {
-                headers: {
-                  Authorization: `Bearer ${tokenInfo.access_token}`,
-                },
-              };
-              const driveFileUrl = "https://www.googleapis.com/drive/v3/files";
-              Promise.all(
-                data.docs.map(async (doc) => {
-                  let response;
-                  if (
-                    doc.mimeType === "application/vnd.google-apps.document" ||
-                    doc.mimeType ===
-                      "application/vnd.google-apps.spreadsheet" ||
-                    doc.mimeType === "application/vnd.google-apps.presentation"
-                  ) {
-                    response = await fetch(
-                      `${driveFileUrl}/${doc.id}/export?mimeType=application/pdf`,
-                      fetchOptions
-                    );
-                  } else {
-                    response = await fetch(
-                      `${driveFileUrl}/${doc.id}?alt=media`,
-                      fetchOptions
-                    );
-                  }
-                  return {
-                    ...doc,
-                    blob: await response.blob(),
-                  };
-                })
-              ).then((responses) => {
-                const files = responses.map(
-                  (doc) => new File([doc.blob], doc.name)
-                );
-                const newFiles = [...uploadedFiles, ...files];
-                setUploadedFiles(newFiles);
-                onUploadCompleted(newFiles);
-              });
+              if (data.action === "picked") {
+                const fetchOptions = {
+                  headers: {
+                    Authorization: `Bearer ${tokenInfo.access_token}`,
+                  },
+                };
+                const driveFileUrl =
+                  "https://www.googleapis.com/drive/v3/files";
+                Promise.all(
+                  data.docs.map(async (doc) => {
+                    let response;
+                    if (
+                      doc.mimeType === "application/vnd.google-apps.document" ||
+                      doc.mimeType ===
+                        "application/vnd.google-apps.spreadsheet" ||
+                      doc.mimeType ===
+                        "application/vnd.google-apps.presentation"
+                    ) {
+                      response = await fetch(
+                        `${driveFileUrl}/${doc.id}/export?mimeType=application/pdf`,
+                        fetchOptions
+                      );
+                    } else {
+                      response = await fetch(
+                        `${driveFileUrl}/${doc.id}?alt=media`,
+                        fetchOptions
+                      );
+                    }
+                    return {
+                      ...doc,
+                      blob: await response.blob(),
+                    };
+                  })
+                ).then((responses) => {
+                  const files = responses.map(
+                    (doc) =>
+                      new File([doc.blob], doc.name, { type: doc.mimeType })
+                  );
+                  const newFiles = [...uploadedFiles, ...files];
+                  setUploadedFiles(newFiles);
+                  onUploadCompleted(newFiles);
+                });
+              }
             },
           });
         });
+    });
+  };
+
+  const handleOneDrive = async () => {
+    const clientId = import.meta.env.VITE_ONEDRIVE_CLIENT_ID;
+    (window as any).OneDrive.open({
+      clientId: clientId,
+      action: "download",
+      multiSelect: true,
+      openInNewWindow: true,
+      advanced: {
+        redirectUri: "http://localhost:5173"
+      },
+      success: (d: any) => {
+        console.log("================", d);
+      },
+      // cancel: onCancel,
+      error: (error: any) => {
+        console.error(error);
+      },
     });
   };
 
@@ -198,7 +226,9 @@ export const FileUploader = ({
             };
           })
         ).then((responses) => {
-          const files = responses.map((doc) => new File([doc.blob], doc.name));
+          const files = responses.map(
+            (doc) => new File([doc.blob], doc.name, { type: doc.blob.type })
+          );
           const newFiles = [...uploadedFiles, ...files];
           setUploadedFiles(newFiles);
           onUploadCompleted(newFiles);
@@ -316,19 +346,23 @@ export const FileUploader = ({
                 icon={<GoogleDriveIcon />}
                 onClick={handleGoogleDrive}
               />
-              <ReactOneDriveFilePicker
-                clientID="80dadb7e-58c4-44b3-a03b-c91a068139dc"
-                action="query"
+              {/* <ReactOneDriveFilePicker
+                clientID={import.meta.env.VITE_ONEDRIVE_CLIENT_ID}
+                action="share"
                 multiSelect={!isOneFileOnly}
-                onSuccess={(result) => {
-                  alert(JSON.stringify(result));
+                onSuccess={handleOneDrive}
+                advanced={{
+                  redirectUri: "http://localhost:5173",
+                  filter: ".pdf,.docx,.xlsx",
+                  scopes: "files.readwrite.all",
                 }}
-                onCancel={(result) => {
-                  alert(JSON.stringify(result));
-                }}
-              >
-                <CloudButton name="One Drive" icon={<OneDriveIcon />} />
-              </ReactOneDriveFilePicker>
+              > */}
+              <CloudButton
+                name="One Drive"
+                icon={<OneDriveIcon />}
+                onClick={handleOneDrive}
+              />
+              {/* </ReactOneDriveFilePicker> */}
               <CloudButton
                 name="Dropbox"
                 icon={<DropBoxIcon />}

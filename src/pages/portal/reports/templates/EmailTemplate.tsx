@@ -168,7 +168,7 @@ export const EmailTemplate = memo(
                 sx={{ "& .MuiInputBase-root": { width: 540 } }}
               />
               <Editor
-                apiKey="69ipaoh1jiynpwws60b1nj6fht4zidofpoagklhvb3wnh07a"
+                apiKey={import.meta.env.VITE_TINYMCE_API_KEY}
                 onInit={(_, editor) => (editorRef.current = editor)}
                 value={form.content}
                 onEditorChange={(newValue) =>

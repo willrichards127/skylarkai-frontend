@@ -49,14 +49,14 @@ const CustomCheckBoxIcon = ({
 export const VDDNode = memo(
   ({ nodeId, nodeContent }: { nodeId: string; nodeContent: ITemplateNode }) => {
     const { setNodes } = useReactFlow();
-
+    
     const data = useMemo(() => {
       const files = nodeContent.properties.files as IVDRFileExtend[];
       return flattenTree({
         name: "",
         children: [
           {
-            name: nodeContent.label,
+            name:  nodeContent.properties.vdrName || nodeContent.label,
             children: files.map((f) => ({ name: f.file_name, id: f.id })),
           },
         ],
