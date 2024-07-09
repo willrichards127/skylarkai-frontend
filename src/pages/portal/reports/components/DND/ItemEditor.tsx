@@ -66,7 +66,7 @@ export const ItemEditorTiny = memo(
       console.log(replaceItem, containers);
       onClickAway(replaceItem as IDNDItem, containers);
     }, [onClickAway, item]);
-
+    console.log('===================', import.meta.env.VITE_TINYMCE_API_KEY)
     return (
       <ClickAwayListener onClickAway={onClickAwayAction}>
         <div>
