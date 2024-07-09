@@ -202,7 +202,7 @@ export const FileUploader = ({
       multiSelect: true,
       openInNewWindow: true,
       advanced: {
-        redirectUri: "http://localhost:5173"
+        redirectUri: "http://localhost:5173",
       },
       success: (d: any) => {
         console.log("================", d);
@@ -215,6 +215,7 @@ export const FileUploader = ({
   };
 
   const handleDropBox = () => {
+    (window as any).Dropbox.init({ appKey: import.meta.env.VITE_DROPBOX_APP_KEY });
     (window as any).Dropbox.choose({
       success: function (files: Dropbox.ChooserFile[]) {
         Promise.all(
