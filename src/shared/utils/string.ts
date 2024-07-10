@@ -180,9 +180,9 @@ export const replaceContentBetweenTripleBackticks = (str: string) => {
     // p1 contains the text between triple backticks
 
     /** FIXME **/
-    // if (isCSVFormat(replaced)) {
-    //   return csvToHtmlTable(replaced);
-    // }
+    if (isCSVFormat(replaced)) {
+      return csvToHtmlTable(replaced);
+    }
     /** FIXME **/
     return replaced;
   });
@@ -199,9 +199,9 @@ export const replaceContentBetweenCodeBlock = (str: string) => {
       .replaceAll("<p><code>", "")
       .replaceAll("</code></p>", "");
     /** FIXME **/
-    // if (isCSVFormat(replaced)) {
-    //   return csvToHtmlTable(replaced);
-    // }
+    if (isCSVFormat(replaced)) {
+      return csvToHtmlTable(replaced);
+    }
     /** FIXME **/
     return replaced;
   });
