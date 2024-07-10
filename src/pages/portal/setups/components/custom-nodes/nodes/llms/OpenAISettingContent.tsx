@@ -8,7 +8,7 @@ interface IOpenAINode {
 	temperature: number;
 }
 
-const modelItems = ["gpt-3.5-turbo", "gpt-4"];
+const modelItems = ["gpt-4"];
 
 export const OpenAISettingContent = memo(
 	({ nodeId }: { nodeId: string; nodeContent: any }) => {

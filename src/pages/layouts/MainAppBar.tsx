@@ -10,25 +10,29 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Button,
+  Switch,
 } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import LogoutIcon from "@mui/icons-material/Logout";
 import HelpIcon from "@mui/icons-material/Help";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ApartmentIcon from "@mui/icons-material/Apartment";
+import BusinessCenterIcon from "@mui/icons-material/BusinessCenter";
 import {
   Logo,
   FeaturesIcon,
   HelpIcon as Help2Icon,
   SupportIcon,
-  WelcomeIcon,
-  AdvancedFeaturesIcon,
+  DashboardIcon,
 } from "../../components/Svgs";
 import { Notifications } from "./Notifications";
 import { XPopmenu } from "../../components/XPopmenu";
-import { currentUser, clearUserInfo } from "../../redux/features/authSlice";
+import {
+  currentUser,
+  clearUserInfo,
+  updatePremiumFeaturesAsync,
+} from "../../redux/features/authSlice";
 import { HeaderConfig } from "../../shared/models/constants";
-import { useGetSubScriptionFeaturesQuery } from "../../redux/services/mainFeaturesAPI";
 import { useAddUserActivityMutation } from "../../redux/services/userAPI";
 
 const profileDropdownItems = [
@@ -55,18 +59,22 @@ const profileDropdownItems = [
 ];
 
 export const MainAppBar = memo(() => {
-  const { userInfo: user } = useSelector(currentUser);
+  const { user } = useSelector(currentUser);
+  const { is_enabled_features } = useSelector(
+    (state: any) => state.userAuthSlice
+  );
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { data: features } = useGetSubScriptionFeaturesQuery({
-    subscription_id: user.subscription_id,
-  });
   const [addActivity] = useAddUserActivityMutation();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+
+  const onChangePremiumFeatures = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch(updatePremiumFeaturesAsync(e.target.checked) as any);
+  };
 
   const onFeatures = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -85,6 +93,9 @@ export const MainAppBar = memo(() => {
     },
     [navigate, dispatch, addActivity]
   );
+
+  const isAdmin = user!.persona_id === 5; // admin
+  const isPartner = user!.persona_id === 2;
 
   return (
     <AppBar position="static" color="secondary" enableColorOnDark>
@@ -108,7 +119,7 @@ export const MainAppBar = memo(() => {
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <Box textAlign="right">
                 <Typography variant="body2" fontWeight="bold">
-                  {user.username}
+                  {user!.username}
                 </Typography>
                 <Typography variant="caption">USA</Typography>
               </Box>
@@ -129,40 +140,43 @@ export const MainAppBar = memo(() => {
           </Box>
         </Box>
       </Toolbar>
-      <Box
-        sx={{
-          bgcolor: "secondary.main",
-          height: HeaderConfig.subToolbarHeight,
-          px: 4,
-        }}
-      >
+      {!isAdmin ? (
         <Box
-          sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "100%" }}
+          sx={{
+            bgcolor: "secondary.main",
+            height: HeaderConfig.subToolbarHeight,
+            px: 4,
+          }}
         >
           <Box
-            sx={{ display: "flex", alignItems: "center", gap: 2, height: "100%" }}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              height: "100%",
+            }}
           >
-            {user.subscription_id === 3 &&
+            {isPartner && (
               <Box
                 component={Link}
-                to="/welcome"
+                to="/dashboard"
                 sx={{
                   ml: 4,
                   color: "white",
                   textDecoration: "none",
                   fontSize: 14,
-                  fontWeight: location.pathname.includes("/help")
+                  fontWeight: location.pathname.includes("/dashboard")
                     ? "bold"
                     : "normal",
-                  opacity: location.pathname.includes("/help") ? 1 : 0.3,
+                  opacity: location.pathname.includes("/dashboard") ? 1 : 0.3,
                 }}
               >
                 <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-                  <WelcomeIcon />
-                  Welcome
+                  <DashboardIcon />
+                  Dashboard
                 </Box>
               </Box>
-            }
+            )}
             <Box
               sx={{
                 ml: 4,
@@ -171,7 +185,7 @@ export const MainAppBar = memo(() => {
               <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
                 <Box
                   component={Link}
-                  to="/premium"
+                  to="/welcome"
                   sx={{
                     display: "flex",
                     gap: 1,
@@ -179,12 +193,10 @@ export const MainAppBar = memo(() => {
                     color: "white",
                     textDecoration: "none",
                     fontSize: 14,
-                    fontWeight: location.pathname.includes("/premium")
+                    fontWeight: location.pathname.includes("/features")
                       ? "bold"
                       : "normal",
-                    opacity: location.pathname.includes("/premium")
-                      ? 1
-                      : 0.3,
+                    opacity: location.pathname.includes("/features") ? 1 : 0.3,
                   }}
                 >
                   <FeaturesIcon />
@@ -206,16 +218,15 @@ export const MainAppBar = memo(() => {
                     horizontal: "right",
                   }}
                 >
-                  {(features || []).map((feature) => (
+                  {(user!.main_features || []).map((feature) => (
                     <MenuItem
                       key={feature.id}
-                      selected={
-                        location.pathname === `/premium/${feature.id}`
-                      }
+                      selected={location.pathname === `/features/${feature.id}`}
                       onClick={() => {
                         setAnchorEl(null);
-                        navigate(`/premium/${feature.id}`);
+                        navigate(`/features/${feature.id}`);
                       }}
+                      disabled={is_enabled_features ? false : feature.id < 5}
                     >
                       {feature.feature}
                     </MenuItem>
@@ -223,27 +234,44 @@ export const MainAppBar = memo(() => {
                 </Menu>
               </Box>
             </Box>
-            {user.subscription_id === 3 &&
-              <Box
-                component={Link}
-                to="/advanced-features"
-                sx={{
-                  ml: 4,
-                  color: "white",
-                  textDecoration: "none",
-                  fontSize: 14,
-                  fontWeight: location.pathname.includes("/help")
-                    ? "bold"
-                    : "normal",
-                  opacity: location.pathname.includes("/help") ? 1 : 0.3,
-                }}
-              >
-                <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-                  <AdvancedFeaturesIcon />
-                  Advanced Features
-                </Box>
+            <Box
+              component={Link}
+              to="/portal/units?type=companies"
+              sx={{
+                ml: 4,
+                color: "white",
+                textDecoration: "none",
+                fontSize: 14,
+                fontWeight: location.search.includes("type=companies")
+                  ? "bold"
+                  : "normal",
+                opacity: location.search.includes("type=companies") ? 1 : 0.3,
+              }}
+            >
+              <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                <ApartmentIcon />
+                Companies
               </Box>
-            }
+            </Box>
+            <Box
+              component={Link}
+              to="/portal/units?type=sectors"
+              sx={{
+                ml: 4,
+                color: "white",
+                textDecoration: "none",
+                fontSize: 14,
+                fontWeight: location.search.includes("type=sectors")
+                  ? "bold"
+                  : "normal",
+                opacity: location.search.includes("type=sectors") ? 1 : 0.3,
+              }}
+            >
+              <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                <BusinessCenterIcon />
+                Sectors
+              </Box>
+            </Box>
             <Box
               component={Link}
               to="/help"
@@ -282,17 +310,26 @@ export const MainAppBar = memo(() => {
                 Support
               </Box>
             </Box>
-          </Box>
-          {user.subscription_id === 3 &&
-            <Button
-              variant="contained"
-              sx={{ minWidth: 160 }}
+            <Box mr="auto" />
+            <Box
+              sx={{
+                fontSize: 13,
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+              }}
             >
-              Access Enterprise Portal
-            </Button>
-          }
+              Disable Premium
+              <Switch
+                checked={is_enabled_features}
+                size="small"
+                onChange={onChangePremiumFeatures}
+              />
+              Enable Premium
+            </Box>
+          </Box>
         </Box>
-      </Box>
+      ) : null}
     </AppBar>
   );
 });

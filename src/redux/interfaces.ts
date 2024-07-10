@@ -3,45 +3,82 @@ export interface ISubscription {
   subscription_id: number;
   subscription_name: string;
 }
+export interface IMainFeature {
+  id: number;
+  feature: string;
+  description?: string;
+  img_url: string;
+}
 export interface IUser {
-  user_id?: number;
+  id?: number;
   email: string;
   username: string;
-  // tenant_id: number;
-  subscription_id: number;
-  subscription_name?: string;
-  user_role?: number;
+  persona_id: number; // persona id
+  tenant_id?: number;
+  main_features?: IMainFeature[];
   company: string;
   company_website?: string;
   phone?: string;
   password?: string;
-  // personaId?: number;
-  is_active?: boolean;
+  status?: number;
   created_at?: string;
 }
+
+export interface IUserRegister extends IUser {
+  tenancy: string;
+}
+
+export interface IUserLogin {
+  email: string;
+  password: string;
+  tenancy: string;
+}
+
 export interface IUserAuth {
-  userInfo?: IUser;
-  subscriptions?: ISubscription[];
+  user?: IUser;
   sys_graph_id?: number;
   token?: string;
   loading?: boolean;
   error?: boolean; // only for clear activities
-}
-export interface IMainFeature {
-  id: number;
-  feature: string;
-  description: string;
-  img_url: string;
+  tenancy?: string;
+  is_enabled_features?: boolean;
 }
 
 export interface ITranscript {
   file_name: string;
+  id?: number;
 }
 
-export interface IChat {
-  type: "question" | "answer" | "loading" | "topic" | "suggestions";
+export const metrics: TMetric[] = [
+  "Accuracy",
+  "Relevance",
+  "Specificity",
+  "Currentness",
+  "Verbosity",
+];
+
+export interface IMetricContent {
+  rating: number | null;
+  feedback: string;
+}
+
+export type TMetric =
+  | "Accuracy"
+  | "Relevance"
+  | "Specificity"
+  | "Currentness"
+  | "Verbosity";
+
+export interface IChatContent {
   content: string | string[];
+  tables?: string[];
   reference?: string[];
+  rating?: number;
+  rating_response?: Record<TMetric, IMetricContent>;
+}
+
+export interface IChat extends IChatContent {
+  type: "question" | "answer" | "loading" | "topic" | "suggestions";
 }
 
 export interface ICompany {
@@ -74,6 +111,7 @@ export interface IEdgarFile {
   title?: string;
   filing_date: string;
   form_type: string;
+  url: string;
 }
 
 export interface ITransaction {
@@ -91,6 +129,7 @@ export interface ITransaction {
   OfficerTitle: string;
   transaction_dump: string;
   footnotes: string;
+  url: string;
   file_name: string;
   reported_date: string;
 }
@@ -116,8 +155,28 @@ export interface ITopic {
 }
 
 export interface IResponseAnswer {
-	question?: string;
-	answer: string;
-	data: string[];
-	question_history?: string[][] | string[] | string;
+  question?: string;
+  answer: string;
+  data: string[];
+  question_history?: string[][] | string[] | string;
+}
+
+export interface IExecutionQueryDetail {
+  question: string;
+  completed_at: string | null;
+  sub_query_duration: string | null;
+}
+
+export interface IExecutionSectionDetail {
+  section_name: string;
+  section_completed_at: string | null;
+  section_duration: string | null;
+  sub_queries: IExecutionQueryDetail[];
+}
+
+export interface IExecutionReportDetail {
+  report_name: string;
+  base_query_completed_at: string | null;
+  base_query_duration: string | null;
+  sections: IExecutionSectionDetail[];
 }

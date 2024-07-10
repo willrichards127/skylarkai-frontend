@@ -269,7 +269,7 @@ export const SelectDocuments = ({
                 label: "Shares",
                 align: "right",
                 cellRenderer: ({ column, row }: { column: any; row: any }) =>
-                  row[column.id] ? currencyFormat(row[column.id]) : "",
+                  row[column.id] ? +row[column.id].toLocaleString() : "",
               },
               {
                 id: "price",

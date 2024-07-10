@@ -1,0 +1,41 @@
+[
+  {
+    "name": "Financial Health and Growth Potential",
+    "children": [
+      { "name": "Revenue Growth", "question": "Has the company demonstrated a minimum annual revenue growth rate of 20% over the past three years?" },
+      { "name": "Profit Margins", "question": "Does the company maintain a net profit margin of at least 10%?" },
+      { "name": "Cash Flow", "question": "Is the operating cash flow consistently positive over the past three years?" },
+      { "name": "Debt Levels", "question": "Is the debt-to-equity ratio less than 2:1, and does the interest coverage ratio exceed 3:1?" }
+    ]
+  },
+  {
+    "name": "Market Position and Competitive Advantage",
+    "children": [
+      { "name": "Market Share", "question": "Does the company hold a top 3 market share position in its industry?" },
+      { "name": "Unique Value Proposition", "question": "Does the company have at least one significant competitive advantage (e.g., proprietary technology, patents, or strong brand)?" },
+      { "name": "Barriers to Entry", "question": "Are the industry’s barriers to entry high enough to protect the company’s market position?" }
+    ]
+  },
+  {
+    "name": "Management Team and Governance",
+    "children": [
+      { "name": "Leadership Experience", "question": "Does the management team have a proven track record with at least 10 years of relevant industry experience?" },
+      { "name": "Board Composition", "question": "Does the board include at least two independent directors with relevant expertise?" }
+    ]
+  },
+  {
+    "name": "Product and Innovation Pipeline",
+    "children": [
+      { "name": "Product Portfolio", "question": "Does the company offer a diversified product portfolio with at least three distinct revenue-generating products or services?" },
+      { "name": "R&D Investment", "question": "Has the company consistently invested at least 5% of its revenue in R&D over the past three years?" },
+      { "name": "Product Roadmap", "question": "Does the company have a clear product roadmap with planned launches for the next two years?" }
+    ]
+  },
+  {
+    "name": "Market Trends and External Factors",
+    "children": [
+      { "name": "Industry Trends", "question": "Is the company operating in an industry expected to grow at least 10% annually over the next five years?" },
+      { "name": "Regulatory Environment", "question": "Is the regulatory environment stable and favorable for the company’s operations?" }
+    ]
+  }
+]

@@ -8,10 +8,11 @@ import { Chat } from "./Chat";
 import { FAQReport } from "./FAQReport";
 // import { FAQIcon } from "../../../../../components/Svgs";
 import { leftNavWidth } from "../../../../shared/models/constants";
-import { uniqueArr } from "../../../../shared/utils/basic";
+import { myRandomInts, uniqueArr } from "../../../../shared/utils/basic";
 import { DocumentChip } from "../../../../components/DocumentChip";
 import { ICustomInstance } from "./interface";
-import { IEdgarFile } from "../../../../redux/interfaces";
+import { IEdgarFile, ITopic } from "../../../../redux/interfaces";
+import { suggestionDict } from "../../../../shared/models/constants";
 
 const AskSecFilingsFeature = ({ featureId }: { featureId: number }) => {
   const [instance, setInstance] = useState<ICustomInstance>({
@@ -20,31 +21,67 @@ const AskSecFilingsFeature = ({ featureId }: { featureId: number }) => {
     instance_name: "",
     company_name: "",
     ticker: "",
-    instance_metadata: { docs: [] },
+    instance_metadata: { docs: [], suggestions: [] },
   });
 
-  const onChangeDocuments = useCallback(({ docs }: { docs: IEdgarFile[] }) => {
-    setInstance((prev) => ({
-      ...prev,
-      instance_metadata: {
-        docs: uniqueArr(
-          [...(prev.instance_metadata?.docs || []), ...docs],
-          ["file_name"]
-        ) as IEdgarFile[],
-      },
-    }));
-  }, []);
+  const getSuggestions = (formTypes: string[]) => {
+    if (formTypes.length < 2) {
+      if (suggestionDict[formTypes[0]]) {
+        return myRandomInts(
+          suggestionDict[formTypes[0]].length < 3
+            ? suggestionDict[formTypes[0]].length
+            : 3,
+          suggestionDict[formTypes[0]].length
+        ).map((index) => suggestionDict[formTypes[0]][index]);
+      }
+    } else {
+      return formTypes
+        .reduce<ITopic[]>((prev: ITopic[], formType: string) => {
+          if (suggestionDict[formType]) {
+            const random = myRandomInts(1, suggestionDict[formType].length);
+            return [...prev, suggestionDict[formType][random[0]]];
+          } else {
+            return prev;
+          }
+        }, [])
+        .filter(
+          (value: ITopic, index: number, self: ITopic[]) =>
+            index === self.findIndex((v) => value.topic === v.topic)
+        );
+    }
+    return [];
+  };
 
-  const onRemoveFile = useCallback((removeFilename: string) => {
+  const onChangeDocuments = ({ docs }: { docs: IEdgarFile[] }) => {
+    const currentDocs = uniqueArr(
+      [...(instance.instance_metadata?.docs || []), ...docs],
+      ["file_name"]
+    ) as IEdgarFile[];
+    const formTypes = currentDocs.map((doc) => doc.form_type);
+    const suggestions = getSuggestions(formTypes);
     setInstance((prev) => ({
       ...prev,
       instance_metadata: {
-        docs: prev.instance_metadata!.docs.filter(
-          (doc: IEdgarFile) => doc.file_name !== removeFilename
-        ),
+        docs: currentDocs,
+        suggestions,
       },
     }));
-  }, []);
+  };
+
+  const onRemoveFile = (removeFilename: string) => {
+    const currentDocs = instance.instance_metadata!.docs.filter(
+      (doc: IEdgarFile) => doc.file_name !== removeFilename
+    );
+    const formTypes = currentDocs.map((doc) => doc.form_type);
+    const suggestions = getSuggestions(formTypes);
+    setInstance((prev) => ({
+      ...prev,
+      instance_metadata: {
+        docs: currentDocs,
+        suggestions,
+      },
+    }));
+  };
 
   const onViewFile = useCallback((filename: string) => {
     setInstance((prev) => ({
@@ -60,6 +97,7 @@ const AskSecFilingsFeature = ({ featureId }: { featureId: number }) => {
       ...(!args.saved && {
         instance_metadata: {
           docs: [],
+          suggestions: [],
         },
       }),
       step: args.saved ? "chat" : "select_documents",
@@ -86,7 +124,7 @@ const AskSecFilingsFeature = ({ featureId }: { featureId: number }) => {
       instance_name: "",
       company_name: "",
       ticker: "",
-      instance_metadata: { docs: [] },
+      instance_metadata: { docs: [], suggestions: [] },
     });
   }, [featureId]);
 
@@ -106,12 +144,12 @@ const AskSecFilingsFeature = ({ featureId }: { featureId: number }) => {
             <Divider />
             {instance.step !== "create_instance" && (
               <Box sx={{ pl: 3, py: 2 }}>
-                <Typography variant="body1" gutterBottom>
+                <Typography variant="body1" fontSize={12} gutterBottom>
                   Selected Documents
                 </Typography>
                 <Stack
                   spacing={1}
-                  sx={{ maxHeight: 320, overflowY: "auto", pr: 4 }}
+                  sx={{ maxHeight: 240, overflowY: "auto", pr: 4 }}
                 >
                   {(instance.instance_metadata?.docs || []).map((doc) => (
                     <DocumentChip

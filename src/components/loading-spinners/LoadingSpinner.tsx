@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import { memo } from "react";
 import { Box, CircularProgress, Typography } from "@mui/material";
 
 export const LoadingSpinner = memo(

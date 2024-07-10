@@ -17,6 +17,7 @@ export type TXModalProps = {
   footer?: React.ReactNode;
   size?: DialogProps["maxWidth"];
   floatAlign?: "flex-start" | "center" | "flex-end";
+  disableBackdropClose?: boolean;
   onClose: () => void;
 };
 
@@ -29,12 +30,13 @@ export const XModal = memo((props: TXModalProps) => {
     onClose,
     floatAlign = "center",
     size = "md",
+    disableBackdropClose,
   } = props;
 
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={disableBackdropClose ? undefined : onClose}
       scroll="paper"
       maxWidth={size}
       fullWidth

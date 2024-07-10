@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
-  colors,
   Box,
   Button,
   Breadcrumbs,
@@ -10,14 +9,15 @@ import {
   IconButton,
   Typography,
 } from "@mui/material";
+// import { useSelector } from "react-redux";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import IosShareIcon from "@mui/icons-material/IosShare";
+import EmailIcon from "@mui/icons-material/Email";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { ExportModal } from "../../../../components/modals/ExportModal";
 import { ICustomInstance } from "./interfaces";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { generatePdf } from "../../../../shared/utils/pdf-generator";
-import { removeCitations } from "../../../../shared/utils/string";
+// import { ReportTemplate } from "../../../portal/reports/templates/ReportTemplate";
+import { SendEmailModal } from "../../../../components/modals/SendEmailModal";
 
 export const Report = ({
   instance,
@@ -26,10 +26,16 @@ export const Report = ({
   instance: ICustomInstance;
   onGotoMain: () => void;
 }) => {
-  const ref = useRef<HTMLDivElement>(null);
+  const reportPrintRef = useRef<HTMLDivElement>(null);
+  const [exportModal, showExportModal] = useState<boolean>(false);
+  const [emailModal, showEmailModal] = useState<boolean>(false);
 
   const onExport = useCallback(() => {
-    generatePdf(ref.current!.innerHTML, "Investment memo");
+    showExportModal(true);
+  }, []);
+
+  const onSendEmail = useCallback(() => {
+    showEmailModal(true);
   }, []);
 
   return (
@@ -47,6 +53,14 @@ export const Report = ({
         <Box mr="auto" />
         <Button
           variant="contained"
+          startIcon={<EmailIcon />}
+          sx={{ minWidth: 140, mr: 1 }}
+          onClick={onSendEmail}
+        >
+          Send via Email
+        </Button>
+        <Button
+          variant="contained"
           startIcon={<IosShareIcon />}
           sx={{ minWidth: 140 }}
           onClick={onExport}
@@ -61,66 +75,35 @@ export const Report = ({
         <Box mr="auto" />
         <Typography variant="body2">
           Template File:{" "}
-          {instance.instance_metadata?.template || "Default Template"}
+          {instance.instance_metadata?.template_name || "Default Template"}
         </Typography>
       </Box>
-      <Box sx={{ height: "calc(100% - 120px)", position: "relative" }}>
-        <Box
-          sx={{
-            position: "absolute",
-            height: "100%",
-            width: "100%",
-            border: "1px solid black",
-            overflowY: "auto",
-            bgcolor: "white",
-            color: "black",
-            px: 16,
-            py: 8,
+      <Box sx={{ height: "calc(100% - 120px)" }}>
+        {/* <ReportTemplate
+          setup={{
+            id: sys_graph_id,
+            name: instance.company_name,
+            nodes: [],
+            edges: [],
           }}
-          ref={ref}
-        >
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            components={{
-              pre: (props) => <div {...(props as any)} />,
-              table: (props) => (
-                <table
-                  {...props}
-                  style={{
-                    borderCollapse: "collapse",
-                    margin: "4px 2px",
-                    overflowX: "auto",
-                  }}
-                />
-              ),
-              th: (props) => (
-                <th
-                  {...props}
-                  style={{
-                    textAlign: "center",
-                    padding: "2px 4px",
-                    color: "white",
-                    background: "black",
-                    border: `1px solid ${colors.grey[500]}`,
-                  }}
-                />
-              ),
-              td: (props) => (
-                <td
-                  {...props}
-                  style={{
-                    textAlign: "center",
-                    padding: "4px 8px",
-                    border: `1px solid ${colors.grey[500]}`,
-                  }}
-                />
-              ),
-            }}
-          >
-            {removeCitations(instance.instance_metadata.report || "")}
-          </ReactMarkdown>
-        </Box>
+          reportContent={instance.instance_metadata.report!}
+          analysisType="transcript"
+        /> */}
       </Box>
+      {exportModal && (
+        <ExportModal
+          open={exportModal}
+          exportContent={reportPrintRef.current!}
+          onClose={() => showExportModal(false)}
+        />
+      )}
+      {emailModal && (
+        <SendEmailModal
+          open={emailModal}
+          onClose={() => showEmailModal(false)}
+          element={reportPrintRef.current!}
+        />
+      )}
     </Box>
   );
 };

@@ -1,56 +1,51 @@
-import { configureStore, isRejectedWithValue } from "@reduxjs/toolkit";
-import type { Middleware } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import { userAuthSlice } from "./features/authSlice";
 import { userApi } from "./services/userAPI";
-import { mainFeaturesApi } from "./services/mainFeaturesAPI";
+import { adminApi } from "./services/adminApi";
 import { transcriptApi } from "./services/transcriptAPI";
 
-import { authApi } from "./services/authAPI";
 import { setupApi } from "./services/setupApi";
 import { reportApi } from "./services/reportApi";
 import { workOrderApi } from "./services/workOrderApi";
+import { vdrApi } from "./services/vdrApi";
 
 import { loadStoreValue } from "../shared/utils/storage";
-
-// Global error handler
-const rtkQueryErrorLogger: Middleware = () => (next) => (action) => {
-  // RTK Query uses `createAsyncThunk` from redux-toolkit under the hood, so we're able to utilize these matchers!
-  if (isRejectedWithValue(action)) {
-    console.warn("We got a rejected action!", action);
-  }
-
-  return next(action);
-};
+import { checkForUnauthorized, rtkQueryErrorLogger } from "./middleware";
+import { factsetApi } from "./services/factsetApi";
 
 export const store = configureStore({
   preloadedState: {
     userAuthSlice: {
-      userInfo: loadStoreValue("user-info"),
+      user: loadStoreValue("user-info"),
       token: loadStoreValue("token"),
       sys_graph_id: loadStoreValue("sys_graph_id"),
+      tenancy: loadStoreValue("tenancy")
     },
   },
   reducer: {
     [userAuthSlice.reducerPath]: userAuthSlice.reducer,
     [userApi.reducerPath]: userApi.reducer,
-    [mainFeaturesApi.reducerPath]: mainFeaturesApi.reducer,
+    [adminApi.reducerPath]: adminApi.reducer,
     [transcriptApi.reducerPath]: transcriptApi.reducer,
     [setupApi.reducerPath]: setupApi.reducer,
 		[reportApi.reducerPath]: reportApi.reducer,
 		[workOrderApi.reducerPath]: workOrderApi.reducer,
-    [authApi.reducerPath]: authApi.reducer,
+    [vdrApi.reducerPath]: vdrApi.reducer,
+    [factsetApi.reducerPath]: factsetApi.reducer,
   },
   devTools: import.meta.env.VITE_NODE_ENV !== "production",
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({}).concat([
       userApi.middleware,
-      mainFeaturesApi.middleware,
+      adminApi.middleware,
       transcriptApi.middleware,
-      authApi.middleware,
       setupApi.middleware,
 			reportApi.middleware,
 			workOrderApi.middleware,
+      vdrApi.middleware,
+      factsetApi.middleware,
       rtkQueryErrorLogger,
+      checkForUnauthorized,
     ]),
 });
 

@@ -14,18 +14,24 @@ import {
   Backdrop,
   CircularProgress,
   Stack,
+  MenuItem,
 } from "@mui/material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import { FileUploader } from "../../../../components/FileUploader";
 import { SplitContainer } from "../../../../components/SplitContainer";
+import { PdfViewer } from "../../../../components/PDFViewer";
+import { SelectFileModal } from "../../../../components/CompanySelector/SelectFileModal";
 import { ICustomInstance } from "./interfaces";
 import {
   useCreateFeatureInstanceMutation,
   useIngestFilesMutation,
   useCompareDocumentsMutation,
 } from "../../../../redux/services/transcriptAPI";
+import { marked } from "marked";
+import { parseCitation } from "../../../../shared/utils/string";
+import { downloadPdf } from "../../../../shared/utils/download";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -49,33 +55,73 @@ export const UploadDocuments = ({
   const [compareDocs, { isLoading: loadingCompare }] =
     useCompareDocumentsMutation();
 
-  const [file0, setFile0] = useState<File | undefined>();
-  const [file1, setFile1] = useState<File | undefined>();
-  const [fileContent0, setFileContent0] = useState<string>("");
-  const [fileContent1, setFileContent1] = useState<string>("");
+  const [file0, setFile0] = useState<any>(null);
+  const [file1, setFile1] = useState<any>(null);
+  const [fileContent0, setFileContent0] = useState<any>();
+  const [fileContent1, setFileContent1] = useState<any>();
+  const [dbFile0, setDbFile0] = useState<any>();
+  const [dbFile1, setDbFile1] = useState<any>();
+  const [selectFileModal, showSelectFileModal] = useState<number>(-1);
   const [criteria, setCriteria] = useState<string[]>([]);
+  const [llm, setLlm] = useState<string>("Gemini");
 
   const onFileUploaded = useCallback(
     (fileIndex: number) => (selectedFiles: File[]) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         if (typeof e.target?.result === "string") {
-          if (fileIndex === 0) setFileContent0(e.target.result);
-          else setFileContent1(e.target.result);
+          if (fileIndex === 0) {
+            setFile0(selectedFiles[0]);
+            setDbFile0(null);
+            setFileContent0(e.target.result);
+          } else {
+            setFile1(selectedFiles[0]);
+            setDbFile1(null);
+            setFileContent1(e.target.result);
+          }
         }
       };
       reader.readAsDataURL(selectedFiles[0]);
-      if (fileIndex === 0) {
-        setFile0(selectedFiles[0]);
-      } else {
-        setFile1(selectedFiles[0]);
-      }
       onUploadedDocuments({
         fileIndex,
         file: selectedFiles[0],
       });
     },
     [onUploadedDocuments]
+  );
+
+  const onSelectFromDb = useCallback(
+    (fileIndex: number) => () => {
+      showSelectFileModal(fileIndex);
+    },
+    []
+  );
+
+  const onSelectedDBFiles = useCallback(
+    (files: any[]) => {
+      downloadPdf({
+        graph_id: files[0].graph_id,
+        analysis_type: "financial_diligence",
+        filename: files[0].name,
+      }).then((pdfBuffer) => {
+        if (pdfBuffer) {
+          if (selectFileModal === 0) {
+            setDbFile0(files[0]);
+            setFile0(null);
+            setFileContent0(new Uint8Array(pdfBuffer));
+          } else {
+            setDbFile1(files[0]);
+            setFile1(null);
+            setFileContent1(new Uint8Array(pdfBuffer));
+          }
+        }
+      });
+      onUploadedDocuments({
+        fileIndex: selectFileModal,
+        file: files[0],
+      });
+    },
+    [selectFileModal, onUploadedDocuments]
   );
 
   const onChangeCriteria = useCallback(
@@ -85,31 +131,60 @@ export const UploadDocuments = ({
     []
   );
 
-  const onNextStep = useCallback(async () => {
-    await ingestFiles({
-      analysis_type: "compare",
-      files: [file0!, file1!],
-    });
+  const onChangeLLM = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setLlm(e.target.value);
+    },
+    []
+  );
 
+  const onNextStep = useCallback(async () => {
     let template = `## Compare Documents Report\n\n\nCreated: ${new Date().toLocaleDateString()} \n\n`;
     criteria!.forEach((crit) => {
       template += `### ${crit} \n\n`;
     });
+    let filename0, filename1: string;
+    if (file0 && file1) {
+      filename0 = file0.name;
+      filename1 = file1.name;
+      await ingestFiles({
+        analysis_type: "compare",
+        files: [file0!, file1!],
+      });
+    } else if (dbFile0 && file1) {
+      filename0 = dbFile0.name;
+      filename1 = file1.name;
+      await ingestFiles({
+        analysis_type: "compare",
+        files: [file1!],
+      });
+    } else if (dbFile1 && file0) {
+      filename0 = file0.name;
+      filename1 = dbFile1.name;
+      await ingestFiles({
+        analysis_type: "compare",
+        files: [file0!],
+      });
+    } else {
+      filename0 = dbFile0.name;
+      filename1 = dbFile1.name;
+    }
 
     const responseCompare = await compareDocs({
-      document1: file0!.name.replace(".pdf", ""),
-      document2: file1!.name.replace(".pdf", ""),
+      document1: filename0,
+      document2: filename1,
       template,
+      llm,
       is_template_with_content: true,
     }).unwrap();
 
     const responseInstance = await createInstance({
       ...instance,
       instance_metadata: {
-        filename0: file0!.name.replace(".pdf", ""),
-        filename1: file1!.name.replace(".pdf", ""),
+        filename0: filename0,
+        filename1: filename1,
         criteria,
-        report: responseCompare,
+        report: marked.parse(parseCitation(responseCompare)) as string,
       },
     }).unwrap();
     onNext(responseInstance as ICustomInstance);
@@ -122,6 +197,9 @@ export const UploadDocuments = ({
     instance,
     file0,
     file1,
+    dbFile0,
+    dbFile1,
+    llm,
   ]);
 
   return (
@@ -144,7 +222,10 @@ export const UploadDocuments = ({
           variant="contained"
           sx={{ minWidth: 140 }}
           onClick={onNextStep}
-          disabled={!file0 || !file1 || !criteria.length}
+          disabled={
+            (!fileContent0 && !fileContent1) ||
+            !criteria.length
+          }
         >
           Next
         </Button>
@@ -153,58 +234,122 @@ export const UploadDocuments = ({
         Upload company specific documents
       </Typography>
       <Stack spacing={2} direction="row" alignItems="flex-start">
-        <FileUploader isOneFileOnly onUploadCompleted={onFileUploaded(0)} />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            height: "100%",
+            gap: 1,
+          }}
+        >
+          <FileUploader
+            isOneFileOnly
+            onUploadCompleted={onFileUploaded(0)}
+            showFileList
+          />
+          <Box width="100%" textAlign="center" mt="auto">
+            OR
+          </Box>
+          <Typography variant="body2" fontWeight="bold" gutterBottom>
+            Local VDR files
+          </Typography>
+          <Button size="small" variant="outlined" onClick={onSelectFromDb(0)}>
+            Select VDR files
+            {!!dbFile0 && `(${dbFile0.name})`}
+          </Button>
+        </Box>
         <Typography variant="h6">VS</Typography>
-        <FileUploader isOneFileOnly onUploadCompleted={onFileUploaded(1)} />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            height: "100%",
+            gap: 1,
+          }}
+        >
+          <FileUploader
+            isOneFileOnly
+            onUploadCompleted={onFileUploaded(1)}
+            showFileList
+          />
+          <Box width="100%" textAlign="center" mt="auto">
+            OR
+          </Box>
+          <Typography variant="body2" fontWeight="bold" gutterBottom>
+            Local VDR files
+          </Typography>
+          <Button size="small" variant="outlined" onClick={onSelectFromDb(1)}>
+            Select VDR files
+            {!!dbFile1 && `(${dbFile1.name})`}
+          </Button>
+        </Box>
       </Stack>
       <Divider sx={{ my: 2 }} />
-      <Autocomplete
-        id="autocomplete-criteria"
-        multiple
-        limitTags={2}
-        options={[
-          "Similarity Analysis",
-          "Contrast Analysis",
-          "Key Themes Extraction",
-          "Data Comparison",
-          "Tone and Style Analysis",
-          "Conclusion Comparison",
-          "Author's Intent and Purpose",
-          "Target Audience Analysis",
-          "Comprehensive Analysis",
-          "Executive Summary",
-        ]}
-        getOptionLabel={(option) => option}
-        sx={{ maxWidth: 480 }}
-        value={criteria}
-        onChange={onChangeCriteria}
-        renderOption={(props, option, { selected }) => (
-          <li {...props} key={option}>
-            <Checkbox
-              icon={icon}
-              checkedIcon={checkedIcon}
-              style={{ marginRight: 8 }}
-              checked={selected}
-              key={option}
-            />
-            {option}
-          </li>
-        )}
-        renderTags={(value, getTagProps) =>
-          value.map((option, index) => (
-            <Chip
-              variant="outlined"
-              label={option}
-              size="small"
-              {...getTagProps({ index })}
-              key={option}
-            />
-          ))
-        }
-        renderInput={(params) => (
-          <TextField {...params} size="small" label="Comparison Criteria" />
-        )}
-      />
+      <Stack spacing={2} direction="row" justifyContent="space-between">
+        <Autocomplete
+          id="autocomplete-criteria"
+          multiple
+          fullWidth
+          limitTags={2}
+          options={[
+            "Similarity Analysis",
+            "Contrast Analysis",
+            "Key Themes Extraction",
+            "Data Comparison",
+            "Tone and Style Analysis",
+            "Conclusion Comparison",
+            "Author's Intent and Purpose",
+            "Target Audience Analysis",
+            "Comprehensive Analysis",
+            "Executive Summary",
+          ]}
+          getOptionLabel={(option) => option}
+          value={criteria}
+          onChange={onChangeCriteria}
+          renderOption={(props, option, { selected }) => (
+            <li {...props} key={option}>
+              <Checkbox
+                icon={icon}
+                checkedIcon={checkedIcon}
+                style={{ marginRight: 8 }}
+                checked={selected}
+                key={option}
+              />
+              {option}
+            </li>
+          )}
+          renderTags={(value, getTagProps) =>
+            value.map((option, index) => (
+              <Chip
+                variant="outlined"
+                label={option}
+                size="small"
+                {...getTagProps({ index })}
+                key={option}
+              />
+            ))
+          }
+          renderInput={(params) => (
+            <TextField {...params} size="small" label="Comparison Criteria" />
+          )}
+        />
+        <TextField
+          label="Large Language Model"
+          value={llm}
+          onChange={onChangeLLM}
+          select
+          size="small"
+          fullWidth
+        >
+          {["Gemini", "OpenAI", "Anthropic"].map((option) => (
+            <MenuItem key={option} value={option}>
+              {option}
+            </MenuItem>
+          ))}
+        </TextField>
+      </Stack>
       <Divider sx={{ my: 2 }} />
       {(fileContent0 || fileContent1) && (
         <SplitContainer
@@ -212,44 +357,33 @@ export const UploadDocuments = ({
           leftPanel={
             <Box
               sx={{
-                height: "100%",
+                pb: 2,
+                height: 480,
                 width: "100%",
               }}
             >
-              {!!file0 && (
-                <Typography variant="body2" gutterBottom>
-                  {file0.name}
-                </Typography>
-              )}
-              {!!fileContent0 && (
-                <iframe src={fileContent0} width="100%" height="100%" />
-              )}
+              {!!fileContent0 && <PdfViewer pdfUrl={fileContent0} />}
             </Box>
           }
           rightPanel={
             <Box
               sx={{
-                height: "100%",
+                pb: 2,
+                height: 480,
                 width: "100%",
               }}
             >
-              <Box
-                sx={{
-                  height: "100%",
-                  width: "100%",
-                }}
-              >
-                {!!file1 && (
-                  <Typography variant="body2" gutterBottom>
-                    {file1.name}
-                  </Typography>
-                )}
-                {!!fileContent1 && (
-                  <iframe src={fileContent1} width="100%" height="100%" />
-                )}
-              </Box>
+              {!!fileContent1 && <PdfViewer pdfUrl={fileContent1} />}
             </Box>
           }
+        />
+      )}
+      {selectFileModal > -1 && (
+        <SelectFileModal
+          open={selectFileModal > -1}
+          onClose={() => showSelectFileModal(-1)}
+          onActionPerformed={onSelectedDBFiles}
+          isVDROnly
         />
       )}
     </Box>

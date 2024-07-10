@@ -11,7 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Logo } from "../../components/Svgs";
-import { FeatureCard } from "../../components/FeatureCard";
+import { FeaturePremiumCard as FeatureCard } from "../../components/FeaturePremiumCard";
 import secFilingImg from "../../assets/premium/sec_filing.png";
 import investmentImg from "../../assets/premium/investment_memo.png";
 import insiderTransactionImg from "../../assets/premium/insider_transactions.png";
@@ -20,7 +20,7 @@ import compareDocImg from "../../assets/premium/compare.png";
 import sentimentImg from "../../assets/premium/sentiment.png";
 import bottomNavBg from "../../assets/global/bottom-nav-bg.png";
 import { bottomNavHeight } from "../../shared/models/constants";
-import { useGetSubScriptionFeaturesQuery } from "../../redux/services/mainFeaturesAPI";
+import { useGetSubScriptionFeaturesQuery } from "../../redux/services/adminApi";
 import { Stack } from "@mui/system";
 
 const featureImgDict: Record<string, string> = {

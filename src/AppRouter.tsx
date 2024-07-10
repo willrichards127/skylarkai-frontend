@@ -1,40 +1,48 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { lazy, Suspense, useCallback, useEffect } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo } from "react";
 import {
   createBrowserRouter,
-  redirect,
+  Navigate,
   RouterProvider,
   useRouteError,
 } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { Box, CircularProgress } from "@mui/material";
+import { Backdrop, CircularProgress, Box } from "@mui/material";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { currentUser } from "./redux/features/authSlice";
 import { useAddUserActivityMutation } from "./redux/services/userAPI";
 import FeaturePage from "./pages/premium/feature";
 import ReportsPage from "./pages/portal/reports/ReportsPage";
 import ReportDetailPage from "./pages/portal/reports/ReportDetailPage";
+import VDRsPage from "./pages/portal/vdr/VDRsPage";
+import VDRDetailPage from "./pages/portal/vdr/VDRDetailPage";
 import SetupsPage from "./pages/portal/setups/SetupsPage";
 import SetupDetailPage from "./pages/portal/setups/SetupDetailPage";
-import OrdersPage from "./pages/portal/workorders/OrdersPage";
-import OrderDetailPage from "./pages/portal/workorders/OrderDetailPage";
-import CompaniesPage from "./pages/portal/workorders/CompaniesPage";
-import CompanyDetailPage from "./pages/portal/workorders/CompanyDetailPage";
+// import OrdersPage from "./pages/portal/workorders/OrdersPage";
+// import OrderDetailPage from "./pages/portal/workorders/OrderDetailPage";
+// import CompaniesPage from "./pages/portal/workorders/CompaniesPage";
+// import CompanyDetailPage from "./pages/portal/workorders/CompanyDetailPage";
 import ProfilePage from "./pages/portal/profile/ProfilePage";
-import HomePage from "./pages/portal";
+import DashboardPage from "./pages/dashboard";
+import UnitsPage from "./pages/portal/units";
+import UnitPage from "./pages/portal/units/unit";
 
-const LandingPage = lazy(() => import("./pages/landing"));
+// const LandingPage = lazy(() => import("./pages/landing"));
+
+const AdminPage = lazy(() => import("./pages/admin"));
 
 const ForgotPasswordForm = lazy(
-  () => import("./pages/auth_premium/ForgotPasswordForm")
+  () => import("./pages/auth/ForgotPasswordForm")
 );
+
+const ResetPasswordForm = lazy(() => import("./pages/auth/ResetPasswordForm"));
+
 const ForgotPasswordOTPForm = lazy(
-  () => import("./pages/auth_premium/ForgotPasswordOTPForm")
+  () => import("./pages/auth/ForgotPasswordOTPForm")
 );
-const RegisterForm = lazy(() => import("./pages/auth_premium/RegisterForm"));
-const RegisterOTPForm = lazy(() => import("./pages/auth_premium/RegisterOTPForm"));
-const LoginForm = lazy(() => import("./pages/auth_premium/LoginForm"));
-const LoginFormEnterprise = lazy(() => import("./pages/auth_enterprise/LoginForm"));
+const RegisterForm = lazy(() => import("./pages/auth/RegisterForm"));
+const RegisterOTPForm = lazy(() => import("./pages/auth/RegisterOTPForm"));
+const LoginForm = lazy(() => import("./pages/auth/LoginForm"));
 
 const HelpPage = lazy(() => import("./pages/help"));
 const SupportPage = lazy(() => import("./pages/support"));
@@ -47,10 +55,29 @@ const ErrorBoundary = () => {
 };
 
 function AppRouter() {
-  const { userInfo: user, token } = useSelector(currentUser);
-  if (!user || !token) {
-    redirect("/login");
-  }
+  const params = new URLSearchParams(window.location.search);
+  const redirectTo = (params.get("redirect") || "").replaceAll("___", "&");
+
+  const { user, token, loading } = useSelector(currentUser);
+  const redirectPath = useMemo(() => {
+    if (!user || !token) {
+      return `/login${redirectTo ? "?redirect=" + redirectTo : ""}`;
+    } else {
+      if (user.persona_id === 5) {
+        // admin role: system, skylarkai admin
+        return "/admin";
+      } else if (user.persona_id === 1) {
+        // analyst role
+        return `/portal/units?type=companies${
+          redirectTo ? "&redirect=" + redirectTo : ""
+        }`;
+      } else if (user.persona_id === 2) {
+        // partner role
+        return `/dashboard${redirectTo ? "?redirect=" + redirectTo : ""}`;
+      }
+      return "/welcome";
+    }
+  }, [user, token, redirectTo]);
 
   const [addActivity] = useAddUserActivityMutation();
 
@@ -65,19 +92,27 @@ function AppRouter() {
     };
   }, [onCloseTab]);
 
+  useEffect(() => {
+    if (!user || !token || !redirectTo) return;
+    window.location.href = redirectTo;
+  }, [user, token, redirectTo]);
+
+  if (loading)
+    return (
+      <Box sx={{ width: "100%", p: 2, textAlign: "center" }}>
+        <CircularProgress />
+      </Box>
+    );
+
   return (
     <Suspense
       fallback={
-        <Box
-          sx={{
-            p: 4,
-            width: "100%",
-            display: "flex",
-            justifyContent: "center",
-          }}
+        <Backdrop
+          sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open
         >
-          <CircularProgress />
-        </Box>
+          <CircularProgress color="inherit" />
+        </Backdrop>
       }
     >
       <RouterProvider
@@ -86,19 +121,10 @@ function AppRouter() {
             path: "*",
             element: <>No matched.</>,
           },
-          {
-            path: "/",
-            element: <LandingPage />,
-            errorElement: <ErrorBoundary />,
-          },
+          { path: "/", element: <Navigate to={redirectPath} /> },
           {
             path: "/login",
             element: <LoginForm />,
-            errorElement: <ErrorBoundary />,
-          },
-          {
-            path: "/login-enterprise",
-            element: <LoginFormEnterprise />,
             errorElement: <ErrorBoundary />,
           },
           {
@@ -117,55 +143,28 @@ function AppRouter() {
             errorElement: <ErrorBoundary />,
           },
           {
+            path: "/reset_password",
+            element: <ResetPasswordForm />,
+            errorElement: <ErrorBoundary />,
+          },
+          {
             path: "/forgot_password_otp",
             element: <ForgotPasswordOTPForm />,
             errorElement: <ErrorBoundary />,
-          },
-          // portal routing
-          {
-            path: "/main/reports",
-            element: <ReportsPage />
-          },
-          {
-            path: "/main/reports/:reportId",
-            element: <ReportDetailPage />
-          },
-          {
-            path: "/main/setups",
-            element: <SetupsPage />
-          },
-          {
-            path: "/main/setups/:setupId",
-            element: <SetupDetailPage />
-          },
-          {
-            path: "/main/orders",
-            element: <OrdersPage />
-          },
-          {
-            path: "/main/companies",
-            element: <CompaniesPage />
-          },
-          {
-            path: "/main/companies/:companyId",
-            element: <CompanyDetailPage />
-          },
-          {
-            path: "/main/companies/:companyId/:orderId",
-            element: <OrderDetailPage />
-          },
-          {
-            path: "/main/profile",
-            element: <ProfilePage />
-          },
-          {
-            path: "/portal",
-            element: <HomePage />,
           },
           {
             element: <ProtectedRoute isAllowed={!!token && !!user} />,
             errorElement: <ErrorBoundary />,
             children: [
+              // admin only
+              {
+                path: "/admin",
+                element: <AdminPage />,
+              },
+              {
+                path: "/dashboard",
+                element: <DashboardPage />,
+              },
               {
                 path: "/help",
                 element: <HelpPage />,
@@ -175,12 +174,59 @@ function AppRouter() {
                 element: <SupportPage />,
               },
               {
-                path: "/premium",
+                path: "/welcome",
                 element: <FeaturesPage />,
               },
               {
-                path: "/premium/:featureId",
+                path: "/features/:featureId",
                 element: <FeaturePage />,
+              },
+              // portal routing
+              {
+                path: "/portal/units",
+                element: <UnitsPage />,
+              },
+              {
+                path: "/portal/units/:unitId",
+                element: <UnitPage />,
+                children: [
+                  {
+                    path: "reports",
+                    element: <ReportsPage reportType={1} />,
+                  },
+                  {
+                    path: "tearsheets",
+                    element: <ReportsPage reportType={2} />,
+                  },
+                  {
+                    path: "criterias",
+                    element: <ReportsPage reportType={3} />,
+                  },
+                  {
+                    path: "setups",
+                    element: <SetupsPage />,
+                  },
+                  {
+                    path: "vdrs",
+                    element: <VDRsPage />,
+                  },
+                ],
+              },
+              {
+                path: "/portal/reports/:reportId",
+                element: <ReportDetailPage />,
+              },
+              {
+                path: "/portal/setups/:setupId",
+                element: <SetupDetailPage />,
+              },
+              {
+                path: "/portal/vdrs/:vdrId",
+                element: <VDRDetailPage />,
+              },
+              {
+                path: "/portal/profile",
+                element: <ProfilePage />,
               },
             ],
           },

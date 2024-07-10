@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { axiosBaseQueryWithReauth } from "./base";
+import { baseQuery } from "./base";
 import {
   IChat,
   IEdgarFile,
@@ -11,15 +11,14 @@ import {
   ICompany,
   IChatResponse,
   IFetchFileResponse,
+  IExecutionReportDetail,
 } from "../interfaces";
 import { parseTransaction } from "../../shared/utils/string";
+import { handleCatchError } from "./helper";
 
 export const transcriptApi = createApi({
   reducerPath: "transcriptApi",
-  baseQuery: axiosBaseQueryWithReauth({
-    baseUrl: import.meta.env.VITE_PREMIUM_API_URL,
-    isGuarded: true,
-  }),
+  baseQuery: baseQuery,
   tagTypes: ["FeatureInstance", "FetchFileLog"],
   endpoints: (builder) => ({
     createFeatureInstance: builder.mutation<
@@ -41,7 +40,7 @@ export const transcriptApi = createApi({
       }) => ({
         url: "feature_instances",
         method: "POST",
-        data: {
+        body: {
           feature_id,
           company_name,
           ticker,
@@ -134,13 +133,7 @@ export const transcriptApi = createApi({
             data: response.data,
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              data: "Error in fetch_edgar/fetch_transcript API",
-            },
-          };
+          return handleCatchError(e, "fetchFiles");
         }
       },
     }),
@@ -162,13 +155,12 @@ export const transcriptApi = createApi({
         const graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
         try {
           const response: any = await apiBaseQuery({
-            url: `${
-              analysis_type === "edgar"
+            url: `${analysis_type === "edgar"
                 ? "edgar_files"
                 : analysis_type === "transcript"
-                ? "transcript_files"
-                : "insider_transaction"
-            }/${graph_id}?company_name=${company_name}&ticker=${ticker}`,
+                  ? "transcript_files"
+                  : "insider_transaction"
+              }/${graph_id}?company_name=${company_name}&ticker=${ticker}`,
             method: "GET",
           });
           if (!response.data || response.data[1] === 400) {
@@ -180,13 +172,7 @@ export const transcriptApi = createApi({
             data: response.data,
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              data: "Error in edgar_files/transcript_files/insider_transaction API",
-            },
-          };
+          return handleCatchError(e, "getFiles");
         }
       },
       keepUnusedDataFor: 0,
@@ -214,13 +200,7 @@ export const transcriptApi = createApi({
             ),
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              data: "Error in edgar_files API",
-            },
-          };
+          return handleCatchError(e, "getEdgars");
         }
       },
     }),
@@ -241,13 +221,7 @@ export const transcriptApi = createApi({
             data: response.data,
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              data: "Error in transcript_files API",
-            },
-          };
+          return handleCatchError(e, "getTranscripts");
         }
       },
     }),
@@ -261,13 +235,29 @@ export const transcriptApi = createApi({
       async queryFn({ company_name, ticker }, api, __, apiBaseQuery) {
         const graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
         try {
+          const responseEdgars: any = await apiBaseQuery({
+            url: `edgar_files/${graph_id}?company_name=${company_name}&ticker=${ticker}`,
+            method: "GET",
+          });
           const responseTransactions: any = await apiBaseQuery({
             url: `insider_transaction/${graph_id}?company_name=${company_name}&ticker=${ticker}`,
-            method: "get",
+            method: "GET",
           });
 
+          const finalResult = responseTransactions.data.map(
+            (transaction: any) => {
+              const matchedEdgar = responseEdgars.data.find(
+                (edgar: any) => edgar.file_name === transaction.file_name
+              );
+              return {
+                ...transaction,
+                url: matchedEdgar ? matchedEdgar.url : "",
+              };
+            }
+          );
+
           return {
-            data: responseTransactions.data
+            data: finalResult
               .map((record: any) => parseTransaction(record))
               .sort(
                 (a: any, b: any) =>
@@ -276,31 +266,80 @@ export const transcriptApi = createApi({
               ),
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              data: "Error in insider_transaction API",
+          return handleCatchError(e, "getTransactions");
+        }
+      },
+      keepUnusedDataFor: 0,
+    }),
+    updateFeedback: builder.mutation<
+      any,
+      {
+        graph_id: number;
+        question_text: string;
+        user_feedback: any;
+        system_feedback: any;
+      }
+    >({
+      async queryFn(
+        { graph_id, question_text, user_feedback, system_feedback },
+        api,
+        __,
+        apiBaseQuery
+      ) {
+        const user = (api.getState() as any).userAuthSlice.user;
+
+        try {
+          const response = await apiBaseQuery({
+            url: "update-feedback",
+            method: "POST",
+            data: {
+              graph_id,
+              user_id: user.id,
+              question_text,
+              user_feedback,
+              system_feedback,
             },
-          };
+          });
+
+          if (response.error) {
+            return {
+              error: response.error,
+            };
+          } else if (response.data) {
+            return {
+              data: {
+                message: (response.data as any).status,
+              },
+            };
+          }
+
+          throw new Error("Fetch error");
+        } catch (e) {
+          return handleCatchError(e, "updateFeedback");
         }
       },
     }),
     customQuery: builder.mutation<
       IChat,
       {
+        graph_id?: number;
         question: string;
+        company_name?: string;
         filenames: string[];
         analysis_type?: string;
         llm?: string;
+        recursion?: number;
         chatmode?: boolean;
         insider_transaction?: boolean;
       }
     >({
       async queryFn(
         {
+          graph_id,
           question,
           filenames,
+          company_name,
+          recursion = 5,
           analysis_type = "transcript",
           chatmode = false,
           llm = "OpenAI",
@@ -310,56 +349,254 @@ export const transcriptApi = createApi({
         __,
         apiBaseQuery
       ) {
-        const graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
+        const sys_graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
+        const current_graph_id = graph_id || sys_graph_id;
         try {
-          const response: any = await apiBaseQuery({
-            url: `customquery/${graph_id}?${
-              insider_transaction
+          const response = await apiBaseQuery({
+            url: `customquery/${current_graph_id}?llm=${llm}&recursion=${recursion}&analysis_type=${analysis_type}&company_name=${company_name}&${insider_transaction
                 ? "&insider_transaction=" + insider_transaction
                 : ""
-            }`,
+              }`,
             method: "POST",
-            data: {
+            body: {
+              company_name,
               question,
               filenames,
-              analysis_type,
               chatmode,
               llm,
             },
           });
 
-          return {
-            data: {
-              type: "answer",
-              content: response.data.answer,
-              reference: response.data.reference,
-            },
-          };
+          if (response.error) {
+            return {
+              error: response.error,
+            };
+          } else if (response.data) {
+            return {
+              data: {
+                type: "answer",
+                content: (response.data as any).answer,
+                reference: (response.data as any).reference,
+                rating: (response.data as any).rating,
+                rating_response: (response.data as any).rating_response,
+              },
+            };
+          }
+
+          throw new Error("Fetch error");
         } catch (e) {
           return {
             error: {
-              status: 404,
-              statusText: e,
-              data: "Error in customquery API",
+              status: "CUSTOM_ERROR",
+              error: "Error in customQuery API",
+              data: e,
             },
           };
         }
       },
     }),
-    generateSentimentAnalysis: builder.mutation<
-      IChat,
+    bulkCustomQuery: builder.mutation<
+      any[],
       {
-        sentiments: string[];
+        graph_id?: number;
+        questions: string[];
+        company_name?: string;
         filenames: string[];
+        analysis_type?: string;
+        llm?: string;
+        recursion?: number;
+        chatmode?: boolean;
+        insider_transaction?: boolean;
       }
     >({
-      async queryFn({ sentiments, filenames }, api, __, apiBaseQuery) {
-        const graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
+      async queryFn(
+        {
+          graph_id,
+          questions,
+          filenames,
+          company_name,
+          recursion = 5,
+          analysis_type = "transcript",
+          chatmode = false,
+          llm = "OpenAI",
+          insider_transaction = false,
+        },
+        api,
+        __,
+        apiBaseQuery
+      ) {
+        const sys_graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
+        const current_graph_id = graph_id || sys_graph_id;
+        try {
+          const promises: any[] = [];
+          for (const question of questions) {
+            const promise = Promise.resolve(
+              apiBaseQuery({
+                url: `customquery/${current_graph_id}?llm=${llm}&recursion=${recursion}&analysis_type=${analysis_type}&company_name=${company_name}&${
+                  insider_transaction
+                    ? "&insider_transaction=" + insider_transaction
+                    : ""
+                }`,
+                method: "POST",
+                body: {
+                  company_name,
+                  question,
+                  filenames,
+                  chatmode,
+                  llm,
+                },
+              })
+            );
+            promises.push(promise);
+          }
+
+          const responses: any = await Promise.all(promises);
+          const answers = responses.map((res: any) => res.data.answer);
+          return {
+            data: answers,
+          } as any;
+        } catch (e) {
+          return {
+            error: {
+              status: "CUSTOM_ERROR",
+              error: "Error in customQuery API",
+              data: e,
+            },
+          };
+        }
+      },
+    }),
+    reportSectionTemplate: builder.mutation<
+      any,
+      {
+        graph_id?: number;
+        template: string;
+        question: string;
+        analysis_type: string;
+        company_name: string;
+        sub_question: string[];
+        is_file_with_content?: boolean;
+        is_template_with_content?: boolean;
+        all_files?: boolean;
+        llm?: string;
+      }
+    >({
+      async queryFn(
+        {
+          graph_id,
+          analysis_type,
+          template,
+          question,
+          is_file_with_content = false,
+          is_template_with_content = true,
+          company_name,
+          all_files = true,
+          sub_question,
+          llm = "OpenAI",
+        },
+        api,
+        __,
+        apiBaseQuery
+      ) {
+        const sys_graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
+        const current_graph_id = graph_id || sys_graph_id;
         try {
           const response: any = await apiBaseQuery({
-            url: `sentimentanalysis/${graph_id}?llm=${"Anthropic"}`,
+            url: "reports/section_template",
             method: "POST",
             data: {
+              graph_id: current_graph_id,
+              question,
+              analysis_type,
+              template,
+              sub_question,
+              is_file_with_content,
+              is_template_with_content,
+              company_name,
+              all_files,
+              llm,
+            },
+          });
+
+          if (response.error) {
+            return {
+              error: response.erorr,
+            };
+          }
+          return response;
+        } catch (e) {
+          return {
+            error: {
+              status: 404,
+              statusText: e,
+              msg: "Error in reports/section_template API",
+            },
+          };
+        }
+      },
+    }),
+    createReport: builder.mutation<
+      any,
+      {
+        company_name: string;
+        report_name: string;
+        data: string;
+        template: string;
+      }
+    >({
+      async queryFn(args, api, ___, apiBaseQuery) {
+        const { company_name, report_name, data, template } = args;
+        const graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
+        try {
+          const reportResponse: any = await apiBaseQuery({
+            url: `reports`,
+            method: "POST",
+            data: {
+              data,
+              graph_id,
+              report_name,
+              execute_query: true,
+              template,
+              company_name,
+            },
+          });
+          const generatedId: number = reportResponse.data.new_id;
+
+          return {
+            data: generatedId,
+          };
+        } catch (e) {
+          return handleCatchError(e, "createReport");
+        }
+      },
+    }),
+    generateSentimentAnalysis: builder.mutation<
+      any,
+      {
+        sentiments: string[];
+        filenames: { graph_id: number; id?: number; file_name: string }[];
+        is_report?: boolean;
+        analysis_type: string;
+        llm?: string;
+      }
+    >({
+      async queryFn(
+        {
+          sentiments,
+          is_report = false,
+          analysis_type,
+          filenames,
+          llm = "OpenAI",
+        },
+        _,
+        __,
+        apiBaseQuery
+      ) {
+        try {
+          const response: any = await apiBaseQuery({
+            url: `sentimentanalysis?llm=${llm}&is_report=${is_report}&analysis_type=${analysis_type}`,
+            method: "POST",
+            body: {
               sentiments,
               filenames,
             },
@@ -373,15 +610,23 @@ export const transcriptApi = createApi({
             },
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              data: "Error in sentimentanalysis API",
-            },
-          };
+          return handleCatchError(e, "generateSentimentAnalysis");
         }
       },
+    }),
+    cloneFeatureReport: builder.mutation<
+      any,
+      { report_name: string; content: string; unit_id: number }
+    >({
+      query: ({ report_name, content, unit_id }) => ({
+        url: "feature_report",
+        method: "POST",
+        body: {
+          report_name,
+          content,
+          company_id: unit_id,
+        },
+      }),
     }),
     getFilesData: builder.query<
       any,
@@ -407,19 +652,13 @@ export const transcriptApi = createApi({
           const merged = [].concat(
             ...responses
               .filter((response) => !!response.data)
-              .map((response) => (response.data as any)[0].text_content)
+              .map((response) => response.data as any)
           );
           return {
             data: merged,
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              data: "Error in file_data API",
-            },
-          };
+          return handleCatchError(e, "getFilesData");
         }
       },
       keepUnusedDataFor: 0,
@@ -441,7 +680,7 @@ export const transcriptApi = createApi({
           document1,
           document2,
           template = "",
-          llm = "OpenAI",
+          llm = "Gemini",
           is_file_with_content = false,
           is_template_with_content = false,
           analysis_type = "compare",
@@ -455,7 +694,7 @@ export const transcriptApi = createApi({
           const response: any = await apiBaseQuery({
             url: `compare_document/${graph_id}?analysis_type=${analysis_type}`,
             method: "POST",
-            data: {
+            body: {
               document1,
               document2,
               template,
@@ -469,13 +708,7 @@ export const transcriptApi = createApi({
             data: response.data.compared_document,
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              data: "Error in compare_document API",
-            },
-          };
+          return handleCatchError(e, "compareDocuments");
         }
       },
     }),
@@ -504,20 +737,14 @@ export const transcriptApi = createApi({
           const response: any = await apiBaseQuery({
             url: `ingestfiles?graph_id=${graph_id}&company_name=${company_name}`,
             method: "POST",
-            data: formdata,
+            body: formdata,
           });
 
           return {
             data: response.data,
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              data: "Error in ingestfiles API",
-            },
-          };
+          return handleCatchError(e, "ingestFiles");
         }
       },
     }),
@@ -526,7 +753,7 @@ export const transcriptApi = createApi({
         url: "crawler",
         method: "POST",
         data: {
-          url: "https://" + website_url,
+          url: website_url,
         },
       }),
     }),
@@ -539,6 +766,7 @@ export const transcriptApi = createApi({
         is_file_with_content?: boolean;
         is_template_with_content?: boolean;
         llm?: string;
+        company_name: string;
         execute_query?: boolean;
       }
     >({
@@ -550,6 +778,7 @@ export const transcriptApi = createApi({
           data,
           is_file_with_content = true,
           is_template_with_content = true,
+          company_name,
           llm = "OpenAI",
         },
         api,
@@ -559,13 +788,17 @@ export const transcriptApi = createApi({
         const graph_id = (api.getState() as any).userAuthSlice.sys_graph_id;
         try {
           const response: any = await apiBaseQuery({
-            url: `generate_report/${graph_id}`,
+            url: `reports`,
             method: "POST",
             data: {
+              graph_id: graph_id,
               execute_query,
               report_name,
               template,
-              data,
+              data: JSON.stringify({
+                answer: data,
+              }),
+              company_name,
               is_file_with_content,
               is_template_with_content,
               llm,
@@ -573,16 +806,10 @@ export const transcriptApi = createApi({
           });
 
           return {
-            data: response.data.filled_template,
+            data: response.data.new_id,
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              data: "Error in sentimentanalysis API",
-            },
-          };
+          return handleCatchError(e, "generateInvestmentReport");
         }
       },
     }),
@@ -604,13 +831,7 @@ export const transcriptApi = createApi({
             data: response.data as ITopic[],
           };
         } catch (e) {
-          return {
-            error: {
-              status: 404,
-              statusText: e,
-              data: "Error in analysis_type_queries API",
-            },
-          };
+          return handleCatchError(e, "getSuggestions");
         }
       },
       keepUnusedDataFor: 0,
@@ -639,20 +860,30 @@ export const transcriptApi = createApi({
       query: ({ feature_instance_id, question, answer }) => ({
         method: "POST",
         url: "chat_history",
-        data: {
+        body: {
           feature_instance_id,
           answer,
           question,
         },
       }),
     }),
-    getTaskStatus: builder.query<
-      { status: string; file_names?: string[] },
+    getTaskExecutionResultStatus: builder.query<
+      { state: string; status: string; result: any },
       { task_id: string }
     >({
       query: ({ task_id }) => ({
         method: "GET",
         url: `task/${task_id}`,
+      }),
+      keepUnusedDataFor: 0,
+    }),
+    getTaskExecutionTimeStatus: builder.query<
+      IExecutionReportDetail,
+      { task_id: string }
+    >({
+      query: ({ task_id }) => ({
+        method: "GET",
+        url: `admin/report_execution_time?task_id=${task_id}`,
       }),
       keepUnusedDataFor: 0,
     }),
@@ -676,6 +907,51 @@ export const transcriptApi = createApi({
       }),
       invalidatesTags: ["FetchFileLog"],
     }),
+    sendReportsViaEmails: builder.mutation<
+      any,
+      {
+        base64str?: string;
+        template: string;
+        emails: string[];
+        subject: string;
+        file_name?: string;
+      }
+    >({
+      async queryFn(
+        { base64str, template, emails, file_name, subject = "Report" },
+        _,
+        __,
+        apiBaseQuery
+      ) {
+        try {
+          const formdata = new FormData();
+          if (base64str) {
+            formdata.append("file_content_base64", base64str);
+          }
+          if (file_name) {
+            formdata.append("file_name", file_name);
+          }
+          formdata.append("html_template", template);
+          formdata.append("subject", subject);
+          emails.forEach((email) => {
+            formdata.append("email_addresses", email);
+          });
+
+          const response: any = await apiBaseQuery({
+            url: `send_email`,
+            method: "POST",
+            body: formdata,
+          });
+          console.log(response, "email: response");
+
+          return {
+            data: response.data,
+          };
+        } catch (e) {
+          return handleCatchError(e, "sendReportsViaEmails");
+        }
+      },
+    }),
   }),
 });
 
@@ -696,8 +972,11 @@ export const {
   // compare documents
   useCompareDocumentsMutation,
 
+  // feedback
+  useUpdateFeedbackMutation,
   // chatbot
   useCustomQueryMutation,
+  useBulkCustomQueryMutation,
 
   // fetch SEC filings or transcript files
   useFetchFilesMutation,
@@ -714,9 +993,13 @@ export const {
   // sentiment analysis
   useGenerateSentimentAnalysisMutation,
 
+  useCloneFeatureReportMutation,
+
   // create investment memo
   useGetSiteContentMutation,
   useGenerateInvestmentReportMutation,
+  useReportSectionTemplateMutation,
+  useCreateReportMutation,
 
   // get suggestions
   useGetSuggestionsQuery,
@@ -729,9 +1012,14 @@ export const {
   useAddChatMutation,
 
   //get fetched file logs
-  useGetTaskStatusQuery,
-  useLazyGetTaskStatusQuery,
+  useGetTaskExecutionResultStatusQuery,
+  useLazyGetTaskExecutionResultStatusQuery,
+  useGetTaskExecutionTimeStatusQuery,
+  useLazyGetTaskExecutionTimeStatusQuery,
   useGetFetchFileLogsQuery,
   useLazyGetFetchFileLogsQuery,
   useUpdateFetchFileLogMutation,
+
+  // send email
+  useSendReportsViaEmailsMutation,
 } = transcriptApi;

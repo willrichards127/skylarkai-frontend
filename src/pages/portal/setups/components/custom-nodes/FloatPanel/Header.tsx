@@ -1,43 +1,43 @@
 import { memo } from "react";
 import { Box, IconButton, Typography } from "@mui/material";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+// import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import CloseIcon from "@mui/icons-material/Close";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+// import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { XChip } from "../../../../../../components/XChip";
-import { XPopmenu } from "../../../../../../components/XPopmenu";
+// import { XPopmenu } from "../../../../../../components/XPopmenu";
 import { ITemplateNode } from "../../../../../../shared/models/interfaces";
 
 export const Header = memo(
-	({
-		nodeId,
-		nodeContent,
-		onClose,
-		onItem,
-	}: {
-		nodeId: string;
-		nodeContent: ITemplateNode;
-		onItem: (itemId: string) => void;
-		onClose: () => void;
-	}) => {
-		return (
-			<Box
-				sx={{
-					display: "flex",
-					alignItems: "center",
-					gap: 1,
-				}}
-			>
-				<img
-					src={`/categories/${nodeContent.name}.png`}
-					width={20}
-					height={20}
-					alt={nodeContent.name}
-				/>
-				<Typography variant='caption'>{nodeContent.description}</Typography>
-				<XChip label={nodeId} />
-				<Box mr='auto' />
-				{nodeContent.name === "OpenAI" && (
+  ({
+    nodeId,
+    nodeContent,
+    onClose,
+    onItem,
+  }: {
+    nodeId: string;
+    nodeContent: ITemplateNode;
+    onItem: (itemId: string) => void;
+    onClose: () => void;
+  }) => {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
+        <img
+          src={`/categories/${nodeContent.name}.png`}
+          width={20}
+          height={20}
+          alt={nodeContent.name}
+        />
+        <Typography variant="caption">{nodeContent.description}</Typography>
+        <XChip label={nodeId} />
+        <Box mr="auto" />
+        {/* {nodeContent.name === "OpenAI" && (
 					<XPopmenu
 						triggerEl={
 							<IconButton size='small'>
@@ -82,13 +82,18 @@ export const Header = memo(
 						]}
 						onItem={onItem}
 					/>
-				)}
-				<IconButton size='small' onClick={onClose}>
-					<CloseIcon sx={{ fontSize: 14 }} />
-				</IconButton>
-			</Box>
-		);
-	}
+				)} */}
+        {nodeContent.name === "InvestmentCriteria" && (
+          <IconButton size="small" onClick={() => onItem("criteria")}>
+            <SettingsIcon sx={{ fontSize: 14 }} />
+          </IconButton>
+        )}
+        <IconButton size="small" onClick={onClose}>
+          <CloseIcon sx={{ fontSize: 14 }} />
+        </IconButton>
+      </Box>
+    );
+  }
 );
 
 Header.displayName = "Header";

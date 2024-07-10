@@ -94,23 +94,23 @@ export const XCard = memo(
               <CardMedia sx={{ height: thumbnailHeight }} image={thumbnail} />
             )}
             <CardHeader
+              sx={{
+                "& .MuiCardHeader-content": {
+                  minWidth: 0,
+                },
+              }}
               avatar={
-                <Avatar sx={{ width: 48, height: 48 }} src={logo} alt={label} />
+                <Avatar sx={{ width: 24, height: 24 }} src={logo} alt={label} />
               }
-              title={
-                <Box
-                  sx={{
-                    fontSize: 16,
-                    fontWeight: "500",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    width: width - 30,
-                  }}
-                >
-                  {label}
-                </Box>
-              }
+              title={label}
+              titleTypographyProps={{
+                fontSize: 16,
+                fontWeight: "500",
+                textOverflow: "ellipsis",
+                overflow: "hidden",
+                whiteSpace: "nowrap",
+                paddingRight: 2,
+              }}
               subheader={updatedAt || ""}
             />
           </Box>

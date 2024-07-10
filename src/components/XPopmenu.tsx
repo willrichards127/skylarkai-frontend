@@ -6,7 +6,7 @@ import React, {
   useCallback,
 } from "react";
 import { Divider, Menu, MenuItem } from "@mui/material";
-import { IMenuItem } from "../models/interfaces";
+import { IMenuItem } from "../shared/models/interfaces";
 
 export const XPopmenu = memo(
   ({
@@ -45,7 +45,7 @@ export const XPopmenu = memo(
 
     const open = !!anchorEl;
 
-    return (
+    return items.length > 0 ? (
       <>
         {cloneEl}
         <Menu
@@ -62,7 +62,7 @@ export const XPopmenu = memo(
           }}
           sx={{
             "& .MuiList-root": {
-              padding: 0
+              padding: 0,
             },
             "& .MuiPaper-root": {
               borderRadius: 2,
@@ -74,14 +74,14 @@ export const XPopmenu = memo(
         >
           {items.map((item, index) =>
             item.id === "divider" ? (
-              <Divider key={item.id + index} style={{margin: 0}} />
+              <Divider key={item.id + index} style={{ margin: 0 }} />
             ) : (
               <MenuItem
                 key={item.id}
-                onClick={() => onItemClick(item.id)}
-                sx={{
-                  pointerEvents: item.clickable ? "auto" : "none",
-                }}
+                onClick={() => (item.clickable ? onItemClick(item.id) : null)}
+                // sx={{
+                //   pointerEvents: item.clickable ? "auto" : "none",
+                // }}
               >
                 {item.content}
               </MenuItem>
@@ -89,6 +89,8 @@ export const XPopmenu = memo(
           )}
         </Menu>
       </>
+    ) : (
+      <></>
     );
   }
 );

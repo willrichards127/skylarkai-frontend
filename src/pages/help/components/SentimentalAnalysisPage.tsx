@@ -6,7 +6,7 @@ export const SentimentalAnalysisPage = () => {
     <Box pb={4}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 4 }}>
         <CircleLogo />
-        <Typography variant="h5">Sentiment Analysis</Typography>
+        <Typography variant="h5">Investment Criteria Analysis</Typography>
       </Box>
       <Typography variant="h6" color="primary.main" gutterBottom>
         Quickstart Guide:

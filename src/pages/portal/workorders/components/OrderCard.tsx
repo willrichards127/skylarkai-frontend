@@ -12,8 +12,6 @@ export const OrderCard = memo(
   ({
     width = 300,
     height = 200,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    orderStatus,
     logo,
     thumbnail,
     label,

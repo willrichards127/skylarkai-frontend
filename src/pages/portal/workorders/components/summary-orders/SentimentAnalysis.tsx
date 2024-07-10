@@ -27,7 +27,7 @@ export const SentimentAnalysis = memo(
             <BorderColorIcon sx={{ fontSize: 18 }} />
           </IconButton>
           <Typography variant="body1" fontWeight="bold" gutterBottom>
-            Sentiment Analysis
+            Investment Criteria Analysis
           </Typography>
           <ul style={{ paddingLeft: 16 }}>
             {content.map((category: string) => (

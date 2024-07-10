@@ -5,25 +5,20 @@ import {
   Divider,
   Menu,
   MenuItem,
-  CircularProgress,
 } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { NotificationItem } from "./NotificationItem";
-import { useLazyGetFetchFileLogsQuery } from "../../../redux/services/transcriptAPI";
+import { useNotification } from "../../../shared/socket/NotificationProvider";
 
 export const Notifications = () => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-  const [fetchNotifications, { data: notifications, isLoading }] =
-    useLazyGetFetchFileLogsQuery();
+  const { notifications, sendMessage } = useNotification();
 
-  const onOpenMenu = useCallback(
-    (e: React.MouseEvent<HTMLElement>) => {
-      setAnchorEl(e.currentTarget);
-      fetchNotifications();
-    },
-    [fetchNotifications]
-  );
+  const onOpenMenu = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(e.currentTarget);
+    sendMessage();
+  }, []);
 
   const onClose = useCallback(() => {
     setAnchorEl(null);
@@ -34,7 +29,7 @@ export const Notifications = () => {
   return (
     <>
       <IconButton onClick={onOpenMenu}>
-        <Badge color="info" variant="dot" invisible={!notifications?.length}>
+        <Badge color="info" variant="dot" invisible={notifications.every(notification => notification.marked)}>
           <NotificationsIcon />
         </Badge>
       </IconButton>
@@ -53,6 +48,8 @@ export const Notifications = () => {
         sx={{
           "& .MuiList-root": {
             padding: 0,
+            maxWidth: 320,
+            maxHeight: 360,
           },
           "& .MuiPaper-root": {
             borderRadius: 2,
@@ -62,21 +59,14 @@ export const Notifications = () => {
           },
         }}
       >
-        {isLoading ? (
-          <MenuItem sx={{ textAlign: "center", fontSize: 16 }}>
-            <CircularProgress />
-          </MenuItem>
-        ) : !notifications?.length ? (
+        {!notifications.length ? (
           <MenuItem sx={{ textAlign: "center", fontSize: 10, color: "grey" }}>
             No notifications available.
           </MenuItem>
         ) : (
-          notifications!.map((notification) => (
-            <MenuItem key={notification.id}>
-              <NotificationItem
-                key={notification.id}
-                notification={notification}
-              />
+          notifications.map((notification, index) => (
+            <MenuItem key={`notification-${index}`}>
+              <NotificationItem notification={notification} />
               <Divider style={{ margin: 0 }} />
             </MenuItem>
           ))

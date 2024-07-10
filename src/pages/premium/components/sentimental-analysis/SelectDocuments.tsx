@@ -1,8 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCallback, useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import {
   Box,
   Button,
+  Stack,
+  MenuItem,
   Backdrop,
   CircularProgress,
   Breadcrumbs,
@@ -25,6 +28,8 @@ import {
   useCreateFeatureInstanceMutation,
   useGenerateSentimentAnalysisMutation,
 } from "../../../../redux/services/transcriptAPI";
+import { marked } from "marked";
+import { parseCitation } from "../../../../shared/utils/string";
 
 const extractRow = (row: { file_name: string }) => {
   const splited = row.file_name.split("_");
@@ -51,11 +56,19 @@ export const SelectDocuments = ({
   onNext: (args: ICustomInstance) => void;
   onGotoMain: () => void;
 }) => {
+  const { sys_graph_id } = useSelector((state: any) => state.userAuthSlice);
   const { isLoading: loadingTranscripts, data: dataTranscripts } =
-    useGetTranscriptsQuery({
-      company_name: instance.company_name,
-      ticker: instance.ticker,
-    });
+    useGetTranscriptsQuery(
+      {
+        company_name: instance.company_name,
+        ticker: instance.ticker,
+      },
+      {
+        skip:
+          !instance.company_name ||
+          !!instance.instance_metadata.db_files?.length,
+      }
+    );
   const [createInstance, { isLoading: loadingCreateInstance }] =
     useCreateFeatureInstanceMutation();
   const [generateReport, { isLoading: loadingGenerateReport }] =
@@ -71,6 +84,7 @@ export const SelectDocuments = ({
     } & ITranscript)[]
   >([]);
   const [criteria, setCriteria] = useState<string[]>([]);
+  const [llm, setLlm] = useState<string>("Gemini");
 
   const onSelectRow = useCallback(
     (row: any) => {
@@ -94,23 +108,69 @@ export const SelectDocuments = ({
     []
   );
 
-  const onNextStep = useCallback(async () => {
-    const selectedDocuments = rows.filter((row) => row.selected);
-    const responseReport = await generateReport({
-      filenames: selectedDocuments.map((doc) => doc.file_name),
-      sentiments: criteria,
-    }).unwrap();
-    const responseInstance = await createInstance({
-      ...instance,
-      instance_metadata: {
-        docs: selectedDocuments.map((doc) => ({ file_name: doc.file_name })),
-        criteria,
-        report: responseReport.content,
-      },
-    }).unwrap();
+  const onChangeLLM = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setLlm(e.target.value);
+    },
+    []
+  );
 
-    onNext(responseInstance as ICustomInstance);
-  }, [onNext, createInstance, generateReport, criteria, rows, instance]);
+  const onNextStep = useCallback(async () => {
+    if (instance.instance_metadata.db_files?.length) {
+      const responseReport = await generateReport({
+        filenames: instance.instance_metadata.db_files.map((file) => ({
+          graph_id: file.graph_id,
+          id: file.id,
+          file_name: file.name.replace(".pdf", ""),
+        })),
+        analysis_type: "financial_diligence",
+        sentiments: criteria,
+        llm,
+        ...(!!instance.instance_metadata.db_files[0].id && { is_report: true }),
+      }).unwrap();
+      const responseInstance = await createInstance({
+        ...instance,
+        instance_metadata: {
+          docs: instance.instance_metadata.db_files.map((file) => ({
+            file_name: file.name,
+            ...(!!file.id && { id: file.id }),
+          })),
+          criteria,
+          report: marked.parse(parseCitation(responseReport.content)) as string,
+        },
+      }).unwrap();
+      onNext(responseInstance as ICustomInstance);
+    } else {
+      const selectedDocuments = rows.filter((row) => row.selected);
+      const responseReport = await generateReport({
+        filenames: selectedDocuments.map((doc) => ({
+          graph_id: sys_graph_id,
+          file_name: doc.file_name,
+        })),
+        analysis_type: "transcript",
+        sentiments: criteria,
+        llm,
+      }).unwrap();
+      const responseInstance = await createInstance({
+        ...instance,
+        instance_metadata: {
+          docs: selectedDocuments.map((doc) => ({ file_name: doc.file_name })),
+          criteria,
+          report: responseReport.content,
+        },
+      }).unwrap();
+      onNext(responseInstance as ICustomInstance);
+    }
+  }, [
+    onNext,
+    createInstance,
+    generateReport,
+    sys_graph_id,
+    llm,
+    criteria,
+    rows,
+    instance,
+  ]);
 
   useEffect(() => {
     if (loadingTranscripts || !dataTranscripts) return;
@@ -141,7 +201,7 @@ export const SelectDocuments = ({
       <Box sx={{ display: "flex", alignItems: "center" }}>
         <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
           <Link underline="hover" color="inherit" href="#" onClick={onGotoMain}>
-            Sentiment Analysis
+            Investment Criteria Analysis
           </Link>
           <Typography color="text.primary">Select Documents</Typography>
         </Breadcrumbs>
@@ -151,17 +211,22 @@ export const SelectDocuments = ({
           sx={{ minWidth: 140 }}
           onClick={onNextStep}
           disabled={
-            !(instance.instance_metadata?.docs || []).length || !criteria.length
+            (!instance.instance_metadata.docs?.length &&
+              !instance.instance_metadata.db_files?.length) ||
+            !criteria.length
           }
         >
           Next
         </Button>
       </Box>
-      <Box sx={{ display: "flex", alignItems: "center", my: 4 }}>
-        <Typography variant="h5">
-          {instance.company_name} ({instance.ticker})
-        </Typography>
-        <Box mr="auto" />
+      {!!instance.company_name && (
+        <Box sx={{ my: 2 }}>
+          <Typography variant="h5">
+            {instance.company_name} ({instance.ticker})
+          </Typography>
+        </Box>
+      )}
+      <Stack spacing={2} direction="row" my={2}>
         <Autocomplete
           multiple
           fullWidth
@@ -179,8 +244,8 @@ export const SelectDocuments = ({
             "ESG (Environmental, Social, Governance) Factors",
             "Acquisition and Expansion Plans",
           ]}
+          sx={{ minWidth: 650 }}
           getOptionLabel={(option) => option}
-          sx={{ maxWidth: 540 }}
           value={criteria}
           onChange={onChangeCriteria}
           renderOption={(props, option, { selected }) => (
@@ -207,39 +272,70 @@ export const SelectDocuments = ({
             ))
           }
           renderInput={(params) => (
-            <TextField
-              {...params}
-              size="small"
-              label="Sentiment Analysis Purpose"
-            />
+            <TextField {...params} size="small" label="Investment Criteria" />
           )}
         />
-      </Box>
+        <TextField
+          label="Large Language Model"
+          value={llm}
+          onChange={onChangeLLM}
+          select
+          size="small"
+          sx={{ ml: 1, minWidth: 240 }}
+        >
+          {["Gemini", "OpenAI", "Anthropic"].map((option) => (
+            <MenuItem key={option} value={option}>
+              {option}
+            </MenuItem>
+          ))}
+        </TextField>
+      </Stack>
 
-      <XPanel sxProps={{ bgcolor: "#000D1C", py: 4, px: 8 }}>
-        <XTable
-          loading={loadingTranscripts}
-          columns={[
-            {
-              id: "name",
-              label: "Name",
-            },
-            {
-              id: "title",
-              label: "Title",
-            },
-            {
-              id: "quarter",
-              label: "Quarter",
-            },
-            {
-              id: "year",
-              label: "Year",
-            },
-          ]}
-          rows={rows.sort((a: any, b: any) => b.year - a.year)}
-          onSelectRow={onSelectRow}
-        />
+      <XPanel sxProps={{ bgcolor: "#000D1C", p: 2 }}>
+        {!!instance.instance_metadata.db_files?.length && (
+          <Typography variant="body2" fontWeight="bold" mb={2}>
+            Selected Report/VDR files
+          </Typography>
+        )}
+        {!!instance.instance_metadata.db_files?.length &&
+          instance.instance_metadata.db_files.map((file) => (
+            <Box
+              key={file.name}
+              sx={{ p: 1, borderRadius: 1, bgcolor: "black", mb: 1 }}
+            >
+              {file.name}
+            </Box>
+          ))}
+        {!!instance.company_name && (
+          <Typography variant="body2" fontWeight="bold" mb={2}>
+            Transcripts
+          </Typography>
+        )}
+        {!!instance.company_name && (
+          <XTable
+            loading={loadingTranscripts}
+            columns={[
+              {
+                id: "name",
+                label: "Name",
+              },
+              {
+                id: "title",
+                label: "Title",
+              },
+              {
+                id: "quarter",
+                label: "Quarter",
+              },
+              {
+                id: "year",
+                label: "Year",
+              },
+            ]}
+            rows={rows.sort((a: any, b: any) => b.year - a.year)}
+            onSelectRow={onSelectRow}
+          />
+        )}
       </XPanel>
     </Box>
   );

@@ -1,100 +1,98 @@
-import { memo } from "react";
-import { Box } from "@mui/material";
+import { useMemo, memo } from "react";
 import { chartTypeConfig } from "./config";
-import { TChartType } from "../../../../../shared/models/types"; 
+import { TChartType } from "../../../../../shared/models/types";
 import ApexChart from "react-apexcharts";
-
-const colors = [
-  "#008FFB",
-  "#00E396",
-  "#FEB019",
-  "#FF4560",
-  "#775DD0",
-  "#3F51B5",
-  "#03A9F4",
-  "#4CAF50",
-  "#F9CE1D",
-  "#FF9800",
-];
+import { IReportItemMetadata } from "../../../../../shared/models/interfaces";
+import { parseCellData } from "../../../../../shared/utils/parse";
 
 export const Chart = memo(
   ({
-    chartType,
-    chartConfig,
+    data,
+    vizType = "bar",
     height = 320,
     title,
   }: {
-    chartConfig: {
-      series: ApexAxisChartSeries | ApexNonAxisChartSeries;
-      categories: (string | number)[];
-      xAxisLabel: string;
-      yAxisLabel: string;
-    };
+    data: IReportItemMetadata;
+    vizType?: string;
     title?: string;
     height?: number | string;
-    chartType: TChartType;
   }) => {
+    const chartType = vizType as TChartType;
     const config = chartTypeConfig[chartType];
-    if (!chartConfig) return <>Unable to show this chart.</>;
+
+    const chartData = useMemo(() => {
+      if (data.axis && data.axis.x.length && data.axis.y.length) {
+        let categories: string[];
+
+        const [direct, xIndex] = data.axis.x.split("-");
+        if (direct === "col") {
+          const colLabel = data.columns[+xIndex].label;
+          categories = data.rows.map((row) => row[colLabel]);
+        } else {
+          categories = Object.keys(data.rows[+xIndex]).map(
+            (key) => data.rows[+xIndex][key]
+          );
+        }
+
+        const series = data.axis.y.map((eachY) => {
+          let sTitle = "";
+          let sData: number[];
+          const [direct, index] = eachY.split("-");
+          if (direct === "col") {
+            const colLabel = data.columns[+index].label;
+            sData = data.rows.map((row) => parseCellData(row[colLabel]));
+            sTitle = colLabel;
+          } else {
+            sData = Object.keys(data.rows[+index]).map((key) =>
+              parseCellData(data.rows[+index][key])
+            );
+            sTitle = `Row-${index}`;
+          }
+
+          return { data: sData, name: sTitle };
+        });
+
+        return {
+          categories,
+          series,
+        };
+      }
+    }, [data]);
+
+    if (!chartData) return <>Unable to show this chart.</>;
+
     return (
-      <Box>
-        <Box
-          className="print-legend"
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: 1,
-            visibility: "hidden",
-          }}
-        >
-          {(["pie", "donut"].includes(chartType)
-            ? chartConfig.categories!
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            : chartConfig.series.map((item: any) => item.name)
-          ).map((category: string | number, index: number) => (
-            <Box
-              key={category}
-              style={{
-                display: "flex",
-                fontSize: 12,
-                alignItems: "center",
-                margin: "0 8px",
-              }}
-            >
-              <svg width={15} height={10}>
-                <rect width={10} height={10} fill={colors[index]} />
-              </svg>
-              {category}
-            </Box>
-          ))}
-        </Box>
+      <div
+        style={{ background: "white", color: "black", borderRadius: "4px" }}
+        className="chart"
+        data-options={data}
+      >
         <ApexChart
           options={{
-            colors,
-            theme: {
-              mode: "dark",
-              // palette: "palette0",
-            },
             chart: {
+              id: "chart-1",
               animations: {
                 enabled: false,
               },
-              background: "transparent",
               toolbar: {
                 show: false,
               },
               ...config.chart,
             },
             dataLabels: {
-              enabled: false,
-              offsetX: -6,
-              style: {
-                fontSize: "12px",
+              enabled: true,
+              formatter: (value) => {
+                if (["pie", "donut"].includes(config.chart!.type!)) {
+                  return (value as number).toFixed(1) + "%";
+                }
+                return value.toLocaleString();
               },
+              style: {
+                colors: ['black']
+              }
             },
             stroke: {
               show: true,
-              width: 1,
             },
             tooltip: {
               shared: true,
@@ -106,18 +104,20 @@ export const Chart = memo(
             }),
             ...(!!title && { title: { text: title } }),
             ...(["pie", "donut"].includes(chartType) && {
-              labels: chartConfig.categories!.map((item) => item.toString()),
+              labels: chartData.categories,
             }),
             xaxis: {
-              categories: chartConfig.categories!,
-              // tickPlacement: "on",
-              title: {
-                text: chartConfig.xAxisLabel,
-              },
+              categories: chartData.categories,
             },
             yaxis: {
-              title: {
-                text: chartConfig.yAxisLabel,
+              axisBorder: {
+                show: false,
+              },
+              axisTicks: {
+                show: false,
+              },
+              labels: {
+                show: false,
               },
             },
             ...(["pie", "donut"].includes(chartType)
@@ -139,15 +139,14 @@ export const Chart = memo(
           }}
           series={
             ["pie", "donut"].includes(chartType)
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              ? (chartConfig.series[0] as any).data.map((item: any) => +item)
-              : chartConfig.series
+              ? chartData.series[0].data
+              : chartData.series
           }
           type={config.chart!.type}
           width="100%"
           height={height}
         />
-      </Box>
+      </div>
     );
   }
 );

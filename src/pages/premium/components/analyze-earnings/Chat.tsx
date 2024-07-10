@@ -37,13 +37,12 @@ export const Chat = ({
   const [quote, setQuote] = useState<string>("");
 
   const onJumpTo = useCallback(
-    (tag: string) => {
-      const [filename, quote] = tag.substring(1).split("______");
-      const parsedFilename = filename.replace(/___/g, " ");
-      const parsedQuote = quote.replace(/___/g, " ").trim();
-      console.log(parsedFilename, parsedQuote, "### parsed---");
-      onChangeViewFile(parsedFilename);
-      setQuote(parsedQuote);
+    ({ filename, quote: keyword }: { filename: string; quote: string }) => {
+      console.log(filename, keyword, "### parsed---");
+      onChangeViewFile(filename);
+      setTimeout(() => {
+        setQuote(keyword);
+      }, 1000);
     },
     [onChangeViewFile]
   );
@@ -52,7 +51,6 @@ export const Chat = ({
     const downloadFile = async () => {
       const pdfBuffer = await downloadPdf({
         graph_id: sys_graph_id!,
-        company_name: instance.company_name,
         ticker: instance.ticker,
         analysis_type: "transcript",
         filename: instance.view_doc!,
@@ -119,6 +117,7 @@ export const Chat = ({
                 filenames={instance.instance_metadata!.docs.map(
                   (doc) => doc.file_name
                 )}
+                companyName={instance.company_name}
                 onJumpTo={onJumpTo}
                 analysis_type="transcript"
                 suggestions={suggestions || []}

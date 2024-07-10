@@ -1,3 +1,5 @@
+import moment from "moment";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const getUniques = (arr: string[]) => {
   if (!arr.length) return [];
@@ -122,10 +124,37 @@ export const currencyFormat = (q: number) => {
 };
 
 export const myRandomInts = (quantity: number, max: number) => {
-  const arr = []
+  const arr = [];
   while (arr.length < quantity) {
     const candidateInt = Math.floor(Math.random() * max);
-    if (arr.indexOf(candidateInt) === -1) arr.push(candidateInt)
+    if (arr.indexOf(candidateInt) === -1) arr.push(candidateInt);
   }
-  return arr
+  return arr;
+};
+
+export const longDateFormat = (date: Date) => {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+  return formatter.format(date);
+};
+
+export const getHumanableDuration = (_duration: moment.Duration) => {
+  const hours = _duration.hours();
+  const minutes = _duration.minutes();
+  const seconds = _duration.seconds();
+
+  let duration = "";
+  if (hours) duration += `${hours}h`;
+  if (minutes) duration += `${duration ? " " : ""}${minutes}m`;
+  if (seconds) duration += `${duration ? " " : ""}${seconds}s`;
+
+  return duration;
+}
+
+export function getFileExtension(fileName: string) {
+  const match = fileName.match(/\.([^.]+)$/);
+  return match ? match[1].toLowerCase() : '';
 }

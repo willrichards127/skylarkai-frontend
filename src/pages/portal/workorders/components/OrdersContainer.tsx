@@ -17,6 +17,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { XTable } from "../../../../components/table";
 import { useGetWorkOrdersPerCompanyQuery } from "../../../../redux/services/workOrderApi";
 import { useNavigate } from "react-router-dom";
+import { convertUtcToLocal } from "../../../../shared/utils/dateUtils";
 
 const statusColorDict: Record<number, any> = {
   2: {
@@ -48,17 +49,17 @@ const OrdersContainer = memo(
         if (row.status === 1) {
           // draft
           navigate(
-            `/main/companies/${companyId}/${row.id}?company_name=${companyName}&view_mode=edit&work_order_name=${row.work_order_name}`
+            `/portal/companies/${companyId}/${row.id}?company_name=${companyName}&view_mode=edit&work_order_name=${row.work_order_name}`
           );
         } else if (row.status === 2) {
           // in progress
           navigate(
-            `/main/companies/${companyId}/${row.id}?company_name=${companyName}&view_mode=wip&work_order_name=${row.work_order_name}`
+            `/portal/companies/${companyId}/${row.id}?company_name=${companyName}&view_mode=wip&work_order_name=${row.work_order_name}`
           );
         } else {
           // completed
           navigate(
-            `/main/companies/${companyId}/${row.id}?company_name=${companyName}&view_mode=completed&work_order_name=${row.work_order_name}`
+            `/portal/companies/${companyId}/${row.id}?company_name=${companyName}&view_mode=completed&work_order_name=${row.work_order_name}`
           );
         }
       },
@@ -67,7 +68,7 @@ const OrdersContainer = memo(
 
     const onAddWorkOrder = useCallback(() => {
       navigate(
-        `/main/companies/${companyId}/new?company_name=${companyName}&view_mode=edit`
+        `/portal/companies/${companyId}/new?company_name=${companyName}&view_mode=edit`
       );
     }, [navigate, companyId, companyName]);
 
@@ -163,7 +164,7 @@ const OrdersContainer = memo(
                 id: "created_at",
                 label: "Created At",
                 cellRenderer: ({ row, column }: { row: any; column: any }) =>
-                  new Date(row[column.id]).toLocaleString(),
+                  convertUtcToLocal(row[column.id]),
               },
               {
                 id: "actions",

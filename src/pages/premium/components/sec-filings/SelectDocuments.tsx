@@ -69,6 +69,7 @@ export const SelectDocuments = ({
     const responseInstance = await createInstance({
       ...instance,
       instance_metadata: {
+        ...instance.instance_metadata,
         docs: selectedDocuments,
       },
     }).unwrap();

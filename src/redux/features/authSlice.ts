@@ -2,25 +2,29 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
 import axios from "axios";
-import { IUser, IUserAuth } from "../interfaces";
+import { IUserAuth, IUserLogin, IUserRegister } from "../interfaces";
 import { removeStoreValue, saveStoreValue } from "../../shared/utils/storage";
 
 const initialState: IUserAuth = {
-  userInfo: undefined,
+  user: undefined,
   token: undefined,
-  sys_graph_id: undefined,
   loading: false,
   error: undefined,
-  subscriptions: [],
+  is_enabled_features: false,
 };
 
 export const registerAPI = createAsyncThunk(
   "users/register",
-  async (userData: IUser) => {
+  async ({ tenancy, ...data }: IUserRegister) => {
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_PREMIUM_API_URL}register`,
-        userData
+        `${import.meta.env.VITE_API_URL}register`,
+        data,
+        {
+          headers: {
+            "X-TENANT-ID": tenancy,
+          },
+        }
       );
       return response.data;
     } catch (e) {
@@ -34,29 +38,35 @@ export const registerAPI = createAsyncThunk(
 
 export const loginAPI = createAsyncThunk(
   "users/login",
-  async ({ email, password }: { email: string; password: string }) => {
+  async ({ email, password, tenancy }: IUserLogin) => {
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_PREMIUM_API_URL}login`,
+        `${import.meta.env.VITE_API_URL}login`,
         {
           email,
           password,
+        },
+        {
+          headers: {
+            "X-TENANT-ID": tenancy,
+          },
         }
       );
       // get system graph id
       const responseSystemGraph = await axios.get(
-        `${import.meta.env.VITE_PREMIUM_API_URL}system_graph_id`,
+        `${import.meta.env.VITE_API_URL}system_graph_id`,
         {
           headers: {
             Authorization: `Bearer ${response.data.token}`,
             "Content-Type": "application/json",
+            "X-TENANT-ID": tenancy,
           },
         }
       );
       return {
         ...response.data,
+        tenancy: tenancy,
         sys_graph_id: responseSystemGraph.data,
-        password,
       };
     } catch (e) {
       return {
@@ -68,33 +78,91 @@ export const loginAPI = createAsyncThunk(
   }
 );
 
-export const subscriptionAPI = createAsyncThunk("subscriptions", async () => {
-  const response = await axios(`${import.meta.env.VITE_PREMIUM_API_URL}subscriptions`);
-
-  if (response.status !== 200) {
-    return {
-      error: "Failed to get subscriptions.",
-    };
-  }
-  return response.data;
-});
-
-export const verifyEmailAPI = createAsyncThunk(
-  "verify_registered_email",
-  async ({ token }: { token: string }) => {
+export const clearUserActivitiesAPI = createAsyncThunk(
+  "users/clear",
+  async ({ email, tenancy }: { email: string; tenancy: string }) => {
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_PREMIUM_API_URL}verify_register_email?token=${token}`,
+      const response = await axios.delete(
+        `${import.meta.env.VITE_API_URL}user_activities/${email}`,
         {
-          token,
+          headers: {
+            "X-TENANT-ID": tenancy,
+          },
         }
       );
-
-      return response.data;
+      if (response.data) {
+        return true;
+      } else {
+        return false;
+      }
     } catch (e) {
       return {
         error:
-          (e as any).response.data.detail || "Failed to verify your email.",
+          (e as any).response.data.detail ||
+          "Incorrect email or password. Please retry with correct credentials.",
+      };
+    }
+  }
+);
+
+export const forgotPasswordAPI = createAsyncThunk(
+  "users/forgot_password",
+  async ({ email, tenancy }: { email: string; tenancy: string }) => {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}forgot_password?email=${email}`,
+        undefined,
+        {
+          headers: {
+            "X-TENANT-ID": tenancy,
+          },
+        }
+      );
+      if (response.data) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return {
+        error: (e as any).response.data.detail || "Incorrect email.",
+      };
+    }
+  }
+);
+
+export const resetPasswordAPI = createAsyncThunk(
+  "users/reset_password",
+  async ({
+    token,
+    new_password,
+    tenancy,
+  }: {
+    token: string;
+    new_password: string;
+    tenancy: string;
+  }) => {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}reset_password`,
+        {
+          token,
+          new_password,
+        },
+        {
+          headers: {
+            "X-TENANT-ID": tenancy,
+          },
+        }
+      );
+      if (response.data) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return {
+        error: (e as any).response.data.detail || "Incorrect email.",
       };
     }
   }
@@ -113,22 +181,31 @@ export const userAuthSlice = createSlice({
   initialState,
   reducers: {
     reset: (state) => {
-      state.userInfo = undefined;
+      state.user = undefined;
       state.token = undefined;
       state.loading = false;
       state.error = undefined;
+      state.tenancy = undefined;
       removeStoreValue("user-info");
       removeStoreValue("token");
+      removeStoreValue("tenancy");
     },
     updateToken: (state, { payload }) => {
       state.token = payload;
       saveStoreValue("token", payload);
     },
+    setTenancy: (state, { payload }) => {
+      state.tenancy = payload;
+      saveStoreValue("tenancy", payload);
+    },
+    updatePremiumFeatures: (state, { payload }) => {
+      state.is_enabled_features = payload;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(registerAPI.pending, (state) => {
       state.loading = true;
-      state.userInfo = undefined;
+      state.user = undefined;
       state.token = undefined;
     }),
       builder.addCase(registerAPI.fulfilled, (state, { payload }) => {
@@ -137,11 +214,10 @@ export const userAuthSlice = createSlice({
           errorHandler(state, payload.error);
           return;
         }
-        state.userInfo = payload;
       }),
       builder.addCase(loginAPI.pending, (state) => {
         state.loading = true;
-        state.userInfo = undefined;
+        state.user = undefined;
         state.token = undefined;
       }),
       builder.addCase(loginAPI.fulfilled, (state, { payload }) => {
@@ -153,34 +229,60 @@ export const userAuthSlice = createSlice({
           errorHandler(state, payload.error);
           return;
         }
-        if (!payload.is_active) {
+        if (payload.status === 3) {
           errorHandler(state, "This user registeration is under the review.");
           return;
         }
-        state.userInfo = payload;
-        state.token = payload.token;
-        state.sys_graph_id = payload.sys_graph_id;
-        saveStoreValue("user-info", payload);
-        saveStoreValue("token", payload.token);
-        saveStoreValue("sys_graph_id", payload.sys_graph_id);
+        if (payload.status === 2) {
+          errorHandler(state, "This user registeration is rejected.");
+          return;
+        }
+
+        const { token, sys_graph_id, tenancy, ...restPayload } = payload;
+        state.user = {
+          ...restPayload,
+          main_features: (restPayload.main_features || []).filter(
+            (item: any) => item.id < 7 && item.id !== 2
+          ), // remove 7, 8 features now
+        };
+
+        state.token = token;
+        state.sys_graph_id = sys_graph_id;
+        state.tenancy = tenancy;
+        state.is_enabled_features = false;
+
+        saveStoreValue("user-info", state.user);
+        saveStoreValue("token", token);
+        saveStoreValue("sys_graph_id", sys_graph_id);
+        saveStoreValue("tenancy", tenancy);
       }),
-      builder.addCase(subscriptionAPI.pending, (state) => {
-        state.loading = true;
-      }),
-      builder.addCase(subscriptionAPI.fulfilled, (state, { payload }) => {
-        state.loading = false;
-        state.subscriptions = payload;
-      }),
-      builder.addCase(verifyEmailAPI.pending, (state) => {
-        state.loading = true;
-      }),
-      builder.addCase(verifyEmailAPI.fulfilled, (state) => {
-        state.loading = false;
-      });
+      builder.addCase(
+        forgotPasswordAPI.fulfilled,
+        (state, { payload }: { payload: any }) => {
+          if (payload.error) {
+            errorHandler(state, payload.error);
+            return;
+          }
+          toast.success("Sent a reset password link to your email.");
+        }
+      ),
+      builder.addCase(
+        resetPasswordAPI.fulfilled,
+        (state, { payload }: { payload: any }) => {
+          if (payload.error) {
+            errorHandler(state, payload.error);
+            return;
+          }
+          toast.success("Updated your password successfully.");
+        }
+      );
   },
 });
-const { reset, updateToken } = userAuthSlice.actions;
+const { reset, updateToken, updatePremiumFeatures } = userAuthSlice.actions;
 export const clearUserInfo = () => (dispatch: any) => dispatch(reset());
 export const updateTokenAsync = (newToken: string) => (dispatch: any) =>
   dispatch(updateToken(newToken));
-export const currentUser = (state: any) => state.userAuthSlice;
+export const updatePremiumFeaturesAsync =
+  (enabled: boolean) => (dispatch: any) =>
+    dispatch(updatePremiumFeatures(enabled));
+export const currentUser = (state: any) => state.userAuthSlice as IUserAuth;

@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useEffect, useMemo, useCallback, useRef } from "react";
 import {
   Box,
   Backdrop,
@@ -18,8 +17,11 @@ import { SplitContainer } from "../../../../components/SplitContainer";
 import ChatPanel from "../../../../components/ChatPanel";
 import { ICustomInstance } from "./interfaces";
 import { loadStoreValue } from "../../../../shared/utils/storage";
-import { useGetSuggestionsQuery } from "../../../../redux/services/transcriptAPI";
+// import { useGetSuggestionsQuery } from "../../../../redux/services/transcriptAPI";
 import { scrollToAndHighlightInIFrame } from "../../../../shared/utils/basic";
+import { suggestionDict } from "../../../../shared/models/constants";
+import { useSelector } from "react-redux";
+import { currentUser } from "../../../../redux/features/authSlice";
 
 export const Chat = ({
   instance,
@@ -30,13 +32,13 @@ export const Chat = ({
   onChangeViewFile: (filename: string) => void;
   onGotoMain: () => void;
 }) => {
+  const { tenancy, token } = useSelector(currentUser);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const tagRef = useRef<string>("");
-  const { sys_graph_id } = useSelector((state: any) => state.userAuthSlice);
-  const { isLoading, data: suggestions } = useGetSuggestionsQuery({
-    analysis_type: "edgar",
-  });
-  const [file, setFile] = useState<any>();
+
+  // const { isLoading, data: suggestions } = useGetSuggestionsQuery({
+  //   analysis_type: "edgar",
+  // });
 
   const viewFile = useMemo(
     () =>
@@ -47,13 +49,10 @@ export const Chat = ({
   );
 
   const onJumpTo = useCallback(
-    (tag: string) => {
-      const [filename, quote] = tag.substring(1).split("______");
-      const parsedFilename = filename.replace(/___/g, " ");
-      const parsedQuote = quote.replace(/___/g, " ").trim();
-      console.log(parsedFilename, parsedQuote, "### parsed---");
-      onChangeViewFile(parsedFilename);
-      tagRef.current = parsedQuote;
+    ({ filename, quote }: { filename: string; quote: string }) => {
+      console.log(filename, quote, "### parsed---");
+      onChangeViewFile(filename);
+      tagRef.current = quote;
       iframeRef.current!.contentDocument!.location.reload();
     },
     [onChangeViewFile]
@@ -67,39 +66,33 @@ export const Chat = ({
   }, []);
 
   useEffect(() => {
-    const token = loadStoreValue("token");
-    const myHeaders = new Headers();
-    myHeaders.append("Authorization", `Bearer ${token}`);
-    myHeaders.append("Content-Type", "application/json");
-    myHeaders.append("Accept", "application/pdf");
+    if (token && tenancy) {
+      const token = loadStoreValue("token");
+      const myHeaders = new Headers();
+      myHeaders.append("Authorization", `Bearer ${token}`);
+      myHeaders.append("X-TENANT-ID", tenancy);
+      const formdata = new FormData();
+      formdata.append("url", viewFile!.url);
 
-    const raw = JSON.stringify({
-      graph_id: sys_graph_id!,
-      company_name: instance.company_name,
-      ticker: instance.ticker,
-      analysis_type: "edgar",
-      filename: instance.view_doc,
-    });
+      const requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: formdata,
+      };
 
-    const requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: raw,
-    };
-
-    fetch(
-      `${import.meta.env.VITE_PREMIUM_API_URL}downloadfile/${sys_graph_id!}`,
-      requestOptions as any
-    )
-      .then((response) => response.blob())
-      .then((result) => {
-        const file = new Blob([result], { type: "text/html" });
-        //Build a URL from the file
-        const fileURL = URL.createObjectURL(file);
-        setFile(fileURL);
-      })
-      .catch((error) => console.log("error", error));
-  }, [instance, sys_graph_id]);
+      fetch(
+        `${import.meta.env.VITE_API_URL}edgar_file_with_url`,
+        requestOptions as any
+      )
+        .then((response) => response.text())
+        .then((result) => {
+          iframeRef.current?.contentDocument?.open();
+          iframeRef.current?.contentDocument?.write(result);
+          iframeRef.current?.contentDocument?.close();
+        })
+        .catch((error) => console.log("error", error));
+    }
+  }, [instance, tenancy, token, viewFile]);
 
   useEffect(() => {
     if (!iframeRef.current) return;
@@ -114,7 +107,7 @@ export const Chat = ({
     <Box sx={{ height: "100%" }}>
       <Backdrop
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={isLoading}
+        open={false}
       >
         <CircularProgress color="inherit" />
       </Backdrop>
@@ -163,7 +156,7 @@ export const Chat = ({
                 overflowY: "auto",
               }}
             >
-              <iframe src={file} width="100%" height="100%" ref={iframeRef} />
+              <iframe width="100%" height="100%" ref={iframeRef} />
             </Box>
           }
           rightPanel={
@@ -178,16 +171,11 @@ export const Chat = ({
                 filenames={instance.instance_metadata!.docs.map(
                   (doc) => doc.file_name
                 )}
+                companyName={instance.company_name}
                 onJumpTo={onJumpTo}
                 analysis_type="edgar"
                 insider_transaction={true}
-                suggestions={
-                  suggestions
-                    ? suggestions.filter(
-                        (sug) => sug.topic === "insider_transactions"
-                      )
-                    : []
-                }
+                suggestions={suggestionDict["4"]}
               />
             </Box>
           }

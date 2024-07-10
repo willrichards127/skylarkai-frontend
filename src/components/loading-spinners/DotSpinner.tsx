@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import { memo } from "react";
 import Box from "@mui/material/Box";
 import { styled } from "@mui/system";
 import { keyframes } from "@emotion/react";
@@ -21,23 +21,22 @@ const DotSpan = styled("span")`
 	border-radius: 50%;
 `;
 
-export const DotSpinner = memo(
-	({ size }: { size?: "small" | "medium" | "large" }) => {
-		return (
-			<Box p={1}>
-				<DotSpan />
-				<DotSpan
-					sx={{
-						animationDelay: "0.2s",
-					}}
-				/>
-				<DotSpan
-					sx={{
-						animationDelay: "0.3s",
-					}}
-				/>
-			</Box>
-		);
-	}
+export const DotSpinner = memo(() => {
+	return (
+		<Box p={1}>
+			<DotSpan />
+			<DotSpan
+				sx={{
+					animationDelay: "0.2s",
+				}}
+			/>
+			<DotSpan
+				sx={{
+					animationDelay: "0.3s",
+				}}
+			/>
+		</Box>
+	);
+}
 );
 DotSpinner.displayName = "DotSpinner";

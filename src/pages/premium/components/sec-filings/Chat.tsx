@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useMemo, useState, useEffect, useCallback, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useMemo, useEffect, useCallback, useRef } from "react";
 import {
   Box,
   Backdrop,
@@ -15,12 +14,10 @@ import { SplitContainer } from "../../../../components/SplitContainer";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ChatPanel from "../../../../components/ChatPanel";
 import { ICustomInstance } from "./interface";
-import { loadStoreValue } from "../../../../shared/utils/storage";
-import { myRandomInts, scrollToAndHighlightInIFrame } from "../../../../shared/utils/basic";
-// import { useGetSuggestionsQuery } from "../../../../redux/services/transcriptAPI";
+import { scrollToAndHighlightInIFrame } from "../../../../shared/utils/basic";
 import { addDownloadButtons } from "../../../../shared/utils/xlsx";
-import { ITopic } from "../../../../redux/interfaces";
-import { suggestionDict as suggestions } from "../../../../shared/models/constants";
+import { useSelector } from "react-redux";
+import { currentUser } from "../../../../redux/features/authSlice";
 
 export const Chat = ({
   instance,
@@ -31,13 +28,10 @@ export const Chat = ({
   onChangeViewFile: (filename: string) => void;
   onGotoMain: () => void;
 }) => {
+  const { tenancy, token } = useSelector(currentUser);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const tagRef = useRef<string>("");
-  const { sys_graph_id } = useSelector((state: any) => state.userAuthSlice);
-  // const { isLoading, data: suggestions } = useGetSuggestionsQuery({
-  //   analysis_type: "edgar",
-  // });
-  const [file, setFile] = useState<any>();
+
   const viewFile = useMemo(
     () =>
       instance.instance_metadata!.docs.find(
@@ -47,12 +41,10 @@ export const Chat = ({
   );
 
   const onJumpTo = useCallback(
-    (tag: string) => {
-      const [filename, quote] = tag.substring(1).split("______");
-      const parsedFilename = filename.replace(/___/g, " ");
-      const parsedQuote = quote.replace(/___/g, " ").trim();      
-      onChangeViewFile(parsedFilename);
-      tagRef.current = parsedQuote;
+    ({ filename, quote }: { filename: string; quote: string }) => {
+      console.log(filename, quote, "citation===");
+      onChangeViewFile(filename);
+      tagRef.current = quote;
       iframeRef.current!.contentDocument!.location.reload();
     },
     [onChangeViewFile]
@@ -60,8 +52,8 @@ export const Chat = ({
 
   const onloadIframe = useCallback(() => {
     console.log(tagRef.current, "### jumping to---");
-    addDownloadButtons(iframeRef.current!.contentDocument!)
-    
+    addDownloadButtons(iframeRef.current!.contentDocument!);
+
     scrollToAndHighlightInIFrame(
       iframeRef.current!.contentDocument!,
       tagRef.current
@@ -69,39 +61,32 @@ export const Chat = ({
   }, []);
 
   useEffect(() => {
-    const token = loadStoreValue("token");
-    const myHeaders = new Headers();
-    myHeaders.append("Authorization", `Bearer ${token}`);
-    myHeaders.append("Content-Type", "application/json");
-    myHeaders.append("Accept", "application/pdf");
+    if (token && tenancy) {
+      const myHeaders = new Headers();
+      myHeaders.append("Authorization", `Bearer ${token}`);
+      myHeaders.append("X-TENANT-ID", tenancy);
+      const formdata = new FormData();
+      formdata.append("url", viewFile!.url);
 
-    const raw = JSON.stringify({
-      graph_id: sys_graph_id!,
-      company_name: instance.company_name,
-      ticker: instance.ticker,
-      analysis_type: "edgar",
-      filename: instance.view_doc,
-    });
+      const requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: formdata,
+      };
 
-    const requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: raw,
-    };
-
-    fetch(
-      `${import.meta.env.VITE_PREMIUM_API_URL}downloadfile/${sys_graph_id!}`,
-      requestOptions as any
-    )
-      .then((response) => response.blob())
-      .then((result) => {
-        const file = new Blob([result], { type: "text/html" });
-        //Build a URL from the file
-        const fileURL = URL.createObjectURL(file);
-        setFile(fileURL);
-      })
-      .catch((error) => console.log("error", error));
-  }, [instance, sys_graph_id]);
+      fetch(
+        `${import.meta.env.VITE_API_URL}edgar_file_with_url`,
+        requestOptions as any
+      )
+        .then((response) => response.text())
+        .then((result) => {
+          iframeRef.current?.contentDocument?.open();
+          iframeRef.current?.contentDocument?.write(result);
+          iframeRef.current?.contentDocument?.close();
+        })
+        .catch((error) => console.log("error", error));
+    }
+  }, [instance, tenancy, token, viewFile]);
 
   useEffect(() => {
     if (!iframeRef.current) return;
@@ -112,31 +97,10 @@ export const Chat = ({
     };
   }, [onloadIframe]);
 
-  const selectedSuggestions = useMemo(() => {
-    if (suggestions && instance.instance_metadata.docs.length) {
-      const formTypes = instance.instance_metadata.docs.map(doc => doc.form_type);
-      if (formTypes.length < 2) {
-        if (suggestions[formTypes[0]]) {
-          return myRandomInts(3, suggestions[formTypes[0]].length).map(index => suggestions[formTypes[0]][index])
-        }
-      } else {
-        return formTypes.reduce<ITopic[]>((prev: ITopic[], formType: string) => {
-          if (suggestions[formType]) {
-            const random = myRandomInts(1, suggestions[formType].length);
-            return [...prev, suggestions[formType][random[0]]];
-          } else {
-            return prev;
-          }
-        }, []);
-      }
-    }
-  }, [instance]);
-
   return (
     <Box sx={{ height: "100%" }}>
       <Backdrop
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        // open={isLoading}
         open={false}
       >
         <CircularProgress color="inherit" />
@@ -158,7 +122,9 @@ export const Chat = ({
         </Typography>
         <Box mr="auto" />
         <Box>
-          <Typography variant="body2">Name: {instance.ticker} {viewFile!.form_type}</Typography>
+          <Typography variant="body2">
+            Name: {instance.ticker} {viewFile!.form_type}
+          </Typography>
           <Typography variant="body2">
             Filed On: {viewFile!.filing_date}
           </Typography>
@@ -176,7 +142,7 @@ export const Chat = ({
                 overflowY: "auto",
               }}
             >
-              <iframe src={file} width="100%" height="100%" ref={iframeRef} />
+              <iframe width="100%" height="100%" ref={iframeRef} />
             </Box>
           }
           rightPanel={
@@ -191,9 +157,10 @@ export const Chat = ({
                 filenames={instance.instance_metadata!.docs.map(
                   (doc) => doc.file_name
                 )}
+                companyName={instance.company_name}
                 onJumpTo={onJumpTo}
                 analysis_type="edgar"
-                suggestions={selectedSuggestions}
+                suggestions={instance.instance_metadata.suggestions}
               />
             </Box>
           }

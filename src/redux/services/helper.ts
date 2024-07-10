@@ -1,0 +1,38 @@
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+
+/**
+ * Type predicate to narrow an unknown error to `FetchBaseQueryError`
+ */
+export function isFetchBaseQueryError(
+  error: unknown
+): error is FetchBaseQueryError {
+  return typeof error === "object" && error != null && "status" in error;
+}
+
+/**
+ * Type predicate to narrow an unknown error to an object with a string 'message' property
+ */
+export function isErrorWithMessage(
+  error: unknown
+): error is { message: string } {
+  return (
+    typeof error === "object" &&
+    error != null &&
+    "message" in error &&
+    typeof (error as any).message === "string"
+  );
+}
+
+export function handleCatchError(error: unknown, tag?: string) {
+  if (isFetchBaseQueryError(error)) {
+    return { error };
+  } else {
+    return {
+      error: {
+        status: "CUSTOM_ERROR",
+        error: "Error" + tag ? ` in ${tag}` : "",
+        data: error,
+      } as FetchBaseQueryError,
+    };
+  }
+}

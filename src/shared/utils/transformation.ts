@@ -22,14 +22,14 @@ export const categorizeEdgars = (docs: IEdgarFile[]) => {
       }
       if (forms.includes(doc.form_type)) {
         if (doc.form_type === "10-K") {
-          const [, , date] = doc.file_name.split("-");
+          const [, date] = doc.file_name.split("-");
           const fiscalYear = parseDate(date).getFullYear();
           categorized[category].push({
             ...doc,
             title: fiscalYear ? `FY ${fiscalYear}` : "",
           });
         } else if (doc.form_type === "10-Q") {
-          const [, , date] = doc.file_name.split("-");
+          const [, date] = doc.file_name.split("-");
           const quarter = getQuarter(parseDate(date));
           categorized[category].push({
             ...doc,

@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 import CircleIcon from "@mui/icons-material/Circle";
 import { leftNavWidth } from "../../../../shared/models/constants";
-import { useGetSubScriptionFeaturesQuery } from "../../../../redux/services/mainFeaturesAPI";
 import { IMainFeature } from "../../../../redux/interfaces";
 
 export const LeftNavbar = ({
@@ -24,15 +23,14 @@ export const LeftNavbar = ({
   const { featureId } = useParams();
 
   const navigate = useNavigate();
-  const { userInfo: user } = useSelector(currentUser);
-
-  const { data: features } = useGetSubScriptionFeaturesQuery({
-    subscription_id: user.subscription_id,
-  });
+  const { user } = useSelector(currentUser);
+  const { is_enabled_features } = useSelector(
+    (state: any) => state.userAuthSlice
+  );
 
   const onItem = useCallback(
     (itemId: number) => {
-      navigate(`/premium/${itemId}`);
+      navigate(`/features/${itemId}`);
     },
     [navigate]
   );
@@ -42,20 +40,22 @@ export const LeftNavbar = ({
       sx={{
         width: leftNavWidth,
         bgcolor: "#060606",
-        p: 3,
+        p: 2,
         height: "100%",
       }}
     >
       <List sx={{ maxHeight: 480, overflowY: "auto" }}>
-        {(features || []).map((item: IMainFeature) => (
+        {(user!.main_features || []).map((item: IMainFeature) => (
           <ListItem disablePadding key={item.id}>
             <ListItemButton
+              disabled={is_enabled_features ? false : item.id < 5}
               selected={featureId === item.id.toString()}
               onClick={() => onItem(item.id)}
             >
               <ListItemIcon>
                 <CircleIcon
                   sx={{
+                    fontSize: 16,
                     color:
                       featureId === item.id.toString()
                         ? "green"
@@ -63,7 +63,7 @@ export const LeftNavbar = ({
                   }}
                 />
               </ListItemIcon>
-              <ListItemText primary={item.feature} />
+              <ListItemText primary={<Box fontSize={14}>{item.feature}</Box>} />
             </ListItemButton>
           </ListItem>
         ))}

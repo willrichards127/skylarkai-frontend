@@ -1,57 +1,140 @@
 /* eslint-disable no-prototype-builtins */
-
+import * as marked from "marked";
 import { ITransaction } from "../../redux/interfaces";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-export const parseAnswer = (inputString: string) => {
-  // Step 1: Check all sections that start with "{" and end with "}" (potential JSON objects)
-  const jsonMatches = inputString.match(/{[^{}]+}/g) || [];
+export const isCSVFormat = (csvStr: string) => {
+  // remove all " symbols
+  const replaced = csvStr;
+  // Split the string into lines
+  const lines = replaced.split("\n").filter((line) => !!line.trim());
 
-  // Step 2: Replace sections based on the criteria
-  let stringWithReplacedSections = inputString;
-  for (const jsonSection of jsonMatches) {
-    try {
-      const jsonObj = JSON.parse(jsonSection);
-
-      if (jsonObj && typeof jsonObj === "object") {
-        if (jsonObj.hasOwnProperty("citation")) {
-          // If JSON object includes "citation"
-          const firstCitationValue: any = Object.values(jsonObj.citation)[0];
-          const replacement = `[link](#${encodeURIComponent(
-            firstCitationValue
-          )})`;
-          stringWithReplacedSections = stringWithReplacedSections.replace(
-            `{"citation": ${jsonSection}}`,
-            replacement
-          );
-        } else {
-          // If JSON object does not include "citation"
-          const firstObjValue: any = Object.values(jsonObj)[0];
-          const replacement = `[link](#${encodeURIComponent(firstObjValue)})`;
-          stringWithReplacedSections = stringWithReplacedSections.replace(
-            jsonSection,
-            replacement
-          );
-        }
-      }
-    } catch (error) {
-      console.error("Error parsing JSON:", error);
+  // Check if each line has the same number of commas
+  const numColumns = lines[0].split('",').length;
+  for (let i = 1; i < lines.length; i++) {
+    const columns = lines[i].split('",');
+    if (columns.length !== numColumns) {
+      return false;
     }
   }
 
-  return stringWithReplacedSections;
+  // If all lines have the same number of columns, it's likely CSV
+  return true;
 };
 
-const cleanUp = (inputString: string, limitWordCount = 5) => {
+export const csvToMDTable = (csv: string) => {
+  // Split the CSV into rows
+  const rows = csv.trim().split("\n");
+
+  // Extract headers
+  const headers = rows[0].split(",");
+
+  // Generate Markdown table header
+  let markdown = "|" + headers.join(" | ") + " |\n";
+  markdown += "|" + Array(headers.length).fill("---").join(" | ") + " |\n";
+
+  // Generate Markdown table rows
+  for (let i = 1; i < rows.length; i++) {
+    const values = rows[i].split(",");
+    markdown += "|" + values.join(" | ") + " |\n";
+  }
+
+  return markdown;
+};
+
+export const csvToHtmlTable = (csv: string) => {
+  // remove all "
+  const replaced = csv;
+  // reformat csv string
+  // const lines = replaced.split("\n").filter((line) => !!line.trim());
+  // const newFormat = lines
+  //   .map((line) =>
+  //     line
+  //       .split(", ")
+  //       .map((item) => item.replaceAll(",", ""))
+  //       .join(",")
+  //   )
+  //   .join("\n");
+
+  // Split CSV into rows
+  const rows = replaced.trim().split("\n");
+
+  // Extract headers
+  const headers = rows[0].split('",');
+
+  // Generate table headers
+  let html = `<table><thead><tr>`;
+  headers.forEach((header) => {
+    html += `<th>${header.replaceAll('"', "")}</th>`;
+  });
+  html += "</tr></thead><tbody>";
+
+  // Generate table rows
+  for (let i = 1; i < rows.length; i++) {
+    const values = rows[i].split('",');
+    html += "<tr>";
+    values.forEach((value) => {
+      html += `<td>${value.replaceAll('"', "")}</td>`;
+    });
+    html += "</tr>";
+  }
+
+  // Close table
+  html += "</tbody></table>";
+
+  return html;
+};
+
+export const htmlTable2CSV = (html: string) => {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+  const rows = Array.from(doc.querySelectorAll("table tr"));
+  const csvData = rows
+    .map((row) => {
+      const cells = Array.from(row.querySelectorAll("th, td"));
+      return cells
+        .map((cell) => (cell.textContent || "").trim().replaceAll(",", ""))
+        .join(",");
+    })
+    .join("\n");
+
+  return csvData;
+};
+
+const addTableAttr = (html: string) => {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+  const rows = Array.from(doc.querySelectorAll("table tr"));
+  const csvData = rows
+    .map((row) => {
+      const cells = Array.from(row.querySelectorAll("th, td"));
+      return cells
+        .map((cell) => (cell.textContent || "").trim().replaceAll(",", ""))
+        .join(",");
+    })
+    .join("\n");
+
+  return html.replace("<table>", `<table data-csv="${csvData}">`);
+};
+
+const addTableAttrs = (html: string) => {
+  const regex = /<table[\s\S]*?<\/table>/g;
+
+  return html.replace(regex, (s: string) => {
+    return addTableAttr(s);
+  });
+};
+
+const cleanUp = (inputString: string, limitWordCount?: number) => {
   // replace all `("` and `")` with `"`
-  let result = inputString.replace(/\("\s?/g, '"');
-  result = result.replace(/"\)/g, '"');
-  // replace all `(` and `)` with `"`;
-  result = result.replace(/[()]/g, '"');
+  // let result = inputString.replace(/\("\s?/g, '"');
+  const result = inputString.replace(/"\)/g, '"');
+  // replace all `(` and `)` with `'`;
+  // result = result.replace(/[()]/g, "'");
   let filename: string = "",
     quote: string = "";
   try {
     const parsed = JSON.parse(result);
+
     if (parsed.citation) {
       filename = parsed.citation["Document Title"];
       quote = parsed.citation["Direct Quote"];
@@ -67,21 +150,71 @@ const cleanUp = (inputString: string, limitWordCount = 5) => {
     quote = quote.replace(/\s/g, "___");
     // reduce the count of words of quote
     const splited = quote.split("___");
-    quote =
-      splited.length > limitWordCount
+    quote = limitWordCount
+      ? splited.length > limitWordCount
         ? splited.slice(0, limitWordCount).join("___")
-        : quote;
-    return `[link](#${filename}______${quote})`;
+        : quote
+      : quote;
+    return `[Link](#${filename}______${quote})`;
   } catch (e) {
+    console.log("parsing citation error.");
     return "";
   }
 };
 
-// parse citation phase only
-export const parseCitation = (documentContent: string, limitWordCount = 5) => {
-  // step 1. remove all ```
-  let content: string = documentContent.replace(/```/g, "");
+export const removeTemplateCode = (str: string) => {
+  const regex = /<template>([\s\S]*?)<\/template>/g;
+  return str.replace(regex, (s: string) => {
+    const replaced = s
+      .replaceAll("<template>", "")
+      .replaceAll("</template>", "")
+    return replaced;
+  });
+}
 
+export const replaceContentBetweenTripleBackticks = (str: string) => {
+  const regex = /```([\s\S]*?)```/g;
+  return str.replace(regex, (s: string) => {
+    // if pl starts with csv
+    const replaced = s.replaceAll("```plaintext", "").replaceAll("```markdown", "").replaceAll("```", "").replaceAll("csv", "").replaceAll("json", "");
+    // p1 contains the text between triple backticks
+
+    /** FIXME **/
+    if (isCSVFormat(replaced)) {
+      return csvToHtmlTable(replaced);
+    }
+    /** FIXME **/
+    return replaced;
+  });
+};
+
+export const replaceContentBetweenCodeBlock = (str: string) => {
+  const regex = /<p><code>([\s\S]*?)<\/code><\/p>/g;
+
+  return str.replace(regex, (s: string) => {
+    const replaced = s
+      .replaceAll("markdown", "")
+      .replaceAll("csv", "")
+      .replaceAll("json", "")
+      .replaceAll("<p><code>", "")
+      .replaceAll("</code></p>", "");
+    /** FIXME **/
+    if (isCSVFormat(replaced)) {
+      return csvToHtmlTable(replaced);
+    }
+    /** FIXME **/
+    return replaced;
+  });
+};
+
+// parse citation phase and convert csv format to table
+export const parseCitation = (
+  documentContent: string,
+  limitWordCount?: number
+) => {
+  // convert ``` content to html table
+  let content: string = replaceContentBetweenTripleBackticks(documentContent);
+  content = replaceContentBetweenCodeBlock(content);
   let startIndex = -1;
   let braceCount = 0;
 
@@ -104,98 +237,39 @@ export const parseCitation = (documentContent: string, limitWordCount = 5) => {
       }
     }
   }
-
-  return content;
-};
-
-const cleanUp2 = (inputString: string, limitWordCount = 5) => {
-  // replace all `("` and `")` with `"`
-  let result = inputString.replace(/\("\s?/g, '"');
-  result = result.replace(/"\)/g, '"');
-  // replace all `(` and `)` with `"`;
-  result = result.replace(/[()]/g, '"');
-  let filename: string = "",
-    quote: string = "";
-  try {
-    const parsed = JSON.parse(result);
-    if (parsed.citation) {
-      filename = parsed.citation["Company File Name"];
-      quote = parsed.citation["Direct Quote"];
-    } else if (parsed["Company File Name"]) {
-      filename = parsed["Company File Name"];
-      quote = parsed["Direct Quote"];
-    } else {
-      filename = Object.keys(parsed)[0];
-      quote = Object.values<string>(parsed)[0];
-    }
-    // replace whitespaces with "___"
-    filename = filename.replace(/\s/g, "___");
-    quote = quote.replace(/\s/g, "___");
-    // reduce the count of words of quote
-    const splited = quote.split("___");
-    quote =
-      splited.length > limitWordCount
-        ? splited.slice(0, limitWordCount).join("___")
-        : quote;
-    return `[link](#${filename}______${quote})`;
-  } catch (e) {
-    return "";
-  }
-};
-
-export const parseCitationInReport = (
-  documentContent: string,
-  limitWordCount = 5
-) => {
-  // step 1. remove all ```
-  let content: string = documentContent.replace(/```/g, "");
-
-  let startIndex = -1;
-  let braceCount = 0;
-
-  for (let i = 0; i < content.length; i++) {
-    if (content[i] === "{") {
-      if (braceCount === 0) {
-        startIndex = i;
-      }
-      braceCount++;
-    } else if (content[i] === "}") {
-      braceCount--;
-      if (braceCount === 0 && startIndex !== -1) {
-        const section = cleanUp2(
-          content.substring(startIndex, i + 1),
-          limitWordCount
-        );
-        content = content.slice(0, startIndex) + section + content.slice(i + 1);
-        i = startIndex; // Reset index to re-scan the string
-        startIndex = -1;
-      }
-    }
-  }
-
-  return content;
+  // convert markdown to html format
+  const html = marked.parse(content, { gfm: true }) as string;
+  return addTableAttrs(html);
 };
 
 export const scrollToAndHighlightText = (
   container: HTMLDivElement,
   searchText: string
 ) => {
+  let reducedSearchText = searchText;
   const text = container.textContent || container.innerText;
-  const index = text.indexOf(searchText);
-  if (index !== -1) {
+  const timesLimit = 7;
+  const reduceStep = 2;
+  let index = -1,
+    times = 0;
+  while (index === -1) {
+    index = text.indexOf(reducedSearchText);
+    console.log(index, "pending index===");
+    if (index !== -1) {
+      const range = document.createRange();
+      range.setStart(container.firstChild!, index);
+      range.setEnd(container.firstChild!, index + searchText.length);
 
-    const range = document.createRange();
-    range.setStart(container.firstChild!, index);
-    range.setEnd(container.firstChild!, index + searchText.length);
-
-    const rect = range.getBoundingClientRect();
-
-    container.scrollTop =
-      rect.top + container.scrollTop - container.clientHeight / 2;
-
-    const span = document.createElement("span");
-    span.style.backgroundColor = "yellow"; // You can customize the highlight color
-    range.surroundContents(span);
+      const span = document.createElement("span");
+      span.style.backgroundColor = "yellow"; // You can customize the highlight color
+      range.surroundContents(span);
+      span.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    if (times === timesLimit) return;
+    reducedSearchText = reducedSearchText.slice(0, -reduceStep);
+    console.log(reducedSearchText, "reducedSearchText");
+    times++;
   }
 };
 
@@ -271,4 +345,8 @@ export const parseTransaction = (transaction: ITransaction) => {
   };
 
   return updatedTransaction;
+};
+
+export const removeExtension = (filename: string) => {
+  return filename.split(".").slice(0, -1).join(".");
 };

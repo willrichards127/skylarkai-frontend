@@ -84,7 +84,8 @@ export const CompanySelector = ({
           <TextField
             {...params}
             size="small"
-            label="Company Name"
+            label="Company"
+            placeholder="Select Company"
             onClick={onInputAction}
           />
         )}
@@ -99,15 +100,16 @@ export const CompanySelector = ({
           onChange(newValue);
         }}
       />
-      {!!analysisType && (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "flex-end",
-            mt: 0.5,
-            gap: 0.5,
-          }}
-        >
+
+      <Box
+        sx={{
+          display: "flex",
+          mt: 0.5,
+          gap: 0.5,
+        }}
+      >
+        <Box mr="auto" />
+        {!!analysisType && (
           <ToggleButtonGroup
             value={viewMode}
             exclusive
@@ -129,6 +131,8 @@ export const CompanySelector = ({
               </ToggleButton>
             ))}
           </ToggleButtonGroup>
+        )}
+        {analysisType === "transcript" && (
           <Button
             variant="outlined"
             size="small"
@@ -137,8 +141,9 @@ export const CompanySelector = ({
           >
             Download files
           </Button>
-        </Box>
-      )}
+        )}
+      </Box>
+
       {fetchModal && (
         <FetchFilesModal
           open={fetchModal}

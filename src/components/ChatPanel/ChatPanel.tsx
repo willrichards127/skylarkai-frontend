@@ -2,6 +2,7 @@
 import { memo, useRef, useCallback, useEffect, useState } from "react";
 import { Box, TextField, Typography } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
+import EmailIcon from "@mui/icons-material/Email";
 import { XIconButton } from "../buttons/XIconButton";
 import { XPanel } from "../XPanel";
 import { ChatContentBox } from "./ChatContentBox";
@@ -13,6 +14,7 @@ import {
   useGetChatHistoryQuery,
 } from "../../redux/services/transcriptAPI";
 import { generatePdf } from "../../shared/utils/pdf-generator";
+import { SendEmailModal } from "../modals/SendEmailModal";
 
 export const ChatPanel = memo(
   ({
@@ -21,17 +23,30 @@ export const ChatPanel = memo(
     filenames,
     analysis_type,
     insider_transaction = false,
+    companyName,
     onJumpTo,
   }: {
     feature_instance_id: number;
     filenames: string[];
     analysis_type: string;
+    companyName: string;
     suggestions?: ITopic[];
     insider_transaction?: boolean;
-    onJumpTo: (tag: string) => void;
+    onJumpTo: ({
+      filename,
+      quote,
+    }: {
+      filename: string;
+      quote: string;
+    }) => void;
   }) => {
     const ref = useRef<HTMLDivElement>();
-    const [llm, setLlm] = useState<"OpenAI" | "Anthropic" | "Mistral">("OpenAI");
+
+    const [llm, setLlm] = useState<"OpenAI" | "Anthropic" | "BOTH" | "Gemini">(
+      "OpenAI"
+    );
+    const [emailModal, showEmailModal] = useState<boolean>(false);
+
     const [suggestion, setSuggestion] = useState<string>("");
     const [chatHistory, setChatHistory] = useState<IChat[]>([]);
 
@@ -51,24 +66,27 @@ export const ChatPanel = memo(
           question,
           filenames,
           analysis_type,
+          company_name: companyName,
           insider_transaction,
           llm,
         }).unwrap();
-        setChatHistory((prev) => [
-          ...prev.filter((chat) => chat.type.toString() !== "loading"),
-          { type: "answer", content: response.content },
-        ]);
-        addChat({
-          feature_instance_id,
-          question,
-          answer: response.content as string,
-        });
-        
+        if (response) {
+          setChatHistory((prev) => [
+            ...prev.filter((chat) => chat.type.toString() !== "loading"),
+            { type: "answer", content: response.content },
+          ]);
+          addChat({
+            feature_instance_id,
+            question,
+            answer: response.content as string,
+          });
+        }
       },
       [
         llm,
         getAnswer,
         addChat,
+        companyName,
         feature_instance_id,
         filenames,
         analysis_type,
@@ -77,12 +95,14 @@ export const ChatPanel = memo(
     );
 
     const onPrint = useCallback(() => {
-      if( !ref.current ) return;
+      if (!ref.current) return;
 
       const today = new Date().toLocaleDateString();
-      const container = document.createElement('div');
+      const container = document.createElement("div");
       container.appendChild(ref.current.cloneNode(true));
-      const removeItems = container.querySelectorAll(".suggestions, .topic, .loading");
+      const removeItems = container.querySelectorAll(
+        ".suggestions, .topic, .loading"
+      );
       for (const item of removeItems) {
         item.remove();
       }
@@ -91,7 +111,7 @@ export const ChatPanel = memo(
         const paragraphs = item.querySelectorAll("p");
         for (const paragraph of paragraphs) {
           paragraph.before(...paragraph.childNodes);
-          const br = document.createElement('br');
+          const br = document.createElement("br");
           paragraph.replaceWith(br);
         }
       }
@@ -102,13 +122,19 @@ export const ChatPanel = memo(
       );
     }, []);
 
+    const onSendViaEmail = useCallback(async () => {
+      showEmailModal(true);
+    }, []);
+
     const onChooseSuggestion = useCallback((suggest: string) => {
       setSuggestion(suggest);
     }, []);
 
     const onChooseTopic = useCallback(
       (topicId: string) => {
-        const queries = suggestions.find((sug) => sug.topic === topicId)!.queries;
+        const queries = suggestions.find(
+          (sug) => sug.topic === topicId
+        )!.queries;
         if (queries.length == 1) {
           const query = queries[0];
           onChooseSuggestion(query);
@@ -117,7 +143,8 @@ export const ChatPanel = memo(
             ...prev,
             {
               type: "suggestions",
-              content: suggestions.find((sug) => sug.topic === topicId)!.queries,
+              content: suggestions.find((sug) => sug.topic === topicId)!
+                .queries,
             },
           ]);
         }
@@ -172,7 +199,7 @@ export const ChatPanel = memo(
               alignItems: "center",
             }}
           >
-            <Typography variant="body1">Skye Chat</Typography>
+            <Typography variant="body1">Sky Chat</Typography>
             <Box mr="auto" />
             <TextField
               size="small"
@@ -186,16 +213,31 @@ export const ChatPanel = memo(
                 mr: 1,
                 "& .MuiNativeSelect-select": {
                   fontSize: 12,
-                  padding: "4px 14px",
+                  padding: "8px 14px",
+                  lineHeight: "14px",
                 },
               }}
             >
-              {["OpenAI", "Anthropic", "Mistral"].map((item) => (
+              {["OpenAI", "Anthropic", "BOTH", "Gemini"].map((item) => (
                 <option key={item} value={item}>
                   {item}
                 </option>
               ))}
             </TextField>
+            <XIconButton
+              size="small"
+              variant="contained"
+              sxProps={{
+                "&.MuiButtonBase-root": {
+                  minHeight: 31,
+                  minWidth: 31,
+                },
+                mr: 1,
+              }}
+              onClick={onSendViaEmail}
+            >
+              <EmailIcon />
+            </XIconButton>
             <XIconButton
               size="small"
               variant="contained"
@@ -219,9 +261,22 @@ export const ChatPanel = memo(
           onChooseTopic={onChooseTopic}
           onChooseSuggestion={onChooseSuggestion}
           onJumpTo={onJumpTo}
+          analysis_type={analysis_type}
           insider_transaction={insider_transaction}
+          companyName={companyName}
         />
-        <InputBox disabled={isLoading || loadingChatHistory} initialQuestion={suggestion} onSubmitAction={onSend} />
+        <InputBox
+          disabled={isLoading || loadingChatHistory}
+          initialQuestion={suggestion}
+          onSubmitAction={onSend}
+        />
+        {emailModal && (
+          <SendEmailModal
+            open={emailModal}
+            element={ref.current!}
+            onClose={() => showEmailModal(false)}
+          />
+        )}
       </XPanel>
     );
   }
