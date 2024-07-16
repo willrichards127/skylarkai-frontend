@@ -1,0 +1,63 @@
+name: Deploy to Prod EC2 Nginx server
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::398336187600:role/prod-skylarkai-github-role
+          aws-region: us-east-1
+
+      - name: Open EC2 Security Group
+        run: |
+          SECURITY_GROUP_ID="sg-0d35ae0cd2edb602c"
+          IP_ADDRESS="$(curl -s https://api.ipify.org)"
+          aws ec2 authorize-security-group-ingress --group-id $SECURITY_GROUP_ID --protocol tcp --port 22 --cidr $IP_ADDRESS/32
+
+      - name: Fetch Secrets from Parameter Store
+        id: get-secrets
+        run: |
+          JUMPHOST_PRIVATE_KEY=$(aws ssm get-parameter --name /prod/skylarkai/PRIVATE_KEY --with-decryption --query 'Parameter.Value' --output text)
+          echo "JUMPHOST_IP=$(aws ssm get-parameter --name /prod/skylarkai/JUMPHOST_IP --with-decryption --query 'Parameter.Value' --output text)" >> $GITHUB_ENV
+          echo "EC2_PRIVATE_IP=$(aws ssm get-parameter --name /prod/skylarkai-app/NGINX_IP --with-decryption --query 'Parameter.Value' --output text)" >> $GITHUB_ENV
+          echo "CODE_PATH=$(aws ssm get-parameter --name /prod/skylarkai-app/CODE_PATH --with-decryption --query 'Parameter.Value' --output text)" >> $GITHUB_ENV
+          echo "${JUMPHOST_PRIVATE_KEY}" > jumphost_key.pem
+
+      - name: SSH to Jumphost and Deploy
+        run: |
+          chmod 600 jumphost_key.pem 
+          echo $ jumphost_key.pem
+          ssh -i jumphost_key.pem -o StrictHostKeyChecking=no ec2-user@${{ env.JUMPHOST_IP }} << 'EOF'
+          ls -la
+          ssh -i prod-skylarkai-jump-host.pem -o StrictHostKeyChecking=no ubuntu@${{ env.EC2_PRIVATE_IP }}
+          cd ${{ env.CODE_PATH }}
+          echo "current directory"
+          echo $pwd
+          ls -lart
+          git fetch origin main
+          git checkout main
+          ./deploy_prod.sh
+          EOF
+
+      - name: Revoke EC2 Security Group
+        run: |
+          SECURITY_GROUP_ID="sg-0d35ae0cd2edb602c"
+          IP_ADDRESS="$(curl -s https://api.ipify.org)"
+          aws ec2 revoke-security-group-ingress --group-id $SECURITY_GROUP_ID --protocol tcp --port 22 --cidr $IP_ADDRESS/32
